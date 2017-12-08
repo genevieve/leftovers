@@ -15,6 +15,9 @@ type Logger struct {
 		Receives struct {
 			Message string
 		}
+		Returns struct {
+			Proceed bool
+		}
 	}
 }
 
@@ -25,6 +28,8 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	l.PrintfCall.Messages = append(l.PrintfCall.Messages, fmt.Sprintf(message, a...))
 }
 
-func (l *Logger) Prompt(message string) {
+func (l *Logger) Prompt(message string) bool {
 	l.PromptCall.Receives.Message = message
+
+	return l.PromptCall.Returns.Proceed
 }

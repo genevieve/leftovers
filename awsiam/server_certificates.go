@@ -26,6 +26,12 @@ func (s ServerCertificates) Delete() error {
 
 	for _, c := range certificates.ServerCertificateMetadataList {
 		n := c.ServerCertificateName
+
+		proceed := s.logger.Prompt(fmt.Sprintf("Are you sure you want to delete server certificate %s?", *n))
+		if !proceed {
+			continue
+		}
+
 		_, err := s.client.DeleteServerCertificate(&iam.DeleteServerCertificateInput{ServerCertificateName: n})
 		if err == nil {
 			s.logger.Printf("SUCCESS deleting server certificate %s\n", *n)

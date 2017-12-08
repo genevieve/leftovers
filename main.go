@@ -20,7 +20,7 @@ type infraCreds struct {
 }
 
 func main() {
-	logger := app.NewLogger(os.Stdout)
+	logger := app.NewLogger(os.Stdout, os.Stdin)
 
 	var c infraCreds
 	parser := flags.NewParser(&c, flags.IgnoreUnknown)

@@ -28,6 +28,7 @@ var _ = Describe("Roles", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
+			logger.PromptCall.Returns.Proceed = true
 			iamClient.ListRolesCall.Returns.Output = &iam.ListRolesOutput{
 				Roles: []*iam.Role{{
 					RoleName: aws.String("banana"),
@@ -67,6 +68,20 @@ var _ = Describe("Roles", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting role banana: some error\n"}))
+			})
+		})
+
+		Context("when the user responds no to the prompt", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = false
+			})
+
+			It("returns the error", func() {
+				err := instanceProfiles.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role banana?"))
+				Expect(iamClient.DeleteRoleCall.CallCount).To(Equal(0))
 			})
 		})
 	})

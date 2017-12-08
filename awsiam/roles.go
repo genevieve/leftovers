@@ -26,6 +26,12 @@ func (o Roles) Delete() error {
 
 	for _, r := range roles.Roles {
 		n := r.RoleName
+
+		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role %s?", *n))
+		if !proceed {
+			continue
+		}
+
 		_, err := o.client.DeleteRole(&iam.DeleteRoleInput{RoleName: n})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting role %s\n", *n)

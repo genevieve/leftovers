@@ -28,6 +28,7 @@ var _ = Describe("InstanceProfiles", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
+			logger.PromptCall.Returns.Proceed = true
 			iamClient.ListInstanceProfilesCall.Returns.Output = &iam.ListInstanceProfilesOutput{
 				InstanceProfiles: []*iam.InstanceProfile{{
 					InstanceProfileName: aws.String("banana"),
@@ -68,6 +69,20 @@ var _ = Describe("InstanceProfiles", func() {
 
 				Expect(iamClient.DeleteInstanceProfileCall.CallCount).To(Equal(1))
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance profile banana: deleting error\n"}))
+			})
+		})
+
+		Context("when the user responds no to the prompt", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = false
+			})
+
+			It("returns the error", func() {
+				err := instanceProfiles.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance profile banana?"))
+				Expect(iamClient.DeleteInstanceProfileCall.CallCount).To(Equal(0))
 			})
 		})
 	})

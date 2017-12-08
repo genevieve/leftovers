@@ -28,6 +28,7 @@ var _ = Describe("ServerCertificates", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
+			logger.PromptCall.Returns.Proceed = true
 			iamClient.ListServerCertificatesCall.Returns.Output = &iam.ListServerCertificatesOutput{
 				ServerCertificateMetadataList: []*iam.ServerCertificateMetadata{{
 					ServerCertificateName: aws.String("banana"),
@@ -67,6 +68,20 @@ var _ = Describe("ServerCertificates", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana: some error\n"}))
+			})
+		})
+
+		Context("when the user responds no to the prompt", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = false
+			})
+
+			It("returns the error", func() {
+				err := serverCertificates.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete server certificate banana?"))
+				Expect(iamClient.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})
 		})
 	})

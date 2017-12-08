@@ -26,6 +26,12 @@ func (i InstanceProfiles) Delete() error {
 
 	for _, p := range profiles.InstanceProfiles {
 		n := p.InstanceProfileName
+
+		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", *n))
+		if !proceed {
+			continue
+		}
+
 		_, err := i.client.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{InstanceProfileName: n})
 		if err == nil {
 			i.logger.Printf("SUCCESS deleting instance profile %s\n", *n)
