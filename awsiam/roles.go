@@ -8,27 +8,31 @@ import (
 
 type Roles struct {
 	client iamClient
+	logger logger
 }
 
-func NewRoles(client iamClient) Roles {
+func NewRoles(client iamClient, logger logger) Roles {
 	return Roles{
 		client: client,
+		logger: logger,
 	}
 }
 
-func (o Roles) Delete() {
+func (o Roles) Delete() error {
 	roles, err := o.client.ListRoles(&iam.ListRolesInput{})
 	if err != nil {
-		fmt.Errorf("ERROR listing roles: %s", err)
+		return fmt.Errorf("Listing roles: %s", err)
 	}
 
 	for _, r := range roles.Roles {
 		n := r.RoleName
 		_, err := o.client.DeleteRole(&iam.DeleteRoleInput{RoleName: n})
 		if err == nil {
-			fmt.Printf("SUCCESS deleting role %s\n", *n)
+			o.logger.Printf("SUCCESS deleting role %s\n", *n)
 		} else {
-			fmt.Printf("ERROR deleting role %s: %s\n", *n, err)
+			o.logger.Printf("ERROR deleting role %s: %s\n", *n, err)
 		}
 	}
+
+	return nil
 }

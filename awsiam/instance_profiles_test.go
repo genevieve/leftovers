@@ -13,13 +13,17 @@ import (
 
 var _ = Describe("InstanceProfiles", func() {
 	var (
-		iamClient        *fakes.IAMClient
+		iamClient *fakes.IAMClient
+		logger    *fakes.Logger
+
 		instanceProfiles awsiam.InstanceProfiles
 	)
 
 	BeforeEach(func() {
 		iamClient = &fakes.IAMClient{}
-		instanceProfiles = awsiam.NewInstanceProfiles(iamClient)
+		logger = &fakes.Logger{}
+
+		instanceProfiles = awsiam.NewInstanceProfiles(iamClient, logger)
 	})
 
 	Describe("Delete", func() {
@@ -36,6 +40,7 @@ var _ = Describe("InstanceProfiles", func() {
 
 			Expect(iamClient.DeleteInstanceProfileCall.CallCount).To(Equal(1))
 			Expect(iamClient.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana")))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting instance profile banana\n"}))
 		})
 
 		Context("when the client fails to list instance profiles", func() {
@@ -48,6 +53,20 @@ var _ = Describe("InstanceProfiles", func() {
 				instanceProfiles.Delete()
 
 				Expect(iamClient.DeleteInstanceProfileCall.CallCount).To(Equal(0))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR listing instance profiles: some error\n"}))
+			})
+		})
+
+		Context("when the client fails to delete the instance profile", func() {
+			BeforeEach(func() {
+				iamClient.DeleteInstanceProfileCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				instanceProfiles.Delete()
+
+				Expect(iamClient.DeleteInstanceProfileCall.CallCount).To(Equal(1))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance profile banana: some error\n"}))
 			})
 		})
 	})
