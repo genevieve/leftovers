@@ -17,14 +17,15 @@ type infraCreds struct {
 	AWSAccessKeyID     string `long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"`
 	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY"`
 	AWSRegion          string `long:"aws-region"            env:"AWS_REGION"`
+	NoConfirm          bool   `short:"n"`
 }
 
 func main() {
-	logger := app.NewLogger(os.Stdout, os.Stdin)
-
 	var c infraCreds
 	parser := flags.NewParser(&c, flags.IgnoreUnknown)
 	parser.ParseArgs(os.Args)
+
+	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
 	if c.AWSAccessKeyID == "" {
 		log.Fatal("Missing AWS_ACCESS_KEY_ID.")

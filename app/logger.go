@@ -7,16 +7,18 @@ import (
 )
 
 type Logger struct {
-	newline bool
-	writer  io.Writer
-	reader  io.Reader
+	newline   bool
+	writer    io.Writer
+	reader    io.Reader
+	noConfirm bool
 }
 
-func NewLogger(writer io.Writer, reader io.Reader) *Logger {
+func NewLogger(writer io.Writer, reader io.Reader, noConfirm bool) *Logger {
 	return &Logger{
-		newline: true,
-		writer:  writer,
-		reader:  reader,
+		newline:   true,
+		writer:    writer,
+		reader:    reader,
+		noConfirm: noConfirm,
 	}
 }
 
@@ -35,6 +37,10 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 }
 
 func (l *Logger) Prompt(message string) bool {
+	if l.noConfirm {
+		return true
+	}
+
 	l.clear()
 	fmt.Fprintf(l.writer, "%s (y/N): ", message)
 	l.newline = true
