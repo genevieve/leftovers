@@ -22,6 +22,8 @@ type opts struct {
 }
 
 func main() {
+	log.SetFlags(0)
+
 	var c opts
 	parser := flags.NewParser(&c, flags.HelpFlag|flags.PrintErrors)
 	_, err := parser.ParseArgs(os.Args)
