@@ -41,6 +41,7 @@ var _ = Describe("InstanceProfiles", func() {
 		Context("when the client fails to list instance profiles", func() {
 			BeforeEach(func() {
 				iamClient.ListInstanceProfilesCall.Returns.Error = errors.New("some error")
+				iamClient.ListInstanceProfilesCall.Returns.Output = &iam.ListInstanceProfilesOutput{}
 			})
 
 			It("does not try deleting them", func() {

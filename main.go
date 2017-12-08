@@ -38,4 +38,7 @@ func main() {
 	iamClient := iam.New(session.New(config))
 	ip := awsiam.NewInstanceProfiles(iamClient)
 	ip.Delete()
+
+	sc := awsiam.NewServerCertificates(iamClient)
+	sc.Delete()
 }

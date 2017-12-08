@@ -6,11 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type iamClient interface {
-	ListInstanceProfiles(*iam.ListInstanceProfilesInput) (*iam.ListInstanceProfilesOutput, error)
-	DeleteInstanceProfile(*iam.DeleteInstanceProfileInput) (*iam.DeleteInstanceProfileOutput, error)
-}
-
 type InstanceProfiles struct {
 	client iamClient
 }
