@@ -13,17 +13,21 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
-type infraCreds struct {
-	AWSAccessKeyID     string `long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY"`
-	AWSRegion          string `long:"aws-region"            env:"AWS_REGION"`
-	NoConfirm          bool   `short:"n"`
+type opts struct {
+	NoConfirm bool `short:"n"  long:"no-confirm"`
+
+	AWSAccessKeyID     string `           long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey string `           long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY"`
+	AWSRegion          string `           long:"aws-region"            env:"AWS_REGION"`
 }
 
 func main() {
-	var c infraCreds
-	parser := flags.NewParser(&c, flags.IgnoreUnknown)
-	parser.ParseArgs(os.Args)
+	var c opts
+	parser := flags.NewParser(&c, flags.HelpFlag|flags.PrintErrors)
+	_, err := parser.ParseArgs(os.Args)
+	if err != nil {
+		os.Exit(0)
+	}
 
 	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
@@ -47,7 +51,7 @@ func main() {
 	iamClient := iam.New(session.New(config))
 
 	ir := awsiam.NewRoles(iamClient, logger)
-	err := ir.Delete()
+	err = ir.Delete()
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
