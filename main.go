@@ -23,6 +23,10 @@ type opts struct {
 	AWSRegion          string `           long:"aws-region"            env:"AWS_REGION"`
 }
 
+type resource interface {
+	Delete() error
+}
+
 func main() {
 	log.SetFlags(0)
 
@@ -53,30 +57,18 @@ func main() {
 	}
 
 	iamClient := awsiam.New(session.New(config))
-
-	ir := iam.NewRoles(iamClient, logger)
-	err = ir.Delete()
-	if err != nil {
-		log.Fatalf("\n\n%s\n", err)
-	}
-
-	ip := iam.NewInstanceProfiles(iamClient, logger)
-	err = ip.Delete()
-	if err != nil {
-		log.Fatalf("\n\n%s\n", err)
-	}
-
-	sc := iam.NewServerCertificates(iamClient, logger)
-	err = sc.Delete()
-	if err != nil {
-		log.Fatalf("\n\n%s\n", err)
-	}
-
 	ec2Client := awsec2.New(session.New(config))
 
+	ir := iam.NewRoles(iamClient, logger)
+	ip := iam.NewInstanceProfiles(iamClient, logger)
+	sc := iam.NewServerCertificates(iamClient, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
-	err = vo.Delete()
-	if err != nil {
-		log.Fatalf("\n\n%s\n", err)
+
+	resources := []resource{ir, ip, sc, vo}
+	for _, r := range resources {
+		err = r.Delete()
+		if err != nil {
+			log.Fatalf("\n\n%s\n", err)
+		}
 	}
 }
