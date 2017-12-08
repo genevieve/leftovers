@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/genevievelesperance/leftovers/awsiam"
 )
 
 func main() {
@@ -36,19 +36,6 @@ func main() {
 	}
 
 	iamClient := iam.New(session.New(config))
-
-	profiles, err := iamClient.ListInstanceProfiles(&iam.ListInstanceProfilesInput{})
-	if err != nil {
-		fmt.Printf("ERROR listing instance profiles: %s", err)
-	}
-
-	for _, p := range profiles.InstanceProfiles {
-		n := p.InstanceProfileName
-		_, err := iamClient.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{InstanceProfileName: n})
-		if err == nil {
-			fmt.Printf("SUCCESS deleting instance profile %s\n", &n)
-		} else {
-			fmt.Printf("ERROR deleting instance profile %s: %s\n", &n, err)
-		}
-	}
+	ip := awsiam.NewInstanceProfiles(iamClient)
+	ip.Delete()
 }
