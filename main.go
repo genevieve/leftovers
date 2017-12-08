@@ -66,8 +66,7 @@ func main() {
 
 	resources := []resource{ir, ip, sc, vo}
 	for _, r := range resources {
-		err = r.Delete()
-		if err != nil {
+		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
 		}
 	}
