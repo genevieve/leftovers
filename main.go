@@ -43,6 +43,10 @@ func main() {
 	}
 
 	iamClient := iam.New(session.New(config))
+
+	ir := awsiam.NewRoles(iamClient)
+	ir.Delete()
+
 	ip := awsiam.NewInstanceProfiles(iamClient)
 	ip.Delete()
 

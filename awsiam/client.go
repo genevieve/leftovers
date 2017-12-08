@@ -8,4 +8,7 @@ type iamClient interface {
 
 	ListServerCertificates(*iam.ListServerCertificatesInput) (*iam.ListServerCertificatesOutput, error)
 	DeleteServerCertificate(*iam.DeleteServerCertificateInput) (*iam.DeleteServerCertificateOutput, error)
+
+	ListRoles(*iam.ListRolesInput) (*iam.ListRolesOutput, error)
+	DeleteRole(*iam.DeleteRoleInput) (*iam.DeleteRoleOutput, error)
 }

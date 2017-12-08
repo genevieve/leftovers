@@ -46,6 +46,28 @@ type IAMClient struct {
 			Error  error
 		}
 	}
+
+	ListRolesCall struct {
+		CallCount int
+		Receives  struct {
+			Input *iam.ListRolesInput
+		}
+		Returns struct {
+			Output *iam.ListRolesOutput
+			Error  error
+		}
+	}
+
+	DeleteRoleCall struct {
+		CallCount int
+		Receives  struct {
+			Input *iam.DeleteRoleInput
+		}
+		Returns struct {
+			Output *iam.DeleteRoleOutput
+			Error  error
+		}
+	}
 }
 
 func (i *IAMClient) ListInstanceProfiles(input *iam.ListInstanceProfilesInput) (*iam.ListInstanceProfilesOutput, error) {
@@ -74,4 +96,18 @@ func (i *IAMClient) DeleteServerCertificate(input *iam.DeleteServerCertificateIn
 	i.DeleteServerCertificateCall.Receives.Input = input
 
 	return i.DeleteServerCertificateCall.Returns.Output, i.DeleteServerCertificateCall.Returns.Error
+}
+
+func (i *IAMClient) ListRoles(input *iam.ListRolesInput) (*iam.ListRolesOutput, error) {
+	i.ListRolesCall.CallCount++
+	i.ListRolesCall.Receives.Input = input
+
+	return i.ListRolesCall.Returns.Output, i.ListRolesCall.Returns.Error
+}
+
+func (i *IAMClient) DeleteRole(input *iam.DeleteRoleInput) (*iam.DeleteRoleOutput, error) {
+	i.DeleteRoleCall.CallCount++
+	i.DeleteRoleCall.Receives.Input = input
+
+	return i.DeleteRoleCall.Returns.Output, i.DeleteRoleCall.Returns.Error
 }
