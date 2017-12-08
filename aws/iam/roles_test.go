@@ -1,12 +1,12 @@
-package awsiam_test
+package iam_test
 
 import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/genevievelesperance/leftovers/awsiam"
-	"github.com/genevievelesperance/leftovers/awsiam/fakes"
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	"github.com/genevievelesperance/leftovers/aws/iam"
+	"github.com/genevievelesperance/leftovers/aws/iam/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -16,21 +16,21 @@ var _ = Describe("Roles", func() {
 		iamClient *fakes.IAMClient
 		logger    *fakes.Logger
 
-		roles awsiam.Roles
+		roles iam.Roles
 	)
 
 	BeforeEach(func() {
 		iamClient = &fakes.IAMClient{}
 		logger = &fakes.Logger{}
 
-		roles = awsiam.NewRoles(iamClient, logger)
+		roles = iam.NewRoles(iamClient, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			iamClient.ListRolesCall.Returns.Output = &iam.ListRolesOutput{
-				Roles: []*iam.Role{{
+			iamClient.ListRolesCall.Returns.Output = &awsiam.ListRolesOutput{
+				Roles: []*awsiam.Role{{
 					RoleName: aws.String("banana"),
 				}},
 			}

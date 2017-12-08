@@ -1,9 +1,9 @@
-package awsiam
+package iam
 
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/iam"
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
 type ServerCertificates struct {
@@ -19,7 +19,7 @@ func NewServerCertificates(client iamClient, logger logger) ServerCertificates {
 }
 
 func (s ServerCertificates) Delete() error {
-	certificates, err := s.client.ListServerCertificates(&iam.ListServerCertificatesInput{})
+	certificates, err := s.client.ListServerCertificates(&awsiam.ListServerCertificatesInput{})
 	if err != nil {
 		return fmt.Errorf("Listing server certificates: %s", err)
 	}
@@ -32,7 +32,7 @@ func (s ServerCertificates) Delete() error {
 			continue
 		}
 
-		_, err := s.client.DeleteServerCertificate(&iam.DeleteServerCertificateInput{ServerCertificateName: n})
+		_, err := s.client.DeleteServerCertificate(&awsiam.DeleteServerCertificateInput{ServerCertificateName: n})
 		if err == nil {
 			s.logger.Printf("SUCCESS deleting server certificate %s\n", *n)
 		} else {

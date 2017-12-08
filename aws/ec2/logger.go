@@ -1,4 +1,4 @@
-package awsiam
+package ec2
 
 type logger interface {
 	Printf(m string, a ...interface{})

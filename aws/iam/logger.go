@@ -1,4 +1,4 @@
-package awsec2
+package iam
 
 type logger interface {
 	Printf(m string, a ...interface{})

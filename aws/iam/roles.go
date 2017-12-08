@@ -1,9 +1,9 @@
-package awsiam
+package iam
 
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/iam"
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
 type Roles struct {
@@ -19,7 +19,7 @@ func NewRoles(client iamClient, logger logger) Roles {
 }
 
 func (o Roles) Delete() error {
-	roles, err := o.client.ListRoles(&iam.ListRolesInput{})
+	roles, err := o.client.ListRoles(&awsiam.ListRolesInput{})
 	if err != nil {
 		return fmt.Errorf("Listing roles: %s", err)
 	}
@@ -32,7 +32,7 @@ func (o Roles) Delete() error {
 			continue
 		}
 
-		_, err := o.client.DeleteRole(&iam.DeleteRoleInput{RoleName: n})
+		_, err := o.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: n})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting role %s\n", *n)
 		} else {

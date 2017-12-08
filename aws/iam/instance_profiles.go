@@ -1,9 +1,9 @@
-package awsiam
+package iam
 
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/iam"
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
 type InstanceProfiles struct {
@@ -19,7 +19,7 @@ func NewInstanceProfiles(client iamClient, logger logger) InstanceProfiles {
 }
 
 func (i InstanceProfiles) Delete() error {
-	profiles, err := i.client.ListInstanceProfiles(&iam.ListInstanceProfilesInput{})
+	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
 	if err != nil {
 		return fmt.Errorf("Listing instance profiles: %s", err)
 	}
@@ -32,7 +32,7 @@ func (i InstanceProfiles) Delete() error {
 			continue
 		}
 
-		_, err := i.client.DeleteInstanceProfile(&iam.DeleteInstanceProfileInput{InstanceProfileName: n})
+		_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{InstanceProfileName: n})
 		if err == nil {
 			i.logger.Printf("SUCCESS deleting instance profile %s\n", *n)
 		} else {

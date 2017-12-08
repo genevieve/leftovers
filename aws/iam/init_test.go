@@ -1,4 +1,4 @@
-package awsec2_test
+package iam_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAwsec2(t *testing.T) {
+func TestIAM(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "awsec2")
+	RunSpecs(t, "aws/iam")
 }

@@ -1,12 +1,12 @@
-package awsiam_test
+package iam_test
 
 import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/genevievelesperance/leftovers/awsiam"
-	"github.com/genevievelesperance/leftovers/awsiam/fakes"
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	"github.com/genevievelesperance/leftovers/aws/iam"
+	"github.com/genevievelesperance/leftovers/aws/iam/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -16,21 +16,21 @@ var _ = Describe("ServerCertificates", func() {
 		iamClient *fakes.IAMClient
 		logger    *fakes.Logger
 
-		serverCertificates awsiam.ServerCertificates
+		serverCertificates iam.ServerCertificates
 	)
 
 	BeforeEach(func() {
 		iamClient = &fakes.IAMClient{}
 		logger = &fakes.Logger{}
 
-		serverCertificates = awsiam.NewServerCertificates(iamClient, logger)
+		serverCertificates = iam.NewServerCertificates(iamClient, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			iamClient.ListServerCertificatesCall.Returns.Output = &iam.ListServerCertificatesOutput{
-				ServerCertificateMetadataList: []*iam.ServerCertificateMetadata{{
+			iamClient.ListServerCertificatesCall.Returns.Output = &awsiam.ListServerCertificatesOutput{
+				ServerCertificateMetadataList: []*awsiam.ServerCertificateMetadata{{
 					ServerCertificateName: aws.String("banana"),
 				}},
 			}

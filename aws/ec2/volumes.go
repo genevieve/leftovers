@@ -1,10 +1,10 @@
-package awsec2
+package ec2
 
 import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
 type Volumes struct {
@@ -20,7 +20,7 @@ func NewVolumes(client ec2Client, logger logger) Volumes {
 }
 
 func (o Volumes) Delete() error {
-	volumes, err := o.client.DescribeVolumes(&ec2.DescribeVolumesInput{})
+	volumes, err := o.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
 	if err != nil {
 		return fmt.Errorf("Describing volumes: %s", err)
 	}
@@ -37,7 +37,7 @@ func (o Volumes) Delete() error {
 			continue
 		}
 
-		_, err := o.client.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(n)})
+		_, err := o.client.DeleteVolume(&awsec2.DeleteVolumeInput{VolumeId: aws.String(n)})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting volume %s\n", n)
 		} else {

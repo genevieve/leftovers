@@ -1,12 +1,12 @@
-package awsiam_test
+package iam_test
 
 import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/genevievelesperance/leftovers/awsiam"
-	"github.com/genevievelesperance/leftovers/awsiam/fakes"
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	"github.com/genevievelesperance/leftovers/aws/iam"
+	"github.com/genevievelesperance/leftovers/aws/iam/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -16,21 +16,21 @@ var _ = Describe("InstanceProfiles", func() {
 		iamClient *fakes.IAMClient
 		logger    *fakes.Logger
 
-		instanceProfiles awsiam.InstanceProfiles
+		instanceProfiles iam.InstanceProfiles
 	)
 
 	BeforeEach(func() {
 		iamClient = &fakes.IAMClient{}
 		logger = &fakes.Logger{}
 
-		instanceProfiles = awsiam.NewInstanceProfiles(iamClient, logger)
+		instanceProfiles = iam.NewInstanceProfiles(iamClient, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			iamClient.ListInstanceProfilesCall.Returns.Output = &iam.ListInstanceProfilesOutput{
-				InstanceProfiles: []*iam.InstanceProfile{{
+			iamClient.ListInstanceProfilesCall.Returns.Output = &awsiam.ListInstanceProfilesOutput{
+				InstanceProfiles: []*awsiam.InstanceProfile{{
 					InstanceProfileName: aws.String("banana"),
 				}},
 			}

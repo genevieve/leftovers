@@ -1,4 +1,4 @@
-package awsiam_test
+package ec2_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAwsiam(t *testing.T) {
+func TestEC2(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "awsiam")
+	RunSpecs(t, "ec2")
 }

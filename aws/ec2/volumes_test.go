@@ -1,12 +1,12 @@
-package awsec2_test
+package ec2_test
 
 import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/genevievelesperance/leftovers/awsec2"
-	"github.com/genevievelesperance/leftovers/awsec2/fakes"
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/ec2"
+	"github.com/genevievelesperance/leftovers/aws/ec2/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -16,21 +16,21 @@ var _ = Describe("Volumes", func() {
 		ec2Client *fakes.EC2Client
 		logger    *fakes.Logger
 
-		volumes awsec2.Volumes
+		volumes ec2.Volumes
 	)
 
 	BeforeEach(func() {
 		ec2Client = &fakes.EC2Client{}
 		logger = &fakes.Logger{}
 
-		volumes = awsec2.NewVolumes(ec2Client, logger)
+		volumes = ec2.NewVolumes(ec2Client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			ec2Client.DescribeVolumesCall.Returns.Output = &ec2.DescribeVolumesOutput{
-				Volumes: []*ec2.Volume{{
+			ec2Client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
+				Volumes: []*awsec2.Volume{{
 					VolumeId: aws.String("banana"),
 					State:    aws.String("available"),
 				}},
@@ -88,8 +88,8 @@ var _ = Describe("Volumes", func() {
 
 		Context("when the volume is not available", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeVolumesCall.Returns.Output = &ec2.DescribeVolumesOutput{
-					Volumes: []*ec2.Volume{{
+				ec2Client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
+					Volumes: []*awsec2.Volume{{
 						VolumeId: aws.String("banana"),
 						State:    aws.String("nope"),
 					}},
