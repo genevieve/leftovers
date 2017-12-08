@@ -16,3 +16,5 @@ and infrastructure resources have been orphaned.
 - ec2 eips
 - ec2 vpcs
 - ec2 enis
+- ec2 instances
+- ec2 disks

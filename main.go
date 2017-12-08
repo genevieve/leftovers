@@ -7,8 +7,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/genevievelesperance/leftovers/app"
+	"github.com/genevievelesperance/leftovers/awsec2"
 	"github.com/genevievelesperance/leftovers/awsiam"
 	flags "github.com/jessevdk/go-flags"
 )
@@ -66,6 +68,14 @@ func main() {
 
 	sc := awsiam.NewServerCertificates(iamClient, logger)
 	err = sc.Delete()
+	if err != nil {
+		log.Fatalf("\n\n%s\n", err)
+	}
+
+	ec2Client := ec2.New(session.New(config))
+
+	vo := awsec2.NewVolumes(ec2Client, logger)
+	err = vo.Delete()
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}

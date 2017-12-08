@@ -16,14 +16,14 @@ var _ = Describe("Roles", func() {
 		iamClient *fakes.IAMClient
 		logger    *fakes.Logger
 
-		instanceProfiles awsiam.Roles
+		roles awsiam.Roles
 	)
 
 	BeforeEach(func() {
 		iamClient = &fakes.IAMClient{}
 		logger = &fakes.Logger{}
 
-		instanceProfiles = awsiam.NewRoles(iamClient, logger)
+		roles = awsiam.NewRoles(iamClient, logger)
 	})
 
 	Describe("Delete", func() {
@@ -37,7 +37,7 @@ var _ = Describe("Roles", func() {
 		})
 
 		It("deletes iam roles", func() {
-			err := instanceProfiles.Delete()
+			err := roles.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(iamClient.DeleteRoleCall.CallCount).To(Equal(1))
@@ -51,7 +51,7 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := instanceProfiles.Delete()
+				err := roles.Delete()
 				Expect(err.Error()).To(Equal("Listing roles: some error"))
 
 				Expect(iamClient.DeleteRoleCall.CallCount).To(Equal(0))
@@ -64,7 +64,7 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("returns the error", func() {
-				err := instanceProfiles.Delete()
+				err := roles.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting role banana: some error\n"}))
@@ -77,7 +77,7 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("returns the error", func() {
-				err := instanceProfiles.Delete()
+				err := roles.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role banana?"))
