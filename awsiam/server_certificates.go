@@ -25,7 +25,9 @@ func (s ServerCertificates) Delete() {
 	for _, c := range certificates.ServerCertificateMetadataList {
 		n := c.ServerCertificateName
 		_, err := s.client.DeleteServerCertificate(&iam.DeleteServerCertificateInput{ServerCertificateName: n})
-		if err != nil {
+		if err == nil {
+			fmt.Printf("SUCCESS deleting server certificate %s\n", *n)
+		} else {
 			fmt.Printf("ERROR deleting server certificate %s: %s\n", *n, err)
 		}
 	}
