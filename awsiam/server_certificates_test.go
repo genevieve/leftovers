@@ -13,13 +13,17 @@ import (
 
 var _ = Describe("ServerCertificates", func() {
 	var (
-		iamClient          *fakes.IAMClient
+		iamClient *fakes.IAMClient
+		logger    *fakes.Logger
+
 		serverCertificates awsiam.ServerCertificates
 	)
 
 	BeforeEach(func() {
 		iamClient = &fakes.IAMClient{}
-		serverCertificates = awsiam.NewServerCertificates(iamClient)
+		logger = &fakes.Logger{}
+
+		serverCertificates = awsiam.NewServerCertificates(iamClient, logger)
 	})
 
 	Describe("Delete", func() {
@@ -32,22 +36,37 @@ var _ = Describe("ServerCertificates", func() {
 		})
 
 		It("deletes iam server certificates", func() {
-			serverCertificates.Delete()
+			err := serverCertificates.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(iamClient.DeleteServerCertificateCall.CallCount).To(Equal(1))
 			Expect(iamClient.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana")))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana\n"}))
 		})
 
 		Context("when the client fails to list server certificates", func() {
 			BeforeEach(func() {
 				iamClient.ListServerCertificatesCall.Returns.Error = errors.New("some error")
-				iamClient.ListServerCertificatesCall.Returns.Output = &iam.ListServerCertificatesOutput{}
 			})
 
 			It("does not try deleting them", func() {
-				serverCertificates.Delete()
+				err := serverCertificates.Delete()
+				Expect(err.Error()).To(Equal("Listing server certificates: some error"))
 
 				Expect(iamClient.DeleteServerCertificateCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the client fails to delete the server certificate", func() {
+			BeforeEach(func() {
+				iamClient.DeleteServerCertificateCall.Returns.Error = errors.New("some error")
+			})
+
+			It("does not try deleting them", func() {
+				err := serverCertificates.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana: some error\n"}))
 			})
 		})
 	})

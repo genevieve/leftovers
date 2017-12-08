@@ -52,8 +52,14 @@ func main() {
 	}
 
 	ip := awsiam.NewInstanceProfiles(iamClient, logger)
-	ip.Delete()
+	err = ip.Delete()
+	if err != nil {
+		log.Fatalf("\n\n%s\n", err)
+	}
 
-	sc := awsiam.NewServerCertificates(iamClient)
-	sc.Delete()
+	sc := awsiam.NewServerCertificates(iamClient, logger)
+	err = sc.Delete()
+	if err != nil {
+		log.Fatalf("\n\n%s\n", err)
+	}
 }

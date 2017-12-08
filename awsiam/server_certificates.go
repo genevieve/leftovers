@@ -8,27 +8,31 @@ import (
 
 type ServerCertificates struct {
 	client iamClient
+	logger logger
 }
 
-func NewServerCertificates(client iamClient) ServerCertificates {
+func NewServerCertificates(client iamClient, logger logger) ServerCertificates {
 	return ServerCertificates{
 		client: client,
+		logger: logger,
 	}
 }
 
-func (s ServerCertificates) Delete() {
+func (s ServerCertificates) Delete() error {
 	certificates, err := s.client.ListServerCertificates(&iam.ListServerCertificatesInput{})
 	if err != nil {
-		fmt.Errorf("ERROR listing server certificates: %s", err)
+		return fmt.Errorf("Listing server certificates: %s", err)
 	}
 
 	for _, c := range certificates.ServerCertificateMetadataList {
 		n := c.ServerCertificateName
 		_, err := s.client.DeleteServerCertificate(&iam.DeleteServerCertificateInput{ServerCertificateName: n})
 		if err == nil {
-			fmt.Printf("SUCCESS deleting server certificate %s\n", *n)
+			s.logger.Printf("SUCCESS deleting server certificate %s\n", *n)
 		} else {
-			fmt.Printf("ERROR deleting server certificate %s: %s\n", *n, err)
+			s.logger.Printf("ERROR deleting server certificate %s: %s\n", *n, err)
 		}
 	}
+
+	return nil
 }

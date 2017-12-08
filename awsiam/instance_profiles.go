@@ -1,6 +1,8 @@
 package awsiam
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -16,10 +18,10 @@ func NewInstanceProfiles(client iamClient, logger logger) InstanceProfiles {
 	}
 }
 
-func (i InstanceProfiles) Delete() {
+func (i InstanceProfiles) Delete() error {
 	profiles, err := i.client.ListInstanceProfiles(&iam.ListInstanceProfilesInput{})
 	if err != nil {
-		i.logger.Printf("ERROR listing instance profiles: %s\n", err)
+		return fmt.Errorf("Listing instance profiles: %s", err)
 	}
 
 	for _, p := range profiles.InstanceProfiles {
@@ -31,4 +33,6 @@ func (i InstanceProfiles) Delete() {
 			i.logger.Printf("ERROR deleting instance profile %s: %s\n", *n, err)
 		}
 	}
+
+	return nil
 }
