@@ -9,30 +9,37 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/genevievelesperance/leftovers/awsiam"
+	flags "github.com/jessevdk/go-flags"
 )
+
+type infraCreds struct {
+	AWSAccessKeyID     string `long:"aws-access-key-id" env:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY"`
+	AWSRegion          string `long:"aws-region" env:"AWS_REGION"`
+}
 
 func main() {
 	stdout := log.New(os.Stdout, "", 0)
-	// stderr := log.New(os.Stderr, "", 0)
 
-	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
-	if accessKeyID == "" {
+	var c infraCreds
+	parser := flags.NewParser(&c, flags.IgnoreUnknown)
+	parser.ParseArgs(os.Args)
+
+	if c.AWSAccessKeyID == "" {
 		stdout.Fatal("Missing AWS_ACCESS_KEY_ID.")
 	}
 
-	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	if secretAccessKey == "" {
+	if c.AWSSecretAccessKey == "" {
 		stdout.Fatal("Missing AWS_SECRET_ACCESS_KEY.")
 	}
 
-	region := os.Getenv("AWS_REGION")
-	if region == "" {
+	if c.AWSRegion == "" {
 		stdout.Fatal("Missing AWS_REGION.")
 	}
 
 	config := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
-		Region:      aws.String(region),
+		Credentials: credentials.NewStaticCredentials(c.AWSAccessKeyID, c.AWSSecretAccessKey, ""),
+		Region:      aws.String(c.AWSRegion),
 	}
 
 	iamClient := iam.New(session.New(config))
