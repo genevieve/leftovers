@@ -20,9 +20,9 @@ import (
 type opts struct {
 	NoConfirm bool `short:"n"  long:"no-confirm"`
 
-	AWSAccessKeyID     string `           long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey string `           long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY"`
-	AWSRegion          string `           long:"aws-region"            env:"AWS_REGION"`
+	AWSAccessKeyID     string `long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY"`
+	AWSRegion          string `long:"aws-region"            env:"AWS_REGION"`
 }
 
 type resource interface {
