@@ -67,9 +67,10 @@ func main() {
 	sc := iam.NewServerCertificates(iamClient, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
 	ta := ec2.NewTags(ec2Client, logger)
+	ke := ec2.NewKeyPairs(ec2Client, logger)
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ir, ip, sc, vo, ta, lo}
+	resources := []resource{ir, ip, sc, vo, ta, ke, lo}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)

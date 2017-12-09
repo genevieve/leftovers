@@ -48,6 +48,28 @@ type EC2Client struct {
 			Error  error
 		}
 	}
+
+	DescribeKeyPairsCall struct {
+		CallCount int
+		Receives  struct {
+			Input *ec2.DescribeKeyPairsInput
+		}
+		Returns struct {
+			Output *ec2.DescribeKeyPairsOutput
+			Error  error
+		}
+	}
+
+	DeleteKeyPairCall struct {
+		CallCount int
+		Receives  struct {
+			Input *ec2.DeleteKeyPairInput
+		}
+		Returns struct {
+			Output *ec2.DeleteKeyPairOutput
+			Error  error
+		}
+	}
 }
 
 func (e *EC2Client) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {
@@ -76,4 +98,18 @@ func (e *EC2Client) DeleteTags(input *ec2.DeleteTagsInput) (*ec2.DeleteTagsOutpu
 	e.DeleteTagsCall.Receives.Input = input
 
 	return e.DeleteTagsCall.Returns.Output, e.DeleteTagsCall.Returns.Error
+}
+
+func (e *EC2Client) DescribeKeyPairs(input *ec2.DescribeKeyPairsInput) (*ec2.DescribeKeyPairsOutput, error) {
+	e.DescribeKeyPairsCall.CallCount++
+	e.DescribeKeyPairsCall.Receives.Input = input
+
+	return e.DescribeKeyPairsCall.Returns.Output, e.DescribeKeyPairsCall.Returns.Error
+}
+
+func (e *EC2Client) DeleteKeyPair(input *ec2.DeleteKeyPairInput) (*ec2.DeleteKeyPairOutput, error) {
+	e.DeleteKeyPairCall.CallCount++
+	e.DeleteKeyPairCall.Receives.Input = input
+
+	return e.DeleteKeyPairCall.Returns.Output, e.DeleteKeyPairCall.Returns.Error
 }
