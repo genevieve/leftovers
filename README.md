@@ -14,9 +14,9 @@ infrastructure resources were tragically orphaned
 - iam server certificates
 - ec2 volumes
 - ec2 tags
+- elb load balancers
 
 ## Upcoming
-- elb load balancers
 - elbv2 load balancers
 - ec2 key pairs
 - ec2 eips

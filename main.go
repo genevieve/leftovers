@@ -8,9 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	awselb "github.com/aws/aws-sdk-go/service/elb"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/aws/ec2"
+	"github.com/genevievelesperance/leftovers/aws/elb"
 	"github.com/genevievelesperance/leftovers/aws/iam"
 	flags "github.com/jessevdk/go-flags"
 )
@@ -58,14 +60,16 @@ func main() {
 
 	iamClient := awsiam.New(session.New(config))
 	ec2Client := awsec2.New(session.New(config))
+	elbClient := awselb.New(session.New(config))
 
 	ir := iam.NewRoles(iamClient, logger)
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
 	ta := ec2.NewTags(ec2Client, logger)
+	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ir, ip, sc, vo, ta}
+	resources := []resource{ir, ip, sc, vo, ta, lo}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
