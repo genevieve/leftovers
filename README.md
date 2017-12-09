@@ -14,11 +14,11 @@ infrastructure resources were tragically orphaned
 - iam server certificates
 - ec2 volumes
 - ec2 tags
+- ec2 key pairs
 - elb load balancers
 
 ## Upcoming
 - elbv2 load balancers
-- ec2 key pairs
 - ec2 eips
 - ec2 vpcs
 - ec2 enis
