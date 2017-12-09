@@ -1,13 +1,19 @@
 # Leftovers
 
-For the tragic times when terraform destroy fails, your container has disappeared,
-and infrastructure resources have been orphaned.
+Clean up orphaned IAAS resources.
 
-## Currently cleaning
+## Why you might be here?
+- You `terraform apply`'d way back when and lost your `terraform.tfstate`
+- You used the console or cli to create some infrastructure and want to clean up
+- Your acceptance tests in CI failed, the container disappeared, and
+infrastructure resources were tragically orphaned
+
+## Currently deleting
 - iam instance profiles
 - iam roles
 - iam server certificates
 - ec2 volumes
+- ec2 tags
 
 ## Upcoming
 - elb load balancers
@@ -17,3 +23,4 @@ and infrastructure resources have been orphaned.
 - ec2 vpcs
 - ec2 enis
 - ec2 instances
+
