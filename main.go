@@ -63,8 +63,9 @@ func main() {
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
+	ta := ec2.NewTags(ec2Client, logger)
 
-	resources := []resource{ir, ip, sc, vo}
+	resources := []resource{ir, ip, sc, vo, ta}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
