@@ -19,6 +19,7 @@ infrastructure resources were tragically orphaned
 - elb load balancers
 
 ## Upcoming
+- iam policies
 - elbv2 load balancers
 - ec2 eips
 - ec2 vpcs
