@@ -65,12 +65,15 @@ func main() {
 	ir := iam.NewRoles(iamClient, logger)
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
-	vo := ec2.NewVolumes(ec2Client, logger)
-	ta := ec2.NewTags(ec2Client, logger)
+
 	ke := ec2.NewKeyPairs(ec2Client, logger)
+	in := ec2.NewInstances(ec2Client, logger)
+	ta := ec2.NewTags(ec2Client, logger)
+	vo := ec2.NewVolumes(ec2Client, logger)
+
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ir, ip, sc, vo, ta, ke, lo}
+	resources := []resource{ir, ip, sc, vo, ta, ke, lo, in}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)

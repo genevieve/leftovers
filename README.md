@@ -23,4 +23,4 @@ infrastructure resources were tragically orphaned
 - ec2 vpcs
 - ec2 enis
 - ec2 instances
-
+- s3 buckets
