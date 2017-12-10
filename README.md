@@ -15,6 +15,7 @@ infrastructure resources were tragically orphaned
 - ec2 volumes
 - ec2 tags
 - ec2 key pairs
+- ec2 instances
 - elb load balancers
 
 ## Upcoming
@@ -22,5 +23,4 @@ infrastructure resources were tragically orphaned
 - ec2 eips
 - ec2 vpcs
 - ec2 enis
-- ec2 instances
 - s3 buckets
