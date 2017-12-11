@@ -60,12 +60,12 @@ var _ = Describe("LoadBalancers", func() {
 			})
 		})
 
-		Context("when the client fails to delete the loadBalancer", func() {
+		Context("when the client fails to delete the load balancer", func() {
 			BeforeEach(func() {
 				elbClient.DeleteLoadBalancerCall.Returns.Error = errors.New("some error")
 			})
 
-			It("returns the error", func() {
+			It("logs the error", func() {
 				err := loadBalancers.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -78,7 +78,7 @@ var _ = Describe("LoadBalancers", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not delete the load balancer", func() {
 				err := loadBalancers.Delete()
 				Expect(err).NotTo(HaveOccurred())
 

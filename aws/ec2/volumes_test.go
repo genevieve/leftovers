@@ -64,7 +64,7 @@ var _ = Describe("Volumes", func() {
 				ec2Client.DeleteVolumeCall.Returns.Error = errors.New("some error")
 			})
 
-			It("returns the error", func() {
+			It("logs the error", func() {
 				err := volumes.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -77,7 +77,7 @@ var _ = Describe("Volumes", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not delete the volume", func() {
 				err := volumes.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -95,6 +95,7 @@ var _ = Describe("Volumes", func() {
 					}},
 				}
 			})
+
 			It("does not prompt the user and it does not delete it", func() {
 				err := volumes.Delete()
 				Expect(err).NotTo(HaveOccurred())

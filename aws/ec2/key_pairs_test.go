@@ -78,7 +78,7 @@ var _ = Describe("KeyPairs", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not delete the key pair", func() {
 				err := keyPairs.Delete()
 				Expect(err).NotTo(HaveOccurred())
 

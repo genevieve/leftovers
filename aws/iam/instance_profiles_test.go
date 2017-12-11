@@ -50,7 +50,7 @@ var _ = Describe("InstanceProfiles", func() {
 				iamClient.ListInstanceProfilesCall.Returns.Error = errors.New("listing error")
 			})
 
-			It("does not try deleting them", func() {
+			It("returns the error and does not try deleting them", func() {
 				err := instanceProfiles.Delete()
 				Expect(err.Error()).To(Equal("Listing instance profiles: listing error"))
 
@@ -63,7 +63,7 @@ var _ = Describe("InstanceProfiles", func() {
 				iamClient.DeleteInstanceProfileCall.Returns.Error = errors.New("deleting error")
 			})
 
-			It("returns the error", func() {
+			It("logs the error", func() {
 				err := instanceProfiles.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -77,7 +77,7 @@ var _ = Describe("InstanceProfiles", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not delete the instance profile", func() {
 				err := instanceProfiles.Delete()
 				Expect(err).NotTo(HaveOccurred())
 

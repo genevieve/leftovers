@@ -111,12 +111,12 @@ var _ = Describe("Instances", func() {
 			})
 		})
 
-		Context("when the client fails to terminate the instace", func() {
+		Context("when the client fails to terminate the instance", func() {
 			BeforeEach(func() {
 				ec2Client.TerminateInstancesCall.Returns.Error = errors.New("some error")
 			})
 
-			It("returns the error", func() {
+			It("logs the error", func() {
 				err := instances.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -129,7 +129,7 @@ var _ = Describe("Instances", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not terminate the instance", func() {
 				err := instances.Delete()
 				Expect(err).NotTo(HaveOccurred())
 

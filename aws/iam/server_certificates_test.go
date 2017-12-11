@@ -76,7 +76,7 @@ var _ = Describe("ServerCertificates", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not delete the server certificate", func() {
 				err := serverCertificates.Delete()
 				Expect(err).NotTo(HaveOccurred())
 

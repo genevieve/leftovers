@@ -68,7 +68,7 @@ var _ = Describe("Tags", func() {
 				ec2Client.DeleteTagsCall.Returns.Error = errors.New("some error")
 			})
 
-			It("returns the error", func() {
+			It("logs the error", func() {
 				err := tags.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -81,7 +81,7 @@ var _ = Describe("Tags", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("returns the error", func() {
+			It("does not delete the tag", func() {
 				err := tags.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
