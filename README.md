@@ -8,7 +8,8 @@ Clean up orphaned IAAS resources.
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned
 
-## Currently deleting
+## AWS
+### Currently deleting
 - iam instance profiles (& detaching roles)
 - iam roles
 - iam role policies
@@ -19,7 +20,7 @@ infrastructure resources were tragically orphaned
 - ec2 instances
 - elb load balancers
 
-## Upcoming
+### Upcoming
 - iam group policies
 - iam user policies
 - elbv2 load balancers
@@ -28,3 +29,13 @@ infrastructure resources were tragically orphaned
 - ec2 vpcs
 - ec2 enis
 - s3 buckets
+
+## GCP
+### Upcoming
+- compute disks
+- compute health checks
+- compute vm instances
+- compute vm instance groups
+- compute vm instance templates
+- compute snapshots
+- compute images
