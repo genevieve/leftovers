@@ -3,7 +3,6 @@ package ec2
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -27,12 +26,13 @@ func (a KeyPairs) Delete() error {
 
 	for _, t := range keyPairs.KeyPairs {
 		n := *t.KeyName
+
 		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete key pair %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := a.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{KeyName: aws.String(n)})
+		_, err := a.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{KeyName: t.KeyName})
 		if err == nil {
 			a.logger.Printf("SUCCESS deleting key pair %s\n", n)
 		} else {

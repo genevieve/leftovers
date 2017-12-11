@@ -69,12 +69,13 @@ func main() {
 
 	ke := ec2.NewKeyPairs(ec2Client, logger)
 	in := ec2.NewInstances(ec2Client, logger)
+	se := ec2.NewSecurityGroups(ec2Client, logger)
 	ta := ec2.NewTags(ec2Client, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ro, ip, sc, vo, ta, ke, lo, in}
+	resources := []resource{ro, ip, sc, vo, ta, ke, lo, in, se}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
