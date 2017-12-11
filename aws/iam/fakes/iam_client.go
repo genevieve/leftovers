@@ -25,6 +25,17 @@ type IAMClient struct {
 		}
 	}
 
+	RemoveRoleFromInstanceProfileCall struct {
+		CallCount int
+		Receives  struct {
+			Input *iam.RemoveRoleFromInstanceProfileInput
+		}
+		Returns struct {
+			Output *iam.RemoveRoleFromInstanceProfileOutput
+			Error  error
+		}
+	}
+
 	ListServerCertificatesCall struct {
 		CallCount int
 		Receives  struct {
@@ -104,6 +115,13 @@ func (i *IAMClient) DeleteInstanceProfile(input *iam.DeleteInstanceProfileInput)
 	i.DeleteInstanceProfileCall.Receives.Input = input
 
 	return i.DeleteInstanceProfileCall.Returns.Output, i.DeleteInstanceProfileCall.Returns.Error
+}
+
+func (i *IAMClient) RemoveRoleFromInstanceProfile(input *iam.RemoveRoleFromInstanceProfileInput) (*iam.RemoveRoleFromInstanceProfileOutput, error) {
+	i.RemoveRoleFromInstanceProfileCall.CallCount++
+	i.RemoveRoleFromInstanceProfileCall.Receives.Input = input
+
+	return i.RemoveRoleFromInstanceProfileCall.Returns.Output, i.RemoveRoleFromInstanceProfileCall.Returns.Error
 }
 
 func (i *IAMClient) ListServerCertificates(input *iam.ListServerCertificatesInput) (*iam.ListServerCertificatesOutput, error) {
