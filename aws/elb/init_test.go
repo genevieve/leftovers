@@ -9,5 +9,5 @@ import (
 
 func TestELB(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "elb")
+	RunSpecs(t, "aws/elb")
 }
