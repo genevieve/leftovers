@@ -11,6 +11,7 @@ infrastructure resources were tragically orphaned
 ## Currently deleting
 - iam instance profiles
 - iam roles
+- iam role policies
 - iam server certificates
 - ec2 volumes
 - ec2 tags
@@ -21,7 +22,6 @@ infrastructure resources were tragically orphaned
 ## Upcoming
 - iam group policies
 - iam user policies
-- iam role policies
 - elbv2 load balancers
 - ec2 eips
 - ec2 vpcs
