@@ -9,7 +9,7 @@ Clean up orphaned IAAS resources.
 infrastructure resources were tragically orphaned
 
 ## Currently deleting
-- iam instance profiles
+- iam instance profiles (& detaching roles)
 - iam roles
 - iam role policies
 - iam server certificates

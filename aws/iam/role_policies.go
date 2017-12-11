@@ -37,7 +37,9 @@ func (o RolePolicies) Delete(roleName string) error {
 			continue
 		}
 
-		_, err := o.client.DeleteRolePolicy(&awsiam.DeleteRolePolicyInput{
+		o.detach(n, roleName)
+
+		_, err = o.client.DeleteRolePolicy(&awsiam.DeleteRolePolicyInput{
 			RoleName:   aws.String(roleName),
 			PolicyName: p,
 		})
@@ -49,4 +51,27 @@ func (o RolePolicies) Delete(roleName string) error {
 	}
 
 	return nil
+}
+
+func (o RolePolicies) detach(n, roleName string) {
+	policies, err := o.client.ListPolicies(&awsiam.ListPoliciesInput{
+		Scope: aws.String("Local"),
+	})
+	if err == nil {
+		for _, policy := range policies.Policies {
+			if *policy.PolicyName == n {
+				_, err = o.client.DetachRolePolicy(&awsiam.DetachRolePolicyInput{
+					RoleName:  aws.String(roleName),
+					PolicyArn: policy.Arn,
+				})
+				if err == nil {
+					o.logger.Printf("SUCCESS detaching role policy %s\n", n)
+				} else {
+					o.logger.Printf("ERROR detaching role policy %s: %s\n", n, err)
+				}
+			}
+		}
+	} else {
+		o.logger.Printf("ERROR getting role policy %s: %s\n", n, err)
+	}
 }

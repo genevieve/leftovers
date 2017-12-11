@@ -91,6 +91,28 @@ type IAMClient struct {
 		}
 	}
 
+	ListPoliciesCall struct {
+		CallCount int
+		Receives  struct {
+			Input *iam.ListPoliciesInput
+		}
+		Returns struct {
+			Output *iam.ListPoliciesOutput
+			Error  error
+		}
+	}
+
+	DetachRolePolicyCall struct {
+		CallCount int
+		Receives  struct {
+			Input *iam.DetachRolePolicyInput
+		}
+		Returns struct {
+			Output *iam.DetachRolePolicyOutput
+			Error  error
+		}
+	}
+
 	DeleteRolePolicyCall struct {
 		CallCount int
 		Receives  struct {
@@ -157,6 +179,20 @@ func (i *IAMClient) ListRolePolicies(input *iam.ListRolePoliciesInput) (*iam.Lis
 	i.ListRolePoliciesCall.Receives.Input = input
 
 	return i.ListRolePoliciesCall.Returns.Output, i.ListRolePoliciesCall.Returns.Error
+}
+
+func (i *IAMClient) ListPolicies(input *iam.ListPoliciesInput) (*iam.ListPoliciesOutput, error) {
+	i.ListPoliciesCall.CallCount++
+	i.ListPoliciesCall.Receives.Input = input
+
+	return i.ListPoliciesCall.Returns.Output, i.ListPoliciesCall.Returns.Error
+}
+
+func (i *IAMClient) DetachRolePolicy(input *iam.DetachRolePolicyInput) (*iam.DetachRolePolicyOutput, error) {
+	i.DetachRolePolicyCall.CallCount++
+	i.DetachRolePolicyCall.Receives.Input = input
+
+	return i.DetachRolePolicyCall.Returns.Output, i.DetachRolePolicyCall.Returns.Error
 }
 
 func (i *IAMClient) DeleteRolePolicy(input *iam.DeleteRolePolicyInput) (*iam.DeleteRolePolicyOutput, error) {
