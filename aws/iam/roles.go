@@ -7,14 +7,16 @@ import (
 )
 
 type Roles struct {
-	client iamClient
-	logger logger
+	client   iamClient
+	logger   logger
+	policies rolePolicies
 }
 
-func NewRoles(client iamClient, logger logger) Roles {
+func NewRoles(client iamClient, logger logger, policies rolePolicies) Roles {
 	return Roles{
-		client: client,
-		logger: logger,
+		client:   client,
+		logger:   logger,
+		policies: policies,
 	}
 }
 
@@ -25,18 +27,22 @@ func (o Roles) Delete() error {
 	}
 
 	for _, r := range roles.Roles {
-		n := r.RoleName
+		n := *r.RoleName
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role %s?", *n))
+		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := o.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: n})
+		if err := o.policies.Delete(n); err != nil {
+			return fmt.Errorf("Deleting policies for %s: %s", n, err)
+		}
+
+		_, err = o.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: r.RoleName})
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting role %s\n", *n)
+			o.logger.Printf("SUCCESS deleting role %s\n", n)
 		} else {
-			o.logger.Printf("ERROR deleting role %s: %s\n", *n, err)
+			o.logger.Printf("ERROR deleting role %s: %s\n", n, err)
 		}
 	}
 

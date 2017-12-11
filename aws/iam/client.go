@@ -13,4 +13,7 @@ type iamClient interface {
 
 	ListRoles(*awsiam.ListRolesInput) (*awsiam.ListRolesOutput, error)
 	DeleteRole(*awsiam.DeleteRoleInput) (*awsiam.DeleteRoleOutput, error)
+
+	ListRolePolicies(*awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error)
+	DeleteRolePolicy(*awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error)
 }

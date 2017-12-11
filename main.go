@@ -62,7 +62,8 @@ func main() {
 	ec2Client := awsec2.New(session.New(config))
 	elbClient := awselb.New(session.New(config))
 
-	ir := iam.NewRoles(iamClient, logger)
+	rp := iam.NewRolePolicies(iamClient, logger)
+	ro := iam.NewRoles(iamClient, logger, rp)
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 
@@ -73,7 +74,7 @@ func main() {
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ir, ip, sc, vo, ta, ke, lo, in}
+	resources := []resource{ro, ip, sc, vo, ta, ke, lo, in}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
