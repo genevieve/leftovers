@@ -5,28 +5,6 @@ import (
 )
 
 type EC2Client struct {
-	DescribeInstancesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.DescribeInstancesInput
-		}
-		Returns struct {
-			Output *ec2.DescribeInstancesOutput
-			Error  error
-		}
-	}
-
-	TerminateInstancesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.TerminateInstancesInput
-		}
-		Returns struct {
-			Output *ec2.TerminateInstancesOutput
-			Error  error
-		}
-	}
-
 	DescribeSecurityGroupsCall struct {
 		CallCount int
 		Receives  struct {
@@ -114,20 +92,6 @@ type EC2Client struct {
 			Error  error
 		}
 	}
-}
-
-func (e *EC2Client) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
-	e.DescribeInstancesCall.CallCount++
-	e.DescribeInstancesCall.Receives.Input = input
-
-	return e.DescribeInstancesCall.Returns.Output, e.DescribeInstancesCall.Returns.Error
-}
-
-func (e *EC2Client) TerminateInstances(input *ec2.TerminateInstancesInput) (*ec2.TerminateInstancesOutput, error) {
-	e.TerminateInstancesCall.CallCount++
-	e.TerminateInstancesCall.Receives.Input = input
-
-	return e.TerminateInstancesCall.Returns.Output, e.TerminateInstancesCall.Returns.Error
 }
 
 func (e *EC2Client) DescribeSecurityGroups(input *ec2.DescribeSecurityGroupsInput) (*ec2.DescribeSecurityGroupsOutput, error) {

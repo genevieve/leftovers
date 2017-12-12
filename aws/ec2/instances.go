@@ -6,12 +6,17 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+type instancesClient interface {
+	DescribeInstances(*awsec2.DescribeInstancesInput) (*awsec2.DescribeInstancesOutput, error)
+	TerminateInstances(*awsec2.TerminateInstancesInput) (*awsec2.TerminateInstancesOutput, error)
+}
+
 type Instances struct {
-	client ec2Client
+	client instancesClient
 	logger logger
 }
 
-func NewInstances(client ec2Client, logger logger) Instances {
+func NewInstances(client instancesClient, logger logger) Instances {
 	return Instances{
 		client: client,
 		logger: logger,

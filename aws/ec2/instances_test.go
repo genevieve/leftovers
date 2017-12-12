@@ -13,23 +13,23 @@ import (
 
 var _ = Describe("Instances", func() {
 	var (
-		ec2Client *fakes.EC2Client
-		logger    *fakes.Logger
+		client *fakes.InstancesClient
+		logger *fakes.Logger
 
 		instances ec2.Instances
 	)
 
 	BeforeEach(func() {
-		ec2Client = &fakes.EC2Client{}
+		client = &fakes.InstancesClient{}
 		logger = &fakes.Logger{}
 		logger.PromptCall.Returns.Proceed = true
 
-		instances = ec2.NewInstances(ec2Client, logger)
+		instances = ec2.NewInstances(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			ec2Client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
+			client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
 				Reservations: []*awsec2.Reservation{{
 					Instances: []*awsec2.Instance{{
 						State: &awsec2.InstanceState{Name: aws.String("available")},
@@ -47,17 +47,17 @@ var _ = Describe("Instances", func() {
 			err := instances.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(ec2Client.DescribeInstancesCall.CallCount).To(Equal(1))
-			Expect(ec2Client.TerminateInstancesCall.CallCount).To(Equal(1))
-			Expect(ec2Client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
-			Expect(ec2Client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
+			Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
+			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
+			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
+			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id/banana?"))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id/banana\n"}))
 		})
 
 		Context("when there is no tag name", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
+				client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
 					Reservations: []*awsec2.Reservation{{
 						Instances: []*awsec2.Instance{{
 							State:      &awsec2.InstanceState{Name: aws.String("available")},
@@ -78,7 +78,7 @@ var _ = Describe("Instances", func() {
 
 		Context("when the instance state is terminated", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
+				client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
 					Reservations: []*awsec2.Reservation{{
 						Instances: []*awsec2.Instance{{
 							State:      &awsec2.InstanceState{Name: aws.String("terminated")},
@@ -92,28 +92,28 @@ var _ = Describe("Instances", func() {
 				err := instances.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(ec2Client.DescribeInstancesCall.CallCount).To(Equal(1))
-				Expect(ec2Client.TerminateInstancesCall.CallCount).To(Equal(0))
+				Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
+				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the client fails to list instances", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeInstancesCall.Returns.Error = errors.New("some error")
+				client.DescribeInstancesCall.Returns.Error = errors.New("some error")
 			})
 
 			It("does not try terminating them", func() {
 				err := instances.Delete()
 				Expect(err.Error()).To(Equal("Describing instances: some error"))
 
-				Expect(ec2Client.TerminateInstancesCall.CallCount).To(Equal(0))
+				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the client fails to terminate the instance", func() {
 			BeforeEach(func() {
-				ec2Client.TerminateInstancesCall.Returns.Error = errors.New("some error")
+				client.TerminateInstancesCall.Returns.Error = errors.New("some error")
 			})
 
 			It("logs the error", func() {
@@ -134,7 +134,7 @@ var _ = Describe("Instances", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id/banana?"))
-				Expect(ec2Client.TerminateInstancesCall.CallCount).To(Equal(0))
+				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
 			})
 		})
 	})
