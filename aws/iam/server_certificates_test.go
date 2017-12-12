@@ -13,23 +13,23 @@ import (
 
 var _ = Describe("ServerCertificates", func() {
 	var (
-		iamClient *fakes.IAMClient
-		logger    *fakes.Logger
+		client *fakes.ServerCertificatesClient
+		logger *fakes.Logger
 
 		serverCertificates iam.ServerCertificates
 	)
 
 	BeforeEach(func() {
-		iamClient = &fakes.IAMClient{}
+		client = &fakes.ServerCertificatesClient{}
 		logger = &fakes.Logger{}
 
-		serverCertificates = iam.NewServerCertificates(iamClient, logger)
+		serverCertificates = iam.NewServerCertificates(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			iamClient.ListServerCertificatesCall.Returns.Output = &awsiam.ListServerCertificatesOutput{
+			client.ListServerCertificatesCall.Returns.Output = &awsiam.ListServerCertificatesOutput{
 				ServerCertificateMetadataList: []*awsiam.ServerCertificateMetadata{{
 					ServerCertificateName: aws.String("banana"),
 				}},
@@ -40,27 +40,27 @@ var _ = Describe("ServerCertificates", func() {
 			err := serverCertificates.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(iamClient.DeleteServerCertificateCall.CallCount).To(Equal(1))
-			Expect(iamClient.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana")))
+			Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
+			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana")))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana\n"}))
 		})
 
 		Context("when the client fails to list server certificates", func() {
 			BeforeEach(func() {
-				iamClient.ListServerCertificatesCall.Returns.Error = errors.New("some error")
+				client.ListServerCertificatesCall.Returns.Error = errors.New("some error")
 			})
 
 			It("does not try deleting them", func() {
 				err := serverCertificates.Delete()
 				Expect(err.Error()).To(Equal("Listing server certificates: some error"))
 
-				Expect(iamClient.DeleteServerCertificateCall.CallCount).To(Equal(0))
+				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the client fails to delete the server certificate", func() {
 			BeforeEach(func() {
-				iamClient.DeleteServerCertificateCall.Returns.Error = errors.New("some error")
+				client.DeleteServerCertificateCall.Returns.Error = errors.New("some error")
 			})
 
 			It("does not try deleting them", func() {
@@ -81,7 +81,7 @@ var _ = Describe("ServerCertificates", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete server certificate banana?"))
-				Expect(iamClient.DeleteServerCertificateCall.CallCount).To(Equal(0))
+				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})
 		})
 	})

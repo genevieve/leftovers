@@ -6,12 +6,17 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
+type serverCertificatesClient interface {
+	ListServerCertificates(*awsiam.ListServerCertificatesInput) (*awsiam.ListServerCertificatesOutput, error)
+	DeleteServerCertificate(*awsiam.DeleteServerCertificateInput) (*awsiam.DeleteServerCertificateOutput, error)
+}
+
 type ServerCertificates struct {
-	client iamClient
+	client serverCertificatesClient
 	logger logger
 }
 
-func NewServerCertificates(client iamClient, logger logger) ServerCertificates {
+func NewServerCertificates(client serverCertificatesClient, logger logger) ServerCertificates {
 	return ServerCertificates{
 		client: client,
 		logger: logger,

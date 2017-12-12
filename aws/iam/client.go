@@ -5,9 +5,6 @@ import (
 )
 
 type iamClient interface {
-	ListServerCertificates(*awsiam.ListServerCertificatesInput) (*awsiam.ListServerCertificatesOutput, error)
-	DeleteServerCertificate(*awsiam.DeleteServerCertificateInput) (*awsiam.DeleteServerCertificateOutput, error)
-
 	ListRoles(*awsiam.ListRolesInput) (*awsiam.ListRolesOutput, error)
 	DeleteRole(*awsiam.DeleteRoleInput) (*awsiam.DeleteRoleOutput, error)
 
