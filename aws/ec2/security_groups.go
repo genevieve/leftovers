@@ -6,12 +6,19 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+type securityGroupsClient interface {
+	DescribeSecurityGroups(*awsec2.DescribeSecurityGroupsInput) (*awsec2.DescribeSecurityGroupsOutput, error)
+	RevokeSecurityGroupIngress(*awsec2.RevokeSecurityGroupIngressInput) (*awsec2.RevokeSecurityGroupIngressOutput, error)
+	RevokeSecurityGroupEgress(*awsec2.RevokeSecurityGroupEgressInput) (*awsec2.RevokeSecurityGroupEgressOutput, error)
+	DeleteSecurityGroup(*awsec2.DeleteSecurityGroupInput) (*awsec2.DeleteSecurityGroupOutput, error)
+}
+
 type SecurityGroups struct {
-	client ec2Client
+	client securityGroupsClient
 	logger logger
 }
 
-func NewSecurityGroups(client ec2Client, logger logger) SecurityGroups {
+func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroups {
 	return SecurityGroups{
 		client: client,
 		logger: logger,
