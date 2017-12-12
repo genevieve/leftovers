@@ -2,7 +2,7 @@ package fakes
 
 import "github.com/aws/aws-sdk-go/service/elb"
 
-type ELBClient struct {
+type LoadBalancersClient struct {
 	DescribeLoadBalancersCall struct {
 		CallCount int
 		Receives  struct {
@@ -26,14 +26,14 @@ type ELBClient struct {
 	}
 }
 
-func (e *ELBClient) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
+func (e *LoadBalancersClient) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
 	e.DescribeLoadBalancersCall.CallCount++
 	e.DescribeLoadBalancersCall.Receives.Input = input
 
 	return e.DescribeLoadBalancersCall.Returns.Output, e.DescribeLoadBalancersCall.Returns.Error
 }
 
-func (e *ELBClient) DeleteLoadBalancer(input *elb.DeleteLoadBalancerInput) (*elb.DeleteLoadBalancerOutput, error) {
+func (e *LoadBalancersClient) DeleteLoadBalancer(input *elb.DeleteLoadBalancerInput) (*elb.DeleteLoadBalancerOutput, error) {
 	e.DeleteLoadBalancerCall.CallCount++
 	e.DeleteLoadBalancerCall.Receives.Input = input
 

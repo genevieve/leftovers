@@ -7,12 +7,17 @@ import (
 	awselb "github.com/aws/aws-sdk-go/service/elb"
 )
 
+type loadBalancersClient interface {
+	DescribeLoadBalancers(*awselb.DescribeLoadBalancersInput) (*awselb.DescribeLoadBalancersOutput, error)
+	DeleteLoadBalancer(*awselb.DeleteLoadBalancerInput) (*awselb.DeleteLoadBalancerOutput, error)
+}
+
 type LoadBalancers struct {
-	client elbClient
+	client loadBalancersClient
 	logger logger
 }
 
-func NewLoadBalancers(client elbClient, logger logger) LoadBalancers {
+func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	return LoadBalancers{
 		client: client,
 		logger: logger,
