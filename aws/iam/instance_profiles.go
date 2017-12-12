@@ -6,12 +6,18 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
+type instanceProfilesClient interface {
+	ListInstanceProfiles(*awsiam.ListInstanceProfilesInput) (*awsiam.ListInstanceProfilesOutput, error)
+	RemoveRoleFromInstanceProfile(*awsiam.RemoveRoleFromInstanceProfileInput) (*awsiam.RemoveRoleFromInstanceProfileOutput, error)
+	DeleteInstanceProfile(*awsiam.DeleteInstanceProfileInput) (*awsiam.DeleteInstanceProfileOutput, error)
+}
+
 type InstanceProfiles struct {
-	client iamClient
+	client instanceProfilesClient
 	logger logger
 }
 
-func NewInstanceProfiles(client iamClient, logger logger) InstanceProfiles {
+func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceProfiles {
 	return InstanceProfiles{
 		client: client,
 		logger: logger,
