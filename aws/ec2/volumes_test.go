@@ -13,23 +13,23 @@ import (
 
 var _ = Describe("Volumes", func() {
 	var (
-		ec2Client *fakes.EC2Client
-		logger    *fakes.Logger
+		client *fakes.VolumesClient
+		logger *fakes.Logger
 
 		volumes ec2.Volumes
 	)
 
 	BeforeEach(func() {
-		ec2Client = &fakes.EC2Client{}
+		client = &fakes.VolumesClient{}
 		logger = &fakes.Logger{}
 
-		volumes = ec2.NewVolumes(ec2Client, logger)
+		volumes = ec2.NewVolumes(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			ec2Client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
+			client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
 				Volumes: []*awsec2.Volume{{
 					VolumeId: aws.String("banana"),
 					State:    aws.String("available"),
@@ -41,27 +41,27 @@ var _ = Describe("Volumes", func() {
 			err := volumes.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(ec2Client.DeleteVolumeCall.CallCount).To(Equal(1))
-			Expect(ec2Client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(aws.String("banana")))
+			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
+			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(aws.String("banana")))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting volume banana\n"}))
 		})
 
 		Context("when the client fails to list volumes", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeVolumesCall.Returns.Error = errors.New("some error")
+				client.DescribeVolumesCall.Returns.Error = errors.New("some error")
 			})
 
 			It("does not try deleting them", func() {
 				err := volumes.Delete()
 				Expect(err.Error()).To(Equal("Describing volumes: some error"))
 
-				Expect(ec2Client.DeleteVolumeCall.CallCount).To(Equal(0))
+				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the client fails to delete the volume", func() {
 			BeforeEach(func() {
-				ec2Client.DeleteVolumeCall.Returns.Error = errors.New("some error")
+				client.DeleteVolumeCall.Returns.Error = errors.New("some error")
 			})
 
 			It("logs the error", func() {
@@ -82,13 +82,13 @@ var _ = Describe("Volumes", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete volume banana?"))
-				Expect(ec2Client.DeleteVolumeCall.CallCount).To(Equal(0))
+				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the volume is not available", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
+				client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
 					Volumes: []*awsec2.Volume{{
 						VolumeId: aws.String("banana"),
 						State:    aws.String("nope"),
@@ -101,7 +101,7 @@ var _ = Describe("Volumes", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(ec2Client.DeleteVolumeCall.CallCount).To(Equal(0))
+				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
 			})
 		})
 	})

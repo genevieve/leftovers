@@ -7,12 +7,17 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+type volumesClient interface {
+	DescribeVolumes(*awsec2.DescribeVolumesInput) (*awsec2.DescribeVolumesOutput, error)
+	DeleteVolume(*awsec2.DeleteVolumeInput) (*awsec2.DeleteVolumeOutput, error)
+}
+
 type Volumes struct {
-	client ec2Client
+	client volumesClient
 	logger logger
 }
 
-func NewVolumes(client ec2Client, logger logger) Volumes {
+func NewVolumes(client volumesClient, logger logger) Volumes {
 	return Volumes{
 		client: client,
 		logger: logger,
