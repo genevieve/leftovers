@@ -1,0 +1,12 @@
+- Remove roles from instance profiles
+- Delete instance profiles
+- Remove policies from roles
+- Delete roles
+- Delete load balancers
+- Delete server certificates
+- Delete volumes
+- Delete tags
+- Delete key pairs
+- Delete instances
+- Remove rules from security groups
+- Delete security groups
