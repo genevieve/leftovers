@@ -76,7 +76,7 @@ var _ = Describe("Vpcs", func() {
 
 			It("does not try deleting them", func() {
 				err := vpcs.Delete()
-				Expect(err.Error()).To(Equal("Describing vpcs: some error"))
+				Expect(err).To(MatchError("Describing vpcs: some error"))
 
 				Expect(ec2Client.DeleteVpcCall.CallCount).To(Equal(0))
 			})

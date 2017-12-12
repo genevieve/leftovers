@@ -57,7 +57,7 @@ var _ = Describe("Tags", func() {
 
 			It("does not try deleting them", func() {
 				err := tags.Delete()
-				Expect(err.Error()).To(Equal("Describing tags: some error"))
+				Expect(err).To(MatchError("Describing tags: some error"))
 
 				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
 			})

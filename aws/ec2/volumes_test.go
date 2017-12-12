@@ -53,7 +53,7 @@ var _ = Describe("Volumes", func() {
 
 			It("does not try deleting them", func() {
 				err := volumes.Delete()
-				Expect(err.Error()).To(Equal("Describing volumes: some error"))
+				Expect(err).To(MatchError("Describing volumes: some error"))
 
 				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
 			})

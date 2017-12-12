@@ -57,7 +57,7 @@ var _ = Describe("SecurityGroups", func() {
 
 			It("does not try deleting them", func() {
 				err := securityGroups.Delete()
-				Expect(err.Error()).To(Equal("Describing security groups: some error"))
+				Expect(err).To(MatchError("Describing security groups: some error"))
 
 				Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(0))
 			})

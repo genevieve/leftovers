@@ -105,7 +105,7 @@ var _ = Describe("Instances", func() {
 
 			It("does not try terminating them", func() {
 				err := instances.Delete()
-				Expect(err.Error()).To(Equal("Describing instances: some error"))
+				Expect(err).To(MatchError("Describing instances: some error"))
 
 				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
 			})

@@ -57,7 +57,7 @@ var _ = Describe("Roles", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				err := roles.Delete()
-				Expect(err.Error()).To(Equal("Listing roles: some error"))
+				Expect(err).To(MatchError("Listing roles: some error"))
 
 				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
 			})
@@ -70,7 +70,7 @@ var _ = Describe("Roles", func() {
 
 			It("returns the error", func() {
 				err := roles.Delete()
-				Expect(err.Error()).To(Equal("Deleting policies for banana: some error"))
+				Expect(err).To(MatchError("Deleting policies for banana: some error"))
 
 				Expect(policies.DeleteCall.CallCount).To(Equal(1))
 			})

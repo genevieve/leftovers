@@ -65,7 +65,7 @@ var _ = Describe("Users", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				err := users.Delete()
-				Expect(err.Error()).To(Equal("Listing users: some error"))
+				Expect(err).To(MatchError("Listing users: some error"))
 
 				Expect(client.DeleteUserCall.CallCount).To(Equal(0))
 			})

@@ -54,7 +54,7 @@ var _ = Describe("KeyPairs", func() {
 
 			It("does not try deleting them", func() {
 				err := keyPairs.Delete()
-				Expect(err.Error()).To(Equal("Describing key pairs: some error"))
+				Expect(err).To(MatchError("Describing key pairs: some error"))
 
 				Expect(ec2Client.DeleteKeyPairCall.CallCount).To(Equal(0))
 			})

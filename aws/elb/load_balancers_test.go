@@ -54,7 +54,7 @@ var _ = Describe("LoadBalancers", func() {
 
 			It("does not try deleting them", func() {
 				err := loadBalancers.Delete()
-				Expect(err.Error()).To(Equal("Describing load balancers: some error"))
+				Expect(err).To(MatchError("Describing load balancers: some error"))
 
 				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
 			})
