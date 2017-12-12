@@ -1,6 +1,8 @@
-- Remove roles from instance profiles
+- Detach roles from users
+- Delete users
+- Detach roles from instance profiles
 - Delete instance profiles
-- Remove policies from roles
+- Detach policies from roles
 - Delete roles
 - Delete load balancers
 - Delete server certificates
