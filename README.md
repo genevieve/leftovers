@@ -23,10 +23,15 @@ Usage:
   leftovers [OPTIONS]
 
 Application Options:
-  -n, --no-confirm             Destroy resources without prompting. THIS DANGEROUS, MAKE GOOD CHOICES!
+  -i, --iaas=                  The IAAS for clean up. (default: aws) [$LEFTOVERS_IAAS]
+  -n, --no-confirm             Destroy resources without prompting. This is dangerous, make good choices!
       --aws-access-key-id=     AWS access key id. [$AWS_ACCESS_KEY_ID]
       --aws-secret-access-key= AWS secret access key. [$AWS_SECRET_ACCESS_KEY]
       --aws-region=            AWS region. [$AWS_REGION]
+      --azure-client-id=       Azure client id. [$AZURE_CLIENT_ID]
+      --azure-client-secret=   Azure client secret. [$AZURE_CLIENT_SECRET]
+      --azure-tenant-id=       Azure tenant id. [$AZURE_TENANT_ID]
+      --azure-subscription-id= Azure subscription id. [$AZURE_SUBSCRIPTION_ID]
 
 Help Options:
   -h, --help                   Show this help message
@@ -60,6 +65,13 @@ Help Options:
 - s3 buckets
 ```
 
+## Azure
+### What can you delete with this?
+
+```diff
++ resource groups
+```
+
 ## GCP
 ### What's up next?
 
@@ -71,13 +83,6 @@ Help Options:
 - compute vm instance templates
 - compute snapshots
 - compute images
-```
-
-## Azure
-### What's up next?
-
-```diff
-- resource groups
 ```
 
 ## vSphere
