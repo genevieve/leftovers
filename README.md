@@ -10,6 +10,8 @@ infrastructure resources were tragically orphaned
 
 ## Installation
 
+[Install go.](https://golang.org/doc/install)
+
 ```
 $  go get github.com/genevievelesperance/leftovers
 ```
