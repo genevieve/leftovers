@@ -18,7 +18,7 @@ $  go get github.com/genevievelesperance/leftovers
 
 ```
 Usage:
-  main [OPTIONS]
+  leftovers [OPTIONS]
 
 Application Options:
   -n, --no-confirm             Destroy resources without prompting. THIS DANGEROUS, MAKE GOOD CHOICES!
