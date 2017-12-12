@@ -55,5 +55,10 @@ infrastructure resources were tragically orphaned
 ```
 
 ## Azure
+### What's up next?
+
+```diff
+- resource groups
+```
 
 ## vSphere
