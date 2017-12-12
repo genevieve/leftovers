@@ -71,7 +71,7 @@ var _ = Describe("UserPolicies", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				err := policies.Delete("banana")
-				Expect(err.Error()).To(Equal("Listing user policies: some error"))
+				Expect(err).To(MatchError("Listing user policies: some error"))
 
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
 			})

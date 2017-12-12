@@ -52,7 +52,7 @@ var _ = Describe("ServerCertificates", func() {
 
 			It("does not try deleting them", func() {
 				err := serverCertificates.Delete()
-				Expect(err.Error()).To(Equal("Listing server certificates: some error"))
+				Expect(err).To(MatchError("Listing server certificates: some error"))
 
 				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})

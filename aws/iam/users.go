@@ -12,16 +12,18 @@ type usersClient interface {
 }
 
 type Users struct {
-	client   usersClient
-	logger   logger
-	policies userPolicies
+	client     usersClient
+	logger     logger
+	policies   userPolicies
+	accessKeys accessKeys
 }
 
-func NewUsers(client usersClient, logger logger, policies userPolicies) Users {
+func NewUsers(client usersClient, logger logger, policies userPolicies, accessKeys accessKeys) Users {
 	return Users{
-		client:   client,
-		logger:   logger,
-		policies: policies,
+		client:     client,
+		logger:     logger,
+		policies:   policies,
+		accessKeys: accessKeys,
 	}
 }
 
@@ -37,6 +39,10 @@ func (o Users) Delete() error {
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user %s?", n))
 		if !proceed {
 			continue
+		}
+
+		if err := o.accessKeys.Delete(n); err != nil {
+			return fmt.Errorf("Deleting access keys for %s: %s", n, err)
 		}
 
 		if err := o.policies.Delete(n); err != nil {

@@ -16,6 +16,7 @@ var _ = Describe("Users", func() {
 		client   *fakes.UsersClient
 		logger   *fakes.Logger
 		policies *fakes.UserPolicies
+		keys     *fakes.AccessKeys
 
 		users iam.Users
 	)
@@ -24,8 +25,9 @@ var _ = Describe("Users", func() {
 		client = &fakes.UsersClient{}
 		logger = &fakes.Logger{}
 		policies = &fakes.UserPolicies{}
+		keys = &fakes.AccessKeys{}
 
-		users = iam.NewUsers(client, logger, policies)
+		users = iam.NewUsers(client, logger, policies, keys)
 	})
 
 	Describe("Delete", func() {
@@ -43,10 +45,16 @@ var _ = Describe("Users", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListUsersCall.CallCount).To(Equal(1))
+
+			Expect(keys.DeleteCall.CallCount).To(Equal(1))
+			Expect(keys.DeleteCall.Receives.UserName).To(Equal("banana"))
+
 			Expect(policies.DeleteCall.CallCount).To(Equal(1))
 			Expect(policies.DeleteCall.Receives.UserName).To(Equal("banana"))
+
 			Expect(client.DeleteUserCall.CallCount).To(Equal(1))
 			Expect(client.DeleteUserCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
+
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting user banana\n"}))
 		})
 
@@ -63,6 +71,19 @@ var _ = Describe("Users", func() {
 			})
 		})
 
+		Context("when access keys fails to delete", func() {
+			BeforeEach(func() {
+				keys.DeleteCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				err := users.Delete()
+				Expect(err).To(MatchError("Deleting access keys for banana: some error"))
+
+				Expect(keys.DeleteCall.CallCount).To(Equal(1))
+			})
+		})
+
 		Context("when policies fails to delete", func() {
 			BeforeEach(func() {
 				policies.DeleteCall.Returns.Error = errors.New("some error")
@@ -70,7 +91,7 @@ var _ = Describe("Users", func() {
 
 			It("returns the error", func() {
 				err := users.Delete()
-				Expect(err.Error()).To(Equal("Deleting policies for banana: some error"))
+				Expect(err).To(MatchError("Deleting policies for banana: some error"))
 
 				Expect(policies.DeleteCall.CallCount).To(Equal(1))
 			})

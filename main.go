@@ -62,10 +62,12 @@ func main() {
 	ec2Client := awsec2.New(session.New(config))
 	elbClient := awselb.New(session.New(config))
 
-	rp := iam.NewRolePolicies(iamClient, logger)
-	ro := iam.NewRoles(iamClient, logger, rp)
-	up := iam.NewUserPolicies(iamClient, logger)
-	us := iam.NewUsers(iamClient, logger, up)
+	rolePolicies := iam.NewRolePolicies(iamClient, logger)
+	userPolicies := iam.NewUserPolicies(iamClient, logger)
+	accessKeys := iam.NewAccessKeys(iamClient, logger)
+
+	ro := iam.NewRoles(iamClient, logger, rolePolicies)
+	us := iam.NewUsers(iamClient, logger, userPolicies, accessKeys)
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 

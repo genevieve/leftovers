@@ -78,7 +78,7 @@ var _ = Describe("InstanceProfiles", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				err := instanceProfiles.Delete()
-				Expect(err.Error()).To(Equal("Listing instance profiles: listing error"))
+				Expect(err).To(MatchError("Listing instance profiles: listing error"))
 
 				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(0))
 			})
