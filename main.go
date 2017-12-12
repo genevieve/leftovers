@@ -64,6 +64,8 @@ func main() {
 
 	rp := iam.NewRolePolicies(iamClient, logger)
 	ro := iam.NewRoles(iamClient, logger, rp)
+	up := iam.NewUserPolicies(iamClient, logger)
+	us := iam.NewUsers(iamClient, logger, up)
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 
@@ -75,7 +77,7 @@ func main() {
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ip, ro, lo, sc, vo, ta, ke, in, se}
+	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
