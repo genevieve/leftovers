@@ -18,15 +18,15 @@ infrastructure resources were tragically orphaned
 - ec2 tags
 - ec2 key pairs
 - ec2 instances
+- ec2 security groups
+- ec2 vpcs
 - elb load balancers
 
 ### Upcoming
 - iam group policies
 - iam user policies
 - elbv2 load balancers
-- ec2 security groups
 - ec2 eips
-- ec2 vpcs
 - ec2 enis
 - s3 buckets
 

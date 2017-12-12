@@ -44,7 +44,7 @@ func (e SecurityGroups) Delete() error {
 		if err == nil {
 			e.logger.Printf("SUCCESS deleting security group %s\n", n)
 		} else {
-			//List any security groups that mention this security group
+			//TODO: List any security groups that mention this security group
 			//Prompt if they are okay revoking rules from all these groups
 			//Delete the one group
 			e.logger.Printf("ERROR deleting security group %s: %s\n", n, err)
