@@ -8,6 +8,12 @@ Clean up orphaned IAAS resources.
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned
 
+## Installation
+
+```
+$  go get github.com/genevievelesperance/leftovers
+```
+
 ## Usage
 
 1. Provide IAAS credentials.
