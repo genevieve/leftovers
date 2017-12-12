@@ -1,2 +1,3 @@
+- GetBucketLocation to filter by region/location in client config
 - allow argument to leftovers for a particular category like (leftovers aws s3)
 - accept an environment name for filtering

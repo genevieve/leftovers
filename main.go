@@ -10,10 +10,12 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	awselb "github.com/aws/aws-sdk-go/service/elb"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/aws/ec2"
 	"github.com/genevievelesperance/leftovers/aws/elb"
 	"github.com/genevievelesperance/leftovers/aws/iam"
+	"github.com/genevievelesperance/leftovers/aws/s3"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -57,10 +59,12 @@ func main() {
 		Credentials: credentials.NewStaticCredentials(c.AWSAccessKeyID, c.AWSSecretAccessKey, ""),
 		Region:      aws.String(c.AWSRegion),
 	}
+	sess := session.New(config)
 
-	iamClient := awsiam.New(session.New(config))
-	ec2Client := awsec2.New(session.New(config))
-	elbClient := awselb.New(session.New(config))
+	iamClient := awsiam.New(sess)
+	ec2Client := awsec2.New(sess)
+	elbClient := awselb.New(sess)
+	s3Client := awss3.New(sess)
 
 	rolePolicies := iam.NewRolePolicies(iamClient, logger)
 	userPolicies := iam.NewUserPolicies(iamClient, logger)
@@ -79,7 +83,9 @@ func main() {
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se}
+	bu := s3.NewBuckets(s3Client, logger)
+
+	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se, bu}
 	for _, r := range resources {
 		if err = r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)
