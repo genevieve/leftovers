@@ -13,23 +13,23 @@ import (
 
 var _ = Describe("LoadBalancers", func() {
 	var (
-		elbClient *fakes.ELBClient
-		logger    *fakes.Logger
+		client *fakes.LoadBalancersClient
+		logger *fakes.Logger
 
 		loadBalancers elb.LoadBalancers
 	)
 
 	BeforeEach(func() {
-		elbClient = &fakes.ELBClient{}
+		client = &fakes.LoadBalancersClient{}
 		logger = &fakes.Logger{}
 
-		loadBalancers = elb.NewLoadBalancers(elbClient, logger)
+		loadBalancers = elb.NewLoadBalancers(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			elbClient.DescribeLoadBalancersCall.Returns.Output = &awselb.DescribeLoadBalancersOutput{
+			client.DescribeLoadBalancersCall.Returns.Output = &awselb.DescribeLoadBalancersOutput{
 				LoadBalancerDescriptions: []*awselb.LoadBalancerDescription{{
 					LoadBalancerName: aws.String("banana"),
 				}},
@@ -40,29 +40,29 @@ var _ = Describe("LoadBalancers", func() {
 			err := loadBalancers.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(elbClient.DescribeLoadBalancersCall.CallCount).To(Equal(1))
-			Expect(elbClient.DeleteLoadBalancerCall.CallCount).To(Equal(1))
-			Expect(elbClient.DeleteLoadBalancerCall.Receives.Input.LoadBalancerName).To(Equal(aws.String("banana")))
+			Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
+			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
+			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerName).To(Equal(aws.String("banana")))
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting load balancer banana\n"}))
 		})
 
 		Context("when the client fails to list load balancers", func() {
 			BeforeEach(func() {
-				elbClient.DescribeLoadBalancersCall.Returns.Error = errors.New("some error")
+				client.DescribeLoadBalancersCall.Returns.Error = errors.New("some error")
 			})
 
 			It("does not try deleting them", func() {
 				err := loadBalancers.Delete()
 				Expect(err.Error()).To(Equal("Describing load balancers: some error"))
 
-				Expect(elbClient.DeleteLoadBalancerCall.CallCount).To(Equal(0))
+				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the client fails to delete the load balancer", func() {
 			BeforeEach(func() {
-				elbClient.DeleteLoadBalancerCall.Returns.Error = errors.New("some error")
+				client.DeleteLoadBalancerCall.Returns.Error = errors.New("some error")
 			})
 
 			It("logs the error", func() {
@@ -83,7 +83,7 @@ var _ = Describe("LoadBalancers", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))
-				Expect(elbClient.DeleteLoadBalancerCall.CallCount).To(Equal(0))
+				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
 			})
 		})
 	})
