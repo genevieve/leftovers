@@ -13,14 +13,14 @@ import (
 
 var _ = Describe("KeyPairs", func() {
 	var (
-		ec2Client *fakes.EC2Client
+		ec2Client *fakes.KeyPairClient
 		logger    *fakes.Logger
 
 		keyPairs ec2.KeyPairs
 	)
 
 	BeforeEach(func() {
-		ec2Client = &fakes.EC2Client{}
+		ec2Client = &fakes.KeyPairClient{}
 		logger = &fakes.Logger{}
 
 		keyPairs = ec2.NewKeyPairs(ec2Client, logger)

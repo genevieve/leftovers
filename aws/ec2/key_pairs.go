@@ -6,12 +6,17 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+type keyPairClient interface {
+	DescribeKeyPairs(*awsec2.DescribeKeyPairsInput) (*awsec2.DescribeKeyPairsOutput, error)
+	DeleteKeyPair(*awsec2.DeleteKeyPairInput) (*awsec2.DeleteKeyPairOutput, error)
+}
+
 type KeyPairs struct {
-	client ec2Client
+	client keyPairClient
 	logger logger
 }
 
-func NewKeyPairs(client ec2Client, logger logger) KeyPairs {
+func NewKeyPairs(client keyPairClient, logger logger) KeyPairs {
 	return KeyPairs{
 		client: client,
 		logger: logger,
