@@ -1,7 +1,6 @@
 package azure
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
@@ -46,12 +45,8 @@ func Bootstrap(logger logger, clientId, clientSecret, subscriptionId, tenantId s
 	gc := resources.NewGroupsClient(subscriptionId)
 	gc.ManagementClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 
-	result, err := gc.List("", nil)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, g := range *result.Value {
-		fmt.Println(*g.Name)
+	gr := NewGroups(gc, logger)
+	if err := gr.Delete(); err != nil {
+		log.Fatalf("\n\n%s\n", err)
 	}
 }
