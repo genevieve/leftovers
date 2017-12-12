@@ -3,24 +3,13 @@ package fakes
 import "github.com/aws/aws-sdk-go/service/iam"
 
 type UserPoliciesClient struct {
-	ListUserPoliciesCall struct {
+	ListAttachedUserPoliciesCall struct {
 		CallCount int
 		Receives  struct {
-			Input *iam.ListUserPoliciesInput
+			Input *iam.ListAttachedUserPoliciesInput
 		}
 		Returns struct {
-			Output *iam.ListUserPoliciesOutput
-			Error  error
-		}
-	}
-
-	ListPoliciesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *iam.ListPoliciesInput
-		}
-		Returns struct {
-			Output *iam.ListPoliciesOutput
+			Output *iam.ListAttachedUserPoliciesOutput
 			Error  error
 		}
 	}
@@ -48,18 +37,11 @@ type UserPoliciesClient struct {
 	}
 }
 
-func (i *UserPoliciesClient) ListUserPolicies(input *iam.ListUserPoliciesInput) (*iam.ListUserPoliciesOutput, error) {
-	i.ListUserPoliciesCall.CallCount++
-	i.ListUserPoliciesCall.Receives.Input = input
+func (i *UserPoliciesClient) ListAttachedUserPolicies(input *iam.ListAttachedUserPoliciesInput) (*iam.ListAttachedUserPoliciesOutput, error) {
+	i.ListAttachedUserPoliciesCall.CallCount++
+	i.ListAttachedUserPoliciesCall.Receives.Input = input
 
-	return i.ListUserPoliciesCall.Returns.Output, i.ListUserPoliciesCall.Returns.Error
-}
-
-func (i *UserPoliciesClient) ListPolicies(input *iam.ListPoliciesInput) (*iam.ListPoliciesOutput, error) {
-	i.ListPoliciesCall.CallCount++
-	i.ListPoliciesCall.Receives.Input = input
-
-	return i.ListPoliciesCall.Returns.Output, i.ListPoliciesCall.Returns.Error
+	return i.ListAttachedUserPoliciesCall.Returns.Output, i.ListAttachedUserPoliciesCall.Returns.Error
 }
 
 func (i *UserPoliciesClient) DetachUserPolicy(input *iam.DetachUserPolicyInput) (*iam.DetachUserPolicyOutput, error) {

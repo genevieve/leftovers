@@ -8,8 +8,7 @@ import (
 )
 
 type userPoliciesClient interface {
-	ListUserPolicies(*awsiam.ListUserPoliciesInput) (*awsiam.ListUserPoliciesOutput, error)
-	ListPolicies(*awsiam.ListPoliciesInput) (*awsiam.ListPoliciesOutput, error)
+	ListAttachedUserPolicies(*awsiam.ListAttachedUserPoliciesInput) (*awsiam.ListAttachedUserPoliciesOutput, error)
 	DetachUserPolicy(*awsiam.DetachUserPolicyInput) (*awsiam.DetachUserPolicyOutput, error)
 	DeleteUserPolicy(*awsiam.DeleteUserPolicyInput) (*awsiam.DeleteUserPolicyOutput, error)
 }
@@ -31,24 +30,32 @@ func NewUserPolicies(client userPoliciesClient, logger logger) UserPolicies {
 }
 
 func (o UserPolicies) Delete(userName string) error {
-	policies, err := o.client.ListUserPolicies(&awsiam.ListUserPoliciesInput{UserName: aws.String(userName)})
+	policies, err := o.client.ListAttachedUserPolicies(&awsiam.ListAttachedUserPoliciesInput{UserName: aws.String(userName)})
 	if err != nil {
 		return fmt.Errorf("Listing user policies: %s", err)
 	}
 
-	for _, p := range policies.PolicyNames {
-		n := *p
+	for _, p := range policies.AttachedPolicies {
+		n := *p.PolicyName
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user policy %s?", n))
 		if !proceed {
 			continue
 		}
 
-		o.detach(n, userName)
+		_, err = o.client.DetachUserPolicy(&awsiam.DetachUserPolicyInput{
+			UserName:  aws.String(userName),
+			PolicyArn: p.PolicyArn,
+		})
+		if err == nil {
+			o.logger.Printf("SUCCESS detaching user policy %s\n", n)
+		} else {
+			o.logger.Printf("ERROR detaching user policy %s: %s\n", n, err)
+		}
 
 		_, err = o.client.DeleteUserPolicy(&awsiam.DeleteUserPolicyInput{
 			UserName:   aws.String(userName),
-			PolicyName: p,
+			PolicyName: p.PolicyName,
 		})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting user policy %s\n", n)
@@ -58,27 +65,4 @@ func (o UserPolicies) Delete(userName string) error {
 	}
 
 	return nil
-}
-
-func (o UserPolicies) detach(n, userName string) {
-	policies, err := o.client.ListPolicies(&awsiam.ListPoliciesInput{
-		Scope: aws.String("Local"),
-	})
-	if err == nil {
-		for _, policy := range policies.Policies {
-			if *policy.PolicyName == n {
-				_, err = o.client.DetachUserPolicy(&awsiam.DetachUserPolicyInput{
-					UserName:  aws.String(userName),
-					PolicyArn: policy.Arn,
-				})
-				if err == nil {
-					o.logger.Printf("SUCCESS detaching user policy %s\n", n)
-				} else {
-					o.logger.Printf("ERROR detaching user policy %s: %s\n", n, err)
-				}
-			}
-		}
-	} else {
-		o.logger.Printf("ERROR getting user policy %s: %s\n", n, err)
-	}
 }

@@ -29,33 +29,27 @@ var _ = Describe("UserPolicies", func() {
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			client.ListUserPoliciesCall.Returns.Output = &awsiam.ListUserPoliciesOutput{
-				PolicyNames: []*string{aws.String("the-policy")},
-			}
-			client.ListPoliciesCall.Returns.Output = &awsiam.ListPoliciesOutput{
-				Policies: []*awsiam.Policy{{
-					Arn:        aws.String("the-policy-arn"),
+			client.ListAttachedUserPoliciesCall.Returns.Output = &awsiam.ListAttachedUserPoliciesOutput{
+				AttachedPolicies: []*awsiam.AttachedPolicy{{
 					PolicyName: aws.String("the-policy"),
+					PolicyArn:  aws.String("the-policy-arn"),
 				}},
 			}
 		})
 
 		It("detaches and deletes the policies", func() {
-			err := policies.Delete("the-user")
+			err := policies.Delete("banana")
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(client.ListUserPoliciesCall.CallCount).To(Equal(1))
-			Expect(client.ListUserPoliciesCall.Receives.Input.UserName).To(Equal(aws.String("the-user")))
-
-			Expect(client.ListPoliciesCall.CallCount).To(Equal(1))
-			Expect(client.ListPoliciesCall.Receives.Input.Scope).To(Equal(aws.String("Local")))
+			Expect(client.ListAttachedUserPoliciesCall.CallCount).To(Equal(1))
+			Expect(client.ListAttachedUserPoliciesCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
 
 			Expect(client.DetachUserPolicyCall.CallCount).To(Equal(1))
-			Expect(client.DetachUserPolicyCall.Receives.Input.UserName).To(Equal(aws.String("the-user")))
+			Expect(client.DetachUserPolicyCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
 			Expect(client.DetachUserPolicyCall.Receives.Input.PolicyArn).To(Equal(aws.String("the-policy-arn")))
 
 			Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
-			Expect(client.DeleteUserPolicyCall.Receives.Input.UserName).To(Equal(aws.String("the-user")))
+			Expect(client.DeleteUserPolicyCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
 			Expect(client.DeleteUserPolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-policy")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
@@ -64,34 +58,17 @@ var _ = Describe("UserPolicies", func() {
 			}))
 		})
 
-		Context("when the client fails to list user policies", func() {
+		Context("when the client fails to list attached user policies", func() {
 			BeforeEach(func() {
-				client.ListUserPoliciesCall.Returns.Error = errors.New("some error")
+				client.ListAttachedUserPoliciesCall.Returns.Error = errors.New("some error")
 			})
 
 			It("returns the error and does not try deleting them", func() {
 				err := policies.Delete("banana")
 				Expect(err).To(MatchError("Listing user policies: some error"))
 
-				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to get the user policy", func() {
-			BeforeEach(func() {
-				client.ListPoliciesCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error and does not try to detach the user policy", func() {
-				err := policies.Delete("banana")
-				Expect(err).NotTo(HaveOccurred())
-
 				Expect(client.DetachUserPolicyCall.CallCount).To(Equal(0))
-				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR getting user policy the-policy: some error\n",
-					"SUCCESS deleting user policy the-policy\n",
-				}))
+				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
 			})
 		})
 
@@ -138,6 +115,7 @@ var _ = Describe("UserPolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete user policy the-policy?"))
+				Expect(client.DetachUserPolicyCall.CallCount).To(Equal(0))
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
 			})
 		})
