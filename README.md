@@ -16,15 +16,12 @@ $  go get github.com/genevievelesperance/leftovers
 
 ## Usage
 
-1. Provide IAAS credentials.
-1. Run with `--no-confirm` to delete everything without a prompt.
-
 ```
 Usage:
   main [OPTIONS]
 
 Application Options:
-  -n, --no-confirm
+  -n, --no-confirm             Destroy resources without prompting. THIS DANGEROUS, MAKE GOOD CHOICES!
       --aws-access-key-id=     AWS access key id. [$AWS_ACCESS_KEY_ID]
       --aws-secret-access-key= AWS secret access key. [$AWS_SECRET_ACCESS_KEY]
       --aws-region=            AWS region. [$AWS_REGION]

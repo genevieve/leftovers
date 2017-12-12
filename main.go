@@ -18,7 +18,7 @@ import (
 )
 
 type opts struct {
-	NoConfirm bool `short:"n"  long:"no-confirm"`
+	NoConfirm bool `short:"n"  long:"no-confirm"  description:"Destroy resources without prompting. THIS DANGEROUS, MAKE GOOD CHOICES!"`
 
 	AWSAccessKeyID     string `long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"     description:"AWS access key id."`
 	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY" description:"AWS secret access key."`
