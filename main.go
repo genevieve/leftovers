@@ -20,9 +20,8 @@ import (
 )
 
 type opts struct {
-	NoConfirm bool `short:"n"  long:"no-confirm"  description:"Destroy resources without prompting. THIS DANGEROUS, MAKE GOOD CHOICES!"`
-
-	IAAS string `long:"iaas"  env:"LEFTOVERS_IAAS"  description:"The IAAS for clean up."  default:"aws"`
+	IAAS      string `short:"i"  long:"iaas"        default:"aws"  env:"LEFTOVERS_IAAS"  description:"The IAAS for clean up."  `
+	NoConfirm bool   `short:"n"  long:"no-confirm"                                       description:"Destroy resources without prompting. This is dangerous, make good choices!"`
 
 	AWSAccessKeyID     string `long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"     description:"AWS access key id."`
 	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY" description:"AWS secret access key."`
