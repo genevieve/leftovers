@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type EC2Client struct {
+type TagsClient struct {
 	DescribeTagsCall struct {
 		CallCount int
 		Receives  struct {
@@ -26,17 +26,16 @@ type EC2Client struct {
 			Error  error
 		}
 	}
-
 }
 
-func (e *EC2Client) DescribeTags(input *ec2.DescribeTagsInput) (*ec2.DescribeTagsOutput, error) {
+func (e *TagsClient) DescribeTags(input *ec2.DescribeTagsInput) (*ec2.DescribeTagsOutput, error) {
 	e.DescribeTagsCall.CallCount++
 	e.DescribeTagsCall.Receives.Input = input
 
 	return e.DescribeTagsCall.Returns.Output, e.DescribeTagsCall.Returns.Error
 }
 
-func (e *EC2Client) DeleteTags(input *ec2.DeleteTagsInput) (*ec2.DeleteTagsOutput, error) {
+func (e *TagsClient) DeleteTags(input *ec2.DeleteTagsInput) (*ec2.DeleteTagsOutput, error) {
 	e.DeleteTagsCall.CallCount++
 	e.DeleteTagsCall.Receives.Input = input
 

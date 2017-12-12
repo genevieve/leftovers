@@ -6,12 +6,17 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+type tagsClient interface {
+	DescribeTags(*awsec2.DescribeTagsInput) (*awsec2.DescribeTagsOutput, error)
+	DeleteTags(*awsec2.DeleteTagsInput) (*awsec2.DeleteTagsOutput, error)
+}
+
 type Tags struct {
-	client ec2Client
+	client tagsClient
 	logger logger
 }
 
-func NewTags(client ec2Client, logger logger) Tags {
+func NewTags(client tagsClient, logger logger) Tags {
 	return Tags{
 		client: client,
 		logger: logger,
