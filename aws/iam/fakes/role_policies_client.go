@@ -2,7 +2,7 @@ package fakes
 
 import "github.com/aws/aws-sdk-go/service/iam"
 
-type IAMClient struct {
+type RolePoliciesClient struct {
 	ListRolePoliciesCall struct {
 		CallCount int
 		Receives  struct {
@@ -48,28 +48,28 @@ type IAMClient struct {
 	}
 }
 
-func (i *IAMClient) ListRolePolicies(input *iam.ListRolePoliciesInput) (*iam.ListRolePoliciesOutput, error) {
+func (i *RolePoliciesClient) ListRolePolicies(input *iam.ListRolePoliciesInput) (*iam.ListRolePoliciesOutput, error) {
 	i.ListRolePoliciesCall.CallCount++
 	i.ListRolePoliciesCall.Receives.Input = input
 
 	return i.ListRolePoliciesCall.Returns.Output, i.ListRolePoliciesCall.Returns.Error
 }
 
-func (i *IAMClient) ListPolicies(input *iam.ListPoliciesInput) (*iam.ListPoliciesOutput, error) {
+func (i *RolePoliciesClient) ListPolicies(input *iam.ListPoliciesInput) (*iam.ListPoliciesOutput, error) {
 	i.ListPoliciesCall.CallCount++
 	i.ListPoliciesCall.Receives.Input = input
 
 	return i.ListPoliciesCall.Returns.Output, i.ListPoliciesCall.Returns.Error
 }
 
-func (i *IAMClient) DetachRolePolicy(input *iam.DetachRolePolicyInput) (*iam.DetachRolePolicyOutput, error) {
+func (i *RolePoliciesClient) DetachRolePolicy(input *iam.DetachRolePolicyInput) (*iam.DetachRolePolicyOutput, error) {
 	i.DetachRolePolicyCall.CallCount++
 	i.DetachRolePolicyCall.Receives.Input = input
 
 	return i.DetachRolePolicyCall.Returns.Output, i.DetachRolePolicyCall.Returns.Error
 }
 
-func (i *IAMClient) DeleteRolePolicy(input *iam.DeleteRolePolicyInput) (*iam.DeleteRolePolicyOutput, error) {
+func (i *RolePoliciesClient) DeleteRolePolicy(input *iam.DeleteRolePolicyInput) (*iam.DeleteRolePolicyOutput, error) {
 	i.DeleteRolePolicyCall.CallCount++
 	i.DeleteRolePolicyCall.Receives.Input = input
 

@@ -13,14 +13,14 @@ import (
 
 var _ = Describe("RolePolicies", func() {
 	var (
-		client *fakes.IAMClient
+		client *fakes.RolePoliciesClient
 		logger *fakes.Logger
 
 		policies iam.RolePolicies
 	)
 
 	BeforeEach(func() {
-		client = &fakes.IAMClient{}
+		client = &fakes.RolePoliciesClient{}
 		logger = &fakes.Logger{}
 
 		policies = iam.NewRolePolicies(client, logger)
