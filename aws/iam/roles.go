@@ -6,13 +6,18 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
+type rolesClient interface {
+	ListRoles(*awsiam.ListRolesInput) (*awsiam.ListRolesOutput, error)
+	DeleteRole(*awsiam.DeleteRoleInput) (*awsiam.DeleteRoleOutput, error)
+}
+
 type Roles struct {
-	client   iamClient
+	client   rolesClient
 	logger   logger
 	policies rolePolicies
 }
 
-func NewRoles(client iamClient, logger logger, policies rolePolicies) Roles {
+func NewRoles(client rolesClient, logger logger, policies rolePolicies) Roles {
 	return Roles{
 		client:   client,
 		logger:   logger,
