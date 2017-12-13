@@ -12,14 +12,16 @@ type vpcClient interface {
 }
 
 type Vpcs struct {
-	client vpcClient
-	logger logger
+	client   vpcClient
+	logger   logger
+	gateways internetGateways
 }
 
-func NewVpcs(client vpcClient, logger logger) Vpcs {
+func NewVpcs(client vpcClient, logger logger, gateways internetGateways) Vpcs {
 	return Vpcs{
-		client: client,
-		logger: logger,
+		client:   client,
+		logger:   logger,
+		gateways: gateways,
 	}
 }
 
@@ -31,6 +33,15 @@ func (p Vpcs) Delete() error {
 
 	for _, v := range vpcs.Vpcs {
 		vpcId := *v.VpcId
+
+		if *v.IsDefault {
+			continue
+		}
+
+		if err := p.gateways.Delete(vpcId); err != nil {
+			return fmt.Errorf("Deleting internet gateways for %s: %s", vpcId, err)
+		}
+
 		n := vpcName(v)
 
 		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s%s?", vpcId, n))
