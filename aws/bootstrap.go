@@ -54,6 +54,7 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 	accessKeys := iam.NewAccessKeys(iamClient, logger)
 	internetGateways := ec2.NewInternetGateways(ec2Client, logger)
 	subnets := ec2.NewSubnets(ec2Client, logger)
+	bucketManager := s3.NewBucketManager()
 
 	ro := iam.NewRoles(iamClient, logger, rolePolicies)
 	us := iam.NewUsers(iamClient, logger, userPolicies, accessKeys)
@@ -69,7 +70,7 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
-	bu := s3.NewBuckets(s3Client, logger)
+	bu := s3.NewBuckets(s3Client, logger, region, bucketManager)
 
 	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se, bu, vp}
 	for _, r := range resources {

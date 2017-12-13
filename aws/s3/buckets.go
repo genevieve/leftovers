@@ -12,14 +12,18 @@ type bucketsClient interface {
 }
 
 type Buckets struct {
-	client bucketsClient
-	logger logger
+	client  bucketsClient
+	logger  logger
+	region  string
+	manager bucketManager
 }
 
-func NewBuckets(client bucketsClient, logger logger) Buckets {
+func NewBuckets(client bucketsClient, logger logger, region string, manager bucketManager) Buckets {
 	return Buckets{
-		client: client,
-		logger: logger,
+		client:  client,
+		logger:  logger,
+		region:  region,
+		manager: manager,
 	}
 }
 
@@ -32,12 +36,16 @@ func (u Buckets) Delete() error {
 	for _, b := range buckets.Buckets {
 		n := *b.Name
 
+		if !u.manager.IsInRegion(n, u.region) {
+			continue
+		}
+
 		proceed := u.logger.Prompt(fmt.Sprintf("Are you sure you want to delete bucket %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := u.client.DeleteBucket(&awss3.DeleteBucketInput{Bucket: b.Name})
+		_, err = u.client.DeleteBucket(&awss3.DeleteBucketInput{Bucket: b.Name})
 		if err == nil {
 			u.logger.Printf("SUCCESS deleting bucket %s\n", n)
 		} else {

@@ -13,8 +13,10 @@ import (
 
 var _ = Describe("Buckets", func() {
 	var (
-		client *fakes.BucketsClient
-		logger *fakes.Logger
+		client  *fakes.BucketsClient
+		logger  *fakes.Logger
+		region  string
+		manager *fakes.BucketManager
 
 		buckets s3.Buckets
 	)
@@ -22,8 +24,10 @@ var _ = Describe("Buckets", func() {
 	BeforeEach(func() {
 		client = &fakes.BucketsClient{}
 		logger = &fakes.Logger{}
+		region = "us-west-2"
+		manager = &fakes.BucketManager{}
 
-		buckets = s3.NewBuckets(client, logger)
+		buckets = s3.NewBuckets(client, logger, region, manager)
 	})
 
 	Describe("Delete", func() {
@@ -34,6 +38,7 @@ var _ = Describe("Buckets", func() {
 					Name: aws.String("banana"),
 				}},
 			}
+			manager.IsInRegionCall.Returns.Output = true
 		})
 
 		It("deletes s3 buckets", func() {
@@ -41,9 +46,15 @@ var _ = Describe("Buckets", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
+			Expect(manager.IsInRegionCall.CallCount).To(Equal(1))
+			Expect(manager.IsInRegionCall.Receives.Bucket).To(Equal("banana"))
+			Expect(manager.IsInRegionCall.Receives.Region).To(Equal(region))
+
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
+
 			Expect(client.DeleteBucketCall.CallCount).To(Equal(1))
 			Expect(client.DeleteBucketCall.Receives.Input.Bucket).To(Equal(aws.String("banana")))
+
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting bucket banana\n"}))
 		})
 
@@ -55,6 +66,19 @@ var _ = Describe("Buckets", func() {
 			It("returns the error and does not try deleting them", func() {
 				err := buckets.Delete()
 				Expect(err).To(MatchError("Listing buckets: some error"))
+
+				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the bucket isn't in the region configured", func() {
+			BeforeEach(func() {
+				manager.IsInRegionCall.Returns.Output = false
+			})
+
+			It("does not delete the bucket", func() {
+				err := buckets.Delete()
+				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
 			})
