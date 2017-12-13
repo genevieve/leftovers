@@ -53,6 +53,7 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 	userPolicies := iam.NewUserPolicies(iamClient, logger)
 	accessKeys := iam.NewAccessKeys(iamClient, logger)
 	internetGateways := ec2.NewInternetGateways(ec2Client, logger)
+	subnets := ec2.NewSubnets(ec2Client, logger)
 
 	ro := iam.NewRoles(iamClient, logger, rolePolicies)
 	us := iam.NewUsers(iamClient, logger, userPolicies, accessKeys)
@@ -64,7 +65,7 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 	se := ec2.NewSecurityGroups(ec2Client, logger)
 	ta := ec2.NewTags(ec2Client, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
-	vp := ec2.NewVpcs(ec2Client, logger, internetGateways)
+	vp := ec2.NewVpcs(ec2Client, logger, internetGateways, subnets)
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 

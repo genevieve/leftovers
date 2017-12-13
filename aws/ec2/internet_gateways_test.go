@@ -60,7 +60,7 @@ var _ = Describe("InternetGateways", func() {
 			}))
 		})
 
-		Context("when the client fails to list attached internet gateways", func() {
+		Context("when the client fails to describe attached internet gateways", func() {
 			BeforeEach(func() {
 				client.DescribeInternetGatewaysCall.Returns.Error = errors.New("some error")
 			})

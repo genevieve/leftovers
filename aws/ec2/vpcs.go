@@ -14,13 +14,15 @@ type vpcClient interface {
 type Vpcs struct {
 	client   vpcClient
 	logger   logger
+	subnets  subnets
 	gateways internetGateways
 }
 
-func NewVpcs(client vpcClient, logger logger, gateways internetGateways) Vpcs {
+func NewVpcs(client vpcClient, logger logger, subnets subnets, gateways internetGateways) Vpcs {
 	return Vpcs{
 		client:   client,
 		logger:   logger,
+		subnets:  subnets,
 		gateways: gateways,
 	}
 }
@@ -36,6 +38,10 @@ func (p Vpcs) Delete() error {
 
 		if *v.IsDefault {
 			continue
+		}
+
+		if err := p.subnets.Delete(vpcId); err != nil {
+			return fmt.Errorf("Deleting subnets for %s: %s", vpcId, err)
 		}
 
 		if err := p.gateways.Delete(vpcId); err != nil {
