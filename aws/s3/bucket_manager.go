@@ -7,17 +7,21 @@ import (
 )
 
 type bucketManager interface {
-	IsInRegion(bucket, region string) bool
+	IsInRegion(bucket string) bool
 }
 
-type BucketManager struct{}
-
-func NewBucketManager() BucketManager {
-	return BucketManager{}
+type BucketManager struct {
+	region string
 }
 
-func (u BucketManager) IsInRegion(bucket, region string) bool {
+func NewBucketManager(region string) BucketManager {
+	return BucketManager{
+		region: region,
+	}
+}
+
+func (u BucketManager) IsInRegion(bucket string) bool {
 	sess := session.Must(session.NewSession())
 	r, _ := s3manager.GetBucketRegion(aws.BackgroundContext(), sess, bucket, "us-west-1")
-	return region == r
+	return u.region == r
 }

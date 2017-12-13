@@ -5,7 +5,6 @@ type BucketManager struct {
 		CallCount int
 		Receives  struct {
 			Bucket string
-			Region string
 		}
 		Returns struct {
 			Output bool
@@ -13,10 +12,9 @@ type BucketManager struct {
 	}
 }
 
-func (b *BucketManager) IsInRegion(bucket, region string) bool {
+func (b *BucketManager) IsInRegion(bucket string) bool {
 	b.IsInRegionCall.CallCount++
 	b.IsInRegionCall.Receives.Bucket = bucket
-	b.IsInRegionCall.Receives.Region = region
 
 	return b.IsInRegionCall.Returns.Output
 }

@@ -15,7 +15,6 @@ var _ = Describe("Buckets", func() {
 	var (
 		client  *fakes.BucketsClient
 		logger  *fakes.Logger
-		region  string
 		manager *fakes.BucketManager
 
 		buckets s3.Buckets
@@ -24,10 +23,9 @@ var _ = Describe("Buckets", func() {
 	BeforeEach(func() {
 		client = &fakes.BucketsClient{}
 		logger = &fakes.Logger{}
-		region = "us-west-2"
 		manager = &fakes.BucketManager{}
 
-		buckets = s3.NewBuckets(client, logger, region, manager)
+		buckets = s3.NewBuckets(client, logger, manager)
 	})
 
 	Describe("Delete", func() {
@@ -48,7 +46,6 @@ var _ = Describe("Buckets", func() {
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
 			Expect(manager.IsInRegionCall.CallCount).To(Equal(1))
 			Expect(manager.IsInRegionCall.Receives.Bucket).To(Equal("banana"))
-			Expect(manager.IsInRegionCall.Receives.Region).To(Equal(region))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
 

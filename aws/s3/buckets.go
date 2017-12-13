@@ -14,15 +14,13 @@ type bucketsClient interface {
 type Buckets struct {
 	client  bucketsClient
 	logger  logger
-	region  string
 	manager bucketManager
 }
 
-func NewBuckets(client bucketsClient, logger logger, region string, manager bucketManager) Buckets {
+func NewBuckets(client bucketsClient, logger logger, manager bucketManager) Buckets {
 	return Buckets{
 		client:  client,
 		logger:  logger,
-		region:  region,
 		manager: manager,
 	}
 }
@@ -36,7 +34,7 @@ func (u Buckets) Delete() error {
 	for _, b := range buckets.Buckets {
 		n := *b.Name
 
-		if !u.manager.IsInRegion(n, u.region) {
+		if !u.manager.IsInRegion(n) {
 			continue
 		}
 
