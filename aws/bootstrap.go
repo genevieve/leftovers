@@ -61,6 +61,7 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 
+	ad := ec2.NewAddresses(ec2Client, logger)
 	ke := ec2.NewKeyPairs(ec2Client, logger)
 	in := ec2.NewInstances(ec2Client, logger)
 	se := ec2.NewSecurityGroups(ec2Client, logger)
@@ -73,7 +74,7 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 
 	bu := s3.NewBuckets(s3Client, logger, bucketManager)
 
-	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se, bu, ni, vp}
+	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
 	for _, r := range resources {
 		if err := r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)

@@ -44,6 +44,7 @@ Help Options:
 + iam instance profiles (& detaching roles)
 + iam roles
 + iam role policies
+- iam user policies
 + iam server certificates
 + ec2 volumes
 + ec2 tags
@@ -61,7 +62,6 @@ Help Options:
 
 ```diff
 - iam group policies
-- iam user policies
 - elbv2 load balancers
 - ec2 eips
 - s3 buckets
