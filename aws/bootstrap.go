@@ -66,13 +66,14 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 	se := ec2.NewSecurityGroups(ec2Client, logger)
 	ta := ec2.NewTags(ec2Client, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
+	ni := ec2.NewNetworkInterfaces(ec2Client, logger)
 	vp := ec2.NewVpcs(ec2Client, logger, internetGateways, subnets)
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 
 	bu := s3.NewBuckets(s3Client, logger, bucketManager)
 
-	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se, bu, vp}
+	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ke, in, se, bu, ni, vp}
 	for _, r := range resources {
 		if err := r.Delete(); err != nil {
 			log.Fatalf("\n\n%s\n", err)

@@ -13,23 +13,23 @@ import (
 
 var _ = Describe("KeyPairs", func() {
 	var (
-		ec2Client *fakes.KeyPairClient
-		logger    *fakes.Logger
+		client *fakes.KeyPairClient
+		logger *fakes.Logger
 
-		keyPairs ec2.KeyPairs
+		keys ec2.KeyPairs
 	)
 
 	BeforeEach(func() {
-		ec2Client = &fakes.KeyPairClient{}
+		client = &fakes.KeyPairClient{}
 		logger = &fakes.Logger{}
 
-		keyPairs = ec2.NewKeyPairs(ec2Client, logger)
+		keys = ec2.NewKeyPairs(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			ec2Client.DescribeKeyPairsCall.Returns.Output = &awsec2.DescribeKeyPairsOutput{
+			client.DescribeKeyPairsCall.Returns.Output = &awsec2.DescribeKeyPairsOutput{
 				KeyPairs: []*awsec2.KeyPairInfo{{
 					KeyName: aws.String("banana"),
 				}},
@@ -37,36 +37,36 @@ var _ = Describe("KeyPairs", func() {
 		})
 
 		It("deletes ec2 key pairs", func() {
-			err := keyPairs.Delete()
+			err := keys.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(ec2Client.DescribeKeyPairsCall.CallCount).To(Equal(1))
-			Expect(ec2Client.DeleteKeyPairCall.CallCount).To(Equal(1))
-			Expect(ec2Client.DeleteKeyPairCall.Receives.Input.KeyName).To(Equal(aws.String("banana")))
+			Expect(client.DescribeKeyPairsCall.CallCount).To(Equal(1))
+			Expect(client.DeleteKeyPairCall.CallCount).To(Equal(1))
+			Expect(client.DeleteKeyPairCall.Receives.Input.KeyName).To(Equal(aws.String("banana")))
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete key pair banana?"))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting key pair banana\n"}))
 		})
 
 		Context("when the client fails to list key pairs", func() {
 			BeforeEach(func() {
-				ec2Client.DescribeKeyPairsCall.Returns.Error = errors.New("some error")
+				client.DescribeKeyPairsCall.Returns.Error = errors.New("some error")
 			})
 
 			It("does not try deleting them", func() {
-				err := keyPairs.Delete()
+				err := keys.Delete()
 				Expect(err).To(MatchError("Describing key pairs: some error"))
 
-				Expect(ec2Client.DeleteKeyPairCall.CallCount).To(Equal(0))
+				Expect(client.DeleteKeyPairCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the client fails to delete the key pair", func() {
 			BeforeEach(func() {
-				ec2Client.DeleteKeyPairCall.Returns.Error = errors.New("some error")
+				client.DeleteKeyPairCall.Returns.Error = errors.New("some error")
 			})
 
 			It("returns the error", func() {
-				err := keyPairs.Delete()
+				err := keys.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting key pair banana: some error\n"}))
@@ -79,11 +79,11 @@ var _ = Describe("KeyPairs", func() {
 			})
 
 			It("does not delete the key pair", func() {
-				err := keyPairs.Delete()
+				err := keys.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete key pair banana?"))
-				Expect(ec2Client.DeleteKeyPairCall.CallCount).To(Equal(0))
+				Expect(client.DeleteKeyPairCall.CallCount).To(Equal(0))
 			})
 		})
 	})
