@@ -53,6 +53,7 @@ Help Options:
 + ec2 vpcs
 + ec2 subnets
 + ec2 internet gateways
+- ec2 network interfaces
 + elb load balancers
 ```
 
@@ -63,7 +64,6 @@ Help Options:
 - iam user policies
 - elbv2 load balancers
 - ec2 eips
-- ec2 enis
 - s3 buckets
 ```
 
