@@ -9,6 +9,7 @@ import (
 
 type rolePoliciesClient interface {
 	ListAttachedRolePolicies(*awsiam.ListAttachedRolePoliciesInput) (*awsiam.ListAttachedRolePoliciesOutput, error)
+	ListRolePolicies(*awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error)
 	DetachRolePolicy(*awsiam.DetachRolePolicyInput) (*awsiam.DetachRolePolicyOutput, error)
 	DeleteRolePolicy(*awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error)
 }
@@ -30,15 +31,15 @@ func NewRolePolicies(client rolePoliciesClient, logger logger) RolePolicies {
 }
 
 func (o RolePolicies) Delete(roleName string) error {
-	policies, err := o.client.ListAttachedRolePolicies(&awsiam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)})
+	attachedPolicies, err := o.client.ListAttachedRolePolicies(&awsiam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)})
 	if err != nil {
-		return fmt.Errorf("Listing role policies: %s", err)
+		return fmt.Errorf("Listing attached role policies: %s", err)
 	}
 
-	for _, p := range policies.AttachedPolicies {
+	for _, p := range attachedPolicies.AttachedPolicies {
 		n := *p.PolicyName
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role policy %s?", n))
+		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to detach and delete role policy %s?", n))
 		if !proceed {
 			continue
 		}
@@ -56,6 +57,30 @@ func (o RolePolicies) Delete(roleName string) error {
 		_, err = o.client.DeleteRolePolicy(&awsiam.DeleteRolePolicyInput{
 			RoleName:   aws.String(roleName),
 			PolicyName: p.PolicyName,
+		})
+		if err == nil {
+			o.logger.Printf("SUCCESS deleting role policy %s\n", n)
+		} else {
+			o.logger.Printf("ERROR deleting role policy %s: %s\n", n, err)
+		}
+	}
+
+	policies, err := o.client.ListRolePolicies(&awsiam.ListRolePoliciesInput{RoleName: aws.String(roleName)})
+	if err != nil {
+		return fmt.Errorf("Listing role policies: %s", err)
+	}
+
+	for _, p := range policies.PolicyNames {
+		n := *p
+
+		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role policy %s?", n))
+		if !proceed {
+			continue
+		}
+
+		_, err = o.client.DeleteRolePolicy(&awsiam.DeleteRolePolicyInput{
+			RoleName:   aws.String(roleName),
+			PolicyName: p,
 		})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting role policy %s\n", n)

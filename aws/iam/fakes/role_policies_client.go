@@ -14,6 +14,17 @@ type RolePoliciesClient struct {
 		}
 	}
 
+	ListRolePoliciesCall struct {
+		CallCount int
+		Receives  struct {
+			Input *iam.ListRolePoliciesInput
+		}
+		Returns struct {
+			Output *iam.ListRolePoliciesOutput
+			Error  error
+		}
+	}
+
 	DetachRolePolicyCall struct {
 		CallCount int
 		Receives  struct {
@@ -42,6 +53,13 @@ func (i *RolePoliciesClient) ListAttachedRolePolicies(input *iam.ListAttachedRol
 	i.ListAttachedRolePoliciesCall.Receives.Input = input
 
 	return i.ListAttachedRolePoliciesCall.Returns.Output, i.ListAttachedRolePoliciesCall.Returns.Error
+}
+
+func (i *RolePoliciesClient) ListRolePolicies(input *iam.ListRolePoliciesInput) (*iam.ListRolePoliciesOutput, error) {
+	i.ListRolePoliciesCall.CallCount++
+	i.ListRolePoliciesCall.Receives.Input = input
+
+	return i.ListRolePoliciesCall.Returns.Output, i.ListRolePoliciesCall.Returns.Error
 }
 
 func (i *RolePoliciesClient) DetachRolePolicy(input *iam.DetachRolePolicyInput) (*iam.DetachRolePolicyOutput, error) {

@@ -35,9 +35,10 @@ var _ = Describe("RolePolicies", func() {
 					PolicyArn:  aws.String("the-policy-arn"),
 				}},
 			}
+			client.ListRolePoliciesCall.Returns.Output = &awsiam.ListRolePoliciesOutput{}
 		})
 
-		It("detaches and deletes the policies", func() {
+		It("detaches and deletes the attached policies", func() {
 			err := policies.Delete("banana")
 			Expect(err).NotTo(HaveOccurred())
 
@@ -58,16 +59,58 @@ var _ = Describe("RolePolicies", func() {
 			}))
 		})
 
+		Context("when the policies are not attached", func() {
+			BeforeEach(func() {
+				client.ListAttachedRolePoliciesCall.Returns.Output = &awsiam.ListAttachedRolePoliciesOutput{}
+				client.ListRolePoliciesCall.Returns.Output = &awsiam.ListRolePoliciesOutput{
+					PolicyNames: []*string{aws.String("the-not-attached-policy")},
+				}
+			})
+
+			It("deletes the policies", func() {
+				err := policies.Delete("banana")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListRolePoliciesCall.CallCount).To(Equal(1))
+				Expect(client.ListRolePoliciesCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
+
+				Expect(client.DetachRolePolicyCall.CallCount).To(Equal(0))
+
+				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(1))
+				Expect(client.DeleteRolePolicyCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
+				Expect(client.DeleteRolePolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-not-attached-policy")))
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					"SUCCESS deleting role policy the-not-attached-policy\n",
+				}))
+			})
+		})
+
 		Context("when the client fails to list attached role policies", func() {
 			BeforeEach(func() {
 				client.ListAttachedRolePoliciesCall.Returns.Error = errors.New("some error")
+				client.ListRolePoliciesCall.Returns.Output = &awsiam.ListRolePoliciesOutput{}
+			})
+
+			It("returns the error and does not try deleting them", func() {
+				err := policies.Delete("banana")
+				Expect(err).To(MatchError("Listing attached role policies: some error"))
+
+				Expect(client.DetachRolePolicyCall.CallCount).To(Equal(0))
+				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the client fails to list role policies", func() {
+			BeforeEach(func() {
+				client.ListAttachedRolePoliciesCall.Returns.Output = &awsiam.ListAttachedRolePoliciesOutput{}
+				client.ListRolePoliciesCall.Returns.Error = errors.New("some error")
 			})
 
 			It("returns the error and does not try deleting them", func() {
 				err := policies.Delete("banana")
 				Expect(err).To(MatchError("Listing role policies: some error"))
 
-				Expect(client.DetachRolePolicyCall.CallCount).To(Equal(0))
 				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(0))
 			})
 		})
@@ -114,7 +157,7 @@ var _ = Describe("RolePolicies", func() {
 				err := policies.Delete("banana")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role policy the-policy?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to detach and delete role policy the-policy?"))
 				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(0))
 			})
 		})
