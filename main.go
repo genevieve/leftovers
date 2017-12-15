@@ -7,6 +7,7 @@ import (
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/aws"
 	"github.com/genevievelesperance/leftovers/azure"
+	"github.com/genevievelesperance/leftovers/gcp"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -22,6 +23,8 @@ type opts struct {
 	AzureClientSecret   string `long:"azure-client-secret"    env:"AZURE_CLIENT_SECRET"    description:"Azure client secret."`
 	AzureTenantID       string `long:"azure-tenant-id"        env:"AZURE_TENANT_ID"        description:"Azure tenant id."`
 	AzureSubscriptionID string `long:"azure-subscription-id"  env:"AZURE_SUBSCRIPTION_ID"  description:"Azure subscription id."`
+
+	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
 }
 
 func main() {
@@ -41,5 +44,7 @@ func main() {
 		aws.Bootstrap(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
 	case "azure":
 		azure.Bootstrap(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
+	case "gcp":
+		gcp.Bootstrap(logger, c.GCPServiceAccountKey)
 	}
 }
