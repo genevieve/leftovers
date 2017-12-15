@@ -44,7 +44,7 @@ Help Options:
 + iam instance profiles (& detaching roles)
 + iam roles
 + iam role policies
-- iam user policies
++ iam user policies
 + iam server certificates
 + ec2 volumes
 + ec2 tags
@@ -54,7 +54,7 @@ Help Options:
 + ec2 vpcs
 + ec2 subnets
 + ec2 internet gateways
-- ec2 network interfaces
++ ec2 network interfaces
 + elb load balancers
 ```
 
