@@ -3,21 +3,17 @@ package fakes
 import compute "google.golang.org/api/compute/v1"
 
 type NetworksClient struct {
-	ListCall struct {
+	ListNetworksCall struct {
 		CallCount int
-		Receives  struct {
-			Project string
-		}
-		Returns struct {
+		Returns   struct {
 			Output *compute.NetworkList
 			Error  error
 		}
 	}
 
-	DeleteCall struct {
+	DeleteNetworkCall struct {
 		CallCount int
 		Receives  struct {
-			Project string
 			Network string
 		}
 		Returns struct {
@@ -27,17 +23,15 @@ type NetworksClient struct {
 	}
 }
 
-func (n *NetworksClient) List(project string) (*compute.NetworkList, error) {
-	n.ListCall.CallCount++
-	n.ListCall.Receives.Project = project
+func (n *NetworksClient) ListNetworks() (*compute.NetworkList, error) {
+	n.ListNetworksCall.CallCount++
 
-	return n.ListCall.Returns.Output, n.ListCall.Returns.Error
+	return n.ListNetworksCall.Returns.Output, n.ListNetworksCall.Returns.Error
 }
 
-func (n *NetworksClient) Delete(project, network string) (*compute.Operation, error) {
-	n.DeleteCall.CallCount++
-	n.DeleteCall.Receives.Project = project
-	n.DeleteCall.Receives.Network = network
+func (n *NetworksClient) DeleteNetwork(network string) (*compute.Operation, error) {
+	n.DeleteNetworkCall.CallCount++
+	n.DeleteNetworkCall.Receives.Network = network
 
-	return n.DeleteCall.Returns.Output, n.DeleteCall.Returns.Error
+	return n.DeleteNetworkCall.Returns.Output, n.DeleteNetworkCall.Returns.Error
 }

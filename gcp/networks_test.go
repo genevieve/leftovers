@@ -1,6 +1,8 @@
 package gcp_test
 
 import (
+	"errors"
+
 	"github.com/genevievelesperance/leftovers/gcp"
 	"github.com/genevievelesperance/leftovers/gcp/fakes"
 	. "github.com/onsi/ginkgo"
@@ -10,9 +12,8 @@ import (
 
 var _ = Describe("Networks", func() {
 	var (
-		client  *fakes.NetworksClient
-		logger  *fakes.Logger
-		project string
+		client *fakes.NetworksClient
+		logger *fakes.Logger
 
 		networks gcp.Networks
 	)
@@ -20,15 +21,14 @@ var _ = Describe("Networks", func() {
 	BeforeEach(func() {
 		client = &fakes.NetworksClient{}
 		logger = &fakes.Logger{}
-		project = "the-project"
 
-		networks = gcp.NewNetworks(client, logger, project)
+		networks = gcp.NewNetworks(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			client.ListCall.Returns.Output = &compute.NetworkList{
+			client.ListNetworksCall.Returns.Output = &compute.NetworkList{
 				Items: []*compute.Network{{
 					Name: "banana",
 				}},
@@ -39,16 +39,51 @@ var _ = Describe("Networks", func() {
 			err := networks.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(client.ListCall.CallCount).To(Equal(1))
-			Expect(client.ListCall.Receives.Project).To(Equal("the-project"))
+			Expect(client.ListNetworksCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network banana?"))
 
-			Expect(client.DeleteCall.CallCount).To(Equal(1))
-			Expect(client.DeleteCall.Receives.Project).To(Equal("the-project"))
-			Expect(client.DeleteCall.Receives.Network).To(Equal("banana"))
+			Expect(client.DeleteNetworkCall.CallCount).To(Equal(1))
+			Expect(client.DeleteNetworkCall.Receives.Network).To(Equal("banana"))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network banana\n"}))
+		})
+
+		Context("when the client fails to list networks", func() {
+			BeforeEach(func() {
+				client.ListNetworksCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				err := networks.Delete()
+				Expect(err).To(MatchError("Listing networks: some error"))
+			})
+		})
+
+		Context("when the client fails to delete the network", func() {
+			BeforeEach(func() {
+				client.DeleteNetworkCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				err := networks.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network banana: some error\n"}))
+			})
+		})
+
+		Context("when the user says no to the prompt", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = false
+			})
+
+			It("does not delete the network", func() {
+				err := networks.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DeleteNetworkCall.CallCount).To(Equal(0))
+			})
 		})
 	})
 })

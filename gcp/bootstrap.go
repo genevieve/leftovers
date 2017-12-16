@@ -40,12 +40,20 @@ func Bootstrap(logger logger, serviceAccountKey string) {
 		log.Fatalf("Creating GCP client: %s", err)
 	}
 
-	client := computeClient{
-		networks: service.Networks,
-	}
-	ne := NewNetworks(client, logger, p.ProjectId)
+	client := NewComputeClient(p.ProjectId, service)
 
-	if err := ne.Delete(); err != nil {
-		log.Fatalf("\n\n%s\n", err)
+	zones, err := client.ListZones()
+	if err != nil {
+		log.Fatalf("Listing zones: %s", err)
+	}
+
+	ne := NewNetworks(client, logger)
+	di := NewDisks(client, logger, zones)
+
+	resources := []resource{ne, di}
+	for _, r := range resources {
+		if err := r.Delete(); err != nil {
+			log.Fatalf("\n\n%s\n", err)
+		}
 	}
 }

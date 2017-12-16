@@ -7,26 +7,24 @@ import (
 )
 
 type networksClient interface {
-	List(project string) (*compute.NetworkList, error)
-	Delete(project, network string) (*compute.Operation, error)
+	ListNetworks() (*compute.NetworkList, error)
+	DeleteNetwork(network string) (*compute.Operation, error)
 }
 
 type Networks struct {
-	client  networksClient
-	logger  logger
-	project string
+	client networksClient
+	logger logger
 }
 
-func NewNetworks(client networksClient, logger logger, project string) Networks {
+func NewNetworks(client networksClient, logger logger) Networks {
 	return Networks{
-		client:  client,
-		logger:  logger,
-		project: project,
+		client: client,
+		logger: logger,
 	}
 }
 
 func (e Networks) Delete() error {
-	networks, err := e.client.List(e.project)
+	networks, err := e.client.ListNetworks()
 	if err != nil {
 		return fmt.Errorf("Listing networks: %s", err)
 	}
@@ -39,7 +37,7 @@ func (e Networks) Delete() error {
 			continue
 		}
 
-		_, err = e.client.Delete(e.project, n)
+		_, err = e.client.DeleteNetwork(n)
 		if err == nil {
 			e.logger.Printf("SUCCESS deleting network %s\n", n)
 		} else {
