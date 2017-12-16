@@ -64,6 +64,27 @@ var _ = Describe("Disks", func() {
 			})
 		})
 
+		Context("when the disk is in use by an instance", func() {
+			BeforeEach(func() {
+				client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
+					Items: []*gcpcompute.Disk{{
+						Name:  "banana",
+						Zone:  "the-zone",
+						Users: []string{"instance-using-banana"},
+					}},
+				}
+			})
+
+			It("does not try deleting it", func() {
+				err := disks.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListDisksCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteDiskCall.CallCount).To(Equal(0))
+			})
+		})
+
 		Context("when the client fails to delete the disk", func() {
 			BeforeEach(func() {
 				client.DeleteDiskCall.Returns.Error = errors.New("some error")

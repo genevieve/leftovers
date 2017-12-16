@@ -1,14 +1,14 @@
-package compute 
+package compute
 
 import (
 	"fmt"
 
-	gcp "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type disksClient interface {
-	ListDisks() (*gcp.DiskList, error)
-	DeleteDisk(zone, disk string) (*gcp.Operation, error)
+	ListDisks() (*gcpcompute.DiskList, error)
+	DeleteDisk(zone, disk string) (*gcpcompute.Operation, error)
 }
 
 type Disks struct {
@@ -32,16 +32,19 @@ func (i Disks) Delete() error {
 	}
 
 	for _, d := range disks.Items {
+		if len(d.Users) > 0 {
+			continue
+		}
+
 		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete disk %s?", d.Name))
 		if !proceed {
 			continue
 		}
 
-		_, err = i.client.DeleteDisk(d.Zone, d.Name)
-		if err == nil {
-			i.logger.Printf("SUCCESS deleting disk %s\n", d.Name)
-		} else {
+		if _, err := i.client.DeleteDisk(d.Zone, d.Name); err != nil {
 			i.logger.Printf("ERROR deleting disk %s: %s\n", d.Name, err)
+		} else {
+			i.logger.Printf("SUCCESS deleting disk %s\n", d.Name)
 		}
 	}
 
