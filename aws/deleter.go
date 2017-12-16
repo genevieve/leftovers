@@ -25,7 +25,20 @@ type resource interface {
 	Delete() error
 }
 
-func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
+type Deleter struct {
+	resources []resource
+}
+
+func (d Deleter) Delete() error {
+	for _, r := range d.resources {
+		if err := r.Delete(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Deleter {
 	if accessKeyId == "" {
 		log.Fatal("Missing AWS_ACCESS_KEY_ID.")
 	}
@@ -75,9 +88,8 @@ func Bootstrap(logger logger, accessKeyId, secretAccessKey, region string) {
 	bu := s3.NewBuckets(s3Client, logger, bucketManager)
 
 	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
-	for _, r := range resources {
-		if err := r.Delete(); err != nil {
-			log.Fatalf("\n\n%s\n", err)
-		}
+
+	return Deleter{
+		resources: resources,
 	}
 }

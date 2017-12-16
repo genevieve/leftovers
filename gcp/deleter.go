@@ -11,16 +11,29 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
-type resource interface {
-	Delete() error
-}
-
 type logger interface {
 	Printf(m string, a ...interface{})
 	Prompt(m string) bool
 }
 
-func Bootstrap(logger logger, serviceAccountKey string) {
+type resource interface {
+	Delete() error
+}
+
+type Deleter struct {
+	resources []resource
+}
+
+func (d Deleter) Delete() error {
+	for _, r := range d.resources {
+		if err := r.Delete(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 	if serviceAccountKey == "" {
 		log.Fatal("Missing GCP_SERVICE_ACCOUNT_KEY.")
 	}
@@ -55,10 +68,7 @@ func Bootstrap(logger logger, serviceAccountKey string) {
 	ne := compute.NewNetworks(client, logger)
 	di := compute.NewDisks(client, logger, zones)
 
-	resources := []resource{ne, di}
-	for _, r := range resources {
-		if err := r.Delete(); err != nil {
-			log.Fatalf("\n\n%s\n", err)
-		}
+	return Deleter{
+		resources: []resource{ne, di},
 	}
 }

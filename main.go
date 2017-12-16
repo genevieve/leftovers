@@ -27,6 +27,10 @@ type opts struct {
 	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
 }
 
+type deleter interface {
+	Delete() error
+}
+
 func main() {
 	log.SetFlags(0)
 
@@ -39,12 +43,17 @@ func main() {
 
 	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
+	var d deleter
 	switch c.IAAS {
 	case "aws":
-		aws.Bootstrap(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
+		d = aws.NewDeleter(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
 	case "azure":
-		azure.Bootstrap(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
+		d = azure.NewDeleter(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
 	case "gcp":
-		gcp.Bootstrap(logger, c.GCPServiceAccountKey)
+		d = gcp.NewDeleter(logger, c.GCPServiceAccountKey)
+	}
+
+	if err := d.Delete(); err != nil {
+		log.Fatalf("\n\n%s\n", err)
 	}
 }
