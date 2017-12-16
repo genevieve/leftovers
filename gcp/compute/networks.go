@@ -37,11 +37,10 @@ func (e Networks) Delete() error {
 			continue
 		}
 
-		_, err = e.client.DeleteNetwork(n)
-		if err == nil {
-			e.logger.Printf("SUCCESS deleting network %s\n", n)
-		} else {
+		if _, err := e.client.DeleteNetwork(n); err != nil {
 			e.logger.Printf("ERROR deleting network %s: %s\n", n, err)
+		} else {
+			e.logger.Printf("SUCCESS deleting network %s\n", n)
 		}
 	}
 
