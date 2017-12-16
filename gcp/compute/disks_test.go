@@ -1,13 +1,13 @@
-package gcp_test
+package compute_test
 
 import (
 	"errors"
 
-	"github.com/genevievelesperance/leftovers/gcp"
-	"github.com/genevievelesperance/leftovers/gcp/fakes"
+	"github.com/genevievelesperance/leftovers/gcp/compute"
+	"github.com/genevievelesperance/leftovers/gcp/compute/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	compute "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 var _ = Describe("Disks", func() {
@@ -16,7 +16,7 @@ var _ = Describe("Disks", func() {
 		logger *fakes.Logger
 		zones  []string
 
-		disks gcp.Disks
+		disks compute.Disks
 	)
 
 	BeforeEach(func() {
@@ -24,14 +24,14 @@ var _ = Describe("Disks", func() {
 		logger = &fakes.Logger{}
 		zones = []string{"zone-1", "zone-2"}
 
-		disks = gcp.NewDisks(client, logger, zones)
+		disks = compute.NewDisks(client, logger, zones)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			client.ListDisksCall.Returns.Output = &compute.DiskList{
-				Items: []*compute.Disk{{
+			client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
+				Items: []*gcpcompute.Disk{{
 					Name: "banana",
 					Zone: "the-zone",
 				}},

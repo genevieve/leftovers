@@ -1,14 +1,14 @@
-package gcp
+package compute
 
 import (
 	"fmt"
 
-	compute "google.golang.org/api/compute/v1"
+	gcp "google.golang.org/api/compute/v1"
 )
 
 type networksClient interface {
-	ListNetworks() (*compute.NetworkList, error)
-	DeleteNetwork(network string) (*compute.Operation, error)
+	ListNetworks() (*gcp.NetworkList, error)
+	DeleteNetwork(network string) (*gcp.Operation, error)
 }
 
 type Networks struct {

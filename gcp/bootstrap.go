@@ -6,13 +6,18 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/genevievelesperance/leftovers/gcp/compute"
 	"golang.org/x/oauth2/google"
-
-	compute "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type resource interface {
 	Delete() error
+}
+
+type logger interface {
+	Printf(m string, a ...interface{})
+	Prompt(m string) bool
 }
 
 func Bootstrap(logger logger, serviceAccountKey string) {
@@ -30,25 +35,25 @@ func Bootstrap(logger logger, serviceAccountKey string) {
 	}{}
 	json.Unmarshal(key, &p)
 
-	config, err := google.JWTConfigFromJSON(key, compute.ComputeScope)
+	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
 		log.Fatalf("Creating JWT config from GCP_CREDENTIALS: %s", err)
 	}
 
-	service, err := compute.New(config.Client(context.Background()))
+	service, err := gcpcompute.New(config.Client(context.Background()))
 	if err != nil {
 		log.Fatalf("Creating GCP client: %s", err)
 	}
 
-	client := NewComputeClient(p.ProjectId, service)
+	client := compute.NewClient(p.ProjectId, service)
 
 	zones, err := client.ListZones()
 	if err != nil {
 		log.Fatalf("Listing zones: %s", err)
 	}
 
-	ne := NewNetworks(client, logger)
-	di := NewDisks(client, logger, zones)
+	ne := compute.NewNetworks(client, logger)
+	di := compute.NewDisks(client, logger, zones)
 
 	resources := []resource{ne, di}
 	for _, r := range resources {

@@ -1,13 +1,13 @@
-package gcp_test
+package compute_test
 
 import (
 	"errors"
 
-	"github.com/genevievelesperance/leftovers/gcp"
-	"github.com/genevievelesperance/leftovers/gcp/fakes"
+	"github.com/genevievelesperance/leftovers/gcp/compute"
+	"github.com/genevievelesperance/leftovers/gcp/compute/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	compute "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 var _ = Describe("Networks", func() {
@@ -15,21 +15,21 @@ var _ = Describe("Networks", func() {
 		client *fakes.NetworksClient
 		logger *fakes.Logger
 
-		networks gcp.Networks
+		networks compute.Networks
 	)
 
 	BeforeEach(func() {
 		client = &fakes.NetworksClient{}
 		logger = &fakes.Logger{}
 
-		networks = gcp.NewNetworks(client, logger)
+		networks = compute.NewNetworks(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
-			client.ListNetworksCall.Returns.Output = &compute.NetworkList{
-				Items: []*compute.Network{{
+			client.ListNetworksCall.Returns.Output = &gcpcompute.NetworkList{
+				Items: []*gcpcompute.Network{{
 					Name: "banana",
 				}},
 			}

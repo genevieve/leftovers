@@ -1,4 +1,4 @@
-package gcp_test
+package compute_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGCP(t *testing.T) {
+func TestCompute(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "gcp")
+	RunSpecs(t, "gcp/compute")
 }

@@ -1,14 +1,14 @@
-package gcp
+package compute 
 
 import (
 	"fmt"
 
-	compute "google.golang.org/api/compute/v1"
+	gcp "google.golang.org/api/compute/v1"
 )
 
 type disksClient interface {
-	ListDisks() (*compute.DiskList, error)
-	DeleteDisk(zone, disk string) (*compute.Operation, error)
+	ListDisks() (*gcp.DiskList, error)
+	DeleteDisk(zone, disk string) (*gcp.Operation, error)
 }
 
 type Disks struct {
