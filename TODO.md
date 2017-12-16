@@ -3,4 +3,3 @@
 - accept an environment name for filtering
 
 - loop over every gcp zone to list disks
-- skip disks that are in use

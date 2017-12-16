@@ -75,10 +75,15 @@ Help Options:
 ```
 
 ## GCP
+### What can you delete with this?
+
+```diff
++ compute disks
++ compute networks
+```
 ### What's up next?
 
 ```diff
-- compute disks
 - compute health checks
 - compute vm instances
 - compute vm instance groups
