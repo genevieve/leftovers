@@ -36,7 +36,7 @@ func (u RouteTables) Delete(vpcId string) error {
 		}},
 	})
 	if err != nil {
-		return fmt.Errorf("Describing routes: %s", err)
+		return fmt.Errorf("Describing route tables: %s", err)
 	}
 
 	for _, r := range routeTables.RouteTables {
