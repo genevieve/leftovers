@@ -20,15 +20,16 @@ func NewClient(project string, service *gcp.Service) client {
 	}
 }
 
-func (c client) ListZones() ([]string, error) {
+func (c client) ListZones() (map[string]string, error) {
+	zones := map[string]string{}
+
 	list, err := c.zones.List(c.project).Do()
 	if err != nil {
-		return []string{}, err
+		return zones, err
 	}
 
-	var zones []string
 	for _, z := range list.Items {
-		zones = append(zones, z.Name)
+		zones[z.SelfLink] = z.Name
 	}
 	return zones, nil
 }
@@ -41,10 +42,10 @@ func (c client) DeleteNetwork(network string) (*gcp.Operation, error) {
 	return c.networks.Delete(c.project, network).Do()
 }
 
-func (c client) ListDisks() (*gcp.DiskList, error) {
-	return c.disks.List(c.project, "us-west1-a").Do()
+func (c client) ListDisks(zone string) (*gcp.DiskList, error) {
+	return c.disks.List(c.project, zone).Do()
 }
 
 func (c client) DeleteDisk(zone, disk string) (*gcp.Operation, error) {
-	return c.disks.Delete(c.project, "us-west1-a", disk).Do()
+	return c.disks.Delete(c.project, zone, disk).Do()
 }

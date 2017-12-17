@@ -5,7 +5,10 @@ import compute "google.golang.org/api/compute/v1"
 type DisksClient struct {
 	ListDisksCall struct {
 		CallCount int
-		Returns   struct {
+		Receives  struct {
+			Zone string
+		}
+		Returns struct {
 			Output *compute.DiskList
 			Error  error
 		}
@@ -24,8 +27,9 @@ type DisksClient struct {
 	}
 }
 
-func (n *DisksClient) ListDisks() (*compute.DiskList, error) {
+func (n *DisksClient) ListDisks(zone string) (*compute.DiskList, error) {
 	n.ListDisksCall.CallCount++
+	n.ListDisksCall.Receives.Zone = zone
 
 	return n.ListDisksCall.Returns.Output, n.ListDisksCall.Returns.Error
 }

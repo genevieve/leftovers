@@ -14,7 +14,7 @@ var _ = Describe("Disks", func() {
 	var (
 		client *fakes.DisksClient
 		logger *fakes.Logger
-		zones  []string
+		zones  map[string]string
 
 		disks compute.Disks
 	)
@@ -22,7 +22,9 @@ var _ = Describe("Disks", func() {
 	BeforeEach(func() {
 		client = &fakes.DisksClient{}
 		logger = &fakes.Logger{}
-		zones = []string{"zone-1", "zone-2"}
+		zones = map[string]string{
+			"https://zone-1": "zone-1",
+		}
 
 		disks = compute.NewDisks(client, logger, zones)
 	})
@@ -33,7 +35,7 @@ var _ = Describe("Disks", func() {
 			client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
 				Items: []*gcpcompute.Disk{{
 					Name: "banana",
-					Zone: "the-zone",
+					Zone: "https://zone-1",
 				}},
 			}
 		})
@@ -43,11 +45,12 @@ var _ = Describe("Disks", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListDisksCall.CallCount).To(Equal(1))
+			Expect(client.ListDisksCall.Receives.Zone).To(Equal("zone-1"))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete disk banana?"))
 
 			Expect(client.DeleteDiskCall.CallCount).To(Equal(1))
-			Expect(client.DeleteDiskCall.Receives.Zone).To(Equal("the-zone"))
+			Expect(client.DeleteDiskCall.Receives.Zone).To(Equal("zone-1"))
 			Expect(client.DeleteDiskCall.Receives.Disk).To(Equal("banana"))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting disk banana\n"}))
@@ -60,7 +63,7 @@ var _ = Describe("Disks", func() {
 
 			It("returns the error", func() {
 				err := disks.Delete()
-				Expect(err).To(MatchError("Listing disks: some error"))
+				Expect(err).To(MatchError("Listing disks for zone zone-1: some error"))
 			})
 		})
 
@@ -69,7 +72,7 @@ var _ = Describe("Disks", func() {
 				client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
 					Items: []*gcpcompute.Disk{{
 						Name:  "banana",
-						Zone:  "the-zone",
+						Zone:  "zone-1",
 						Users: []string{"instance-using-banana"},
 					}},
 				}
