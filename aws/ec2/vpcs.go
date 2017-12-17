@@ -46,6 +46,13 @@ func (p Vpcs) Delete() error {
 			continue
 		}
 
+		n := vpcName(v)
+
+		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s%s?", vpcId, n))
+		if !proceed {
+			continue
+		}
+
 		if err := p.routes.Delete(vpcId); err != nil {
 			return fmt.Errorf("Deleting routes for %s: %s", vpcId, err)
 		}
@@ -56,13 +63,6 @@ func (p Vpcs) Delete() error {
 
 		if err := p.gateways.Delete(vpcId); err != nil {
 			return fmt.Errorf("Deleting internet gateways for %s: %s", vpcId, err)
-		}
-
-		n := vpcName(v)
-
-		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s%s?", vpcId, n))
-		if !proceed {
-			continue
 		}
 
 		_, err := p.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: v.VpcId})

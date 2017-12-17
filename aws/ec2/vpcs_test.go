@@ -182,6 +182,9 @@ var _ = Describe("Vpcs", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete vpc the-vpc-id/banana?"))
+				Expect(routes.DeleteCall.CallCount).To(Equal(0))
+				Expect(gateways.DeleteCall.CallCount).To(Equal(0))
+				Expect(subnets.DeleteCall.CallCount).To(Equal(0))
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
 			})
 		})
