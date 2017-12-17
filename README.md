@@ -58,6 +58,7 @@ Help Options:
 + ec2 internet gateways
 + ec2 network interfaces
 + elb load balancers
++ s3 buckets
 ```
 
 ### What's up next?
@@ -66,7 +67,6 @@ Help Options:
 - iam group policies
 - elbv2 load balancers
 - ec2 eips
-- s3 buckets
 ```
 
 ## Azure
