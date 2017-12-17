@@ -60,6 +60,25 @@ var _ = Describe("Networks", func() {
 			})
 		})
 
+		Context("when it is the default network", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = true
+				client.ListNetworksCall.Returns.Output = &gcpcompute.NetworkList{
+					Items: []*gcpcompute.Network{{
+						Name: "default",
+					}},
+				}
+			})
+
+			It("does not try deleting it", func() {
+				err := networks.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteNetworkCall.CallCount).To(Equal(0))
+			})
+		})
+
 		Context("when the client fails to delete the network", func() {
 			BeforeEach(func() {
 				client.DeleteNetworkCall.Returns.Error = errors.New("some error")

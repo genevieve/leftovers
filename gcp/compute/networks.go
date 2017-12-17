@@ -32,6 +32,10 @@ func (e Networks) Delete() error {
 	for _, t := range networks.Items {
 		n := t.Name
 
+		if n == "default" {
+			continue
+		}
+
 		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete network %s?", n))
 		if !proceed {
 			continue
