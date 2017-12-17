@@ -51,8 +51,8 @@ var _ = Describe("Instances", func() {
 			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
 			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
 			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id/banana?"))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id/banana\n"}))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana)?"))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id (Name:banana)\n"}))
 		})
 
 		Context("when there is no tag name", func() {
@@ -120,7 +120,7 @@ var _ = Describe("Instances", func() {
 				err := instances.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id/banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id (Name:banana): some error\n"}))
 			})
 		})
 
@@ -133,7 +133,7 @@ var _ = Describe("Instances", func() {
 				err := instances.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id/banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana)?"))
 				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
 			})
 		})

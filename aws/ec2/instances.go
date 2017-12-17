@@ -2,6 +2,7 @@ package ec2
 
 import (
 	"fmt"
+	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -31,22 +32,22 @@ func (a Instances) Delete() error {
 
 	for _, r := range instances.Reservations {
 		for _, i := range r.Instances {
-			if alreadyShutdown(*i.State.Name) {
+			if a.alreadyShutdown(*i.State.Name) {
 				continue
 			}
 
-			instanceId := *i.InstanceId
-			n := name(i)
-			proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to terminate instance %s%s?", instanceId, n))
+			n := a.clearerName(*i.InstanceId, i.Tags)
+
+			proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to terminate instance %s?", n))
 			if !proceed {
 				continue
 			}
 
 			_, err := a.client.TerminateInstances(&awsec2.TerminateInstancesInput{InstanceIds: []*string{i.InstanceId}})
 			if err == nil {
-				a.logger.Printf("SUCCESS terminating instance %s%s\n", instanceId, n)
+				a.logger.Printf("SUCCESS terminating instance %s\n", n)
 			} else {
-				a.logger.Printf("ERROR terminating instance %s%s: %s\n", instanceId, n, err)
+				a.logger.Printf("ERROR terminating instance %s: %s\n", n, err)
 			}
 		}
 	}
@@ -54,15 +55,19 @@ func (a Instances) Delete() error {
 	return nil
 }
 
-func alreadyShutdown(state string) bool {
+func (a Instances) alreadyShutdown(state string) bool {
 	return state == "shutting-down" || state == "terminated"
 }
 
-func name(i *awsec2.Instance) string {
-	for _, t := range i.Tags {
-		if *t.Key == "Name" {
-			return fmt.Sprintf("/%s", *t.Value)
-		}
+func (a Instances) clearerName(instanceId string, tags []*awsec2.Tag) string {
+	extra := []string{}
+	for _, t := range tags {
+		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
 	}
-	return ""
+
+	if len(extra) > 0 {
+		return fmt.Sprintf("%s (%s)", instanceId, strings.Join(extra, ", "))
+	}
+
+	return instanceId
 }
