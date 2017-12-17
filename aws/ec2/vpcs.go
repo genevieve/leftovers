@@ -14,14 +14,20 @@ type vpcClient interface {
 type Vpcs struct {
 	client   vpcClient
 	logger   logger
+	routes   routeTables
 	subnets  subnets
 	gateways internetGateways
 }
 
-func NewVpcs(client vpcClient, logger logger, subnets subnets, gateways internetGateways) Vpcs {
+func NewVpcs(client vpcClient,
+	logger logger,
+	routes routeTables,
+	subnets subnets,
+	gateways internetGateways) Vpcs {
 	return Vpcs{
 		client:   client,
 		logger:   logger,
+		routes:   routes,
 		subnets:  subnets,
 		gateways: gateways,
 	}
@@ -38,6 +44,10 @@ func (p Vpcs) Delete() error {
 
 		if *v.IsDefault {
 			continue
+		}
+
+		if err := p.routes.Delete(vpcId); err != nil {
+			return fmt.Errorf("Deleting routes for %s: %s", vpcId, err)
 		}
 
 		if err := p.subnets.Delete(vpcId); err != nil {

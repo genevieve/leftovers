@@ -15,6 +15,7 @@ var _ = Describe("Vpcs", func() {
 	var (
 		client   *fakes.VpcClient
 		logger   *fakes.Logger
+		routes   *fakes.RouteTables
 		subnets  *fakes.Subnets
 		gateways *fakes.InternetGateways
 
@@ -24,10 +25,11 @@ var _ = Describe("Vpcs", func() {
 	BeforeEach(func() {
 		client = &fakes.VpcClient{}
 		logger = &fakes.Logger{}
+		routes = &fakes.RouteTables{}
 		subnets = &fakes.Subnets{}
 		gateways = &fakes.InternetGateways{}
 
-		vpcs = ec2.NewVpcs(client, logger, subnets, gateways)
+		vpcs = ec2.NewVpcs(client, logger, routes, subnets, gateways)
 	})
 
 	Describe("Delete", func() {
@@ -50,6 +52,9 @@ var _ = Describe("Vpcs", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVpcsCall.CallCount).To(Equal(1))
+
+			Expect(routes.DeleteCall.CallCount).To(Equal(1))
+			Expect(routes.DeleteCall.Receives.VpcId).To(Equal("the-vpc-id"))
 
 			Expect(subnets.DeleteCall.CallCount).To(Equal(1))
 			Expect(subnets.DeleteCall.Receives.VpcId).To(Equal("the-vpc-id"))
@@ -110,6 +115,19 @@ var _ = Describe("Vpcs", func() {
 			It("does not try deleting them", func() {
 				err := vpcs.Delete()
 				Expect(err).To(MatchError("Describing vpcs: some error"))
+
+				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when routes fail to delete", func() {
+			BeforeEach(func() {
+				routes.DeleteCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				err := vpcs.Delete()
+				Expect(err).To(MatchError("Deleting routes for the-vpc-id: some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
 			})

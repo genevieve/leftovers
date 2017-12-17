@@ -12,9 +12,9 @@ type Subnets struct {
 	}
 }
 
-func (r *Subnets) Delete(vpcId string) error {
-	r.DeleteCall.CallCount++
-	r.DeleteCall.Receives.VpcId = vpcId
+func (s *Subnets) Delete(vpcId string) error {
+	s.DeleteCall.CallCount++
+	s.DeleteCall.Receives.VpcId = vpcId
 
-	return r.DeleteCall.Returns.Error
+	return s.DeleteCall.Returns.Error
 }

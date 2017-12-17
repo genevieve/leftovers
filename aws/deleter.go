@@ -66,6 +66,7 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 	userPolicies := iam.NewUserPolicies(iamClient, logger)
 	accessKeys := iam.NewAccessKeys(iamClient, logger)
 	internetGateways := ec2.NewInternetGateways(ec2Client, logger)
+	routeTables := ec2.NewRouteTables(ec2Client, logger)
 	subnets := ec2.NewSubnets(ec2Client, logger)
 	bucketManager := s3.NewBucketManager(region)
 
@@ -81,7 +82,7 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 	ta := ec2.NewTags(ec2Client, logger)
 	vo := ec2.NewVolumes(ec2Client, logger)
 	ni := ec2.NewNetworkInterfaces(ec2Client, logger)
-	vp := ec2.NewVpcs(ec2Client, logger, internetGateways, subnets)
+	vp := ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways)
 
 	lo := elb.NewLoadBalancers(elbClient, logger)
 

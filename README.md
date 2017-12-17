@@ -54,6 +54,7 @@ Help Options:
 + ec2 security groups
 + ec2 vpcs
 + ec2 subnets
++ ec2 route tables
 + ec2 internet gateways
 + ec2 network interfaces
 + elb load balancers
