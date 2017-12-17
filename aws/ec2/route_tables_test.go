@@ -65,7 +65,55 @@ var _ = Describe("RouteTables", func() {
 			})
 		})
 
-		Context("when the client fails to delete the route-table", func() {
+		Context("when the route table has an association id", func() {
+			BeforeEach(func() {
+				client.DescribeRouteTablesCall.Returns.Output = &awsec2.DescribeRouteTablesOutput{
+					RouteTables: []*awsec2.RouteTable{{
+						RouteTableId: aws.String("the-route-table-id"),
+						VpcId:        aws.String("the-vpc-id"),
+						Associations: []*awsec2.RouteTableAssociation{{
+							RouteTableAssociationId: aws.String("the-association-id"),
+							RouteTableId:            aws.String("the-route-table-id"),
+							SubnetId:                aws.String("the-subnet-id"),
+						}},
+					}},
+				}
+			})
+
+			It("disassociates it from the subnet before trying to delete it", func() {
+				err := routeTables.Delete("the-vpc-id")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeRouteTablesCall.CallCount).To(Equal(1))
+				Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
+				Expect(client.DisassociateRouteTableCall.Receives.Input.AssociationId).To(Equal(aws.String("the-association-id")))
+				Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					"SUCCESS disassociating route table the-route-table-id from subnet the-subnet-id\n",
+					"SUCCESS deleting route table the-route-table-id\n",
+				}))
+			})
+
+			Context("when the client fails to disassociate the route table", func() {
+				BeforeEach(func() {
+					client.DisassociateRouteTableCall.Returns.Error = errors.New("some error")
+				})
+
+				It("logs the error", func() {
+					err := routeTables.Delete("the-vpc-id")
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
+					Expect(logger.PrintfCall.Messages).To(Equal([]string{
+						"ERROR disassociating route table the-route-table-id from subnet the-subnet-id: some error\n",
+						"SUCCESS deleting route table the-route-table-id\n",
+					}))
+				})
+			})
+		})
+
+		Context("when the client fails to delete the route table", func() {
 			BeforeEach(func() {
 				client.DeleteRouteTableCall.Returns.Error = errors.New("some error")
 			})

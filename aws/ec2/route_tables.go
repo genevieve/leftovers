@@ -9,6 +9,7 @@ import (
 
 type routesClient interface {
 	DescribeRouteTables(*awsec2.DescribeRouteTablesInput) (*awsec2.DescribeRouteTablesOutput, error)
+	DisassociateRouteTable(*awsec2.DisassociateRouteTableInput) (*awsec2.DisassociateRouteTableOutput, error)
 	DeleteRouteTable(*awsec2.DeleteRouteTableInput) (*awsec2.DeleteRouteTableOutput, error)
 }
 
@@ -41,6 +42,17 @@ func (u RouteTables) Delete(vpcId string) error {
 
 	for _, r := range routeTables.RouteTables {
 		n := *r.RouteTableId
+
+		for _, a := range r.Associations {
+			_, err = u.client.DisassociateRouteTable(&awsec2.DisassociateRouteTableInput{
+				AssociationId: a.RouteTableAssociationId,
+			})
+			if err == nil {
+				u.logger.Printf("SUCCESS disassociating route table %s from subnet %s\n", n, *a.SubnetId)
+			} else {
+				u.logger.Printf("ERROR disassociating route table %s from subnet %s: %s\n", n, *a.SubnetId, err)
+			}
+		}
 
 		_, err = u.client.DeleteRouteTable(&awsec2.DeleteRouteTableInput{
 			RouteTableId: r.RouteTableId,
