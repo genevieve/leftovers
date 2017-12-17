@@ -1,6 +1,6 @@
 # Leftovers
 
-Clean up orphaned IAAS resources.
+Clean up orphaned IAAS resources (mostly created by `bbl`.)
 
 ## Why you might be here?
 - You `terraform apply`'d way back when and lost your `terraform.tfstate`
@@ -80,12 +80,12 @@ Help Options:
 ```diff
 + compute disks
 + compute networks
++ compute vm instances
 ```
 ### What's up next?
 
 ```diff
 - compute health checks
-- compute vm instances
 - compute vm instance groups
 - compute vm instance templates
 - compute snapshots

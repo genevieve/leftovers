@@ -1,23 +1,50 @@
 package compute
 
 import (
-	gcp "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type client struct {
-	project  string
-	networks *gcp.NetworksService
-	disks    *gcp.DisksService
-	zones    *gcp.ZonesService
+	project string
+
+	disks     *gcpcompute.DisksService
+	instances *gcpcompute.InstancesService
+	networks  *gcpcompute.NetworksService
+	zones     *gcpcompute.ZonesService
 }
 
-func NewClient(project string, service *gcp.Service) client {
+func NewClient(project string, service *gcpcompute.Service) client {
 	return client{
-		project:  project,
-		networks: service.Networks,
-		disks:    service.Disks,
-		zones:    service.Zones,
+		project:   project,
+		disks:     service.Disks,
+		instances: service.Instances,
+		networks:  service.Networks,
+		zones:     service.Zones,
 	}
+}
+
+func (c client) ListDisks(zone string) (*gcpcompute.DiskList, error) {
+	return c.disks.List(c.project, zone).Do()
+}
+
+func (c client) DeleteDisk(zone, disk string) (*gcpcompute.Operation, error) {
+	return c.disks.Delete(c.project, zone, disk).Do()
+}
+
+func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
+	return c.instances.List(c.project, zone).Do()
+}
+
+func (c client) DeleteInstance(zone, instance string) (*gcpcompute.Operation, error) {
+	return c.instances.Delete(c.project, zone, instance).Do()
+}
+
+func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
+	return c.networks.List(c.project).Do()
+}
+
+func (c client) DeleteNetwork(network string) (*gcpcompute.Operation, error) {
+	return c.networks.Delete(c.project, network).Do()
 }
 
 func (c client) ListZones() (map[string]string, error) {
@@ -32,20 +59,4 @@ func (c client) ListZones() (map[string]string, error) {
 		zones[z.SelfLink] = z.Name
 	}
 	return zones, nil
-}
-
-func (c client) ListNetworks() (*gcp.NetworkList, error) {
-	return c.networks.List(c.project).Do()
-}
-
-func (c client) DeleteNetwork(network string) (*gcp.Operation, error) {
-	return c.networks.Delete(c.project, network).Do()
-}
-
-func (c client) ListDisks(zone string) (*gcp.DiskList, error) {
-	return c.disks.List(c.project, zone).Do()
-}
-
-func (c client) DeleteDisk(zone, disk string) (*gcp.Operation, error) {
-	return c.disks.Delete(c.project, zone, disk).Do()
 }

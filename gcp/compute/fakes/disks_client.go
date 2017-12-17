@@ -1,6 +1,6 @@
 package fakes
 
-import compute "google.golang.org/api/compute/v1"
+import gcpcompute "google.golang.org/api/compute/v1"
 
 type DisksClient struct {
 	ListDisksCall struct {
@@ -9,7 +9,7 @@ type DisksClient struct {
 			Zone string
 		}
 		Returns struct {
-			Output *compute.DiskList
+			Output *gcpcompute.DiskList
 			Error  error
 		}
 	}
@@ -21,20 +21,20 @@ type DisksClient struct {
 			Disk string
 		}
 		Returns struct {
-			Output *compute.Operation
+			Output *gcpcompute.Operation
 			Error  error
 		}
 	}
 }
 
-func (n *DisksClient) ListDisks(zone string) (*compute.DiskList, error) {
+func (n *DisksClient) ListDisks(zone string) (*gcpcompute.DiskList, error) {
 	n.ListDisksCall.CallCount++
 	n.ListDisksCall.Receives.Zone = zone
 
 	return n.ListDisksCall.Returns.Output, n.ListDisksCall.Returns.Error
 }
 
-func (n *DisksClient) DeleteDisk(zone, disk string) (*compute.Operation, error) {
+func (n *DisksClient) DeleteDisk(zone, disk string) (*gcpcompute.Operation, error) {
 	n.DeleteDiskCall.CallCount++
 	n.DeleteDiskCall.Receives.Zone = zone
 	n.DeleteDiskCall.Receives.Disk = disk

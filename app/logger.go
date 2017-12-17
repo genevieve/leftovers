@@ -33,7 +33,7 @@ func (l *Logger) clear() {
 
 func (l *Logger) Printf(message string, a ...interface{}) {
 	l.clear()
-	fmt.Fprintf(l.writer, "%s", fmt.Sprintf(message, a...))
+	fmt.Fprintf(l.writer, "\t%s", fmt.Sprintf(message, a...))
 }
 
 func (l *Logger) Prompt(message string) bool {
