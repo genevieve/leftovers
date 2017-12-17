@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/genevievelesperance/leftovers/aws/s3"
 	"github.com/genevievelesperance/leftovers/aws/s3/fakes"
@@ -91,6 +92,20 @@ var _ = Describe("Buckets", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some error\n"}))
+			})
+		})
+
+		Context("when the client fails to delete the bucket and list object versions", func() {
+			BeforeEach(func() {
+				client.DeleteBucketCall.Returns.Error = awserr.New("BucketNotEmpty", "some error", errors.New("some error"))
+				client.ListObjectVersionsCall.Returns.Error = errors.New("some other error")
+			})
+
+			It("logs the error", func() {
+				err := buckets.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some other error\n"}))
 			})
 		})
 
