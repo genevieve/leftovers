@@ -59,15 +59,15 @@ func (a Instances) alreadyShutdown(state string) bool {
 	return state == "shutting-down" || state == "terminated"
 }
 
-func (a Instances) clearerName(instanceId string, tags []*awsec2.Tag) string {
+func (a Instances) clearerName(id string, tags []*awsec2.Tag) string {
 	extra := []string{}
 	for _, t := range tags {
 		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
 	}
 
 	if len(extra) > 0 {
-		return fmt.Sprintf("%s (%s)", instanceId, strings.Join(extra, ", "))
+		return fmt.Sprintf("%s (%s)", id, strings.Join(extra, ", "))
 	}
 
-	return instanceId
+	return id
 }

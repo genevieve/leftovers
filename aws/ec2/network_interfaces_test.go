@@ -48,6 +48,28 @@ var _ = Describe("NetworkInterfaces", func() {
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network interface banana\n"}))
 		})
 
+		Context("when the network interface has tags", func() {
+			BeforeEach(func() {
+				client.DescribeNetworkInterfacesCall.Returns.Output = &awsec2.DescribeNetworkInterfacesOutput{
+					NetworkInterfaces: []*awsec2.NetworkInterface{{
+						NetworkInterfaceId: aws.String("banana"),
+						TagSet: []*awsec2.Tag{{
+							Key:   aws.String("the-key"),
+							Value: aws.String("the-value"),
+						}},
+					}},
+				}
+			})
+
+			It("uses them in the prompt", func() {
+				err := networkInterfaces.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network interface banana (the-key:the-value)?"))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network interface banana (the-key:the-value)\n"}))
+			})
+		})
+
 		Context("when the client fails to list network interfaces", func() {
 			BeforeEach(func() {
 				client.DescribeNetworkInterfacesCall.Returns.Error = errors.New("some error")
