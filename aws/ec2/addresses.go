@@ -30,8 +30,7 @@ func (d Addresses) Delete() error {
 	}
 
 	for _, a := range addresses.Addresses {
-		inUse := *a.InstanceId
-		if inUse != "" {
+		if d.inUse(a) {
 			continue
 		}
 
@@ -53,4 +52,8 @@ func (d Addresses) Delete() error {
 	}
 
 	return nil
+}
+
+func (d Addresses) inUse(a *awsec2.Address) bool {
+	return a.InstanceId != nil && *a.InstanceId != ""
 }
