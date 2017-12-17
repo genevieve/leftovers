@@ -33,6 +33,7 @@ var _ = Describe("Addresses", func() {
 				Addresses: []*awsec2.Address{{
 					PublicIp:     aws.String("banana"),
 					AllocationId: aws.String("the-allocation-id"),
+					InstanceId:   aws.String(""),
 				}},
 			}
 		})
@@ -42,10 +43,31 @@ var _ = Describe("Addresses", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to release address banana?"))
+
 			Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
 			Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(aws.String("the-allocation-id")))
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to release address banana?"))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS releasing address banana\n"}))
+		})
+
+		Context("when the address is in use by an instance", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = true
+				client.DescribeAddressesCall.Returns.Output = &awsec2.DescribeAddressesOutput{
+					Addresses: []*awsec2.Address{{
+						InstanceId: aws.String("the-instance-using-it"),
+					}},
+				}
+			})
+
+			It("does not try to release it", func() {
+				err := keys.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.ReleaseAddressCall.CallCount).To(Equal(0))
+			})
 		})
 
 		Context("when the client fails to describe addresses", func() {

@@ -30,6 +30,11 @@ func (d Addresses) Delete() error {
 	}
 
 	for _, a := range addresses.Addresses {
+		inUse := *a.InstanceId
+		if inUse != "" {
+			continue
+		}
+
 		n := *a.PublicIp
 
 		proceed := d.logger.Prompt(fmt.Sprintf("Are you sure you want to release address %s?", n))
