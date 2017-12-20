@@ -90,7 +90,7 @@ var _ = Describe("RouteTables", func() {
 				Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"SUCCESS disassociating route table the-route-table-id from subnet the-subnet-id\n",
+					"SUCCESS disassociating route table the-route-table-id\n",
 					"SUCCESS deleting route table the-route-table-id\n",
 				}))
 			})
@@ -106,7 +106,7 @@ var _ = Describe("RouteTables", func() {
 
 					Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
 					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"ERROR disassociating route table the-route-table-id from subnet the-subnet-id: some error\n",
+						"ERROR disassociating route table the-route-table-id: some error\n",
 						"SUCCESS deleting route table the-route-table-id\n",
 					}))
 				})

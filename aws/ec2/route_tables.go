@@ -48,9 +48,9 @@ func (u RouteTables) Delete(vpcId string) error {
 				AssociationId: a.RouteTableAssociationId,
 			})
 			if err == nil {
-				u.logger.Printf("SUCCESS disassociating route table %s from subnet %s\n", n, *a.SubnetId)
+				u.logger.Printf("SUCCESS disassociating route table %s\n", n)
 			} else {
-				u.logger.Printf("ERROR disassociating route table %s from subnet %s: %s\n", n, *a.SubnetId, err)
+				u.logger.Printf("ERROR disassociating route table %s: %s\n", n, err)
 			}
 		}
 
