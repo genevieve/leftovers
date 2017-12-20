@@ -72,6 +72,7 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 
 	ro := iam.NewRoles(iamClient, logger, rolePolicies)
 	us := iam.NewUsers(iamClient, logger, userPolicies, accessKeys)
+	po := iam.NewPolicies(iamClient, logger)
 	ip := iam.NewInstanceProfiles(iamClient, logger)
 	sc := iam.NewServerCertificates(iamClient, logger)
 
@@ -88,7 +89,7 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 
 	bu := s3.NewBuckets(s3Client, logger, bucketManager)
 
-	resources := []resource{ip, ro, us, us, lo, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
+	resources := []resource{ip, ro, us, us, po, lo, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
 
 	return Deleter{
 		resources: resources,

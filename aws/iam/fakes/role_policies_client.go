@@ -1,15 +1,15 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/iam"
+import awsiam "github.com/aws/aws-sdk-go/service/iam"
 
 type RolePoliciesClient struct {
 	ListAttachedRolePoliciesCall struct {
 		CallCount int
 		Receives  struct {
-			Input *iam.ListAttachedRolePoliciesInput
+			Input *awsiam.ListAttachedRolePoliciesInput
 		}
 		Returns struct {
-			Output *iam.ListAttachedRolePoliciesOutput
+			Output *awsiam.ListAttachedRolePoliciesOutput
 			Error  error
 		}
 	}
@@ -17,10 +17,10 @@ type RolePoliciesClient struct {
 	ListRolePoliciesCall struct {
 		CallCount int
 		Receives  struct {
-			Input *iam.ListRolePoliciesInput
+			Input *awsiam.ListRolePoliciesInput
 		}
 		Returns struct {
-			Output *iam.ListRolePoliciesOutput
+			Output *awsiam.ListRolePoliciesOutput
 			Error  error
 		}
 	}
@@ -28,10 +28,10 @@ type RolePoliciesClient struct {
 	DetachRolePolicyCall struct {
 		CallCount int
 		Receives  struct {
-			Input *iam.DetachRolePolicyInput
+			Input *awsiam.DetachRolePolicyInput
 		}
 		Returns struct {
-			Output *iam.DetachRolePolicyOutput
+			Output *awsiam.DetachRolePolicyOutput
 			Error  error
 		}
 	}
@@ -39,37 +39,37 @@ type RolePoliciesClient struct {
 	DeleteRolePolicyCall struct {
 		CallCount int
 		Receives  struct {
-			Input *iam.DeleteRolePolicyInput
+			Input *awsiam.DeleteRolePolicyInput
 		}
 		Returns struct {
-			Output *iam.DeleteRolePolicyOutput
+			Output *awsiam.DeleteRolePolicyOutput
 			Error  error
 		}
 	}
 }
 
-func (i *RolePoliciesClient) ListAttachedRolePolicies(input *iam.ListAttachedRolePoliciesInput) (*iam.ListAttachedRolePoliciesOutput, error) {
+func (i *RolePoliciesClient) ListAttachedRolePolicies(input *awsiam.ListAttachedRolePoliciesInput) (*awsiam.ListAttachedRolePoliciesOutput, error) {
 	i.ListAttachedRolePoliciesCall.CallCount++
 	i.ListAttachedRolePoliciesCall.Receives.Input = input
 
 	return i.ListAttachedRolePoliciesCall.Returns.Output, i.ListAttachedRolePoliciesCall.Returns.Error
 }
 
-func (i *RolePoliciesClient) ListRolePolicies(input *iam.ListRolePoliciesInput) (*iam.ListRolePoliciesOutput, error) {
+func (i *RolePoliciesClient) ListRolePolicies(input *awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error) {
 	i.ListRolePoliciesCall.CallCount++
 	i.ListRolePoliciesCall.Receives.Input = input
 
 	return i.ListRolePoliciesCall.Returns.Output, i.ListRolePoliciesCall.Returns.Error
 }
 
-func (i *RolePoliciesClient) DetachRolePolicy(input *iam.DetachRolePolicyInput) (*iam.DetachRolePolicyOutput, error) {
+func (i *RolePoliciesClient) DetachRolePolicy(input *awsiam.DetachRolePolicyInput) (*awsiam.DetachRolePolicyOutput, error) {
 	i.DetachRolePolicyCall.CallCount++
 	i.DetachRolePolicyCall.Receives.Input = input
 
 	return i.DetachRolePolicyCall.Returns.Output, i.DetachRolePolicyCall.Returns.Error
 }
 
-func (i *RolePoliciesClient) DeleteRolePolicy(input *iam.DeleteRolePolicyInput) (*iam.DeleteRolePolicyOutput, error) {
+func (i *RolePoliciesClient) DeleteRolePolicy(input *awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error) {
 	i.DeleteRolePolicyCall.CallCount++
 	i.DeleteRolePolicyCall.Receives.Input = input
 
