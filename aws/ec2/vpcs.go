@@ -2,6 +2,7 @@ package ec2
 
 import (
 	"fmt"
+	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -40,47 +41,51 @@ func (p Vpcs) Delete() error {
 	}
 
 	for _, v := range vpcs.Vpcs {
-		vpcId := *v.VpcId
-
 		if *v.IsDefault {
 			continue
 		}
 
-		n := vpcName(v)
+		vpcId := *v.VpcId
 
-		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s%s?", vpcId, n))
+		n := p.clearerName(vpcId, v.Tags)
+
+		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s?", n))
 		if !proceed {
 			continue
 		}
 
 		if err := p.routes.Delete(vpcId); err != nil {
-			return fmt.Errorf("Deleting routes for %s: %s", vpcId, err)
+			return fmt.Errorf("Deleting routes for %s: %s", n, err)
 		}
 
 		if err := p.subnets.Delete(vpcId); err != nil {
-			return fmt.Errorf("Deleting subnets for %s: %s", vpcId, err)
+			return fmt.Errorf("Deleting subnets for %s: %s", n, err)
 		}
 
 		if err := p.gateways.Delete(vpcId); err != nil {
-			return fmt.Errorf("Deleting internet gateways for %s: %s", vpcId, err)
+			return fmt.Errorf("Deleting internet gateways for %s: %s", n, err)
 		}
 
 		_, err := p.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: v.VpcId})
 		if err == nil {
-			p.logger.Printf("SUCCESS deleting vpc %s%s\n", vpcId, n)
+			p.logger.Printf("SUCCESS deleting vpc %s\n", n)
 		} else {
-			p.logger.Printf("ERROR deleting vpc %s%s: %s\n", vpcId, n, err)
+			p.logger.Printf("ERROR deleting vpc %s: %s\n", n, err)
 		}
 	}
 
 	return nil
 }
 
-func vpcName(v *awsec2.Vpc) string {
-	for _, t := range v.Tags {
-		if *t.Key == "Name" {
-			return fmt.Sprintf("/%s", *t.Value)
-		}
+func (p Vpcs) clearerName(id string, tags []*awsec2.Tag) string {
+	extra := []string{}
+	for _, t := range tags {
+		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
 	}
-	return ""
+
+	if len(extra) > 0 {
+		return fmt.Sprintf("%s (%s)", id, strings.Join(extra, ","))
+	}
+
+	return id
 }
