@@ -35,12 +35,12 @@ func (d Deleter) Delete() error {
 
 func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 	if serviceAccountKey == "" {
-		log.Fatal("Missing GCP_SERVICE_ACCOUNT_KEY.")
+		log.Fatal("Missing BBL_GCP_SERVICE_ACCOUNT_KEY.")
 	}
 
 	key, err := ioutil.ReadFile(serviceAccountKey)
 	if err != nil {
-		log.Fatal("Reading GCP_SERVICE_ACCOUNT_KEY: %s", err)
+		log.Fatal("Reading %s: %s", serviceAccountKey, err)
 	}
 
 	p := struct {
@@ -50,12 +50,12 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
-		log.Fatalf("Creating JWT config from GCP_CREDENTIALS: %s", err)
+		log.Fatalf("Creating jwt config: %s", err)
 	}
 
 	service, err := gcpcompute.New(config.Client(context.Background()))
 	if err != nil {
-		log.Fatalf("Creating GCP client: %s", err)
+		log.Fatalf("Creating gcp client: %s", err)
 	}
 
 	client := compute.NewClient(p.ProjectId, service)

@@ -40,15 +40,15 @@ func (d Deleter) Delete() error {
 
 func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Deleter {
 	if accessKeyId == "" {
-		log.Fatal("Missing AWS_ACCESS_KEY_ID.")
+		log.Fatal("Missing BBL_AWS_ACCESS_KEY_ID.")
 	}
 
 	if secretAccessKey == "" {
-		log.Fatal("Missing AWS_SECRET_ACCESS_KEY.")
+		log.Fatal("Missing BBL_AWS_SECRET_ACCESS_KEY.")
 	}
 
 	if region == "" {
-		log.Fatal("Missing AWS_REGION.")
+		log.Fatal("Missing BBL_AWS_REGION.")
 	}
 
 	config := &awslib.Config{

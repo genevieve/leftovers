@@ -33,16 +33,16 @@ func (d Deleter) Delete() error {
 
 func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId string) Deleter {
 	if clientId == "" {
-		log.Fatal("Missing AZURE_CLIENT_ID.")
+		log.Fatal("Missing BBL_AZURE_CLIENT_ID.")
 	}
 	if clientSecret == "" {
-		log.Fatal("Missing AZURE_CLIENT_SECRET.")
+		log.Fatal("Missing BBL_AZURE_CLIENT_SECRET.")
 	}
 	if subscriptionId == "" {
-		log.Fatal("Missing AZURE_SUBSCRIPTION_ID.")
+		log.Fatal("Missing BBL_AZURE_SUBSCRIPTION_ID.")
 	}
 	if tenantId == "" {
-		log.Fatal("Missing AZURE_TENANT_ID.")
+		log.Fatal("Missing BBL_AZURE_TENANT_ID.")
 	}
 
 	oauthConfig, err := adal.NewOAuthConfig(azurelib.PublicCloud.ActiveDirectoryEndpoint, tenantId)

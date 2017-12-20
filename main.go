@@ -12,19 +12,17 @@ import (
 )
 
 type opts struct {
-	IAAS      string `short:"i"  long:"iaas"        default:"aws"  env:"LEFTOVERS_IAAS"  description:"The IAAS for clean up."  `
-	NoConfirm bool   `short:"n"  long:"no-confirm"                                       description:"Destroy resources without prompting. This is dangerous, make good choices!"`
+	IAAS      string `short:"i"  long:"iaas"        default:"aws"  env:"BBL_IAAS"  description:"The IAAS for clean up."  `
+	NoConfirm bool   `short:"n"  long:"no-confirm"                                 description:"Destroy resources without prompting. This is dangerous, make good choices!"`
 
-	AWSAccessKeyID     string `long:"aws-access-key-id"     env:"AWS_ACCESS_KEY_ID"     description:"AWS access key id."`
-	AWSSecretAccessKey string `long:"aws-secret-access-key" env:"AWS_SECRET_ACCESS_KEY" description:"AWS secret access key."`
-	AWSRegion          string `long:"aws-region"            env:"AWS_REGION"            description:"AWS region."`
-
-	AzureClientID       string `long:"azure-client-id"        env:"AZURE_CLIENT_ID"        description:"Azure client id."`
-	AzureClientSecret   string `long:"azure-client-secret"    env:"AZURE_CLIENT_SECRET"    description:"Azure client secret."`
-	AzureTenantID       string `long:"azure-tenant-id"        env:"AZURE_TENANT_ID"        description:"Azure tenant id."`
-	AzureSubscriptionID string `long:"azure-subscription-id"  env:"AZURE_SUBSCRIPTION_ID"  description:"Azure subscription id."`
-
-	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
+	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
+	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
+	AWSRegion            string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
+	AzureClientID        string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
+	AzureClientSecret    string `long:"azure-client-secret"      env:"BBL_AZURE_CLIENT_SECRET"      description:"Azure client secret."`
+	AzureTenantID        string `long:"azure-tenant-id"          env:"BBL_AZURE_TENANT_ID"          description:"Azure tenant id."`
+	AzureSubscriptionID  string `long:"azure-subscription-id"    env:"BBL_AZURE_SUBSCRIPTION_ID"    description:"Azure subscription id."`
+	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"BBL_GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
 }
 
 type deleter interface {
