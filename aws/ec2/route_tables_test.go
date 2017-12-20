@@ -72,6 +72,7 @@ var _ = Describe("RouteTables", func() {
 						RouteTableId: aws.String("the-route-table-id"),
 						VpcId:        aws.String("the-vpc-id"),
 						Associations: []*awsec2.RouteTableAssociation{{
+							Main: aws.Bool(false),
 							RouteTableAssociationId: aws.String("the-association-id"),
 							RouteTableId:            aws.String("the-route-table-id"),
 							SubnetId:                aws.String("the-subnet-id"),
@@ -93,6 +94,33 @@ var _ = Describe("RouteTables", func() {
 					"SUCCESS disassociating route table the-route-table-id\n",
 					"SUCCESS deleting route table the-route-table-id\n",
 				}))
+			})
+
+			Context("when that association is the main one", func() {
+				BeforeEach(func() {
+					client.DescribeRouteTablesCall.Returns.Output = &awsec2.DescribeRouteTablesOutput{
+						RouteTables: []*awsec2.RouteTable{{
+							RouteTableId: aws.String("the-route-table-id"),
+							VpcId:        aws.String("the-vpc-id"),
+							Associations: []*awsec2.RouteTableAssociation{{
+								Main: aws.Bool(true),
+								RouteTableAssociationId: aws.String("the-association-id"),
+								RouteTableId:            aws.String("the-route-table-id"),
+							}},
+						}},
+					}
+				})
+
+				It("does not dissociate or delete the route table", func() {
+					err := routeTables.Delete("the-vpc-id")
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(client.DescribeRouteTablesCall.CallCount).To(Equal(1))
+					Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(0))
+					Expect(client.DeleteRouteTableCall.CallCount).To(Equal(0))
+
+					Expect(logger.PrintfCall.Messages).To(BeNil())
+				})
 			})
 
 			Context("when the client fails to disassociate the route table", func() {
