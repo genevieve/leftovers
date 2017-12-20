@@ -23,19 +23,19 @@ Usage:
   leftovers [OPTIONS]
 
 Application Options:
-  -i, --iaas=                    The IAAS for clean up. (default: aws) [$LEFTOVERS_IAAS]
+  -i, --iaas=                    The IAAS for clean up. (default: aws) [$BBL_IAAS]
   -n, --no-confirm               Destroy resources without prompting. This is dangerous, make good choices!
-      --aws-access-key-id=       AWS access key id. [$AWS_ACCESS_KEY_ID]
-      --aws-secret-access-key=   AWS secret access key. [$AWS_SECRET_ACCESS_KEY]
-      --aws-region=              AWS region. [$AWS_REGION]
-      --azure-client-id=         Azure client id. [$AZURE_CLIENT_ID]
-      --azure-client-secret=     Azure client secret. [$AZURE_CLIENT_SECRET]
-      --azure-tenant-id=         Azure tenant id. [$AZURE_TENANT_ID]
-      --azure-subscription-id=   Azure subscription id. [$AZURE_SUBSCRIPTION_ID]
-      --gcp-service-account-key= GCP service account key path. [$GCP_SERVICE_ACCOUNT_KEY]
+      --aws-access-key-id=       AWS access key id. [$BBL_AWS_ACCESS_KEY_ID]
+      --aws-secret-access-key=   AWS secret access key. [$BBL_AWS_SECRET_ACCESS_KEY]
+      --aws-region=              AWS region. [$BBL_AWS_REGION]
+      --azure-client-id=         Azure client id. [$BBL_AZURE_CLIENT_ID]
+      --azure-client-secret=     Azure client secret. [$BBL_AZURE_CLIENT_SECRET]
+      --azure-tenant-id=         Azure tenant id. [$BBL_AZURE_TENANT_ID]
+      --azure-subscription-id=   Azure subscription id. [$BBL_AZURE_SUBSCRIPTION_ID]
+      --gcp-service-account-key= GCP service account key path. [$BBL_GCP_SERVICE_ACCOUNT_KEY]
 
 Help Options:
-  -h, --help                   Show this help message
+  -h, --help                     Show this help message
 ```
 
 ## AWS
