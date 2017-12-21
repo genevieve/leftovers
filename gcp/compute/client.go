@@ -7,19 +7,21 @@ import (
 type client struct {
 	project string
 
-	disks     *gcpcompute.DisksService
-	instances *gcpcompute.InstancesService
-	networks  *gcpcompute.NetworksService
-	zones     *gcpcompute.ZonesService
+	disks            *gcpcompute.DisksService
+	instances        *gcpcompute.InstancesService
+	networks         *gcpcompute.NetworksService
+	httpHealthChecks *gcpcompute.HttpHealthChecksService
+	zones            *gcpcompute.ZonesService
 }
 
 func NewClient(project string, service *gcpcompute.Service) client {
 	return client{
-		project:   project,
-		disks:     service.Disks,
-		instances: service.Instances,
-		networks:  service.Networks,
-		zones:     service.Zones,
+		project:          project,
+		disks:            service.Disks,
+		instances:        service.Instances,
+		networks:         service.Networks,
+		httpHealthChecks: service.HttpHealthChecks,
+		zones:            service.Zones,
 	}
 }
 
@@ -45,6 +47,14 @@ func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
 
 func (c client) DeleteNetwork(network string) (*gcpcompute.Operation, error) {
 	return c.networks.Delete(c.project, network).Do()
+}
+
+func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) {
+	return c.httpHealthChecks.List(c.project).Do()
+}
+
+func (c client) DeleteHttpHealthCheck(httpHealthCheck string) (*gcpcompute.Operation, error) {
+	return c.httpHealthChecks.Delete(c.project, httpHealthCheck).Do()
 }
 
 func (c client) ListZones() (map[string]string, error) {
