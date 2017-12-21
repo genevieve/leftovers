@@ -2,6 +2,7 @@ package iam
 
 import (
 	"fmt"
+	"strings"
 
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
@@ -31,7 +32,7 @@ func (i InstanceProfiles) Delete() error {
 	}
 
 	for _, p := range profiles.InstanceProfiles {
-		n := *p.InstanceProfileName
+		n := i.clearerName(*p.InstanceProfileName, p.Roles)
 
 		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", n))
 		if !proceed {
@@ -61,4 +62,17 @@ func (i InstanceProfiles) Delete() error {
 	}
 
 	return nil
+}
+
+func (i InstanceProfiles) clearerName(name string, roles []*awsiam.Role) string {
+	extra := []string{}
+	for _, r := range roles {
+		extra = append(extra, fmt.Sprintf("Role:%s", *r.RoleName))
+	}
+
+	if len(extra) > 0 {
+		return fmt.Sprintf("%s (%s)", name, strings.Join(extra, ", "))
+	}
+
+	return name
 }

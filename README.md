@@ -51,7 +51,7 @@ Help Options:
 + ec2 tags
 + ec2 key pairs
 + ec2 instances
-+ ec2 security groups
++ ec2 security groups (Note: for groups that reference each other, the first pass will delete the references. Run through a second time.)
 + ec2 vpcs
 + ec2 subnets
 + ec2 route tables
