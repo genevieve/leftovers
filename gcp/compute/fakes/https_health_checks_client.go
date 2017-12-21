@@ -1,0 +1,37 @@
+package fakes
+
+import gcpcompute "google.golang.org/api/compute/v1"
+
+type HttpsHealthChecksClient struct {
+	ListHttpsHealthChecksCall struct {
+		CallCount int
+		Returns   struct {
+			Output *gcpcompute.HttpsHealthCheckList
+			Error  error
+		}
+	}
+
+	DeleteHttpsHealthCheckCall struct {
+		CallCount int
+		Receives  struct {
+			HttpsHealthCheck string
+		}
+		Returns struct {
+			Output *gcpcompute.Operation
+			Error  error
+		}
+	}
+}
+
+func (n *HttpsHealthChecksClient) ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error) {
+	n.ListHttpsHealthChecksCall.CallCount++
+
+	return n.ListHttpsHealthChecksCall.Returns.Output, n.ListHttpsHealthChecksCall.Returns.Error
+}
+
+func (n *HttpsHealthChecksClient) DeleteHttpsHealthCheck(httpsHealthCheck string) (*gcpcompute.Operation, error) {
+	n.DeleteHttpsHealthCheckCall.CallCount++
+	n.DeleteHttpsHealthCheckCall.Receives.HttpsHealthCheck = httpsHealthCheck
+
+	return n.DeleteHttpsHealthCheckCall.Returns.Output, n.DeleteHttpsHealthCheckCall.Returns.Error
+}

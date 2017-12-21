@@ -29,9 +29,9 @@ func (n *HttpHealthChecksClient) ListHttpHealthChecks() (*gcpcompute.HttpHealthC
 	return n.ListHttpHealthChecksCall.Returns.Output, n.ListHttpHealthChecksCall.Returns.Error
 }
 
-func (n *HttpHealthChecksClient) DeleteHttpHealthCheck(disk string) (*gcpcompute.Operation, error) {
+func (n *HttpHealthChecksClient) DeleteHttpHealthCheck(httpHealthCheck string) (*gcpcompute.Operation, error) {
 	n.DeleteHttpHealthCheckCall.CallCount++
-	n.DeleteHttpHealthCheckCall.Receives.HttpHealthCheck = disk
+	n.DeleteHttpHealthCheckCall.Receives.HttpHealthCheck = httpHealthCheck
 
 	return n.DeleteHttpHealthCheckCall.Returns.Output, n.DeleteHttpHealthCheckCall.Returns.Error
 }

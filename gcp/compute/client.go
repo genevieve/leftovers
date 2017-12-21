@@ -7,23 +7,25 @@ import (
 type client struct {
 	project string
 
-	backendServices  *gcpcompute.BackendServicesService
-	disks            *gcpcompute.DisksService
-	instances        *gcpcompute.InstancesService
-	networks         *gcpcompute.NetworksService
-	httpHealthChecks *gcpcompute.HttpHealthChecksService
-	zones            *gcpcompute.ZonesService
+	backendServices   *gcpcompute.BackendServicesService
+	disks             *gcpcompute.DisksService
+	httpHealthChecks  *gcpcompute.HttpHealthChecksService
+	httpsHealthChecks *gcpcompute.HttpsHealthChecksService
+	instances         *gcpcompute.InstancesService
+	networks          *gcpcompute.NetworksService
+	zones             *gcpcompute.ZonesService
 }
 
 func NewClient(project string, service *gcpcompute.Service) client {
 	return client{
-		project:          project,
-		backendServices:  service.BackendServices,
-		disks:            service.Disks,
-		instances:        service.Instances,
-		networks:         service.Networks,
-		httpHealthChecks: service.HttpHealthChecks,
-		zones:            service.Zones,
+		project:           project,
+		backendServices:   service.BackendServices,
+		disks:             service.Disks,
+		httpHealthChecks:  service.HttpHealthChecks,
+		httpsHealthChecks: service.HttpsHealthChecks,
+		instances:         service.Instances,
+		networks:          service.Networks,
+		zones:             service.Zones,
 	}
 }
 
@@ -65,6 +67,14 @@ func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) 
 
 func (c client) DeleteHttpHealthCheck(httpHealthCheck string) (*gcpcompute.Operation, error) {
 	return c.httpHealthChecks.Delete(c.project, httpHealthCheck).Do()
+}
+
+func (c client) ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error) {
+	return c.httpsHealthChecks.List(c.project).Do()
+}
+
+func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) (*gcpcompute.Operation, error) {
+	return c.httpsHealthChecks.Delete(c.project, httpsHealthCheck).Do()
 }
 
 func (c client) ListZones() (map[string]string, error) {
