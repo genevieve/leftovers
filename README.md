@@ -84,11 +84,17 @@ Help Options:
 + compute networks
 + compute vm instances
 + compute backend services
-- compute health checks
++ compute http health checks
 ```
 ### What's up next?
 
 ```diff
+- compute routes
+- compute health checks
+- compute https health checks
+- compute firewall rules
+- compute forwarding rules
+- compute target pools
 - compute vm instance groups
 - compute vm instance templates
 - compute snapshots
