@@ -83,11 +83,12 @@ Help Options:
 + compute disks
 + compute networks
 + compute vm instances
++ compute backend services
+- compute health checks
 ```
 ### What's up next?
 
 ```diff
-- compute health checks
 - compute vm instance groups
 - compute vm instance templates
 - compute snapshots

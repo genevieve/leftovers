@@ -7,6 +7,7 @@ import (
 type client struct {
 	project string
 
+	backendServices  *gcpcompute.BackendServicesService
 	disks            *gcpcompute.DisksService
 	instances        *gcpcompute.InstancesService
 	networks         *gcpcompute.NetworksService
@@ -17,12 +18,21 @@ type client struct {
 func NewClient(project string, service *gcpcompute.Service) client {
 	return client{
 		project:          project,
+		backendServices:  service.BackendServices,
 		disks:            service.Disks,
 		instances:        service.Instances,
 		networks:         service.Networks,
 		httpHealthChecks: service.HttpHealthChecks,
 		zones:            service.Zones,
 	}
+}
+
+func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
+	return c.backendServices.List(c.project).Do()
+}
+
+func (c client) DeleteBackendService(backendService string) (*gcpcompute.Operation, error) {
+	return c.backendServices.Delete(c.project, backendService).Do()
 }
 
 func (c client) ListDisks(zone string) (*gcpcompute.DiskList, error) {
