@@ -2,6 +2,7 @@ package ec2
 
 import (
 	"fmt"
+	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -32,11 +33,11 @@ func (e SecurityGroups) Delete() error {
 	}
 
 	for _, s := range groups.SecurityGroups {
-		n := *s.GroupName
-
-		if n == "default" {
+		if *s.GroupName == "default" {
 			continue
 		}
+
+		n := e.clearerName(*s.GroupName, s.Tags)
 
 		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete security group %s?", n))
 		if !proceed {
@@ -51,14 +52,24 @@ func (e SecurityGroups) Delete() error {
 		if err == nil {
 			e.logger.Printf("SUCCESS deleting security group %s\n", n)
 		} else {
-			//TODO: List any security groups that mention this security group
-			//Prompt if they are okay revoking rules from all these groups
-			//Delete the one group
 			e.logger.Printf("ERROR deleting security group %s: %s\n", n, err)
 		}
 	}
 
 	return nil
+}
+
+func (e SecurityGroups) clearerName(n string, tags []*awsec2.Tag) string {
+	extra := []string{}
+	for _, t := range tags {
+		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
+	}
+
+	if len(extra) > 0 {
+		return fmt.Sprintf("%s (%s)", n, strings.Join(extra, ", "))
+	}
+
+	return n
 }
 
 func (e SecurityGroups) revoke(s *awsec2.SecurityGroup) {

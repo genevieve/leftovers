@@ -63,6 +63,26 @@ var _ = Describe("SecurityGroups", func() {
 			})
 		})
 
+		Context("when the security group has tags", func() {
+			BeforeEach(func() {
+				client.DescribeSecurityGroupsCall.Returns.Output = &awsec2.DescribeSecurityGroupsOutput{
+					SecurityGroups: []*awsec2.SecurityGroup{{
+						GroupName: aws.String("banana"),
+						GroupId:   aws.String("the-group-id"),
+						Tags:      []*awsec2.Tag{{Key: aws.String("the-key"), Value: aws.String("the-value")}},
+					}},
+				}
+			})
+
+			It("deletes ec2 security groups", func() {
+				err := securityGroups.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana (the-key:the-value)?"))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana (the-key:the-value)\n"}))
+			})
+		})
+
 		Context("when the client has ingress rules", func() {
 			BeforeEach(func() {
 				client.DescribeSecurityGroupsCall.Returns.Output = &awsec2.DescribeSecurityGroupsOutput{
