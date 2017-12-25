@@ -55,16 +55,16 @@ infrastructure resources were tragically orphaned
 + compute vm instances
 + compute backend services
 + compute http health checks
++ compute https health checks
 + compute target pools
 + compute forwarding rules
++ compute firewalls
 ```
 ### What's up next?
 
 ```diff
 - compute routes
 - compute health checks
-- compute https health checks
-- compute firewall rules
 - compute vm instance groups
 - compute vm instance templates
 - compute snapshots
