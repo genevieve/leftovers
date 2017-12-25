@@ -1,9 +1,6 @@
 package compute
 
 import (
-	"time"
-
-	"github.com/hashicorp/terraform/helper/resource"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -194,23 +191,5 @@ func (c client) waitOnDelete(op *gcpcompute.Operation) error {
 		Project: c.project,
 	}
 
-	state := &resource.StateChangeConf{
-		Delay:      10 * time.Second,
-		Timeout:    10 * time.Minute,
-		MinTimeout: 2 * time.Second,
-		Pending:    []string{"PENDING", "RUNNING"},
-		Target:     []string{"DONE"},
-		Refresh:    waiter.refreshFunc(),
-	}
-
-	opRaw, err := state.WaitForState()
-	if err != nil {
-		return err
-	}
-
-	if resultOp := opRaw.(*gcpcompute.Operation); resultOp.Error != nil {
-		return ComputeOperationError(*resultOp.Error)
-	}
-
-	return nil
+	return waiter.Wait()
 }
