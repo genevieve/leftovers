@@ -16,6 +16,7 @@ type client struct {
 	httpHealthChecks  *gcpcompute.HttpHealthChecksService
 	httpsHealthChecks *gcpcompute.HttpsHealthChecksService
 	instances         *gcpcompute.InstancesService
+	firewalls         *gcpcompute.FirewallsService
 	forwardingRules   *gcpcompute.ForwardingRulesService
 	networks          *gcpcompute.NetworksService
 	targetPools       *gcpcompute.TargetPoolsService
@@ -32,6 +33,7 @@ func NewClient(project string, service *gcpcompute.Service) client {
 		httpHealthChecks:  service.HttpHealthChecks,
 		httpsHealthChecks: service.HttpsHealthChecks,
 		instances:         service.Instances,
+		firewalls:         service.Firewalls,
 		forwardingRules:   service.ForwardingRules,
 		networks:          service.Networks,
 		targetPools:       service.TargetPools,
@@ -105,12 +107,12 @@ func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
-	return c.networks.List(c.project).Do()
+func (c client) ListFirewalls() (*gcpcompute.FirewallList, error) {
+	return c.firewalls.List(c.project).Do()
 }
 
-func (c client) DeleteNetwork(network string) error {
-	op, err := c.networks.Delete(c.project, network).Do()
+func (c client) DeleteFirewall(firewall string) error {
+	op, err := c.firewalls.Delete(c.project, firewall).Do()
 	if err != nil {
 		return err
 	}
@@ -124,6 +126,19 @@ func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleLi
 
 func (c client) DeleteForwardingRule(region string, forwardingRule string) error {
 	op, err := c.forwardingRules.Delete(c.project, region, forwardingRule).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
+	return c.networks.List(c.project).Do()
+}
+
+func (c client) DeleteNetwork(network string) error {
+	op, err := c.networks.Delete(c.project, network).Do()
 	if err != nil {
 		return err
 	}

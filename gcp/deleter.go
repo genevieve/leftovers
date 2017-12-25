@@ -70,7 +70,7 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 		log.Fatalf("Listing zones: %s", err)
 	}
 
-	ne := compute.NewNetworks(client, logger)
+	fi := compute.NewFirewalls(client, logger)
 	fw := compute.NewForwardingRules(client, logger, regions)
 	tp := compute.NewTargetPools(client, logger, regions)
 	in := compute.NewInstances(client, logger, zones)
@@ -78,8 +78,9 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 	hs := compute.NewHttpsHealthChecks(client, logger)
 	ba := compute.NewBackendServices(client, logger)
 	di := compute.NewDisks(client, logger, zones)
+	ne := compute.NewNetworks(client, logger)
 
 	return Deleter{
-		resources: []resource{ne, fw, tp, in, di, ht, hs, ba},
+		resources: []resource{fi, fw, tp, in, di, ht, hs, ba, ne},
 	}
 }
