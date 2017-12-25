@@ -60,19 +60,26 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 
 	client := compute.NewClient(p.ProjectId, service)
 
+	regions, err := client.ListRegions()
+	if err != nil {
+		log.Fatalf("Listing regions: %s", err)
+	}
+
 	zones, err := client.ListZones()
 	if err != nil {
 		log.Fatalf("Listing zones: %s", err)
 	}
 
 	ne := compute.NewNetworks(client, logger)
-	di := compute.NewDisks(client, logger, zones)
+	fw := compute.NewForwardingRules(client, logger, regions)
+	tp := compute.NewTargetPools(client, logger, regions)
 	in := compute.NewInstances(client, logger, zones)
 	ht := compute.NewHttpHealthChecks(client, logger)
 	hs := compute.NewHttpsHealthChecks(client, logger)
 	ba := compute.NewBackendServices(client, logger)
+	di := compute.NewDisks(client, logger, zones)
 
 	return Deleter{
-		resources: []resource{ne, in, di, ht, hs, ba},
+		resources: []resource{ne, fw, tp, in, di, ht, hs, ba},
 	}
 }

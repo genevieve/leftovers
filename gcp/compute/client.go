@@ -16,7 +16,10 @@ type client struct {
 	httpHealthChecks  *gcpcompute.HttpHealthChecksService
 	httpsHealthChecks *gcpcompute.HttpsHealthChecksService
 	instances         *gcpcompute.InstancesService
+	forwardingRules   *gcpcompute.ForwardingRulesService
 	networks          *gcpcompute.NetworksService
+	targetPools       *gcpcompute.TargetPoolsService
+	regions           *gcpcompute.RegionsService
 	zones             *gcpcompute.ZonesService
 }
 
@@ -29,7 +32,10 @@ func NewClient(project string, service *gcpcompute.Service) client {
 		httpHealthChecks:  service.HttpHealthChecks,
 		httpsHealthChecks: service.HttpsHealthChecks,
 		instances:         service.Instances,
+		forwardingRules:   service.ForwardingRules,
 		networks:          service.Networks,
+		targetPools:       service.TargetPools,
+		regions:           service.Regions,
 		zones:             service.Zones,
 	}
 }
@@ -73,19 +79,6 @@ func (c client) DeleteInstance(zone, instance string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
-	return c.networks.List(c.project).Do()
-}
-
-func (c client) DeleteNetwork(network string) error {
-	op, err := c.networks.Delete(c.project, network).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
-}
-
 func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) {
 	return c.httpHealthChecks.List(c.project).Do()
 }
@@ -110,6 +103,59 @@ func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
 	}
 
 	return c.waitOnDelete(op)
+}
+
+func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
+	return c.networks.List(c.project).Do()
+}
+
+func (c client) DeleteNetwork(network string) error {
+	op, err := c.networks.Delete(c.project, network).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleList, error) {
+	return c.forwardingRules.List(c.project, region).Do()
+}
+
+func (c client) DeleteForwardingRule(region string, forwardingRule string) error {
+	op, err := c.forwardingRules.Delete(c.project, region, forwardingRule).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListTargetPools(region string) (*gcpcompute.TargetPoolList, error) {
+	return c.targetPools.List(c.project, region).Do()
+}
+
+func (c client) DeleteTargetPool(region string, targetPool string) error {
+	op, err := c.targetPools.Delete(c.project, region, targetPool).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListRegions() (map[string]string, error) {
+	regions := map[string]string{}
+
+	list, err := c.regions.List(c.project).Do()
+	if err != nil {
+		return regions, err
+	}
+
+	for _, r := range list.Items {
+		regions[r.SelfLink] = r.Name
+	}
+	return regions, nil
 }
 
 func (c client) ListZones() (map[string]string, error) {
