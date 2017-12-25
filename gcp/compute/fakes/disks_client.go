@@ -21,8 +21,7 @@ type DisksClient struct {
 			Disk string
 		}
 		Returns struct {
-			Output *gcpcompute.Operation
-			Error  error
+			Error error
 		}
 	}
 }
@@ -34,10 +33,10 @@ func (n *DisksClient) ListDisks(zone string) (*gcpcompute.DiskList, error) {
 	return n.ListDisksCall.Returns.Output, n.ListDisksCall.Returns.Error
 }
 
-func (n *DisksClient) DeleteDisk(zone, disk string) (*gcpcompute.Operation, error) {
+func (n *DisksClient) DeleteDisk(zone, disk string) error {
 	n.DeleteDiskCall.CallCount++
 	n.DeleteDiskCall.Receives.Zone = zone
 	n.DeleteDiskCall.Receives.Disk = disk
 
-	return n.DeleteDiskCall.Returns.Output, n.DeleteDiskCall.Returns.Error
+	return n.DeleteDiskCall.Returns.Error
 }

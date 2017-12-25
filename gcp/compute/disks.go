@@ -8,7 +8,7 @@ import (
 
 type disksClient interface {
 	ListDisks(zone string) (*gcpcompute.DiskList, error)
-	DeleteDisk(zone, disk string) (*gcpcompute.Operation, error)
+	DeleteDisk(zone, disk string) error
 }
 
 type Disks struct {
@@ -46,7 +46,7 @@ func (i Disks) Delete() error {
 		}
 
 		zoneName := i.zones[d.Zone]
-		if _, err := i.client.DeleteDisk(zoneName, d.Name); err != nil {
+		if err := i.client.DeleteDisk(zoneName, d.Name); err != nil {
 			i.logger.Printf("ERROR deleting disk %s: %s\n", d.Name, err)
 		} else {
 			i.logger.Printf("SUCCESS deleting disk %s\n", d.Name)
