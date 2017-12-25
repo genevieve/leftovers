@@ -17,8 +17,7 @@ type NetworksClient struct {
 			Network string
 		}
 		Returns struct {
-			Output *compute.Operation
-			Error  error
+			Error error
 		}
 	}
 }
@@ -29,9 +28,9 @@ func (n *NetworksClient) ListNetworks() (*compute.NetworkList, error) {
 	return n.ListNetworksCall.Returns.Output, n.ListNetworksCall.Returns.Error
 }
 
-func (n *NetworksClient) DeleteNetwork(network string) (*compute.Operation, error) {
+func (n *NetworksClient) DeleteNetwork(network string) error {
 	n.DeleteNetworkCall.CallCount++
 	n.DeleteNetworkCall.Receives.Network = network
 
-	return n.DeleteNetworkCall.Returns.Output, n.DeleteNetworkCall.Returns.Error
+	return n.DeleteNetworkCall.Returns.Error
 }

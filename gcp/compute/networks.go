@@ -8,7 +8,7 @@ import (
 
 type networksClient interface {
 	ListNetworks() (*gcp.NetworkList, error)
-	DeleteNetwork(network string) (*gcp.Operation, error)
+	DeleteNetwork(network string) error
 }
 
 type Networks struct {
@@ -41,7 +41,7 @@ func (e Networks) Delete() error {
 			continue
 		}
 
-		if _, err := e.client.DeleteNetwork(n); err != nil {
+		if err := e.client.DeleteNetwork(n); err != nil {
 			e.logger.Printf("ERROR deleting network %s: %s\n", n, err)
 		} else {
 			e.logger.Printf("SUCCESS deleting network %s\n", n)

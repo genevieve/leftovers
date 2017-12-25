@@ -8,7 +8,7 @@ import (
 
 type backendServicesClient interface {
 	ListBackendServices() (*gcpcompute.BackendServiceList, error)
-	DeleteBackendService(backendService string) (*gcpcompute.Operation, error)
+	DeleteBackendService(backendService string) error
 }
 
 type BackendServices struct {
@@ -35,7 +35,7 @@ func (i BackendServices) Delete() error {
 			continue
 		}
 
-		if _, err := i.client.DeleteBackendService(b.Name); err != nil {
+		if err := i.client.DeleteBackendService(b.Name); err != nil {
 			i.logger.Printf("ERROR deleting backend service %s: %s\n", b.Name, err)
 		} else {
 			i.logger.Printf("SUCCESS deleting backend service %s\n", b.Name)

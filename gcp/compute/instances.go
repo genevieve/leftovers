@@ -9,7 +9,7 @@ import (
 
 type instancesClient interface {
 	ListInstances(zone string) (*gcpcompute.InstanceList, error)
-	DeleteInstance(zone, instance string) (*gcpcompute.Operation, error)
+	DeleteInstance(zone, instance string) error
 }
 
 type Instances struct {
@@ -45,7 +45,7 @@ func (s Instances) Delete() error {
 		}
 
 		zoneName := s.zones[i.Zone]
-		if _, err := s.client.DeleteInstance(zoneName, i.Name); err != nil {
+		if err := s.client.DeleteInstance(zoneName, i.Name); err != nil {
 			s.logger.Printf("ERROR deleting instance %s: %s\n", i.Name, err)
 		} else {
 			s.logger.Printf("SUCCESS deleting instance %s\n", i.Name)

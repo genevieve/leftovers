@@ -17,8 +17,7 @@ type BackendServicesClient struct {
 			BackendService string
 		}
 		Returns struct {
-			Output *gcpcompute.Operation
-			Error  error
+			Error error
 		}
 	}
 }
@@ -29,9 +28,9 @@ func (n *BackendServicesClient) ListBackendServices() (*gcpcompute.BackendServic
 	return n.ListBackendServicesCall.Returns.Output, n.ListBackendServicesCall.Returns.Error
 }
 
-func (n *BackendServicesClient) DeleteBackendService(backendService string) (*gcpcompute.Operation, error) {
+func (n *BackendServicesClient) DeleteBackendService(backendService string) error {
 	n.DeleteBackendServiceCall.CallCount++
 	n.DeleteBackendServiceCall.Receives.BackendService = backendService
 
-	return n.DeleteBackendServiceCall.Returns.Output, n.DeleteBackendServiceCall.Returns.Error
+	return n.DeleteBackendServiceCall.Returns.Error
 }

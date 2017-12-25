@@ -17,8 +17,7 @@ type HttpHealthChecksClient struct {
 			HttpHealthCheck string
 		}
 		Returns struct {
-			Output *gcpcompute.Operation
-			Error  error
+			Error error
 		}
 	}
 }
@@ -29,9 +28,9 @@ func (n *HttpHealthChecksClient) ListHttpHealthChecks() (*gcpcompute.HttpHealthC
 	return n.ListHttpHealthChecksCall.Returns.Output, n.ListHttpHealthChecksCall.Returns.Error
 }
 
-func (n *HttpHealthChecksClient) DeleteHttpHealthCheck(httpHealthCheck string) (*gcpcompute.Operation, error) {
+func (n *HttpHealthChecksClient) DeleteHttpHealthCheck(httpHealthCheck string) error {
 	n.DeleteHttpHealthCheckCall.CallCount++
 	n.DeleteHttpHealthCheckCall.Receives.HttpHealthCheck = httpHealthCheck
 
-	return n.DeleteHttpHealthCheckCall.Returns.Output, n.DeleteHttpHealthCheckCall.Returns.Error
+	return n.DeleteHttpHealthCheckCall.Returns.Error
 }

@@ -21,8 +21,7 @@ type InstancesClient struct {
 			Instance string
 		}
 		Returns struct {
-			Output *gcpcompute.Operation
-			Error  error
+			Error error
 		}
 	}
 }
@@ -34,10 +33,10 @@ func (n *InstancesClient) ListInstances(zone string) (*gcpcompute.InstanceList, 
 	return n.ListInstancesCall.Returns.Output, n.ListInstancesCall.Returns.Error
 }
 
-func (n *InstancesClient) DeleteInstance(zone, instance string) (*gcpcompute.Operation, error) {
+func (n *InstancesClient) DeleteInstance(zone, instance string) error {
 	n.DeleteInstanceCall.CallCount++
 	n.DeleteInstanceCall.Receives.Zone = zone
 	n.DeleteInstanceCall.Receives.Instance = instance
 
-	return n.DeleteInstanceCall.Returns.Output, n.DeleteInstanceCall.Returns.Error
+	return n.DeleteInstanceCall.Returns.Error
 }

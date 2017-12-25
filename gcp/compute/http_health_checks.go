@@ -8,7 +8,7 @@ import (
 
 type httpHealthChecksClient interface {
 	ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error)
-	DeleteHttpHealthCheck(httpHealthCheck string) (*gcpcompute.Operation, error)
+	DeleteHttpHealthCheck(httpHealthCheck string) error
 }
 
 type HttpHealthChecks struct {
@@ -35,7 +35,7 @@ func (i HttpHealthChecks) Delete() error {
 			continue
 		}
 
-		if _, err := i.client.DeleteHttpHealthCheck(h.Name); err != nil {
+		if err := i.client.DeleteHttpHealthCheck(h.Name); err != nil {
 			i.logger.Printf("ERROR deleting http health check %s: %s\n", h.Name, err)
 		} else {
 			i.logger.Printf("SUCCESS deleting http health check %s\n", h.Name)
