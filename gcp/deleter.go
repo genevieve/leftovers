@@ -58,7 +58,7 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 		log.Fatalf("Creating gcp client: %s", err)
 	}
 
-	client := compute.NewClient(p.ProjectId, service)
+	client := compute.NewClient(p.ProjectId, service, logger)
 
 	regions, err := client.ListRegions()
 	if err != nil {

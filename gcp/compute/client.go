@@ -6,6 +6,7 @@ import (
 
 type client struct {
 	project string
+	logger  logger
 
 	service           *gcpcompute.Service
 	backendServices   *gcpcompute.BackendServicesService
@@ -21,9 +22,10 @@ type client struct {
 	zones             *gcpcompute.ZonesService
 }
 
-func NewClient(project string, service *gcpcompute.Service) client {
+func NewClient(project string, service *gcpcompute.Service, logger logger) client {
 	return client{
 		project:           project,
+		logger:            logger,
 		service:           service,
 		backendServices:   service.BackendServices,
 		disks:             service.Disks,
@@ -186,9 +188,10 @@ func (c client) ListZones() (map[string]string, error) {
 
 func (c client) waitOnDelete(op *gcpcompute.Operation) error {
 	waiter := &operationWaiter{
-		Op:      op,
-		Service: c.service,
-		Project: c.project,
+		op:      op,
+		service: c.service,
+		project: c.project,
+		logger:  c.logger,
 	}
 
 	return waiter.Wait()
