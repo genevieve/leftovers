@@ -21,13 +21,14 @@ infrastructure resources were tragically orphaned
 + ec2 tags
 + ec2 key pairs
 + ec2 instances
-+ ec2 security groups (Note: for groups that reference each other, the first pass will delete the references. Run through a second time.)
++ ec2 security groups (Note: for sgs that reference each other, the first pass will delete the references. Run through a second time.)
 + ec2 vpcs
 + ec2 subnets
 + ec2 route tables
 + ec2 internet gateways
 + ec2 network interfaces
 + elb load balancers
++ elbv2 load balancers
 + s3 buckets
 ```
 
@@ -35,7 +36,6 @@ infrastructure resources were tragically orphaned
 
 ```diff
 - iam group policies
-- elbv2 load balancers
 - ec2 eips
 ```
 

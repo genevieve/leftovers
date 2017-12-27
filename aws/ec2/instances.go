@@ -43,7 +43,9 @@ func (a Instances) Delete() error {
 				continue
 			}
 
-			_, err := a.client.TerminateInstances(&awsec2.TerminateInstancesInput{InstanceIds: []*string{i.InstanceId}})
+			_, err := a.client.TerminateInstances(&awsec2.TerminateInstancesInput{
+				InstanceIds: []*string{i.InstanceId},
+			})
 			if err == nil {
 				a.logger.Printf("SUCCESS terminating instance %s\n", n)
 			} else {

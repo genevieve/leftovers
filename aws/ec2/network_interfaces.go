@@ -38,7 +38,9 @@ func (e NetworkInterfaces) Delete() error {
 			continue
 		}
 
-		_, err := e.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{NetworkInterfaceId: i.NetworkInterfaceId})
+		_, err := e.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{
+			NetworkInterfaceId: i.NetworkInterfaceId,
+		})
 		if err == nil {
 			e.logger.Printf("SUCCESS deleting network interface %s\n", n)
 		} else {

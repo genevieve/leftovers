@@ -3,7 +3,6 @@ package ec2
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -37,12 +36,15 @@ func (o Volumes) Delete() error {
 		}
 
 		n := *v.VolumeId
+
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete volume %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := o.client.DeleteVolume(&awsec2.DeleteVolumeInput{VolumeId: aws.String(n)})
+		_, err := o.client.DeleteVolume(&awsec2.DeleteVolumeInput{
+			VolumeId: v.VolumeId,
+		})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting volume %s\n", n)
 		} else {

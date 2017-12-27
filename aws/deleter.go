@@ -8,10 +8,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	awselb "github.com/aws/aws-sdk-go/service/elb"
+	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/genevievelesperance/leftovers/aws/ec2"
 	"github.com/genevievelesperance/leftovers/aws/elb"
+	"github.com/genevievelesperance/leftovers/aws/elbv2"
 	"github.com/genevievelesperance/leftovers/aws/iam"
 	"github.com/genevievelesperance/leftovers/aws/s3"
 )
@@ -60,6 +62,7 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 	iamClient := awsiam.New(sess)
 	ec2Client := awsec2.New(sess)
 	elbClient := awselb.New(sess)
+	elbv2Client := awselbv2.New(sess)
 	s3Client := awss3.New(sess)
 
 	rolePolicies := iam.NewRolePolicies(iamClient, logger)
@@ -85,11 +88,12 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 	ni := ec2.NewNetworkInterfaces(ec2Client, logger)
 	vp := ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways)
 
-	lo := elb.NewLoadBalancers(elbClient, logger)
+	l1 := elb.NewLoadBalancers(elbClient, logger)
+	l2 := elbv2.NewLoadBalancers(elbv2Client, logger)
 
 	bu := s3.NewBuckets(s3Client, logger, bucketManager)
 
-	resources := []resource{ip, ro, us, us, po, lo, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
+	resources := []resource{ip, ro, us, us, po, l1, l2, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
 
 	return Deleter{
 		resources: resources,

@@ -1,14 +1,14 @@
-package elb
+package elbv2
 
 import (
 	"fmt"
 
-	awselb "github.com/aws/aws-sdk-go/service/elb"
+	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 )
 
 type loadBalancersClient interface {
-	DescribeLoadBalancers(*awselb.DescribeLoadBalancersInput) (*awselb.DescribeLoadBalancersOutput, error)
-	DeleteLoadBalancer(*awselb.DeleteLoadBalancerInput) (*awselb.DeleteLoadBalancerOutput, error)
+	DescribeLoadBalancers(*awselbv2.DescribeLoadBalancersInput) (*awselbv2.DescribeLoadBalancersOutput, error)
+	DeleteLoadBalancer(*awselbv2.DeleteLoadBalancerInput) (*awselbv2.DeleteLoadBalancerOutput, error)
 }
 
 type LoadBalancers struct {
@@ -24,12 +24,12 @@ func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 }
 
 func (o LoadBalancers) Delete() error {
-	loadBalancers, err := o.client.DescribeLoadBalancers(&awselb.DescribeLoadBalancersInput{})
+	loadBalancers, err := o.client.DescribeLoadBalancers(&awselbv2.DescribeLoadBalancersInput{})
 	if err != nil {
 		return fmt.Errorf("Describing load balancers: %s", err)
 	}
 
-	for _, l := range loadBalancers.LoadBalancerDescriptions {
+	for _, l := range loadBalancers.LoadBalancers {
 		n := *l.LoadBalancerName
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete load balancer %s?", n))
@@ -37,7 +37,7 @@ func (o LoadBalancers) Delete() error {
 			continue
 		}
 
-		_, err := o.client.DeleteLoadBalancer(&awselb.DeleteLoadBalancerInput{LoadBalancerName: l.LoadBalancerName})
+		_, err := o.client.DeleteLoadBalancer(&awselbv2.DeleteLoadBalancerInput{LoadBalancerArn: l.LoadBalancerArn})
 		if err == nil {
 			o.logger.Printf("SUCCESS deleting load balancer %s\n", n)
 		} else {
