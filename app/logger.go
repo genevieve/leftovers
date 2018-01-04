@@ -36,6 +36,11 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	fmt.Fprintf(l.writer, "\t%s", fmt.Sprintf(message, a...))
 }
 
+func (l *Logger) Println(message string, a ...interface{}) {
+	l.clear()
+	fmt.Fprintf(l.writer, "%s\n\n", fmt.Sprintf(message, a...))
+}
+
 func (l *Logger) Prompt(message string) bool {
 	if l.noConfirm {
 		return true

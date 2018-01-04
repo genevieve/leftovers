@@ -13,6 +13,7 @@ import (
 
 type logger interface {
 	Printf(m string, a ...interface{})
+	Println(m string, a ...interface{})
 	Prompt(m string) bool
 }
 
@@ -46,7 +47,11 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 	p := struct {
 		ProjectId string `json:"project_id"`
 	}{}
-	json.Unmarshal(key, &p)
+	if err := json.Unmarshal(key, &p); err != nil {
+		log.Fatal("Unmarshalling account key for project id: %s", err)
+	}
+
+	logger.Println("Cleaning gcp project: %s.", p.ProjectId)
 
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
