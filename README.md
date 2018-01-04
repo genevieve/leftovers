@@ -1,6 +1,12 @@
 # Leftovers
 
-Clean up orphaned IAAS resources (mostly created by `bbl`.)
+Useful for cleaning up **orphaned IAAS resources**.
+
+It will **prompt you before deleting** any resource, ie:
+
+```
+Are you sure you want to delete firewall bbl-env-reindeer? (y/N)
+```
 
 ## Why you might be here?
 - You `terraform apply`'d way back when and lost your `terraform.tfstate`
