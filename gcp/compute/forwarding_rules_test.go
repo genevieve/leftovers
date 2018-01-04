@@ -40,7 +40,7 @@ var _ = Describe("ForwardingRules", func() {
 			}
 		})
 
-		It("deletes forwardingRules", func() {
+		It("deletes forwarding rules", func() {
 			err := forwardingRules.Delete()
 			Expect(err).NotTo(HaveOccurred())
 

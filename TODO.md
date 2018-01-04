@@ -1,2 +1,3 @@
 - allow argument to leftovers for a particular category like (leftovers aws s3)
 - accept an environment name for filtering
+- Say which GCP Account/Azure account/etc is being cleaned

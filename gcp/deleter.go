@@ -79,8 +79,9 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 	ba := compute.NewBackendServices(client, logger)
 	di := compute.NewDisks(client, logger, zones)
 	ne := compute.NewNetworks(client, logger)
+	ad := compute.NewAddresses(client, logger, regions)
 
 	return Deleter{
-		resources: []resource{fi, fw, tp, in, di, ht, hs, ba, ne},
+		resources: []resource{fi, fw, tp, in, di, ht, hs, ba, ne, ad},
 	}
 }

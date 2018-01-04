@@ -63,6 +63,7 @@ infrastructure resources were tragically orphaned
 ### What's up next?
 
 ```diff
+- compute addresses
 - compute routes
 - compute health checks
 - compute vm instance groups

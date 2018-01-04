@@ -9,6 +9,7 @@ type client struct {
 	logger  logger
 
 	service           *gcpcompute.Service
+	addresses         *gcpcompute.AddressesService
 	backendServices   *gcpcompute.BackendServicesService
 	disks             *gcpcompute.DisksService
 	httpHealthChecks  *gcpcompute.HttpHealthChecksService
@@ -27,6 +28,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		project:           project,
 		logger:            logger,
 		service:           service,
+		addresses:         service.Addresses,
 		backendServices:   service.BackendServices,
 		disks:             service.Disks,
 		httpHealthChecks:  service.HttpHealthChecks,
@@ -39,6 +41,19 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		regions:           service.Regions,
 		zones:             service.Zones,
 	}
+}
+
+func (c client) ListAddresses(region string) (*gcpcompute.AddressList, error) {
+	return c.addresses.List(c.project, region).Do()
+}
+
+func (c client) DeleteAddress(region, address string) error {
+	op, err := c.addresses.Delete(c.project, region, address).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
 }
 
 func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
@@ -123,7 +138,7 @@ func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleLi
 	return c.forwardingRules.List(c.project, region).Do()
 }
 
-func (c client) DeleteForwardingRule(region string, forwardingRule string) error {
+func (c client) DeleteForwardingRule(region, forwardingRule string) error {
 	op, err := c.forwardingRules.Delete(c.project, region, forwardingRule).Do()
 	if err != nil {
 		return err
