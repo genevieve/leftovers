@@ -59,11 +59,11 @@ infrastructure resources were tragically orphaned
 + compute target pools
 + compute forwarding rules
 + compute firewalls
++ compute addresses
 ```
 ### What's up next?
 
 ```diff
-- compute addresses
 - compute routes
 - compute health checks
 - compute vm instance groups
