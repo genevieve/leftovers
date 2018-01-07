@@ -47,7 +47,7 @@ func main() {
 	case "aws":
 		d, err = aws.NewDeleter(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
 	case "azure":
-		d = azure.NewDeleter(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
+		d, err = azure.NewDeleter(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
 	case "gcp":
 		d, err = gcp.NewDeleter(logger, c.GCPServiceAccountKey)
 	}

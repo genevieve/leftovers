@@ -1,7 +1,8 @@
 package azure
 
 import (
-	"log"
+	"errors"
+	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	"github.com/Azure/go-autorest/autorest"
@@ -31,28 +32,28 @@ func (d Deleter) Delete() error {
 	return nil
 }
 
-func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId string) Deleter {
+func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId string) (Deleter, error) {
 	if clientId == "" {
-		log.Fatal("Missing BBL_AZURE_CLIENT_ID.")
+		return Deleter{}, errors.New("Missing BBL_AZURE_CLIENT_ID.")
 	}
 	if clientSecret == "" {
-		log.Fatal("Missing BBL_AZURE_CLIENT_SECRET.")
+		return Deleter{}, errors.New("Missing BBL_AZURE_CLIENT_SECRET.")
 	}
 	if subscriptionId == "" {
-		log.Fatal("Missing BBL_AZURE_SUBSCRIPTION_ID.")
+		return Deleter{}, errors.New("Missing BBL_AZURE_SUBSCRIPTION_ID.")
 	}
 	if tenantId == "" {
-		log.Fatal("Missing BBL_AZURE_TENANT_ID.")
+		return Deleter{}, errors.New("Missing BBL_AZURE_TENANT_ID.")
 	}
 
 	oauthConfig, err := adal.NewOAuthConfig(azurelib.PublicCloud.ActiveDirectoryEndpoint, tenantId)
 	if err != nil {
-		log.Fatalf("Creating oauth config: %s\n", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Creating oauth config: %s\n", err))
 	}
 
 	servicePrincipalToken, err := adal.NewServicePrincipalToken(*oauthConfig, clientId, clientSecret, azurelib.PublicCloud.ResourceManagerEndpoint)
 	if err != nil {
-		log.Fatalf("Creating service principal token: %s\n", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Creating service principal token: %s\n", err))
 	}
 
 	gc := resources.NewGroupsClient(subscriptionId)
@@ -60,5 +61,5 @@ func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId 
 
 	return Deleter{
 		resources: []resource{NewGroups(gc, logger)},
-	}
+	}, nil
 }
