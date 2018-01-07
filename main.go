@@ -42,13 +42,18 @@ func main() {
 	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
 	var d deleter
+
 	switch c.IAAS {
 	case "aws":
 		d = aws.NewDeleter(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
 	case "azure":
 		d = azure.NewDeleter(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
 	case "gcp":
-		d = gcp.NewDeleter(logger, c.GCPServiceAccountKey)
+		d, err = gcp.NewDeleter(logger, c.GCPServiceAccountKey)
+	}
+
+	if err != nil {
+		log.Fatalf("\n\n%s\n", err)
 	}
 
 	if err := d.Delete(); err != nil {

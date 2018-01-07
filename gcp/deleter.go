@@ -3,8 +3,9 @@ package gcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/genevievelesperance/leftovers/gcp/compute"
 	"golang.org/x/oauth2/google"
@@ -34,45 +35,45 @@ func (d Deleter) Delete() error {
 	return nil
 }
 
-func NewDeleter(logger logger, serviceAccountKey string) Deleter {
+func NewDeleter(logger logger, serviceAccountKey string) (Deleter, error) {
 	if serviceAccountKey == "" {
-		log.Fatal("Missing BBL_GCP_SERVICE_ACCOUNT_KEY.")
+		return Deleter{}, errors.New("Missing BBL_GCP_SERVICE_ACCOUNT_KEY.")
 	}
 
 	key, err := ioutil.ReadFile(serviceAccountKey)
 	if err != nil {
-		log.Fatal("Reading %s: %s", serviceAccountKey, err)
+		return Deleter{}, errors.New(fmt.Sprintf("Reading %s: %s", serviceAccountKey, err))
 	}
 
 	p := struct {
 		ProjectId string `json:"project_id"`
 	}{}
 	if err := json.Unmarshal(key, &p); err != nil {
-		log.Fatal("Unmarshalling account key for project id: %s", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Unmarshalling account key for project id: %s", err))
 	}
 
 	logger.Println("Cleaning gcp project: %s.", p.ProjectId)
 
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
-		log.Fatalf("Creating jwt config: %s", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Creating jwt config: %s", err))
 	}
 
 	service, err := gcpcompute.New(config.Client(context.Background()))
 	if err != nil {
-		log.Fatalf("Creating gcp client: %s", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Creating gcp client: %s", err))
 	}
 
 	client := compute.NewClient(p.ProjectId, service, logger)
 
 	regions, err := client.ListRegions()
 	if err != nil {
-		log.Fatalf("Listing regions: %s", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Listing regions: %s", err))
 	}
 
 	zones, err := client.ListZones()
 	if err != nil {
-		log.Fatalf("Listing zones: %s", err)
+		return Deleter{}, errors.New(fmt.Sprintf("Listing zones: %s", err))
 	}
 
 	fi := compute.NewFirewalls(client, logger)
@@ -88,5 +89,5 @@ func NewDeleter(logger logger, serviceAccountKey string) Deleter {
 
 	return Deleter{
 		resources: []resource{fi, fw, tp, in, di, ht, hs, ba, ne, ad},
-	}
+	}, nil
 }
