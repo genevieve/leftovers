@@ -1,7 +1,7 @@
 package aws
 
 import (
-	"log"
+	"errors"
 
 	awslib "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -40,17 +40,17 @@ func (d Deleter) Delete() error {
 	return nil
 }
 
-func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Deleter {
+func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) (Deleter, error) {
 	if accessKeyId == "" {
-		log.Fatal("Missing BBL_AWS_ACCESS_KEY_ID.")
+		return Deleter{}, errors.New("Missing BBL_AWS_ACCESS_KEY_ID.")
 	}
 
 	if secretAccessKey == "" {
-		log.Fatal("Missing BBL_AWS_SECRET_ACCESS_KEY.")
+		return Deleter{}, errors.New("Missing BBL_AWS_SECRET_ACCESS_KEY.")
 	}
 
 	if region == "" {
-		log.Fatal("Missing BBL_AWS_REGION.")
+		return Deleter{}, errors.New("Missing BBL_AWS_REGION.")
 	}
 
 	config := &awslib.Config{
@@ -97,5 +97,5 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) Dele
 
 	return Deleter{
 		resources: resources,
-	}
+	}, nil
 }

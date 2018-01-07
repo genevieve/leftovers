@@ -45,7 +45,7 @@ func main() {
 
 	switch c.IAAS {
 	case "aws":
-		d = aws.NewDeleter(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
+		d, err = aws.NewDeleter(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
 	case "azure":
 		d = azure.NewDeleter(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
 	case "gcp":
