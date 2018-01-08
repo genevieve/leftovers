@@ -122,7 +122,7 @@ func (s *state) Wait() error {
 				wait = 10 * time.Second
 			}
 
-			s.logger.Printf("Waiting %s before next try", wait)
+			s.logger.Printf("Waiting %s before next try..\n", wait)
 		}
 	}()
 
