@@ -26,12 +26,13 @@ var _ = Describe("Addresses", func() {
 			"https://region-1": "region-1",
 		}
 
+		logger.PromptCall.Returns.Proceed = true
+
 		addresses = compute.NewAddresses(client, logger, regions)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
 			client.ListAddressesCall.Returns.Output = &gcpcompute.AddressList{
 				Items: []*gcpcompute.Address{{
 					Name:   "banana",
@@ -77,6 +78,26 @@ var _ = Describe("Addresses", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting address banana: some error\n"}))
+			})
+		})
+
+		Context("when the address is in use", func() {
+			BeforeEach(func() {
+				client.ListAddressesCall.Returns.Output = &gcpcompute.AddressList{
+					Items: []*gcpcompute.Address{{
+						Name:   "banana",
+						Region: "https://region-1",
+						Users:  []string{"a-virtual-machine"},
+					}},
+				}
+			})
+
+			It("does not delete the address", func() {
+				err := addresses.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteAddressCall.CallCount).To(Equal(0))
 			})
 		})
 

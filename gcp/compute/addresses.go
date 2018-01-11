@@ -36,6 +36,10 @@ func (o Addresses) Delete() error {
 	}
 
 	for _, a := range addrs {
+		if len(a.Users) > 0 {
+			continue
+		}
+
 		n := a.Name
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete address %s?", n))
