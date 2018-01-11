@@ -59,6 +59,7 @@ infrastructure resources were tragically orphaned
 + compute disks
 + compute networks
 + compute vm instances
++ compute vm instance groups
 + compute backend services
 + compute http health checks
 + compute https health checks
@@ -72,7 +73,6 @@ infrastructure resources were tragically orphaned
 ```diff
 - compute routes
 - compute health checks
-- compute vm instance groups
 - compute vm instance templates
 - compute snapshots
 - compute images
