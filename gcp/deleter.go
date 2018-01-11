@@ -80,6 +80,7 @@ func NewDeleter(logger logger, serviceAccountKey string) (Deleter, error) {
 	fw := compute.NewForwardingRules(client, logger, regions)
 	tp := compute.NewTargetPools(client, logger, regions)
 	in := compute.NewInstances(client, logger, zones)
+	ig := compute.NewInstanceGroups(client, logger, zones)
 	ht := compute.NewHttpHealthChecks(client, logger)
 	hs := compute.NewHttpsHealthChecks(client, logger)
 	ba := compute.NewBackendServices(client, logger)
@@ -88,6 +89,6 @@ func NewDeleter(logger logger, serviceAccountKey string) (Deleter, error) {
 	ad := compute.NewAddresses(client, logger, regions)
 
 	return Deleter{
-		resources: []resource{fi, fw, tp, in, di, ht, hs, ba, ne, ad},
+		resources: []resource{fi, fw, tp, in, ig, di, ht, hs, ba, ne, ad},
 	}, nil
 }

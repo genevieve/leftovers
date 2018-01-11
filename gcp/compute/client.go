@@ -15,6 +15,7 @@ type client struct {
 	httpHealthChecks  *gcpcompute.HttpHealthChecksService
 	httpsHealthChecks *gcpcompute.HttpsHealthChecksService
 	instances         *gcpcompute.InstancesService
+	instanceGroups    *gcpcompute.InstanceGroupsService
 	firewalls         *gcpcompute.FirewallsService
 	forwardingRules   *gcpcompute.ForwardingRulesService
 	networks          *gcpcompute.NetworksService
@@ -34,6 +35,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		httpHealthChecks:  service.HttpHealthChecks,
 		httpsHealthChecks: service.HttpsHealthChecks,
 		instances:         service.Instances,
+		instanceGroups:    service.InstanceGroups,
 		firewalls:         service.Firewalls,
 		forwardingRules:   service.ForwardingRules,
 		networks:          service.Networks,
@@ -88,6 +90,19 @@ func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
 
 func (c client) DeleteInstance(zone, instance string) error {
 	op, err := c.instances.Delete(c.project, zone, instance).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, error) {
+	return c.instanceGroups.List(c.project, zone).Do()
+}
+
+func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
+	op, err := c.instanceGroups.Delete(c.project, zone, instanceGroup).Do()
 	if err != nil {
 		return err
 	}
