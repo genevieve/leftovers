@@ -89,6 +89,18 @@ infrastructure resources were tragically orphaned
 $  go get github.com/genevievelesperance/leftovers
 ```
 
+## Assumptions
+
+You have a Google Cloud Platform service account key,
+Amazon Web Services credentials, or a Microsoft Azure
+service principal and credentials.
+
+You can get a Microsoft Azure Service Principal with
+
+```
+$ go get github.com/genevievelesperance/az-automation
+```
+
 ## Usage
 
 ```
