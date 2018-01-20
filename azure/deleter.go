@@ -48,12 +48,12 @@ func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId 
 
 	oauthConfig, err := adal.NewOAuthConfig(azurelib.PublicCloud.ActiveDirectoryEndpoint, tenantId)
 	if err != nil {
-		return Deleter{}, errors.New(fmt.Sprintf("Creating oauth config: %s\n", err))
+		return Deleter{}, fmt.Errorf("Creating oauth config: %s\n", err)
 	}
 
 	servicePrincipalToken, err := adal.NewServicePrincipalToken(*oauthConfig, clientId, clientSecret, azurelib.PublicCloud.ResourceManagerEndpoint)
 	if err != nil {
-		return Deleter{}, errors.New(fmt.Sprintf("Creating service principal token: %s\n", err))
+		return Deleter{}, fmt.Errorf("Creating service principal token: %s\n", err)
 	}
 
 	gc := resources.NewGroupsClient(subscriptionId)
