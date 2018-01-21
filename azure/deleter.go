@@ -34,16 +34,19 @@ func (d Deleter) Delete(filter string) error {
 
 func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId string) (Deleter, error) {
 	if clientId == "" {
-		return Deleter{}, errors.New("Missing BBL_AZURE_CLIENT_ID.")
+		return Deleter{}, errors.New("Missing client id.")
 	}
+
 	if clientSecret == "" {
-		return Deleter{}, errors.New("Missing BBL_AZURE_CLIENT_SECRET.")
+		return Deleter{}, errors.New("Missing client secret.")
 	}
+
 	if subscriptionId == "" {
-		return Deleter{}, errors.New("Missing BBL_AZURE_SUBSCRIPTION_ID.")
+		return Deleter{}, errors.New("Missing subscription id.")
 	}
+
 	if tenantId == "" {
-		return Deleter{}, errors.New("Missing BBL_AZURE_TENANT_ID.")
+		return Deleter{}, errors.New("Missing tenant id.")
 	}
 
 	oauthConfig, err := adal.NewOAuthConfig(azurelib.PublicCloud.ActiveDirectoryEndpoint, tenantId)
