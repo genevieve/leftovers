@@ -12,8 +12,6 @@ type state struct {
 type stateRefreshFunc func() (result interface{}, state string, err error)
 
 func (s *state) Wait() error {
-	s.logger.Printf("Deleting..\n")
-
 	notfoundTick := 0
 	targetOccurence := 0
 	notFoundChecks := 20

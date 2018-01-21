@@ -1,6 +1,7 @@
 package acceptance_test
 
 import (
+	"bytes"
 	"os"
 
 	"github.com/genevievelesperance/leftovers"
@@ -13,31 +14,42 @@ import (
 )
 
 var _ = Describe("GCP", func() {
+	var acc *acceptance.Acceptance
+
 	BeforeEach(func() {
-		if !acceptance.ReadyToTest() {
+		acc = acceptance.NewAcceptance()
+
+		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")
 		}
 	})
 
 	Describe("Delete", func() {
 		var (
-			deleter           leftovers.Deleter
-			logger            *app.Logger
-			serviceAccountKey string
+			stdout  *bytes.Buffer
+			logger  *app.Logger
+			filter  string
+			deleter leftovers.Deleter
 		)
 
 		BeforeEach(func() {
-			logger = app.NewLogger(os.Stdout, os.Stdin, false)
-			serviceAccountKey = os.Getenv("BBL_GCP_SERVICE_ACCOUNT_KEY")
+			noConfirm := true
+			stdout = bytes.NewBuffer([]byte{})
+			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
+
+			filter = "leftovers-acceptance"
+			acc.InsertGCPDisk(filter)
 
 			var err error
-			deleter, err = gcp.NewDeleter(logger, serviceAccountKey)
+			deleter, err = gcp.NewDeleter(logger, acc.KeyPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("deletes resources with the filter", func() {
-			err := deleter.Delete("fake")
+			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout).To(ContainSubstring("SUCCESS deleting disk"))
 		})
 	})
 })
