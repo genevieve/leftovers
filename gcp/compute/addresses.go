@@ -7,7 +7,7 @@ import (
 )
 
 type addressesClient interface {
-	ListAddresses(region string) (*gcpcompute.AddressList, error)
+	ListAddresses(region, filter string) (*gcpcompute.AddressList, error)
 	DeleteAddress(region, address string) error
 }
 
@@ -28,7 +28,7 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 func (o Addresses) Delete(filter string) error {
 	var addrs []*gcpcompute.Address
 	for _, region := range o.regions {
-		l, err := o.client.ListAddresses(region)
+		l, err := o.client.ListAddresses(region, filter)
 		if err != nil {
 			return fmt.Errorf("Listing addresses for region %s: %s", region, err)
 		}

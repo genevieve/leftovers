@@ -8,7 +8,7 @@ import (
 )
 
 type instancesClient interface {
-	ListInstances(zone string) (*gcpcompute.InstanceList, error)
+	ListInstances(zone, filter string) (*gcpcompute.InstanceList, error)
 	DeleteInstance(zone, instance string) error
 }
 
@@ -29,7 +29,7 @@ func NewInstances(client instancesClient, logger logger, zones map[string]string
 func (s Instances) Delete(filter string) error {
 	var instances []*gcpcompute.Instance
 	for _, zone := range s.zones {
-		l, err := s.client.ListInstances(zone)
+		l, err := s.client.ListInstances(zone, filter)
 		if err != nil {
 			return fmt.Errorf("Listing instances for zone %s: %s", zone, err)
 		}

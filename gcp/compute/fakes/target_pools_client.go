@@ -7,6 +7,7 @@ type TargetPoolsClient struct {
 		CallCount int
 		Receives  struct {
 			Region string
+			Filter string
 		}
 		Returns struct {
 			Output *gcpcompute.TargetPoolList
@@ -26,9 +27,10 @@ type TargetPoolsClient struct {
 	}
 }
 
-func (n *TargetPoolsClient) ListTargetPools(region string) (*gcpcompute.TargetPoolList, error) {
+func (n *TargetPoolsClient) ListTargetPools(region, filter string) (*gcpcompute.TargetPoolList, error) {
 	n.ListTargetPoolsCall.CallCount++
 	n.ListTargetPoolsCall.Receives.Region = region
+	n.ListTargetPoolsCall.Receives.Filter = filter
 
 	return n.ListTargetPoolsCall.Returns.Output, n.ListTargetPoolsCall.Returns.Error
 }

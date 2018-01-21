@@ -5,7 +5,10 @@ import gcpcompute "google.golang.org/api/compute/v1"
 type BackendServicesClient struct {
 	ListBackendServicesCall struct {
 		CallCount int
-		Returns   struct {
+		Receives  struct {
+			Filter string
+		}
+		Returns struct {
 			Output *gcpcompute.BackendServiceList
 			Error  error
 		}
@@ -22,8 +25,9 @@ type BackendServicesClient struct {
 	}
 }
 
-func (n *BackendServicesClient) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
+func (n *BackendServicesClient) ListBackendServices(filter string) (*gcpcompute.BackendServiceList, error) {
 	n.ListBackendServicesCall.CallCount++
+	n.ListBackendServicesCall.Receives.Filter = filter
 
 	return n.ListBackendServicesCall.Returns.Output, n.ListBackendServicesCall.Returns.Error
 }

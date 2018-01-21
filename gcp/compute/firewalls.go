@@ -7,7 +7,7 @@ import (
 )
 
 type firewallsClient interface {
-	ListFirewalls() (*gcpcompute.FirewallList, error)
+	ListFirewalls(filter string) (*gcpcompute.FirewallList, error)
 	DeleteFirewall(firewall string) error
 }
 
@@ -24,7 +24,7 @@ func NewFirewalls(client firewallsClient, logger logger) Firewalls {
 }
 
 func (i Firewalls) Delete(filter string) error {
-	firewalls, err := i.client.ListFirewalls()
+	firewalls, err := i.client.ListFirewalls(filter)
 	if err != nil {
 		return fmt.Errorf("Listing firewalls: %s", err)
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type targetPoolsClient interface {
-	ListTargetPools(region string) (*gcpcompute.TargetPoolList, error)
+	ListTargetPools(region, filter string) (*gcpcompute.TargetPoolList, error)
 	DeleteTargetPool(region string, targetPool string) error
 }
 
@@ -28,7 +28,7 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 func (a TargetPools) Delete(filter string) error {
 	var pools []*gcpcompute.TargetPool
 	for _, region := range a.regions {
-		l, err := a.client.ListTargetPools(region)
+		l, err := a.client.ListTargetPools(region, filter)
 		if err != nil {
 			return fmt.Errorf("Listing target pools for region %s: %s", region, err)
 		}

@@ -7,7 +7,7 @@ import (
 )
 
 type backendServicesClient interface {
-	ListBackendServices() (*gcpcompute.BackendServiceList, error)
+	ListBackendServices(filter string) (*gcpcompute.BackendServiceList, error)
 	DeleteBackendService(backendService string) error
 }
 
@@ -24,7 +24,7 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 }
 
 func (i BackendServices) Delete(filter string) error {
-	backendServices, err := i.client.ListBackendServices()
+	backendServices, err := i.client.ListBackendServices(filter)
 	if err != nil {
 		return fmt.Errorf("Listing backend services: %s", err)
 	}

@@ -5,7 +5,10 @@ import gcpcompute "google.golang.org/api/compute/v1"
 type FirewallsClient struct {
 	ListFirewallsCall struct {
 		CallCount int
-		Returns   struct {
+		Receives  struct {
+			Filter string
+		}
+		Returns struct {
 			Output *gcpcompute.FirewallList
 			Error  error
 		}
@@ -22,8 +25,9 @@ type FirewallsClient struct {
 	}
 }
 
-func (c *FirewallsClient) ListFirewalls() (*gcpcompute.FirewallList, error) {
+func (c *FirewallsClient) ListFirewalls(filter string) (*gcpcompute.FirewallList, error) {
 	c.ListFirewallsCall.CallCount++
+	c.ListFirewallsCall.Receives.Filter = filter
 
 	return c.ListFirewallsCall.Returns.Output, c.ListFirewallsCall.Returns.Error
 }

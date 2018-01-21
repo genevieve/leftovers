@@ -7,7 +7,7 @@ import (
 )
 
 type disksClient interface {
-	ListDisks(zone string) (*gcpcompute.DiskList, error)
+	ListDisks(zone, filter string) (*gcpcompute.DiskList, error)
 	DeleteDisk(zone, disk string) error
 }
 
@@ -28,7 +28,7 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 func (i Disks) Delete(filter string) error {
 	var disks []*gcpcompute.Disk
 	for _, zone := range i.zones {
-		l, err := i.client.ListDisks(zone)
+		l, err := i.client.ListDisks(zone, filter)
 		if err != nil {
 			return fmt.Errorf("Listing disks for zone %s: %s", zone, err)
 		}

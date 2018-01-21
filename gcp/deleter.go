@@ -76,19 +76,19 @@ func NewDeleter(logger logger, serviceAccountKey string) (Deleter, error) {
 		return Deleter{}, errors.New(fmt.Sprintf("Listing zones: %s", err))
 	}
 
-	fi := compute.NewFirewalls(client, logger)
-	fw := compute.NewForwardingRules(client, logger, regions)
-	tp := compute.NewTargetPools(client, logger, regions)
-	in := compute.NewInstances(client, logger, zones)
-	ig := compute.NewInstanceGroups(client, logger, zones)
-	ht := compute.NewHttpHealthChecks(client, logger)
-	hs := compute.NewHttpsHealthChecks(client, logger)
-	ba := compute.NewBackendServices(client, logger)
-	di := compute.NewDisks(client, logger, zones)
-	ne := compute.NewNetworks(client, logger)
-	ad := compute.NewAddresses(client, logger, regions)
-
 	return Deleter{
-		resources: []resource{fi, fw, tp, in, ig, di, ht, hs, ba, ne, ad},
+		resources: []resource{
+			compute.NewFirewalls(client, logger),
+			compute.NewForwardingRules(client, logger, regions),
+			compute.NewTargetPools(client, logger, regions),
+			compute.NewInstances(client, logger, zones),
+			compute.NewInstanceGroups(client, logger, zones),
+			compute.NewHttpHealthChecks(client, logger),
+			compute.NewHttpsHealthChecks(client, logger),
+			compute.NewBackendServices(client, logger),
+			compute.NewDisks(client, logger, zones),
+			compute.NewNetworks(client, logger),
+			compute.NewAddresses(client, logger, regions),
+		},
 	}, nil
 }

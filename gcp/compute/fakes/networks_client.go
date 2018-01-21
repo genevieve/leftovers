@@ -5,7 +5,10 @@ import compute "google.golang.org/api/compute/v1"
 type NetworksClient struct {
 	ListNetworksCall struct {
 		CallCount int
-		Returns   struct {
+		Receives  struct {
+			Filter string
+		}
+		Returns struct {
 			Output *compute.NetworkList
 			Error  error
 		}
@@ -22,8 +25,9 @@ type NetworksClient struct {
 	}
 }
 
-func (n *NetworksClient) ListNetworks() (*compute.NetworkList, error) {
+func (n *NetworksClient) ListNetworks(filter string) (*compute.NetworkList, error) {
 	n.ListNetworksCall.CallCount++
+	n.ListNetworksCall.Receives.Filter = filter
 
 	return n.ListNetworksCall.Returns.Output, n.ListNetworksCall.Returns.Error
 }

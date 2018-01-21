@@ -7,6 +7,7 @@ type ForwardingRulesClient struct {
 		CallCount int
 		Receives  struct {
 			Region string
+			Filter string
 		}
 		Returns struct {
 			Output *gcpcompute.ForwardingRuleList
@@ -26,9 +27,10 @@ type ForwardingRulesClient struct {
 	}
 }
 
-func (n *ForwardingRulesClient) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleList, error) {
+func (n *ForwardingRulesClient) ListForwardingRules(region, filter string) (*gcpcompute.ForwardingRuleList, error) {
 	n.ListForwardingRulesCall.CallCount++
 	n.ListForwardingRulesCall.Receives.Region = region
+	n.ListForwardingRulesCall.Receives.Filter = filter
 
 	return n.ListForwardingRulesCall.Returns.Output, n.ListForwardingRulesCall.Returns.Error
 }

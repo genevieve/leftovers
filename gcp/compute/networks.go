@@ -7,7 +7,7 @@ import (
 )
 
 type networksClient interface {
-	ListNetworks() (*gcp.NetworkList, error)
+	ListNetworks(filter string) (*gcp.NetworkList, error)
 	DeleteNetwork(network string) error
 }
 
@@ -24,7 +24,7 @@ func NewNetworks(client networksClient, logger logger) Networks {
 }
 
 func (e Networks) Delete(filter string) error {
-	networks, err := e.client.ListNetworks()
+	networks, err := e.client.ListNetworks(filter)
 	if err != nil {
 		return fmt.Errorf("Listing networks: %s", err)
 	}

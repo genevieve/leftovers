@@ -5,7 +5,10 @@ import gcpcompute "google.golang.org/api/compute/v1"
 type HttpsHealthChecksClient struct {
 	ListHttpsHealthChecksCall struct {
 		CallCount int
-		Returns   struct {
+		Receives  struct {
+			Filter string
+		}
+		Returns struct {
 			Output *gcpcompute.HttpsHealthCheckList
 			Error  error
 		}
@@ -22,8 +25,9 @@ type HttpsHealthChecksClient struct {
 	}
 }
 
-func (n *HttpsHealthChecksClient) ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error) {
+func (n *HttpsHealthChecksClient) ListHttpsHealthChecks(filter string) (*gcpcompute.HttpsHealthCheckList, error) {
 	n.ListHttpsHealthChecksCall.CallCount++
+	n.ListHttpsHealthChecksCall.Receives.Filter = filter
 
 	return n.ListHttpsHealthChecksCall.Returns.Output, n.ListHttpsHealthChecksCall.Returns.Error
 }

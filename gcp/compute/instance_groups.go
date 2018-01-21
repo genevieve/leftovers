@@ -7,7 +7,7 @@ import (
 )
 
 type instanceGroupsClient interface {
-	ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, error)
+	ListInstanceGroups(zone, filter string) (*gcpcompute.InstanceGroupList, error)
 	DeleteInstanceGroup(zone, instanceGroup string) error
 }
 
@@ -28,7 +28,7 @@ func NewInstanceGroups(client instanceGroupsClient, logger logger, zones map[str
 func (s InstanceGroups) Delete(filter string) error {
 	var groups []*gcpcompute.InstanceGroup
 	for _, zone := range s.zones {
-		l, err := s.client.ListInstanceGroups(zone)
+		l, err := s.client.ListInstanceGroups(zone, filter)
 		if err != nil {
 			return fmt.Errorf("Listing instance groups for zone %s: %s", zone, err)
 		}

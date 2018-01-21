@@ -7,7 +7,7 @@ import (
 )
 
 type httpsHealthChecksClient interface {
-	ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error)
+	ListHttpsHealthChecks(filter string) (*gcpcompute.HttpsHealthCheckList, error)
 	DeleteHttpsHealthCheck(httpsHealthCheck string) error
 }
 
@@ -24,7 +24,7 @@ func NewHttpsHealthChecks(client httpsHealthChecksClient, logger logger) HttpsHe
 }
 
 func (i HttpsHealthChecks) Delete(filter string) error {
-	httpsHealthChecks, err := i.client.ListHttpsHealthChecks()
+	httpsHealthChecks, err := i.client.ListHttpsHealthChecks(filter)
 	if err != nil {
 		return fmt.Errorf("Listing https health checks: %s", err)
 	}
