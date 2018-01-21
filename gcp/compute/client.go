@@ -200,12 +200,8 @@ func (c client) DeleteForwardingRule(region, forwardingRule string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListNetworks(filter string) (*gcpcompute.NetworkList, error) {
-	call := c.networks.List(c.project)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
+	return c.networks.List(c.project).Do()
 }
 
 func (c client) DeleteNetwork(network string) error {
@@ -217,12 +213,8 @@ func (c client) DeleteNetwork(network string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListTargetPools(region, filter string) (*gcpcompute.TargetPoolList, error) {
-	call := c.targetPools.List(c.project, region)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListTargetPools(region string) (*gcpcompute.TargetPoolList, error) {
+	return c.targetPools.List(c.project, region).Do()
 }
 
 func (c client) DeleteTargetPool(region string, targetPool string) error {

@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type targetPoolsClient interface {
-	ListTargetPools(region, filter string) (*gcpcompute.TargetPoolList, error)
+	ListTargetPools(region string) (*gcpcompute.TargetPoolList, error)
 	DeleteTargetPool(region string, targetPool string) error
 }
 
@@ -28,7 +29,7 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 func (a TargetPools) Delete(filter string) error {
 	var pools []*gcpcompute.TargetPool
 	for _, region := range a.regions {
-		l, err := a.client.ListTargetPools(region, filter)
+		l, err := a.client.ListTargetPools(region)
 		if err != nil {
 			return fmt.Errorf("Listing target pools for region %s: %s", region, err)
 		}
@@ -36,16 +37,22 @@ func (a TargetPools) Delete(filter string) error {
 	}
 
 	for _, p := range pools {
-		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target pool %s?", p.Name))
+		n := p.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
+
+		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target pool %s?", n))
 		if !proceed {
 			continue
 		}
 
 		regionName := a.regions[p.Region]
-		if err := a.client.DeleteTargetPool(regionName, p.Name); err != nil {
-			a.logger.Printf("ERROR deleting target pool %s: %s\n", p.Name, err)
+		if err := a.client.DeleteTargetPool(regionName, n); err != nil {
+			a.logger.Printf("ERROR deleting target pool %s: %s\n", n, err)
 		} else {
-			a.logger.Printf("SUCCESS deleting target pool %s\n", p.Name)
+			a.logger.Printf("SUCCESS deleting target pool %s\n", n)
 		}
 	}
 

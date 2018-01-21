@@ -22,7 +22,7 @@ var _ = Describe("Networks", func() {
 	BeforeEach(func() {
 		client = &fakes.NetworksClient{}
 		logger = &fakes.Logger{}
-		filter = "grape"
+		filter = "banana"
 
 		networks = compute.NewNetworks(client, logger)
 	})
@@ -32,7 +32,7 @@ var _ = Describe("Networks", func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListNetworksCall.Returns.Output = &gcpcompute.NetworkList{
 				Items: []*gcpcompute.Network{{
-					Name: "banana",
+					Name: "banana-network",
 				}},
 			}
 		})
@@ -43,12 +43,12 @@ var _ = Describe("Networks", func() {
 
 			Expect(client.ListNetworksCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network banana?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network banana-network?"))
 
 			Expect(client.DeleteNetworkCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNetworkCall.Receives.Network).To(Equal("banana"))
+			Expect(client.DeleteNetworkCall.Receives.Network).To(Equal("banana-network"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network banana\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network banana-network\n"}))
 		})
 
 		Context("when the client fails to list networks", func() {
@@ -57,14 +57,23 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("returns the error", func() {
-				err := networks.Delete(filter)
+				err := networks.Delete("")
 				Expect(err).To(MatchError("Listing networks: some error"))
+			})
+		})
+
+		Context("when the network name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := networks.Delete("grape")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteNetworkCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when it is the default network", func() {
 			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = true
 				client.ListNetworksCall.Returns.Output = &gcpcompute.NetworkList{
 					Items: []*gcpcompute.Network{{
 						Name: "default",
@@ -73,7 +82,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("does not try deleting it", func() {
-				err := networks.Delete(filter)
+				err := networks.Delete("")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
@@ -90,7 +99,7 @@ var _ = Describe("Networks", func() {
 				err := networks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network banana-network: some error\n"}))
 			})
 		})
 

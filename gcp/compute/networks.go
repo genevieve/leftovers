@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcp "google.golang.org/api/compute/v1"
 )
 
 type networksClient interface {
-	ListNetworks(filter string) (*gcp.NetworkList, error)
+	ListNetworks() (*gcp.NetworkList, error)
 	DeleteNetwork(network string) error
 }
 
@@ -24,13 +25,17 @@ func NewNetworks(client networksClient, logger logger) Networks {
 }
 
 func (e Networks) Delete(filter string) error {
-	networks, err := e.client.ListNetworks(filter)
+	networks, err := e.client.ListNetworks()
 	if err != nil {
 		return fmt.Errorf("Listing networks: %s", err)
 	}
 
 	for _, t := range networks.Items {
 		n := t.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		if n == "default" {
 			continue
