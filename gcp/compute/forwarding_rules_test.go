@@ -15,6 +15,7 @@ var _ = Describe("ForwardingRules", func() {
 		client  *fakes.ForwardingRulesClient
 		logger  *fakes.Logger
 		regions map[string]string
+		filter  string
 
 		forwardingRules compute.ForwardingRules
 	)
@@ -25,6 +26,7 @@ var _ = Describe("ForwardingRules", func() {
 		regions = map[string]string{
 			"https://region-1": "region-1",
 		}
+		filter = "grape"
 
 		forwardingRules = compute.NewForwardingRules(client, logger, regions)
 	})
@@ -41,7 +43,7 @@ var _ = Describe("ForwardingRules", func() {
 		})
 
 		It("deletes forwarding rules", func() {
-			err := forwardingRules.Delete()
+			err := forwardingRules.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListForwardingRulesCall.CallCount).To(Equal(1))
@@ -62,7 +64,7 @@ var _ = Describe("ForwardingRules", func() {
 			})
 
 			It("returns the error", func() {
-				err := forwardingRules.Delete()
+				err := forwardingRules.Delete(filter)
 				Expect(err).To(MatchError("Listing forwarding rules for region region-1: some error"))
 			})
 		})
@@ -73,7 +75,7 @@ var _ = Describe("ForwardingRules", func() {
 			})
 
 			It("logs the error", func() {
-				err := forwardingRules.Delete()
+				err := forwardingRules.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting forwarding rule banana: some error\n"}))
@@ -86,7 +88,7 @@ var _ = Describe("ForwardingRules", func() {
 			})
 
 			It("does not delete the forwarding rule", func() {
-				err := forwardingRules.Delete()
+				err := forwardingRules.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteForwardingRuleCall.CallCount).To(Equal(0))

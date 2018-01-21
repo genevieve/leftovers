@@ -15,6 +15,7 @@ var _ = Describe("Disks", func() {
 		client *fakes.DisksClient
 		logger *fakes.Logger
 		zones  map[string]string
+		filter string
 
 		disks compute.Disks
 	)
@@ -25,6 +26,7 @@ var _ = Describe("Disks", func() {
 		zones = map[string]string{
 			"https://zone-1": "zone-1",
 		}
+		filter = "grape"
 
 		disks = compute.NewDisks(client, logger, zones)
 	})
@@ -41,7 +43,7 @@ var _ = Describe("Disks", func() {
 		})
 
 		It("deletes disks", func() {
-			err := disks.Delete()
+			err := disks.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListDisksCall.CallCount).To(Equal(1))
@@ -62,7 +64,7 @@ var _ = Describe("Disks", func() {
 			})
 
 			It("returns the error", func() {
-				err := disks.Delete()
+				err := disks.Delete(filter)
 				Expect(err).To(MatchError("Listing disks for zone zone-1: some error"))
 			})
 		})
@@ -79,7 +81,7 @@ var _ = Describe("Disks", func() {
 			})
 
 			It("does not try deleting it", func() {
-				err := disks.Delete()
+				err := disks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ListDisksCall.CallCount).To(Equal(1))
@@ -94,7 +96,7 @@ var _ = Describe("Disks", func() {
 			})
 
 			It("logs the error", func() {
-				err := disks.Delete()
+				err := disks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting disk banana: some error\n"}))
@@ -107,7 +109,7 @@ var _ = Describe("Disks", func() {
 			})
 
 			It("does not delete the disk", func() {
-				err := disks.Delete()
+				err := disks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteDiskCall.CallCount).To(Equal(0))

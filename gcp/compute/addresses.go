@@ -25,7 +25,7 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 	}
 }
 
-func (o Addresses) Delete() error {
+func (o Addresses) Delete(filter string) error {
 	var addrs []*gcpcompute.Address
 	for _, region := range o.regions {
 		l, err := o.client.ListAddresses(region)

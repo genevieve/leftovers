@@ -14,6 +14,7 @@ var _ = Describe("BackendServices", func() {
 	var (
 		client *fakes.BackendServicesClient
 		logger *fakes.Logger
+		filter string
 
 		backendServices compute.BackendServices
 	)
@@ -21,6 +22,7 @@ var _ = Describe("BackendServices", func() {
 	BeforeEach(func() {
 		client = &fakes.BackendServicesClient{}
 		logger = &fakes.Logger{}
+		filter = "grape"
 
 		backendServices = compute.NewBackendServices(client, logger)
 	})
@@ -36,7 +38,7 @@ var _ = Describe("BackendServices", func() {
 		})
 
 		It("deletes backend services", func() {
-			err := backendServices.Delete()
+			err := backendServices.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBackendServicesCall.CallCount).To(Equal(1))
@@ -55,7 +57,7 @@ var _ = Describe("BackendServices", func() {
 			})
 
 			It("returns the error", func() {
-				err := backendServices.Delete()
+				err := backendServices.Delete(filter)
 				Expect(err).To(MatchError("Listing backend services: some error"))
 			})
 		})
@@ -66,7 +68,7 @@ var _ = Describe("BackendServices", func() {
 			})
 
 			It("logs the error", func() {
-				err := backendServices.Delete()
+				err := backendServices.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting backend service banana: some error\n"}))
@@ -79,7 +81,7 @@ var _ = Describe("BackendServices", func() {
 			})
 
 			It("does not delete the backend service", func() {
-				err := backendServices.Delete()
+				err := backendServices.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteBackendServiceCall.CallCount).To(Equal(0))

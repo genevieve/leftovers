@@ -25,7 +25,7 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 	}
 }
 
-func (i Disks) Delete() error {
+func (i Disks) Delete(filter string) error {
 	var disks []*gcpcompute.Disk
 	for _, zone := range i.zones {
 		l, err := i.client.ListDisks(zone)

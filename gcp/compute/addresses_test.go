@@ -15,6 +15,7 @@ var _ = Describe("Addresses", func() {
 		client  *fakes.AddressesClient
 		logger  *fakes.Logger
 		regions map[string]string
+		filter  string
 
 		addresses compute.Addresses
 	)
@@ -25,6 +26,7 @@ var _ = Describe("Addresses", func() {
 		regions = map[string]string{
 			"https://region-1": "region-1",
 		}
+		filter = "grape"
 
 		logger.PromptCall.Returns.Proceed = true
 
@@ -42,7 +44,7 @@ var _ = Describe("Addresses", func() {
 		})
 
 		It("deletes addresses", func() {
-			err := addresses.Delete()
+			err := addresses.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAddressesCall.CallCount).To(Equal(1))
@@ -63,7 +65,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("returns the error", func() {
-				err := addresses.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).To(MatchError("Listing addresses for region region-1: some error"))
 			})
 		})
@@ -74,7 +76,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("logs the error", func() {
-				err := addresses.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting address banana: some error\n"}))
@@ -93,7 +95,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not delete the address", func() {
-				err := addresses.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
@@ -107,7 +109,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not delete the address", func() {
-				err := addresses.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteAddressCall.CallCount).To(Equal(0))

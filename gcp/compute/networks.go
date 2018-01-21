@@ -23,7 +23,7 @@ func NewNetworks(client networksClient, logger logger) Networks {
 	}
 }
 
-func (e Networks) Delete() error {
+func (e Networks) Delete(filter string) error {
 	networks, err := e.client.ListNetworks()
 	if err != nil {
 		return fmt.Errorf("Listing networks: %s", err)

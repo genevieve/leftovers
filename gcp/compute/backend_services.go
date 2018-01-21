@@ -23,7 +23,7 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 	}
 }
 
-func (i BackendServices) Delete() error {
+func (i BackendServices) Delete(filter string) error {
 	backendServices, err := i.client.ListBackendServices()
 	if err != nil {
 		return fmt.Errorf("Listing backend services: %s", err)

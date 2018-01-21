@@ -19,7 +19,7 @@ type logger interface {
 }
 
 type resource interface {
-	Delete() error
+	Delete(string) error
 }
 
 type Deleter struct {
@@ -28,7 +28,7 @@ type Deleter struct {
 
 func (d Deleter) Delete(filter string) error {
 	for _, r := range d.resources {
-		if err := r.Delete(); err != nil {
+		if err := r.Delete(filter); err != nil {
 			return err
 		}
 	}

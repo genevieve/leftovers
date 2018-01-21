@@ -23,7 +23,7 @@ func NewHttpHealthChecks(client httpHealthChecksClient, logger logger) HttpHealt
 	}
 }
 
-func (i HttpHealthChecks) Delete() error {
+func (i HttpHealthChecks) Delete(filter string) error {
 	httpHealthChecks, err := i.client.ListHttpHealthChecks()
 	if err != nil {
 		return fmt.Errorf("Listing http health checks: %s", err)

@@ -14,6 +14,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 	var (
 		client *fakes.HttpsHealthChecksClient
 		logger *fakes.Logger
+		filter string
 
 		httpsHealthChecks compute.HttpsHealthChecks
 	)
@@ -21,6 +22,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 	BeforeEach(func() {
 		client = &fakes.HttpsHealthChecksClient{}
 		logger = &fakes.Logger{}
+		filter = "grape"
 
 		httpsHealthChecks = compute.NewHttpsHealthChecks(client, logger)
 	})
@@ -36,7 +38,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 		})
 
 		It("deletes https health checks", func() {
-			err := httpsHealthChecks.Delete()
+			err := httpsHealthChecks.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListHttpsHealthChecksCall.CallCount).To(Equal(1))
@@ -55,7 +57,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 			})
 
 			It("returns the error", func() {
-				err := httpsHealthChecks.Delete()
+				err := httpsHealthChecks.Delete(filter)
 				Expect(err).To(MatchError("Listing https health checks: some error"))
 			})
 		})
@@ -66,7 +68,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 			})
 
 			It("logs the error", func() {
-				err := httpsHealthChecks.Delete()
+				err := httpsHealthChecks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting https health check banana: some error\n"}))
@@ -79,7 +81,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 			})
 
 			It("does not delete the https health check", func() {
-				err := httpsHealthChecks.Delete()
+				err := httpsHealthChecks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteHttpsHealthCheckCall.CallCount).To(Equal(0))

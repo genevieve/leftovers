@@ -25,7 +25,7 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 	}
 }
 
-func (o ForwardingRules) Delete() error {
+func (o ForwardingRules) Delete(filter string) error {
 	var rules []*gcpcompute.ForwardingRule
 	for _, region := range o.regions {
 		l, err := o.client.ListForwardingRules(region)

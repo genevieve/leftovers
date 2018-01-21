@@ -14,6 +14,7 @@ var _ = Describe("Networks", func() {
 	var (
 		client *fakes.NetworksClient
 		logger *fakes.Logger
+		filter string
 
 		networks compute.Networks
 	)
@@ -21,6 +22,7 @@ var _ = Describe("Networks", func() {
 	BeforeEach(func() {
 		client = &fakes.NetworksClient{}
 		logger = &fakes.Logger{}
+		filter = "grape"
 
 		networks = compute.NewNetworks(client, logger)
 	})
@@ -36,7 +38,7 @@ var _ = Describe("Networks", func() {
 		})
 
 		It("deletes networks", func() {
-			err := networks.Delete()
+			err := networks.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListNetworksCall.CallCount).To(Equal(1))
@@ -55,7 +57,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("returns the error", func() {
-				err := networks.Delete()
+				err := networks.Delete(filter)
 				Expect(err).To(MatchError("Listing networks: some error"))
 			})
 		})
@@ -71,7 +73,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("does not try deleting it", func() {
-				err := networks.Delete()
+				err := networks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
@@ -85,7 +87,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("logs the error", func() {
-				err := networks.Delete()
+				err := networks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network banana: some error\n"}))
@@ -98,7 +100,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("does not delete the network", func() {
-				err := networks.Delete()
+				err := networks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteNetworkCall.CallCount).To(Equal(0))

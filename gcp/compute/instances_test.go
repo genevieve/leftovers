@@ -15,6 +15,7 @@ var _ = Describe("Instances", func() {
 		client *fakes.InstancesClient
 		logger *fakes.Logger
 		zones  map[string]string
+		filter string
 
 		instances compute.Instances
 	)
@@ -25,6 +26,7 @@ var _ = Describe("Instances", func() {
 		zones = map[string]string{
 			"https://zone-1": "zone-1",
 		}
+		filter = "grape"
 
 		instances = compute.NewInstances(client, logger, zones)
 	})
@@ -41,7 +43,7 @@ var _ = Describe("Instances", func() {
 		})
 
 		It("deletes instances", func() {
-			err := instances.Delete()
+			err := instances.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListInstancesCall.CallCount).To(Equal(1))
@@ -67,7 +69,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("uses them in the prompt", func() {
-				err := instances.Delete()
+				err := instances.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance banana (banana-director)?"))
@@ -80,7 +82,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("returns the error", func() {
-				err := instances.Delete()
+				err := instances.Delete(filter)
 				Expect(err).To(MatchError("Listing instances for zone zone-1: some error"))
 			})
 		})
@@ -91,7 +93,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("logs the error", func() {
-				err := instances.Delete()
+				err := instances.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance banana: some error\n"}))
@@ -104,7 +106,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("does not delete the instance", func() {
-				err := instances.Delete()
+				err := instances.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteInstanceCall.CallCount).To(Equal(0))

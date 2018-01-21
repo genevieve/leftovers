@@ -14,6 +14,7 @@ var _ = Describe("Firewalls", func() {
 	var (
 		client *fakes.FirewallsClient
 		logger *fakes.Logger
+		filter string
 
 		firewalls compute.Firewalls
 	)
@@ -21,6 +22,7 @@ var _ = Describe("Firewalls", func() {
 	BeforeEach(func() {
 		client = &fakes.FirewallsClient{}
 		logger = &fakes.Logger{}
+		filter = "grape"
 
 		firewalls = compute.NewFirewalls(client, logger)
 	})
@@ -36,7 +38,7 @@ var _ = Describe("Firewalls", func() {
 		})
 
 		It("deletes firewalls", func() {
-			err := firewalls.Delete()
+			err := firewalls.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListFirewallsCall.CallCount).To(Equal(1))
@@ -55,7 +57,7 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("returns the error", func() {
-				err := firewalls.Delete()
+				err := firewalls.Delete(filter)
 				Expect(err).To(MatchError("Listing firewalls: some error"))
 			})
 		})
@@ -66,7 +68,7 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("logs the error", func() {
-				err := firewalls.Delete()
+				err := firewalls.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting firewall banana: some error\n"}))
@@ -79,7 +81,7 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("does not delete the firewall", func() {
-				err := firewalls.Delete()
+				err := firewalls.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteFirewallCall.CallCount).To(Equal(0))

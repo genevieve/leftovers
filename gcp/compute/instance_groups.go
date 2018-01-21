@@ -25,7 +25,7 @@ func NewInstanceGroups(client instanceGroupsClient, logger logger, zones map[str
 	}
 }
 
-func (s InstanceGroups) Delete() error {
+func (s InstanceGroups) Delete(filter string) error {
 	var groups []*gcpcompute.InstanceGroup
 	for _, zone := range s.zones {
 		l, err := s.client.ListInstanceGroups(zone)

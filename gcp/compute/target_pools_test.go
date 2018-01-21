@@ -15,6 +15,7 @@ var _ = Describe("TargetPools", func() {
 		client  *fakes.TargetPoolsClient
 		logger  *fakes.Logger
 		regions map[string]string
+		filter  string
 
 		targetPools compute.TargetPools
 	)
@@ -25,6 +26,7 @@ var _ = Describe("TargetPools", func() {
 		regions = map[string]string{
 			"https://region-1": "region-1",
 		}
+		filter = "grape"
 
 		targetPools = compute.NewTargetPools(client, logger, regions)
 	})
@@ -41,7 +43,7 @@ var _ = Describe("TargetPools", func() {
 		})
 
 		It("deletes target pools", func() {
-			err := targetPools.Delete()
+			err := targetPools.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListTargetPoolsCall.CallCount).To(Equal(1))
@@ -62,7 +64,7 @@ var _ = Describe("TargetPools", func() {
 			})
 
 			It("returns the error", func() {
-				err := targetPools.Delete()
+				err := targetPools.Delete(filter)
 				Expect(err).To(MatchError("Listing target pools for region region-1: some error"))
 			})
 		})
@@ -73,7 +75,7 @@ var _ = Describe("TargetPools", func() {
 			})
 
 			It("logs the error", func() {
-				err := targetPools.Delete()
+				err := targetPools.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting target pool banana: some error\n"}))
@@ -86,7 +88,7 @@ var _ = Describe("TargetPools", func() {
 			})
 
 			It("does not delete the target pool", func() {
-				err := targetPools.Delete()
+				err := targetPools.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteTargetPoolCall.CallCount).To(Equal(0))

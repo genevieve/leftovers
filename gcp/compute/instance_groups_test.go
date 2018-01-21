@@ -15,6 +15,7 @@ var _ = Describe("InstanceGroups", func() {
 		client *fakes.InstanceGroupsClient
 		logger *fakes.Logger
 		zones  map[string]string
+		filter string
 
 		instanceGroups compute.InstanceGroups
 	)
@@ -25,6 +26,7 @@ var _ = Describe("InstanceGroups", func() {
 		zones = map[string]string{
 			"https://zone-1": "zone-1",
 		}
+		filter = "grape"
 
 		instanceGroups = compute.NewInstanceGroups(client, logger, zones)
 	})
@@ -41,7 +43,7 @@ var _ = Describe("InstanceGroups", func() {
 		})
 
 		It("deletes instance groups", func() {
-			err := instanceGroups.Delete()
+			err := instanceGroups.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListInstanceGroupsCall.CallCount).To(Equal(1))
@@ -62,7 +64,7 @@ var _ = Describe("InstanceGroups", func() {
 			})
 
 			It("returns the error", func() {
-				err := instanceGroups.Delete()
+				err := instanceGroups.Delete(filter)
 				Expect(err).To(MatchError("Listing instance groups for zone zone-1: some error"))
 			})
 		})
@@ -73,7 +75,7 @@ var _ = Describe("InstanceGroups", func() {
 			})
 
 			It("logs the error", func() {
-				err := instanceGroups.Delete()
+				err := instanceGroups.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance group banana: some error\n"}))
@@ -86,7 +88,7 @@ var _ = Describe("InstanceGroups", func() {
 			})
 
 			It("does not delete the instance", func() {
-				err := instanceGroups.Delete()
+				err := instanceGroups.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteInstanceGroupCall.CallCount).To(Equal(0))

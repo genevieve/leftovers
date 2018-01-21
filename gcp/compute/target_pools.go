@@ -25,7 +25,7 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 	}
 }
 
-func (a TargetPools) Delete() error {
+func (a TargetPools) Delete(filter string) error {
 	var pools []*gcpcompute.TargetPool
 	for _, region := range a.regions {
 		l, err := a.client.ListTargetPools(region)
