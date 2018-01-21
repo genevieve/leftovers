@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type disksClient interface {
-	ListDisks(zone, filter string) (*gcpcompute.DiskList, error)
+	ListDisks(zone string) (*gcpcompute.DiskList, error)
 	DeleteDisk(zone, disk string) error
 }
 
@@ -28,28 +29,34 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 func (i Disks) Delete(filter string) error {
 	var disks []*gcpcompute.Disk
 	for _, zone := range i.zones {
-		l, err := i.client.ListDisks(zone, filter)
+		l, err := i.client.ListDisks(zone)
 		if err != nil {
 			return fmt.Errorf("Listing disks for zone %s: %s", zone, err)
 		}
 		disks = append(disks, l.Items...)
 	}
 
-	for _, d := range disks {
-		if len(d.Users) > 0 {
+	for _, disk := range disks {
+		n := disk.Name
+
+		if !strings.Contains(n, filter) {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete disk %s?", d.Name))
+		if len(disk.Users) > 0 {
+			continue
+		}
+
+		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete disk %s?", n))
 		if !proceed {
 			continue
 		}
 
-		zoneName := i.zones[d.Zone]
-		if err := i.client.DeleteDisk(zoneName, d.Name); err != nil {
-			i.logger.Printf("ERROR deleting disk %s: %s\n", d.Name, err)
+		zoneName := i.zones[disk.Zone]
+		if err := i.client.DeleteDisk(zoneName, n); err != nil {
+			i.logger.Printf("ERROR deleting disk %s: %s\n", n, err)
 		} else {
-			i.logger.Printf("SUCCESS deleting disk %s\n", d.Name)
+			i.logger.Printf("SUCCESS deleting disk %s\n", n)
 		}
 	}
 

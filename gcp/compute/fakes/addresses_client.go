@@ -7,7 +7,6 @@ type AddressesClient struct {
 		CallCount int
 		Receives  struct {
 			Region string
-			Filter string
 		}
 		Returns struct {
 			Output *gcpcompute.AddressList
@@ -27,10 +26,9 @@ type AddressesClient struct {
 	}
 }
 
-func (n *AddressesClient) ListAddresses(region, filter string) (*gcpcompute.AddressList, error) {
+func (n *AddressesClient) ListAddresses(region string) (*gcpcompute.AddressList, error) {
 	n.ListAddressesCall.CallCount++
 	n.ListAddressesCall.Receives.Region = region
-	n.ListAddressesCall.Receives.Filter = filter
 
 	return n.ListAddressesCall.Returns.Output, n.ListAddressesCall.Returns.Error
 }

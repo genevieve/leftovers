@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type addressesClient interface {
-	ListAddresses(region, filter string) (*gcpcompute.AddressList, error)
+	ListAddresses(region string) (*gcpcompute.AddressList, error)
 	DeleteAddress(region, address string) error
 }
 
@@ -28,7 +29,7 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 func (o Addresses) Delete(filter string) error {
 	var addrs []*gcpcompute.Address
 	for _, region := range o.regions {
-		l, err := o.client.ListAddresses(region, filter)
+		l, err := o.client.ListAddresses(region)
 		if err != nil {
 			return fmt.Errorf("Listing addresses for region %s: %s", region, err)
 		}
@@ -41,6 +42,10 @@ func (o Addresses) Delete(filter string) error {
 		}
 
 		n := a.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete address %s?", n))
 		if !proceed {

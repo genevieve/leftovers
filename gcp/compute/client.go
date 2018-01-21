@@ -1,8 +1,6 @@
 package compute
 
 import (
-	"fmt"
-
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -47,12 +45,8 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 	}
 }
 
-func (c client) ListAddresses(region, filter string) (*gcpcompute.AddressList, error) {
-	call := c.addresses.List(c.project, region)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListAddresses(region string) (*gcpcompute.AddressList, error) {
+	return c.addresses.List(c.project, region).Do()
 }
 
 func (c client) DeleteAddress(region, address string) error {
@@ -64,12 +58,8 @@ func (c client) DeleteAddress(region, address string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListBackendServices(filter string) (*gcpcompute.BackendServiceList, error) {
-	call := c.backendServices.List(c.project)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
+	return c.backendServices.List(c.project).Do()
 }
 
 func (c client) DeleteBackendService(backendService string) error {
@@ -81,12 +71,8 @@ func (c client) DeleteBackendService(backendService string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListDisks(zone, filter string) (*gcpcompute.DiskList, error) {
-	call := c.disks.List(c.project, zone)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListDisks(zone string) (*gcpcompute.DiskList, error) {
+	return c.disks.List(c.project, zone).Do()
 }
 
 func (c client) DeleteDisk(zone, disk string) error {
@@ -98,12 +84,8 @@ func (c client) DeleteDisk(zone, disk string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListInstances(zone, filter string) (*gcpcompute.InstanceList, error) {
-	call := c.instances.List(c.project, zone)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
+	return c.instances.List(c.project, zone).Do()
 }
 
 func (c client) DeleteInstance(zone, instance string) error {
@@ -115,12 +97,8 @@ func (c client) DeleteInstance(zone, instance string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListInstanceGroups(zone, filter string) (*gcpcompute.InstanceGroupList, error) {
-	call := c.instanceGroups.List(c.project, zone)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, error) {
+	return c.instanceGroups.List(c.project, zone).Do()
 }
 
 func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
@@ -132,12 +110,8 @@ func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListHttpHealthChecks(filter string) (*gcpcompute.HttpHealthCheckList, error) {
-	call := c.httpHealthChecks.List(c.project)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) {
+	return c.httpHealthChecks.List(c.project).Do()
 }
 
 func (c client) DeleteHttpHealthCheck(httpHealthCheck string) error {
@@ -149,12 +123,8 @@ func (c client) DeleteHttpHealthCheck(httpHealthCheck string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListHttpsHealthChecks(filter string) (*gcpcompute.HttpsHealthCheckList, error) {
-	call := c.httpsHealthChecks.List(c.project)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error) {
+	return c.httpsHealthChecks.List(c.project).Do()
 }
 
 func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
@@ -166,12 +136,8 @@ func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListFirewalls(filter string) (*gcpcompute.FirewallList, error) {
-	call := c.firewalls.List(c.project)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListFirewalls() (*gcpcompute.FirewallList, error) {
+	return c.firewalls.List(c.project).Do()
 }
 
 func (c client) DeleteFirewall(firewall string) error {
@@ -183,12 +149,8 @@ func (c client) DeleteFirewall(firewall string) error {
 	return c.waitOnDelete(op)
 }
 
-func (c client) ListForwardingRules(region, filter string) (*gcpcompute.ForwardingRuleList, error) {
-	call := c.forwardingRules.List(c.project, region)
-	if filter != "" {
-		call.Filter(fmt.Sprintf("name eq %s", filter))
-	}
-	return call.Do()
+func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleList, error) {
+	return c.forwardingRules.List(c.project, region).Do()
 }
 
 func (c client) DeleteForwardingRule(region, forwardingRule string) error {

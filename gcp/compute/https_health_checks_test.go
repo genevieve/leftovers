@@ -22,7 +22,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 	BeforeEach(func() {
 		client = &fakes.HttpsHealthChecksClient{}
 		logger = &fakes.Logger{}
-		filter = "grape"
+		filter = "banana"
 
 		httpsHealthChecks = compute.NewHttpsHealthChecks(client, logger)
 	})
@@ -32,7 +32,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListHttpsHealthChecksCall.Returns.Output = &gcpcompute.HttpsHealthCheckList{
 				Items: []*gcpcompute.HttpsHealthCheck{{
-					Name: "banana",
+					Name: "banana-check",
 				}},
 			}
 		})
@@ -43,12 +43,12 @@ var _ = Describe("HttpsHealthChecks", func() {
 
 			Expect(client.ListHttpsHealthChecksCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete https health check banana?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete https health check banana-check?"))
 
 			Expect(client.DeleteHttpsHealthCheckCall.CallCount).To(Equal(1))
-			Expect(client.DeleteHttpsHealthCheckCall.Receives.HttpsHealthCheck).To(Equal("banana"))
+			Expect(client.DeleteHttpsHealthCheckCall.Receives.HttpsHealthCheck).To(Equal("banana-check"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting https health check banana\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting https health check banana-check\n"}))
 		})
 
 		Context("when the client fails to list https health checks", func() {
@@ -62,6 +62,16 @@ var _ = Describe("HttpsHealthChecks", func() {
 			})
 		})
 
+		Context("when the health check name does not contain the filter", func() {
+			It("does not try to delete it", func() {
+				err := httpsHealthChecks.Delete("grape")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteHttpsHealthCheckCall.CallCount).To(Equal(0))
+			})
+		})
+
 		Context("when the client fails to delete the https health check", func() {
 			BeforeEach(func() {
 				client.DeleteHttpsHealthCheckCall.Returns.Error = errors.New("some error")
@@ -71,7 +81,7 @@ var _ = Describe("HttpsHealthChecks", func() {
 				err := httpsHealthChecks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting https health check banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting https health check banana-check: some error\n"}))
 			})
 		})
 

@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type httpHealthChecksClient interface {
-	ListHttpHealthChecks(filter string) (*gcpcompute.HttpHealthCheckList, error)
+	ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error)
 	DeleteHttpHealthCheck(httpHealthCheck string) error
 }
 
@@ -24,21 +25,27 @@ func NewHttpHealthChecks(client httpHealthChecksClient, logger logger) HttpHealt
 }
 
 func (i HttpHealthChecks) Delete(filter string) error {
-	httpHealthChecks, err := i.client.ListHttpHealthChecks(filter)
+	httpHealthChecks, err := i.client.ListHttpHealthChecks()
 	if err != nil {
 		return fmt.Errorf("Listing http health checks: %s", err)
 	}
 
-	for _, h := range httpHealthChecks.Items {
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete http health check %s?", h.Name))
+	for _, check := range httpHealthChecks.Items {
+		n := check.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
+
+		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete http health check %s?", n))
 		if !proceed {
 			continue
 		}
 
-		if err := i.client.DeleteHttpHealthCheck(h.Name); err != nil {
-			i.logger.Printf("ERROR deleting http health check %s: %s\n", h.Name, err)
+		if err := i.client.DeleteHttpHealthCheck(n); err != nil {
+			i.logger.Printf("ERROR deleting http health check %s: %s\n", n, err)
 		} else {
-			i.logger.Printf("SUCCESS deleting http health check %s\n", h.Name)
+			i.logger.Printf("SUCCESS deleting http health check %s\n", n)
 		}
 	}
 

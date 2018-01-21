@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type backendServicesClient interface {
-	ListBackendServices(filter string) (*gcpcompute.BackendServiceList, error)
+	ListBackendServices() (*gcpcompute.BackendServiceList, error)
 	DeleteBackendService(backendService string) error
 }
 
@@ -24,12 +25,18 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 }
 
 func (i BackendServices) Delete(filter string) error {
-	backendServices, err := i.client.ListBackendServices(filter)
+	backendServices, err := i.client.ListBackendServices()
 	if err != nil {
 		return fmt.Errorf("Listing backend services: %s", err)
 	}
 
 	for _, b := range backendServices.Items {
+		n := b.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
+
 		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete backend service %s?", b.Name))
 		if !proceed {
 			continue

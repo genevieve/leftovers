@@ -8,7 +8,7 @@ import (
 )
 
 type instancesClient interface {
-	ListInstances(zone, filter string) (*gcpcompute.InstanceList, error)
+	ListInstances(zone string) (*gcpcompute.InstanceList, error)
 	DeleteInstance(zone, instance string) error
 }
 
@@ -29,26 +29,30 @@ func NewInstances(client instancesClient, logger logger, zones map[string]string
 func (s Instances) Delete(filter string) error {
 	var instances []*gcpcompute.Instance
 	for _, zone := range s.zones {
-		l, err := s.client.ListInstances(zone, filter)
+		l, err := s.client.ListInstances(zone)
 		if err != nil {
 			return fmt.Errorf("Listing instances for zone %s: %s", zone, err)
 		}
 		instances = append(instances, l.Items...)
 	}
 
-	for _, i := range instances {
-		n := s.clearerName(i)
+	for _, instance := range instances {
+		n := s.clearerName(instance)
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := s.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance %s?", n))
 		if !proceed {
 			continue
 		}
 
-		zoneName := s.zones[i.Zone]
-		if err := s.client.DeleteInstance(zoneName, i.Name); err != nil {
-			s.logger.Printf("ERROR deleting instance %s: %s\n", i.Name, err)
+		zoneName := s.zones[instance.Zone]
+		if err := s.client.DeleteInstance(zoneName, instance.Name); err != nil {
+			s.logger.Printf("ERROR deleting instance %s: %s\n", n, err)
 		} else {
-			s.logger.Printf("SUCCESS deleting instance %s\n", i.Name)
+			s.logger.Printf("SUCCESS deleting instance %s\n", n)
 		}
 	}
 

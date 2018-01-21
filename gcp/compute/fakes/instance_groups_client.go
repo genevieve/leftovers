@@ -6,8 +6,7 @@ type InstanceGroupsClient struct {
 	ListInstanceGroupsCall struct {
 		CallCount int
 		Receives  struct {
-			Zone   string
-			Filter string
+			Zone string
 		}
 		Returns struct {
 			Output *gcpcompute.InstanceGroupList
@@ -27,10 +26,9 @@ type InstanceGroupsClient struct {
 	}
 }
 
-func (n *InstanceGroupsClient) ListInstanceGroups(zone, filter string) (*gcpcompute.InstanceGroupList, error) {
+func (n *InstanceGroupsClient) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, error) {
 	n.ListInstanceGroupsCall.CallCount++
 	n.ListInstanceGroupsCall.Receives.Zone = zone
-	n.ListInstanceGroupsCall.Receives.Filter = filter
 
 	return n.ListInstanceGroupsCall.Returns.Output, n.ListInstanceGroupsCall.Returns.Error
 }

@@ -26,7 +26,7 @@ var _ = Describe("Disks", func() {
 		zones = map[string]string{
 			"https://zone-1": "zone-1",
 		}
-		filter = "grape"
+		filter = "banana"
 
 		disks = compute.NewDisks(client, logger, zones)
 	})
@@ -36,7 +36,7 @@ var _ = Describe("Disks", func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
 				Items: []*gcpcompute.Disk{{
-					Name: "banana",
+					Name: "banana-disk",
 					Zone: "https://zone-1",
 				}},
 			}
@@ -49,13 +49,13 @@ var _ = Describe("Disks", func() {
 			Expect(client.ListDisksCall.CallCount).To(Equal(1))
 			Expect(client.ListDisksCall.Receives.Zone).To(Equal("zone-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete disk banana?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete disk banana-disk?"))
 
 			Expect(client.DeleteDiskCall.CallCount).To(Equal(1))
 			Expect(client.DeleteDiskCall.Receives.Zone).To(Equal("zone-1"))
-			Expect(client.DeleteDiskCall.Receives.Disk).To(Equal("banana"))
+			Expect(client.DeleteDiskCall.Receives.Disk).To(Equal("banana-disk"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting disk banana\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting disk banana-disk\n"}))
 		})
 
 		Context("when the client fails to list disks", func() {
@@ -69,13 +69,24 @@ var _ = Describe("Disks", func() {
 			})
 		})
 
+		Context("when the disk name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := disks.Delete("grape")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListDisksCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteDiskCall.CallCount).To(Equal(0))
+			})
+		})
+
 		Context("when the disk is in use by an instance", func() {
 			BeforeEach(func() {
 				client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
 					Items: []*gcpcompute.Disk{{
-						Name:  "banana",
+						Name:  "banana-disk",
 						Zone:  "zone-1",
-						Users: []string{"instance-using-banana"},
+						Users: []string{"instance-using-banana-disk"},
 					}},
 				}
 			})
@@ -99,7 +110,7 @@ var _ = Describe("Disks", func() {
 				err := disks.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting disk banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting disk banana-disk: some error\n"}))
 			})
 		})
 

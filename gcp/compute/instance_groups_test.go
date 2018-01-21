@@ -26,7 +26,7 @@ var _ = Describe("InstanceGroups", func() {
 		zones = map[string]string{
 			"https://zone-1": "zone-1",
 		}
-		filter = "grape"
+		filter = "banana"
 
 		instanceGroups = compute.NewInstanceGroups(client, logger, zones)
 	})
@@ -36,7 +36,7 @@ var _ = Describe("InstanceGroups", func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListInstanceGroupsCall.Returns.Output = &gcpcompute.InstanceGroupList{
 				Items: []*gcpcompute.InstanceGroup{{
-					Name: "banana",
+					Name: "banana-group",
 					Zone: "https://zone-1",
 				}},
 			}
@@ -49,13 +49,13 @@ var _ = Describe("InstanceGroups", func() {
 			Expect(client.ListInstanceGroupsCall.CallCount).To(Equal(1))
 			Expect(client.ListInstanceGroupsCall.Receives.Zone).To(Equal("zone-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance group banana?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance group banana-group?"))
 
 			Expect(client.DeleteInstanceGroupCall.CallCount).To(Equal(1))
 			Expect(client.DeleteInstanceGroupCall.Receives.Zone).To(Equal("zone-1"))
-			Expect(client.DeleteInstanceGroupCall.Receives.InstanceGroup).To(Equal("banana"))
+			Expect(client.DeleteInstanceGroupCall.Receives.InstanceGroup).To(Equal("banana-group"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting instance group banana\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting instance group banana-group\n"}))
 		})
 
 		Context("when the client fails to list instance groups", func() {
@@ -69,6 +69,16 @@ var _ = Describe("InstanceGroups", func() {
 			})
 		})
 
+		Context("when the instance group name does not contain the filter", func() {
+			It("does not try to delete it", func() {
+				err := instanceGroups.Delete("grape")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteInstanceGroupCall.CallCount).To(Equal(0))
+			})
+		})
+
 		Context("when the client fails to delete the instance", func() {
 			BeforeEach(func() {
 				client.DeleteInstanceGroupCall.Returns.Error = errors.New("some error")
@@ -78,7 +88,7 @@ var _ = Describe("InstanceGroups", func() {
 				err := instanceGroups.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance group banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance group banana-group: some error\n"}))
 			})
 		})
 

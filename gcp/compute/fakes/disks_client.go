@@ -6,8 +6,7 @@ type DisksClient struct {
 	ListDisksCall struct {
 		CallCount int
 		Receives  struct {
-			Zone   string
-			Filter string
+			Zone string
 		}
 		Returns struct {
 			Output *gcpcompute.DiskList
@@ -27,10 +26,9 @@ type DisksClient struct {
 	}
 }
 
-func (n *DisksClient) ListDisks(zone, filter string) (*gcpcompute.DiskList, error) {
+func (n *DisksClient) ListDisks(zone string) (*gcpcompute.DiskList, error) {
 	n.ListDisksCall.CallCount++
 	n.ListDisksCall.Receives.Zone = zone
-	n.ListDisksCall.Receives.Filter = filter
 
 	return n.ListDisksCall.Returns.Output, n.ListDisksCall.Returns.Error
 }

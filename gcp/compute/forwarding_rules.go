@@ -2,12 +2,13 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type forwardingRulesClient interface {
-	ListForwardingRules(region, filter string) (*gcpcompute.ForwardingRuleList, error)
+	ListForwardingRules(region string) (*gcpcompute.ForwardingRuleList, error)
 	DeleteForwardingRule(region, rule string) error
 }
 
@@ -28,7 +29,7 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 func (o ForwardingRules) Delete(filter string) error {
 	var rules []*gcpcompute.ForwardingRule
 	for _, region := range o.regions {
-		l, err := o.client.ListForwardingRules(region, filter)
+		l, err := o.client.ListForwardingRules(region)
 		if err != nil {
 			return fmt.Errorf("Listing forwarding rules for region %s: %s", region, err)
 		}
@@ -37,6 +38,10 @@ func (o ForwardingRules) Delete(filter string) error {
 
 	for _, r := range rules {
 		n := r.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete forwarding rule %s?", n))
 		if !proceed {
