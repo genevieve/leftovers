@@ -23,7 +23,7 @@ type Deleter struct {
 	resources []resource
 }
 
-func (d Deleter) Delete() error {
+func (d Deleter) Delete(filter string) error {
 	for _, r := range d.resources {
 		if err := r.Delete(); err != nil {
 			return err

@@ -36,9 +36,9 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	fmt.Fprintf(l.writer, "\t%s", fmt.Sprintf(message, a...))
 }
 
-func (l *Logger) Println(message string, a ...interface{}) {
+func (l *Logger) Println(message string) {
 	l.clear()
-	fmt.Fprintf(l.writer, "%s\n\n", fmt.Sprintf(message, a...))
+	fmt.Fprintf(l.writer, "%s\n\n", message)
 }
 
 func (l *Logger) Prompt(message string) bool {

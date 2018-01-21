@@ -14,6 +14,7 @@ import (
 type opts struct {
 	IAAS      string `short:"i"  long:"iaas"        default:"aws"  env:"BBL_IAAS"  description:"The IAAS for clean up."  `
 	NoConfirm bool   `short:"n"  long:"no-confirm"                                 description:"Destroy resources without prompting. This is dangerous, make good choices!"`
+	Filter    string `short:"f"  long:"filter"                                     description:"Filtering resources by an environment name."`
 
 	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
 	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
@@ -26,7 +27,7 @@ type opts struct {
 }
 
 type deleter interface {
-	Delete() error
+	Delete(string) error
 }
 
 func main() {
@@ -56,7 +57,7 @@ func main() {
 		log.Fatalf("\n\n%s\n", err)
 	}
 
-	if err := d.Delete(); err != nil {
+	if err := d.Delete(c.Filter); err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
 }

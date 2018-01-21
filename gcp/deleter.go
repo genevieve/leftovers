@@ -14,7 +14,7 @@ import (
 
 type logger interface {
 	Printf(m string, a ...interface{})
-	Println(m string, a ...interface{})
+	Println(m string)
 	Prompt(m string) bool
 }
 
@@ -26,7 +26,7 @@ type Deleter struct {
 	resources []resource
 }
 
-func (d Deleter) Delete() error {
+func (d Deleter) Delete(filter string) error {
 	for _, r := range d.resources {
 		if err := r.Delete(); err != nil {
 			return err
@@ -52,7 +52,7 @@ func NewDeleter(logger logger, serviceAccountKey string) (Deleter, error) {
 		return Deleter{}, errors.New(fmt.Sprintf("Unmarshalling account key for project id: %s", err))
 	}
 
-	logger.Println("Cleaning gcp project: %s.", p.ProjectId)
+	logger.Println(fmt.Sprintf("Cleaning gcp project: %s.", p.ProjectId))
 
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
