@@ -8,46 +8,48 @@ type client struct {
 	project string
 	logger  logger
 
-	service            *gcpcompute.Service
-	addresses          *gcpcompute.AddressesService
-	backendServices    *gcpcompute.BackendServicesService
-	disks              *gcpcompute.DisksService
-	httpHealthChecks   *gcpcompute.HttpHealthChecksService
-	httpsHealthChecks  *gcpcompute.HttpsHealthChecksService
-	instances          *gcpcompute.InstancesService
-	instanceGroups     *gcpcompute.InstanceGroupsService
-	firewalls          *gcpcompute.FirewallsService
-	forwardingRules    *gcpcompute.ForwardingRulesService
-	networks           *gcpcompute.NetworksService
-	targetHttpProxies  *gcpcompute.TargetHttpProxiesService
-	targetHttpsProxies *gcpcompute.TargetHttpsProxiesService
-	targetPools        *gcpcompute.TargetPoolsService
-	urlMaps            *gcpcompute.UrlMapsService
-	regions            *gcpcompute.RegionsService
-	zones              *gcpcompute.ZonesService
+	service               *gcpcompute.Service
+	addresses             *gcpcompute.AddressesService
+	backendServices       *gcpcompute.BackendServicesService
+	disks                 *gcpcompute.DisksService
+	httpHealthChecks      *gcpcompute.HttpHealthChecksService
+	httpsHealthChecks     *gcpcompute.HttpsHealthChecksService
+	instances             *gcpcompute.InstancesService
+	instanceGroups        *gcpcompute.InstanceGroupsService
+	firewalls             *gcpcompute.FirewallsService
+	forwardingRules       *gcpcompute.ForwardingRulesService
+	globalForwardingRules *gcpcompute.GlobalForwardingRulesService
+	networks              *gcpcompute.NetworksService
+	targetHttpProxies     *gcpcompute.TargetHttpProxiesService
+	targetHttpsProxies    *gcpcompute.TargetHttpsProxiesService
+	targetPools           *gcpcompute.TargetPoolsService
+	urlMaps               *gcpcompute.UrlMapsService
+	regions               *gcpcompute.RegionsService
+	zones                 *gcpcompute.ZonesService
 }
 
 func NewClient(project string, service *gcpcompute.Service, logger logger) client {
 	return client{
-		project:            project,
-		logger:             logger,
-		service:            service,
-		addresses:          service.Addresses,
-		backendServices:    service.BackendServices,
-		disks:              service.Disks,
-		httpHealthChecks:   service.HttpHealthChecks,
-		httpsHealthChecks:  service.HttpsHealthChecks,
-		instances:          service.Instances,
-		instanceGroups:     service.InstanceGroups,
-		firewalls:          service.Firewalls,
-		forwardingRules:    service.ForwardingRules,
-		networks:           service.Networks,
-		targetHttpProxies:  service.TargetHttpProxies,
-		targetHttpsProxies: service.TargetHttpsProxies,
-		targetPools:        service.TargetPools,
-		urlMaps:            service.UrlMaps,
-		regions:            service.Regions,
-		zones:              service.Zones,
+		project:               project,
+		logger:                logger,
+		service:               service,
+		addresses:             service.Addresses,
+		backendServices:       service.BackendServices,
+		disks:                 service.Disks,
+		httpHealthChecks:      service.HttpHealthChecks,
+		httpsHealthChecks:     service.HttpsHealthChecks,
+		instances:             service.Instances,
+		instanceGroups:        service.InstanceGroups,
+		firewalls:             service.Firewalls,
+		forwardingRules:       service.ForwardingRules,
+		globalForwardingRules: service.GlobalForwardingRules,
+		networks:              service.Networks,
+		targetHttpProxies:     service.TargetHttpProxies,
+		targetHttpsProxies:    service.TargetHttpsProxies,
+		targetPools:           service.TargetPools,
+		urlMaps:               service.UrlMaps,
+		regions:               service.Regions,
+		zones:                 service.Zones,
 	}
 }
 
@@ -148,6 +150,19 @@ func (c client) ListFirewalls() (*gcpcompute.FirewallList, error) {
 
 func (c client) DeleteFirewall(firewall string) error {
 	op, err := c.firewalls.Delete(c.project, firewall).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListGlobalForwardingRules() (*gcpcompute.ForwardingRuleList, error) {
+	return c.globalForwardingRules.List(c.project).Do()
+}
+
+func (c client) DeleteGlobalForwardingRule(globalForwardingRule string) error {
+	op, err := c.globalForwardingRules.Delete(c.project, globalForwardingRule).Do()
 	if err != nil {
 		return err
 	}

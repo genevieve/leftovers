@@ -51,25 +51,25 @@ infrastructure resources were tragically orphaned
 ### What can you delete with this?
 
 ```diff
-+ compute disks
-+ compute networks
-+ compute vm instances
-+ compute vm instance groups
++ compute addresses
 + compute backend services
++ compute disks
++ compute firewalls
++ compute forwarding rules
++ compute global forwarding rules
++ compute networks
 + compute http health checks
 + compute https health checks
 + compute target pools
-+ compute forwarding rules
-+ compute firewalls
-+ compute addresses
-+ compute url maps
 + compute target https proxies
 + compute target http proxies
++ compute url maps
++ compute vm instances
++ compute vm instance groups
 ```
 ### What's up next?
 
 ```diff
-- compute global forwarding rules
 - compute routes
 - compute health checks
 - compute vm instance templates
