@@ -64,16 +64,17 @@ infrastructure resources were tragically orphaned
 + compute addresses
 + compute url maps
 + compute target https proxies
++ compute target http proxies
 ```
 ### What's up next?
 
 ```diff
+- compute global forwarding rules
 - compute routes
 - compute health checks
 - compute vm instance templates
 - compute snapshots
 - compute images
-+ compute target http proxies
 ```
 
 ## vSphere

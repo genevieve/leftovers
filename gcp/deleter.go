@@ -82,10 +82,11 @@ func NewDeleter(logger logger, keyPath string) (Deleter, error) {
 
 	return Deleter{
 		resources: []resource{
+			compute.NewForwardingRules(client, logger, regions),
+			compute.NewFirewalls(client, logger),
+			compute.NewTargetHttpProxies(client, logger),
 			compute.NewTargetHttpsProxies(client, logger),
 			compute.NewUrlMaps(client, logger),
-			compute.NewFirewalls(client, logger),
-			compute.NewForwardingRules(client, logger, regions),
 			compute.NewTargetPools(client, logger, regions),
 			compute.NewInstances(client, logger, zones),
 			compute.NewInstanceGroups(client, logger, zones),

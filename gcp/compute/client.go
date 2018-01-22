@@ -19,6 +19,7 @@ type client struct {
 	firewalls          *gcpcompute.FirewallsService
 	forwardingRules    *gcpcompute.ForwardingRulesService
 	networks           *gcpcompute.NetworksService
+	targetHttpProxies  *gcpcompute.TargetHttpProxiesService
 	targetHttpsProxies *gcpcompute.TargetHttpsProxiesService
 	targetPools        *gcpcompute.TargetPoolsService
 	urlMaps            *gcpcompute.UrlMapsService
@@ -41,6 +42,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		firewalls:          service.Firewalls,
 		forwardingRules:    service.ForwardingRules,
 		networks:           service.Networks,
+		targetHttpProxies:  service.TargetHttpProxies,
 		targetHttpsProxies: service.TargetHttpsProxies,
 		targetPools:        service.TargetPools,
 		urlMaps:            service.UrlMaps,
@@ -172,6 +174,19 @@ func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
 
 func (c client) DeleteNetwork(network string) error {
 	op, err := c.networks.Delete(c.project, network).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListTargetHttpProxies() (*gcpcompute.TargetHttpProxyList, error) {
+	return c.targetHttpProxies.List(c.project).Do()
+}
+
+func (c client) DeleteTargetHttpProxy(targetHttpProxy string) error {
+	op, err := c.targetHttpProxies.Delete(c.project, targetHttpProxy).Do()
 	if err != nil {
 		return err
 	}
