@@ -7,17 +7,17 @@ import (
 	"github.com/genevievelesperance/leftovers"
 	"github.com/genevievelesperance/leftovers/acceptance"
 	"github.com/genevievelesperance/leftovers/app"
-	"github.com/genevievelesperance/leftovers/gcp"
+	"github.com/genevievelesperance/leftovers/azure"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("GCP", func() {
-	var acc *acceptance.GCPAcceptance
+var _ = Describe("Azure", func() {
+	var acc *acceptance.AzureAcceptance
 
 	BeforeEach(func() {
-		acc = acceptance.NewGCPAcceptance()
+		acc = acceptance.NewAzureAcceptance()
 
 		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")
@@ -38,10 +38,10 @@ var _ = Describe("GCP", func() {
 			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
 
 			filter = "leftovers-acceptance"
-			acc.InsertDisk(filter)
+			acc.CreateResourceGroup(filter)
 
 			var err error
-			deleter, err = gcp.NewDeleter(logger, acc.KeyPath)
+			deleter, err = azure.NewDeleter(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -49,7 +49,7 @@ var _ = Describe("GCP", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout).To(ContainSubstring("SUCCESS deleting disk"))
+			Expect(stdout).To(ContainSubstring("SUCCESS deleting resource group"))
 		})
 	})
 })

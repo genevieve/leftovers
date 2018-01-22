@@ -18,7 +18,7 @@ import (
 
 const BBL_GCP_ZONE = "us-east1-b"
 
-type Acceptance struct {
+type GCPAcceptance struct {
 	Key       []byte
 	KeyPath   string
 	ProjectId string
@@ -26,11 +26,11 @@ type Acceptance struct {
 	Logger    *app.Logger
 }
 
-func NewAcceptance() *Acceptance {
-	return &Acceptance{}
+func NewGCPAcceptance() *GCPAcceptance {
+	return &GCPAcceptance{}
 }
 
-func (a *Acceptance) ReadyToTest() bool {
+func (a *GCPAcceptance) ReadyToTest() bool {
 	iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
 	if iaas == "" {
 		return false
@@ -65,7 +65,7 @@ func (a *Acceptance) ReadyToTest() bool {
 	return true
 }
 
-func (a *Acceptance) InsertGCPDisk(name string) {
+func (a *GCPAcceptance) InsertDisk(name string) {
 	config, err := google.JWTConfigFromJSON([]byte(a.Key), gcpcompute.ComputeScope)
 	Expect(err).NotTo(HaveOccurred())
 
