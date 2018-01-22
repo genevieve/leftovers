@@ -26,17 +26,17 @@ type AddressesClient struct {
 	}
 }
 
-func (n *AddressesClient) ListAddresses(region string) (*gcpcompute.AddressList, error) {
-	n.ListAddressesCall.CallCount++
-	n.ListAddressesCall.Receives.Region = region
+func (a *AddressesClient) ListAddresses(region string) (*gcpcompute.AddressList, error) {
+	a.ListAddressesCall.CallCount++
+	a.ListAddressesCall.Receives.Region = region
 
-	return n.ListAddressesCall.Returns.Output, n.ListAddressesCall.Returns.Error
+	return a.ListAddressesCall.Returns.Output, a.ListAddressesCall.Returns.Error
 }
 
-func (n *AddressesClient) DeleteAddress(region, address string) error {
-	n.DeleteAddressCall.CallCount++
-	n.DeleteAddressCall.Receives.Address = address
-	n.DeleteAddressCall.Receives.Region = region
+func (a *AddressesClient) DeleteAddress(region, address string) error {
+	a.DeleteAddressCall.CallCount++
+	a.DeleteAddressCall.Receives.Address = address
+	a.DeleteAddressCall.Receives.Region = region
 
-	return n.DeleteAddressCall.Returns.Error
+	return a.DeleteAddressCall.Returns.Error
 }

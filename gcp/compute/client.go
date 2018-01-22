@@ -20,6 +20,7 @@ type client struct {
 	forwardingRules   *gcpcompute.ForwardingRulesService
 	networks          *gcpcompute.NetworksService
 	targetPools       *gcpcompute.TargetPoolsService
+	urlMaps           *gcpcompute.UrlMapsService
 	regions           *gcpcompute.RegionsService
 	zones             *gcpcompute.ZonesService
 }
@@ -40,6 +41,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		forwardingRules:   service.ForwardingRules,
 		networks:          service.Networks,
 		targetPools:       service.TargetPools,
+		urlMaps:           service.UrlMaps,
 		regions:           service.Regions,
 		zones:             service.Zones,
 	}
@@ -181,6 +183,19 @@ func (c client) ListTargetPools(region string) (*gcpcompute.TargetPoolList, erro
 
 func (c client) DeleteTargetPool(region string, targetPool string) error {
 	op, err := c.targetPools.Delete(c.project, region, targetPool).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListUrlMaps() (*gcpcompute.UrlMapList, error) {
+	return c.urlMaps.List(c.project).Do()
+}
+
+func (c client) DeleteUrlMap(urlMap string) error {
+	op, err := c.urlMaps.Delete(c.project, urlMap).Do()
 	if err != nil {
 		return err
 	}
