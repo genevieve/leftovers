@@ -57,9 +57,10 @@ infrastructure resources were tragically orphaned
 + compute firewalls
 + compute forwarding rules
 + compute global forwarding rules
-+ compute networks
++ compute global health checks
 + compute http health checks
 + compute https health checks
++ compute networks
 + compute target pools
 + compute target https proxies
 + compute target http proxies
@@ -71,7 +72,6 @@ infrastructure resources were tragically orphaned
 
 ```diff
 - compute routes
-- compute health checks
 - compute vm instance templates
 - compute snapshots
 - compute images

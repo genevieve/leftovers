@@ -92,6 +92,7 @@ func NewDeleter(logger logger, keyPath string) (Deleter, error) {
 			compute.NewBackendServices(client, logger),
 			compute.NewInstances(client, logger, zones),
 			compute.NewInstanceGroups(client, logger, zones),
+			compute.NewGlobalHealthChecks(client, logger),
 			compute.NewHttpHealthChecks(client, logger),
 			compute.NewHttpsHealthChecks(client, logger),
 			compute.NewDisks(client, logger, zones),

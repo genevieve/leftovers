@@ -12,6 +12,7 @@ type client struct {
 	addresses             *gcpcompute.AddressesService
 	backendServices       *gcpcompute.BackendServicesService
 	disks                 *gcpcompute.DisksService
+	globalHealthChecks    *gcpcompute.HealthChecksService
 	httpHealthChecks      *gcpcompute.HttpHealthChecksService
 	httpsHealthChecks     *gcpcompute.HttpsHealthChecksService
 	instances             *gcpcompute.InstancesService
@@ -36,6 +37,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		addresses:             service.Addresses,
 		backendServices:       service.BackendServices,
 		disks:                 service.Disks,
+		globalHealthChecks:    service.HealthChecks,
 		httpHealthChecks:      service.HttpHealthChecks,
 		httpsHealthChecks:     service.HttpsHealthChecks,
 		instances:             service.Instances,
@@ -111,6 +113,19 @@ func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, 
 
 func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
 	op, err := c.instanceGroups.Delete(c.project, zone, instanceGroup).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListGlobalHealthChecks() (*gcpcompute.HealthCheckList, error) {
+	return c.globalHealthChecks.List(c.project).Do()
+}
+
+func (c client) DeleteGlobalHealthCheck(globalHealthCheck string) error {
+	op, err := c.globalHealthChecks.Delete(c.project, globalHealthCheck).Do()
 	if err != nil {
 		return err
 	}
