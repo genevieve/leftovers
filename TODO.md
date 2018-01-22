@@ -1,2 +1,4 @@
 - Split getting/listing/filtering resources from deleting them.
 - Can we filter the disks list api call with len of users eq 0?
+- Pointers
+- Multiple types of clients for splitting the gcp client

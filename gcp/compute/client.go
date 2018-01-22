@@ -8,42 +8,44 @@ type client struct {
 	project string
 	logger  logger
 
-	service           *gcpcompute.Service
-	addresses         *gcpcompute.AddressesService
-	backendServices   *gcpcompute.BackendServicesService
-	disks             *gcpcompute.DisksService
-	httpHealthChecks  *gcpcompute.HttpHealthChecksService
-	httpsHealthChecks *gcpcompute.HttpsHealthChecksService
-	instances         *gcpcompute.InstancesService
-	instanceGroups    *gcpcompute.InstanceGroupsService
-	firewalls         *gcpcompute.FirewallsService
-	forwardingRules   *gcpcompute.ForwardingRulesService
-	networks          *gcpcompute.NetworksService
-	targetPools       *gcpcompute.TargetPoolsService
-	urlMaps           *gcpcompute.UrlMapsService
-	regions           *gcpcompute.RegionsService
-	zones             *gcpcompute.ZonesService
+	service            *gcpcompute.Service
+	addresses          *gcpcompute.AddressesService
+	backendServices    *gcpcompute.BackendServicesService
+	disks              *gcpcompute.DisksService
+	httpHealthChecks   *gcpcompute.HttpHealthChecksService
+	httpsHealthChecks  *gcpcompute.HttpsHealthChecksService
+	instances          *gcpcompute.InstancesService
+	instanceGroups     *gcpcompute.InstanceGroupsService
+	firewalls          *gcpcompute.FirewallsService
+	forwardingRules    *gcpcompute.ForwardingRulesService
+	networks           *gcpcompute.NetworksService
+	targetHttpsProxies *gcpcompute.TargetHttpsProxiesService
+	targetPools        *gcpcompute.TargetPoolsService
+	urlMaps            *gcpcompute.UrlMapsService
+	regions            *gcpcompute.RegionsService
+	zones              *gcpcompute.ZonesService
 }
 
 func NewClient(project string, service *gcpcompute.Service, logger logger) client {
 	return client{
-		project:           project,
-		logger:            logger,
-		service:           service,
-		addresses:         service.Addresses,
-		backendServices:   service.BackendServices,
-		disks:             service.Disks,
-		httpHealthChecks:  service.HttpHealthChecks,
-		httpsHealthChecks: service.HttpsHealthChecks,
-		instances:         service.Instances,
-		instanceGroups:    service.InstanceGroups,
-		firewalls:         service.Firewalls,
-		forwardingRules:   service.ForwardingRules,
-		networks:          service.Networks,
-		targetPools:       service.TargetPools,
-		urlMaps:           service.UrlMaps,
-		regions:           service.Regions,
-		zones:             service.Zones,
+		project:            project,
+		logger:             logger,
+		service:            service,
+		addresses:          service.Addresses,
+		backendServices:    service.BackendServices,
+		disks:              service.Disks,
+		httpHealthChecks:   service.HttpHealthChecks,
+		httpsHealthChecks:  service.HttpsHealthChecks,
+		instances:          service.Instances,
+		instanceGroups:     service.InstanceGroups,
+		firewalls:          service.Firewalls,
+		forwardingRules:    service.ForwardingRules,
+		networks:           service.Networks,
+		targetHttpsProxies: service.TargetHttpsProxies,
+		targetPools:        service.TargetPools,
+		urlMaps:            service.UrlMaps,
+		regions:            service.Regions,
+		zones:              service.Zones,
 	}
 }
 
@@ -170,6 +172,19 @@ func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
 
 func (c client) DeleteNetwork(network string) error {
 	op, err := c.networks.Delete(c.project, network).Do()
+	if err != nil {
+		return err
+	}
+
+	return c.waitOnDelete(op)
+}
+
+func (c client) ListTargetHttpsProxies() (*gcpcompute.TargetHttpsProxyList, error) {
+	return c.targetHttpsProxies.List(c.project).Do()
+}
+
+func (c client) DeleteTargetHttpsProxy(targetHttpsProxy string) error {
+	op, err := c.targetHttpsProxies.Delete(c.project, targetHttpsProxy).Do()
 	if err != nil {
 		return err
 	}

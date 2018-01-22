@@ -62,6 +62,8 @@ infrastructure resources were tragically orphaned
 + compute forwarding rules
 + compute firewalls
 + compute addresses
++ compute url maps
++ compute target https proxies
 ```
 ### What's up next?
 
@@ -71,6 +73,7 @@ infrastructure resources were tragically orphaned
 - compute vm instance templates
 - compute snapshots
 - compute images
++ compute target http proxies
 ```
 
 ## vSphere
