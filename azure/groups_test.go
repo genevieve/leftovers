@@ -15,6 +15,7 @@ var _ = Describe("Groups", func() {
 	var (
 		client *fakes.GroupsClient
 		logger *fakes.Logger
+		filter string
 
 		groups azure.Groups
 	)
@@ -22,6 +23,7 @@ var _ = Describe("Groups", func() {
 	BeforeEach(func() {
 		client = &fakes.GroupsClient{}
 		logger = &fakes.Logger{}
+		filter = "banana"
 
 		groups = azure.NewGroups(client, logger)
 	})
@@ -31,7 +33,7 @@ var _ = Describe("Groups", func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListCall.Returns.Output = resources.GroupListResult{
 				Value: &[]resources.Group{{
-					Name: aws.String("banana"),
+					Name: aws.String("banana-group"),
 				}},
 			}
 			errChan := make(chan error, 1)
@@ -40,13 +42,13 @@ var _ = Describe("Groups", func() {
 		})
 
 		It("deletes resource groups", func() {
-			err := groups.Delete()
+			err := groups.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListCall.CallCount).To(Equal(1))
 			Expect(client.DeleteCall.CallCount).To(Equal(1))
-			Expect(client.DeleteCall.Receives.Name).To(Equal("banana"))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting resource group banana\n"}))
+			Expect(client.DeleteCall.Receives.Name).To(Equal("banana-group"))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting resource group banana-group\n"}))
 		})
 
 		Context("when client fails to list resource groups", func() {
@@ -55,34 +57,11 @@ var _ = Describe("Groups", func() {
 			})
 
 			It("returns the error", func() {
-				err := groups.Delete()
+				err := groups.Delete(filter)
 				Expect(err).To(MatchError("Listing resource groups: some error"))
 
 				Expect(client.ListCall.CallCount).To(Equal(1))
 				Expect(client.DeleteCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when client fails to delete the resource group", func() {
-			BeforeEach(func() {
-				client.ListCall.Returns.Output = resources.GroupListResult{
-					Value: &[]resources.Group{{
-						Name: aws.String("banana"),
-					}},
-				}
-				errChan := make(chan error, 1)
-				errChan <- errors.New("some error")
-				client.DeleteCall.Returns.Error = errChan
-			})
-
-			It("logs the error", func() {
-				err := groups.Delete()
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.ListCall.CallCount).To(Equal(1))
-				Expect(client.DeleteCall.CallCount).To(Equal(1))
-				Expect(client.DeleteCall.Receives.Name).To(Equal("banana"))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting resource group banana: some error\n"}))
 			})
 		})
 
@@ -92,11 +71,44 @@ var _ = Describe("Groups", func() {
 			})
 
 			It("does not delete the resource group", func() {
-				err := groups.Delete()
+				err := groups.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete resource group banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete resource group banana-group?"))
 				Expect(client.DeleteCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the resource group name does not contain the filter", func() {
+			It("does not delete it", func() {
+				err := groups.Delete("grape")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when client fails to delete the resource group", func() {
+			BeforeEach(func() {
+				client.ListCall.Returns.Output = resources.GroupListResult{
+					Value: &[]resources.Group{{
+						Name: aws.String("banana-group"),
+					}},
+				}
+				errChan := make(chan error, 1)
+				errChan <- errors.New("some error")
+				client.DeleteCall.Returns.Error = errChan
+			})
+
+			It("logs the error", func() {
+				err := groups.Delete(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListCall.CallCount).To(Equal(1))
+				Expect(client.DeleteCall.CallCount).To(Equal(1))
+				Expect(client.DeleteCall.Receives.Name).To(Equal("banana-group"))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting resource group banana-group: some error\n"}))
 			})
 		})
 	})

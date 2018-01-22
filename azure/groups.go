@@ -2,13 +2,14 @@ package azure
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	"github.com/Azure/go-autorest/autorest"
 )
 
 type groupsClient interface {
-	List(filter string, top *int32) (resources.GroupListResult, error)
+	List(query string, top *int32) (resources.GroupListResult, error)
 	Delete(name string, channel <-chan struct{}) (<-chan autorest.Response, <-chan error)
 }
 
@@ -24,7 +25,7 @@ func NewGroups(client groupsClient, logger logger) Groups {
 	}
 }
 
-func (r Groups) Delete() error {
+func (r Groups) Delete(filter string) error {
 	groups, err := r.client.List("", nil)
 	if err != nil {
 		return fmt.Errorf("Listing resource groups: %s", err)
@@ -32,6 +33,10 @@ func (r Groups) Delete() error {
 
 	for _, g := range *groups.Value {
 		n := *g.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := r.logger.Prompt(fmt.Sprintf("Are you sure you want to delete resource group %s?", n))
 		if !proceed {

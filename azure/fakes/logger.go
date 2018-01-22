@@ -12,7 +12,8 @@ type Logger struct {
 	}
 
 	PromptCall struct {
-		Receives struct {
+		CallCount int
+		Receives  struct {
 			Message string
 		}
 		Returns struct {
@@ -29,6 +30,7 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 }
 
 func (l *Logger) Prompt(message string) bool {
+	l.PromptCall.CallCount++
 	l.PromptCall.Receives.Message = message
 
 	return l.PromptCall.Returns.Proceed
