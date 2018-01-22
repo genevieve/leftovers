@@ -13,13 +13,14 @@ import (
 )
 
 type logger interface {
-	Printf(m string, a ...interface{})
-	Println(m string)
-	Prompt(m string) bool
+	Printf(message string, a ...interface{})
+	Println(message string)
+	Prompt(message string) bool
 }
 
 type resource interface {
-	Delete(string) error
+	List(filter string) (map[string]string, error)
+	Delete(resources map[string]string)
 }
 
 type Deleter struct {
@@ -28,9 +29,12 @@ type Deleter struct {
 
 func (d Deleter) Delete(filter string) error {
 	for _, r := range d.resources {
-		if err := r.Delete(filter); err != nil {
+		list, err := r.List(filter)
+		if err != nil {
 			return err
 		}
+
+		r.Delete(list)
 	}
 	return nil
 }

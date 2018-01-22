@@ -14,7 +14,6 @@ var _ = Describe("BackendServices", func() {
 	var (
 		client *fakes.BackendServicesClient
 		logger *fakes.Logger
-		filter string
 
 		backendServices compute.BackendServices
 	)
@@ -22,13 +21,15 @@ var _ = Describe("BackendServices", func() {
 	BeforeEach(func() {
 		client = &fakes.BackendServicesClient{}
 		logger = &fakes.Logger{}
-		filter = "banana"
 
 		backendServices = compute.NewBackendServices(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
+		var filter string
+
 		BeforeEach(func() {
+			filter = "banana"
 			logger.PromptCall.Returns.Proceed = true
 			client.ListBackendServicesCall.Returns.Output = &gcpcompute.BackendServiceList{
 				Items: []*gcpcompute.BackendService{{
@@ -37,18 +38,16 @@ var _ = Describe("BackendServices", func() {
 			}
 		})
 
-		It("deletes backend services", func() {
-			err := backendServices.Delete(filter)
+		It("lists, filters, and prompts for backend services to delete", func() {
+			list, err := backendServices.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBackendServicesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete backend service banana-backend-service?"))
 
-			Expect(client.DeleteBackendServiceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteBackendServiceCall.Receives.BackendService).To(Equal("banana-backend-service"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting backend service banana-backend-service\n"}))
+			Expect(list).To(HaveLen(1))
+			Expect(list).To(HaveKeyWithValue("banana-backend-service", ""))
 		})
 
 		Context("when the client fails to list backend services", func() {
@@ -57,31 +56,18 @@ var _ = Describe("BackendServices", func() {
 			})
 
 			It("returns the error", func() {
-				err := backendServices.Delete(filter)
+				_, err := backendServices.List(filter)
 				Expect(err).To(MatchError("Listing backend services: some error"))
 			})
 		})
 
 		Context("when the backend service name does not contain the filter", func() {
-			It("does not try to delete it", func() {
-				err := backendServices.Delete("grape")
+			It("does not add it to the list", func() {
+				list, err := backendServices.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteBackendServiceCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the backend service", func() {
-			BeforeEach(func() {
-				client.DeleteBackendServiceCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := backendServices.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting backend service banana-backend-service: some error\n"}))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -90,11 +76,40 @@ var _ = Describe("BackendServices", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the backend service", func() {
-				err := backendServices.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := backendServices.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteBackendServiceCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var list map[string]string
+
+		BeforeEach(func() {
+			list = map[string]string{"banana-backend-service": ""}
+		})
+
+		It("deletes every backend service in the list", func() {
+			backendServices.Delete(list)
+
+			Expect(client.DeleteBackendServiceCall.CallCount).To(Equal(1))
+			Expect(client.DeleteBackendServiceCall.Receives.BackendService).To(Equal("banana-backend-service"))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting backend service banana-backend-service\n"}))
+		})
+
+		Context("when the client fails to delete the backend service", func() {
+			BeforeEach(func() {
+				client.DeleteBackendServiceCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				backendServices.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting backend service banana-backend-service: some error\n"}))
 			})
 		})
 	})

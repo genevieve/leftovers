@@ -26,20 +26,20 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 	}
 }
 
-func (i Disks) Delete(filter string) error {
-	var disks []*gcpcompute.Disk
-	for _, zone := range i.zones {
-		l, err := i.client.ListDisks(zone)
+func (d Disks) List(filter string) (map[string]string, error) {
+	disks := []*gcpcompute.Disk{}
+	delete := map[string]string{}
+
+	for _, zone := range d.zones {
+		l, err := d.client.ListDisks(zone)
 		if err != nil {
-			return fmt.Errorf("Listing disks for zone %s: %s", zone, err)
+			return delete, fmt.Errorf("Listing disks for zone %s: %s", zone, err)
 		}
 		disks = append(disks, l.Items...)
 	}
 
 	for _, disk := range disks {
-		n := disk.Name
-
-		if !strings.Contains(n, filter) {
+		if !strings.Contains(disk.Name, filter) {
 			continue
 		}
 
@@ -47,18 +47,25 @@ func (i Disks) Delete(filter string) error {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete disk %s?", n))
+		proceed := d.logger.Prompt(fmt.Sprintf("Are you sure you want to delete disk %s?", disk.Name))
 		if !proceed {
 			continue
 		}
 
-		zoneName := i.zones[disk.Zone]
-		if err := i.client.DeleteDisk(zoneName, n); err != nil {
-			i.logger.Printf("ERROR deleting disk %s: %s\n", n, err)
-		} else {
-			i.logger.Printf("SUCCESS deleting disk %s\n", n)
-		}
+		delete[disk.Name] = d.zones[disk.Zone]
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (d Disks) Delete(disks map[string]string) {
+	for name, zone := range disks {
+		err := d.client.DeleteDisk(zone, name)
+
+		if err != nil {
+			d.logger.Printf("ERROR deleting disk %s: %s\n", name, err)
+		} else {
+			d.logger.Printf("SUCCESS deleting disk %s\n", name)
+		}
+	}
 }

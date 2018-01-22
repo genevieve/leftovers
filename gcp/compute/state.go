@@ -35,6 +35,8 @@ func (s *state) Wait() error {
 	go func() {
 		defer close(resultCh)
 
+		s.logger.Printf("Deleting..")
+
 		time.Sleep(delay)
 
 		var wait time.Duration

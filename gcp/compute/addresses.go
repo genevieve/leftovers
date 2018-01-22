@@ -26,39 +26,46 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 	}
 }
 
-func (o Addresses) Delete(filter string) error {
-	var addrs []*gcpcompute.Address
-	for _, region := range o.regions {
-		l, err := o.client.ListAddresses(region)
+func (a Addresses) List(filter string) (map[string]string, error) {
+	addresses := []*gcpcompute.Address{}
+	delete := map[string]string{}
+
+	for _, region := range a.regions {
+		l, err := a.client.ListAddresses(region)
 		if err != nil {
-			return fmt.Errorf("Listing addresses for region %s: %s", region, err)
+			return delete, fmt.Errorf("Listing addresses for region %s: %s", region, err)
 		}
-		addrs = append(addrs, l.Items...)
+		addresses = append(addresses, l.Items...)
 	}
 
-	for _, a := range addrs {
-		if len(a.Users) > 0 {
+	for _, address := range addresses {
+		if len(address.Users) > 0 {
 			continue
 		}
 
-		n := a.Name
-
-		if !strings.Contains(n, filter) {
+		if !strings.Contains(address.Name, filter) {
 			continue
 		}
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete address %s?", n))
+		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete address %s?", address.Name))
 		if !proceed {
 			continue
 		}
 
-		regionName := o.regions[a.Region]
-		if err := o.client.DeleteAddress(regionName, n); err != nil {
-			o.logger.Printf("ERROR deleting address %s: %s\n", n, err)
-		} else {
-			o.logger.Printf("SUCCESS deleting address %s\n", n)
-		}
+		delete[address.Name] = a.regions[address.Region]
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (a Addresses) Delete(addrs map[string]string) {
+	for name, region := range addrs {
+		err := a.client.DeleteAddress(region, name)
+
+		if err != nil {
+			a.logger.Printf("ERROR deleting address %s: %s\n", name, err)
+		} else {
+			a.logger.Printf("SUCCESS deleting address %s\n", name)
+		}
+	}
 }

@@ -15,7 +15,6 @@ var _ = Describe("Disks", func() {
 		client *fakes.DisksClient
 		logger *fakes.Logger
 		zones  map[string]string
-		filter string
 
 		disks compute.Disks
 	)
@@ -23,16 +22,16 @@ var _ = Describe("Disks", func() {
 	BeforeEach(func() {
 		client = &fakes.DisksClient{}
 		logger = &fakes.Logger{}
-		zones = map[string]string{
-			"https://zone-1": "zone-1",
-		}
-		filter = "banana"
+		zones = map[string]string{"https://zone-1": "zone-1"}
 
 		disks = compute.NewDisks(client, logger, zones)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
+		var filter string
+
 		BeforeEach(func() {
+			filter = "banana"
 			logger.PromptCall.Returns.Proceed = true
 			client.ListDisksCall.Returns.Output = &gcpcompute.DiskList{
 				Items: []*gcpcompute.Disk{{
@@ -42,8 +41,8 @@ var _ = Describe("Disks", func() {
 			}
 		})
 
-		It("deletes disks", func() {
-			err := disks.Delete(filter)
+		It("lists, filters, and prompts for disks to delete", func() {
+			list, err := disks.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListDisksCall.CallCount).To(Equal(1))
@@ -51,11 +50,8 @@ var _ = Describe("Disks", func() {
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete disk banana-disk?"))
 
-			Expect(client.DeleteDiskCall.CallCount).To(Equal(1))
-			Expect(client.DeleteDiskCall.Receives.Zone).To(Equal("zone-1"))
-			Expect(client.DeleteDiskCall.Receives.Disk).To(Equal("banana-disk"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting disk banana-disk\n"}))
+			Expect(list).To(HaveLen(1))
+			Expect(list).To(HaveKeyWithValue("banana-disk", "zone-1"))
 		})
 
 		Context("when the client fails to list disks", func() {
@@ -64,19 +60,20 @@ var _ = Describe("Disks", func() {
 			})
 
 			It("returns the error", func() {
-				err := disks.Delete(filter)
+				_, err := disks.List(filter)
 				Expect(err).To(MatchError("Listing disks for zone zone-1: some error"))
 			})
 		})
 
 		Context("when the disk name does not contain the filter", func() {
-			It("does not try deleting it", func() {
-				err := disks.Delete("grape")
+			It("does not add it to the list", func() {
+				list, err := disks.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ListDisksCall.CallCount).To(Equal(1))
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteDiskCall.CallCount).To(Equal(0))
+
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -91,26 +88,13 @@ var _ = Describe("Disks", func() {
 				}
 			})
 
-			It("does not try deleting it", func() {
-				err := disks.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := disks.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ListDisksCall.CallCount).To(Equal(1))
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteDiskCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the disk", func() {
-			BeforeEach(func() {
-				client.DeleteDiskCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := disks.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting disk banana-disk: some error\n"}))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -119,11 +103,41 @@ var _ = Describe("Disks", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the disk", func() {
-				err := disks.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := disks.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteDiskCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var list map[string]string
+
+		BeforeEach(func() {
+			list = map[string]string{"banana-disk": "zone-1"}
+		})
+
+		It("deletes disks", func() {
+			disks.Delete(list)
+
+			Expect(client.DeleteDiskCall.CallCount).To(Equal(1))
+			Expect(client.DeleteDiskCall.Receives.Zone).To(Equal("zone-1"))
+			Expect(client.DeleteDiskCall.Receives.Disk).To(Equal("banana-disk"))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting disk banana-disk\n"}))
+		})
+
+		Context("when the client fails to delete the disk", func() {
+			BeforeEach(func() {
+				client.DeleteDiskCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				disks.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting disk banana-disk: some error\n"}))
 			})
 		})
 	})

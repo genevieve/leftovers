@@ -1,8 +1,7 @@
 package leftovers
 
 type Deleter interface {
-	// Delete deletes every resource named with environment,
+	// Delete filters and deletes every resource,
 	// return an error if any happens.
-	Delete(environment string) error
+	Delete(filter string) error
 }
-

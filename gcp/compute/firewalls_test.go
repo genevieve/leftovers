@@ -14,7 +14,6 @@ var _ = Describe("Firewalls", func() {
 	var (
 		client *fakes.FirewallsClient
 		logger *fakes.Logger
-		filter string
 
 		firewalls compute.Firewalls
 	)
@@ -22,12 +21,13 @@ var _ = Describe("Firewalls", func() {
 	BeforeEach(func() {
 		client = &fakes.FirewallsClient{}
 		logger = &fakes.Logger{}
-		filter = "banana"
 
 		firewalls = compute.NewFirewalls(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListFirewallsCall.Returns.Output = &gcpcompute.FirewallList{
@@ -35,20 +35,19 @@ var _ = Describe("Firewalls", func() {
 					Name: "banana-firewall",
 				}},
 			}
+			filter = "banana"
 		})
 
-		It("deletes firewalls", func() {
-			err := firewalls.Delete(filter)
+		It("lists, filters, and prompts for firewalls to delete", func() {
+			list, err := firewalls.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListFirewallsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete firewall banana-firewall?"))
 
-			Expect(client.DeleteFirewallCall.CallCount).To(Equal(1))
-			Expect(client.DeleteFirewallCall.Receives.Firewall).To(Equal("banana-firewall"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting firewall banana-firewall\n"}))
+			Expect(list).To(HaveLen(1))
+			Expect(list).To(HaveKeyWithValue("banana-firewall", ""))
 		})
 
 		Context("when the client fails to list firewalls", func() {
@@ -57,31 +56,18 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("returns the error", func() {
-				err := firewalls.Delete(filter)
+				_, err := firewalls.List(filter)
 				Expect(err).To(MatchError("Listing firewalls: some error"))
 			})
 		})
 
 		Context("when the firewall name does not contain the filter", func() {
-			It("does not delete it", func() {
-				err := firewalls.Delete("grape")
+			It("does not add it to the list", func() {
+				list, err := firewalls.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteFirewallCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the firewall", func() {
-			BeforeEach(func() {
-				client.DeleteFirewallCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := firewalls.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting firewall banana-firewall: some error\n"}))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -90,11 +76,40 @@ var _ = Describe("Firewalls", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete it", func() {
-				err := firewalls.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := firewalls.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteFirewallCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var list map[string]string
+
+		BeforeEach(func() {
+			list = map[string]string{"banana-firewall": ""}
+		})
+
+		It("deletes firewalls", func() {
+			firewalls.Delete(list)
+
+			Expect(client.DeleteFirewallCall.CallCount).To(Equal(1))
+			Expect(client.DeleteFirewallCall.Receives.Firewall).To(Equal("banana-firewall"))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting firewall banana-firewall\n"}))
+		})
+
+		Context("when the client fails to delete a firewall", func() {
+			BeforeEach(func() {
+				client.DeleteFirewallCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				firewalls.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting firewall banana-firewall: some error\n"}))
 			})
 		})
 	})

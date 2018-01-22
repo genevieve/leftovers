@@ -15,7 +15,6 @@ var _ = Describe("TargetPools", func() {
 		client  *fakes.TargetPoolsClient
 		logger  *fakes.Logger
 		regions map[string]string
-		filter  string
 
 		targetPools compute.TargetPools
 	)
@@ -23,15 +22,14 @@ var _ = Describe("TargetPools", func() {
 	BeforeEach(func() {
 		client = &fakes.TargetPoolsClient{}
 		logger = &fakes.Logger{}
-		regions = map[string]string{
-			"https://region-1": "region-1",
-		}
-		filter = "banana"
+		regions = map[string]string{"https://region-1": "region-1"}
 
 		targetPools = compute.NewTargetPools(client, logger, regions)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListTargetPoolsCall.Returns.Output = &gcpcompute.TargetPoolList{
@@ -40,10 +38,11 @@ var _ = Describe("TargetPools", func() {
 					Region: "https://region-1",
 				}},
 			}
+			filter = "banana"
 		})
 
-		It("deletes target pools", func() {
-			err := targetPools.Delete(filter)
+		It("lists, filters, and prompts for target pools to delete", func() {
+			list, err := targetPools.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListTargetPoolsCall.CallCount).To(Equal(1))
@@ -51,11 +50,8 @@ var _ = Describe("TargetPools", func() {
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete target pool banana-pool?"))
 
-			Expect(client.DeleteTargetPoolCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTargetPoolCall.Receives.Region).To(Equal("region-1"))
-			Expect(client.DeleteTargetPoolCall.Receives.TargetPool).To(Equal("banana-pool"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting target pool banana-pool\n"}))
+			Expect(list).To(HaveLen(1))
+			Expect(list).To(HaveKeyWithValue("banana-pool", "region-1"))
 		})
 
 		Context("when the client fails to list target pools", func() {
@@ -64,31 +60,18 @@ var _ = Describe("TargetPools", func() {
 			})
 
 			It("returns the error", func() {
-				err := targetPools.Delete(filter)
+				_, err := targetPools.List(filter)
 				Expect(err).To(MatchError("Listing target pools for region region-1: some error"))
 			})
 		})
 
 		Context("when the target pool name does not contain the filter", func() {
-			It("deletes target pools", func() {
-				err := targetPools.Delete("grape")
+			It("does not add it to the list", func() {
+				list, err := targetPools.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteTargetPoolCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the target pool", func() {
-			BeforeEach(func() {
-				client.DeleteTargetPoolCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := targetPools.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting target pool banana-pool: some error\n"}))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -97,11 +80,42 @@ var _ = Describe("TargetPools", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the target pool", func() {
-				err := targetPools.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := targetPools.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteTargetPoolCall.CallCount).To(Equal(0))
+				Expect(logger.PromptCall.CallCount).To(Equal(1))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var list map[string]string
+
+		BeforeEach(func() {
+			list = map[string]string{"banana-pool": "region-1"}
+		})
+
+		It("deletes target pools", func() {
+			targetPools.Delete(list)
+
+			Expect(client.DeleteTargetPoolCall.CallCount).To(Equal(1))
+			Expect(client.DeleteTargetPoolCall.Receives.Region).To(Equal("region-1"))
+			Expect(client.DeleteTargetPoolCall.Receives.TargetPool).To(Equal("banana-pool"))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting target pool banana-pool\n"}))
+		})
+
+		Context("when the client fails to delete a target pool", func() {
+			BeforeEach(func() {
+				client.DeleteTargetPoolCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				targetPools.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting target pool banana-pool: some error\n"}))
 			})
 		})
 	})

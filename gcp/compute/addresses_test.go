@@ -15,7 +15,6 @@ var _ = Describe("Addresses", func() {
 		client  *fakes.AddressesClient
 		logger  *fakes.Logger
 		regions map[string]string
-		filter  string
 
 		addresses compute.Addresses
 	)
@@ -23,17 +22,16 @@ var _ = Describe("Addresses", func() {
 	BeforeEach(func() {
 		client = &fakes.AddressesClient{}
 		logger = &fakes.Logger{}
-		regions = map[string]string{
-			"https://region-1": "region-1",
-		}
-		filter = "banana"
+		regions = map[string]string{"https://region-1": "region-1"}
 
 		logger.PromptCall.Returns.Proceed = true
 
 		addresses = compute.NewAddresses(client, logger, regions)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
+		var filter string
+
 		BeforeEach(func() {
 			client.ListAddressesCall.Returns.Output = &gcpcompute.AddressList{
 				Items: []*gcpcompute.Address{{
@@ -41,10 +39,11 @@ var _ = Describe("Addresses", func() {
 					Region: "https://region-1",
 				}},
 			}
+			filter = "banana"
 		})
 
-		It("deletes addresses", func() {
-			err := addresses.Delete(filter)
+		It("lists, filters, and prompts for addresses to delete", func() {
+			list, err := addresses.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAddressesCall.CallCount).To(Equal(1))
@@ -52,11 +51,8 @@ var _ = Describe("Addresses", func() {
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete address banana-address?"))
 
-			Expect(client.DeleteAddressCall.CallCount).To(Equal(1))
-			Expect(client.DeleteAddressCall.Receives.Region).To(Equal("region-1"))
-			Expect(client.DeleteAddressCall.Receives.Address).To(Equal("banana-address"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting address banana-address\n"}))
+			Expect(list).To(HaveLen(1))
+			Expect(list).To(HaveKeyWithValue("banana-address", "region-1"))
 		})
 
 		Context("when the client fails to list addresses", func() {
@@ -65,31 +61,18 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("returns the error", func() {
-				err := addresses.Delete(filter)
+				_, err := addresses.List(filter)
 				Expect(err).To(MatchError("Listing addresses for region region-1: some error"))
 			})
 		})
 
 		Context("when the address name does not contain the filter", func() {
-			It("does not try to delete it", func() {
-				err := addresses.Delete("grape")
+			It("does not add it to the list", func() {
+				list, err := addresses.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteAddressCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the address", func() {
-			BeforeEach(func() {
-				client.DeleteAddressCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := addresses.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting address banana-address: some error\n"}))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -104,12 +87,12 @@ var _ = Describe("Addresses", func() {
 				}
 			})
 
-			It("does not delete the address", func() {
-				err := addresses.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := addresses.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteAddressCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -118,11 +101,41 @@ var _ = Describe("Addresses", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the address", func() {
-				err := addresses.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := addresses.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteAddressCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var list map[string]string
+
+		BeforeEach(func() {
+			list = map[string]string{"banana-address": "region-1"}
+		})
+
+		It("deletes addresses", func() {
+			addresses.Delete(list)
+
+			Expect(client.DeleteAddressCall.CallCount).To(Equal(1))
+			Expect(client.DeleteAddressCall.Receives.Region).To(Equal("region-1"))
+			Expect(client.DeleteAddressCall.Receives.Address).To(Equal("banana-address"))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting address banana-address\n"}))
+		})
+
+		Context("when the client fails to delete the address", func() {
+			BeforeEach(func() {
+				client.DeleteAddressCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				addresses.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting address banana-address: some error\n"}))
 			})
 		})
 	})

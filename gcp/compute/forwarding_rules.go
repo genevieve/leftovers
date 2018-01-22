@@ -26,35 +26,42 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 	}
 }
 
-func (o ForwardingRules) Delete(filter string) error {
-	var rules []*gcpcompute.ForwardingRule
-	for _, region := range o.regions {
-		l, err := o.client.ListForwardingRules(region)
+func (f ForwardingRules) List(filter string) (map[string]string, error) {
+	rules := []*gcpcompute.ForwardingRule{}
+	delete := map[string]string{}
+
+	for _, region := range f.regions {
+		l, err := f.client.ListForwardingRules(region)
 		if err != nil {
-			return fmt.Errorf("Listing forwarding rules for region %s: %s", region, err)
+			return delete, fmt.Errorf("Listing forwarding rules for region %s: %s", region, err)
 		}
 		rules = append(rules, l.Items...)
 	}
 
-	for _, r := range rules {
-		n := r.Name
-
-		if !strings.Contains(n, filter) {
+	for _, rule := range rules {
+		if !strings.Contains(rule.Name, filter) {
 			continue
 		}
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete forwarding rule %s?", n))
+		proceed := f.logger.Prompt(fmt.Sprintf("Are you sure you want to delete forwarding rule %s?", rule.Name))
 		if !proceed {
 			continue
 		}
 
-		regionName := o.regions[r.Region]
-		if err := o.client.DeleteForwardingRule(regionName, n); err != nil {
-			o.logger.Printf("ERROR deleting forwarding rule %s: %s\n", n, err)
-		} else {
-			o.logger.Printf("SUCCESS deleting forwarding rule %s\n", n)
-		}
+		delete[rule.Name] = f.regions[rule.Region]
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (f ForwardingRules) Delete(forwardingRules map[string]string) {
+	for name, region := range forwardingRules {
+		err := f.client.DeleteForwardingRule(region, name)
+
+		if err != nil {
+			f.logger.Printf("ERROR deleting forwarding rule %s: %s\n", name, err)
+		} else {
+			f.logger.Printf("SUCCESS deleting forwarding rule %s\n", name)
+		}
+	}
 }

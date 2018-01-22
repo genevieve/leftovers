@@ -24,30 +24,38 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 	}
 }
 
-func (i BackendServices) Delete(filter string) error {
-	backendServices, err := i.client.ListBackendServices()
+func (b BackendServices) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	backendServices, err := b.client.ListBackendServices()
 	if err != nil {
-		return fmt.Errorf("Listing backend services: %s", err)
+		return delete, fmt.Errorf("Listing backend services: %s", err)
 	}
 
-	for _, b := range backendServices.Items {
-		n := b.Name
-
-		if !strings.Contains(n, filter) {
+	for _, backend := range backendServices.Items {
+		if !strings.Contains(backend.Name, filter) {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete backend service %s?", b.Name))
+		proceed := b.logger.Prompt(fmt.Sprintf("Are you sure you want to delete backend service %s?", backend.Name))
 		if !proceed {
 			continue
 		}
 
-		if err := i.client.DeleteBackendService(b.Name); err != nil {
-			i.logger.Printf("ERROR deleting backend service %s: %s\n", b.Name, err)
-		} else {
-			i.logger.Printf("SUCCESS deleting backend service %s\n", b.Name)
-		}
+		delete[backend.Name] = ""
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (b BackendServices) Delete(backendServices map[string]string) {
+	for name, _ := range backendServices {
+		err := b.client.DeleteBackendService(name)
+
+		if err != nil {
+			b.logger.Printf("ERROR deleting backend service %s: %s\n", name, err)
+		} else {
+			b.logger.Printf("SUCCESS deleting backend service %s\n", name)
+		}
+	}
 }

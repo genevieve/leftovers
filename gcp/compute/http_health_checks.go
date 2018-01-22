@@ -24,30 +24,38 @@ func NewHttpHealthChecks(client httpHealthChecksClient, logger logger) HttpHealt
 	}
 }
 
-func (i HttpHealthChecks) Delete(filter string) error {
-	httpHealthChecks, err := i.client.ListHttpHealthChecks()
+func (h HttpHealthChecks) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	checks, err := h.client.ListHttpHealthChecks()
 	if err != nil {
-		return fmt.Errorf("Listing http health checks: %s", err)
+		return delete, fmt.Errorf("Listing http health checks: %s", err)
 	}
 
-	for _, check := range httpHealthChecks.Items {
-		n := check.Name
-
-		if !strings.Contains(n, filter) {
+	for _, check := range checks.Items {
+		if !strings.Contains(check.Name, filter) {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete http health check %s?", n))
+		proceed := h.logger.Prompt(fmt.Sprintf("Are you sure you want to delete http health check %s?", check.Name))
 		if !proceed {
 			continue
 		}
 
-		if err := i.client.DeleteHttpHealthCheck(n); err != nil {
-			i.logger.Printf("ERROR deleting http health check %s: %s\n", n, err)
-		} else {
-			i.logger.Printf("SUCCESS deleting http health check %s\n", n)
-		}
+		delete[check.Name] = ""
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (h HttpHealthChecks) Delete(checks map[string]string) {
+	for name, _ := range checks {
+		err := h.client.DeleteHttpHealthCheck(name)
+
+		if err != nil {
+			h.logger.Printf("ERROR deleting http health check %s: %s\n", name, err)
+		} else {
+			h.logger.Printf("SUCCESS deleting http health check %s\n", name)
+		}
+	}
 }

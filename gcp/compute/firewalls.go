@@ -24,30 +24,38 @@ func NewFirewalls(client firewallsClient, logger logger) Firewalls {
 	}
 }
 
-func (i Firewalls) Delete(filter string) error {
-	firewalls, err := i.client.ListFirewalls()
+func (f Firewalls) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	firewalls, err := f.client.ListFirewalls()
 	if err != nil {
-		return fmt.Errorf("Listing firewalls: %s", err)
+		return delete, fmt.Errorf("Listing firewalls: %s", err)
 	}
 
-	for _, f := range firewalls.Items {
-		n := f.Name
-
-		if !strings.Contains(n, filter) {
+	for _, firewall := range firewalls.Items {
+		if !strings.Contains(firewall.Name, filter) {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete firewall %s?", n))
+		proceed := f.logger.Prompt(fmt.Sprintf("Are you sure you want to delete firewall %s?", firewall.Name))
 		if !proceed {
 			continue
 		}
 
-		if err := i.client.DeleteFirewall(n); err != nil {
-			i.logger.Printf("ERROR deleting firewall %s: %s\n", n, err)
-		} else {
-			i.logger.Printf("SUCCESS deleting firewall %s\n", n)
-		}
+		delete[firewall.Name] = ""
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (f Firewalls) Delete(firewalls map[string]string) {
+	for name, _ := range firewalls {
+		err := f.client.DeleteFirewall(name)
+
+		if err != nil {
+			f.logger.Printf("ERROR deleting firewall %s: %s\n", name, err)
+		} else {
+			f.logger.Printf("SUCCESS deleting firewall %s\n", name)
+		}
+	}
 }

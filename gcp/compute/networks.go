@@ -24,34 +24,38 @@ func NewNetworks(client networksClient, logger logger) Networks {
 	}
 }
 
-func (e Networks) Delete(filter string) error {
-	networks, err := e.client.ListNetworks()
+func (n Networks) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	networks, err := n.client.ListNetworks()
 	if err != nil {
-		return fmt.Errorf("Listing networks: %s", err)
+		return delete, fmt.Errorf("Listing networks: %s", err)
 	}
 
-	for _, t := range networks.Items {
-		n := t.Name
-
-		if !strings.Contains(n, filter) {
+	for _, network := range networks.Items {
+		if !strings.Contains(network.Name, filter) {
 			continue
 		}
 
-		if n == "default" {
-			continue
-		}
-
-		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete network %s?", n))
+		proceed := n.logger.Prompt(fmt.Sprintf("Are you sure you want to delete network %s?", network.Name))
 		if !proceed {
 			continue
 		}
 
-		if err := e.client.DeleteNetwork(n); err != nil {
-			e.logger.Printf("ERROR deleting network %s: %s\n", n, err)
-		} else {
-			e.logger.Printf("SUCCESS deleting network %s\n", n)
-		}
+		delete[network.Name] = ""
 	}
 
-	return nil
+	return delete, nil
+}
+
+func (n Networks) Delete(networks map[string]string) {
+	for name, _ := range networks {
+		err := n.client.DeleteNetwork(name)
+
+		if err != nil {
+			n.logger.Printf("ERROR deleting network %s: %s\n", name, err)
+		} else {
+			n.logger.Printf("SUCCESS deleting network %s\n", name)
+		}
+	}
 }

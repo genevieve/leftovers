@@ -14,7 +14,6 @@ var _ = Describe("HttpHealthChecks", func() {
 	var (
 		client *fakes.HttpHealthChecksClient
 		logger *fakes.Logger
-		filter string
 
 		httpHealthChecks compute.HttpHealthChecks
 	)
@@ -22,12 +21,13 @@ var _ = Describe("HttpHealthChecks", func() {
 	BeforeEach(func() {
 		client = &fakes.HttpHealthChecksClient{}
 		logger = &fakes.Logger{}
-		filter = "banana"
 
 		httpHealthChecks = compute.NewHttpHealthChecks(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListHttpHealthChecksCall.Returns.Output = &gcpcompute.HttpHealthCheckList{
@@ -35,20 +35,19 @@ var _ = Describe("HttpHealthChecks", func() {
 					Name: "banana-check",
 				}},
 			}
+			filter = "banana"
 		})
 
-		It("deletes http health checks", func() {
-			err := httpHealthChecks.Delete(filter)
+		It("lists, filters, and prompts for http health checks to delete", func() {
+			list, err := httpHealthChecks.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListHttpHealthChecksCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete http health check banana-check?"))
 
-			Expect(client.DeleteHttpHealthCheckCall.CallCount).To(Equal(1))
-			Expect(client.DeleteHttpHealthCheckCall.Receives.HttpHealthCheck).To(Equal("banana-check"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting http health check banana-check\n"}))
+			Expect(list).To(HaveLen(1))
+			Expect(list).To(HaveKeyWithValue("banana-check", ""))
 		})
 
 		Context("when the client fails to list http health checks", func() {
@@ -57,31 +56,18 @@ var _ = Describe("HttpHealthChecks", func() {
 			})
 
 			It("returns the error", func() {
-				err := httpHealthChecks.Delete(filter)
+				_, err := httpHealthChecks.List(filter)
 				Expect(err).To(MatchError("Listing http health checks: some error"))
 			})
 		})
 
 		Context("when the health check name does not contain the filter", func() {
-			It("does not try to delete it", func() {
-				err := httpHealthChecks.Delete("grape")
+			It("does not add it to the list", func() {
+				list, err := httpHealthChecks.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteHttpHealthCheckCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the http health check", func() {
-			BeforeEach(func() {
-				client.DeleteHttpHealthCheckCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := httpHealthChecks.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting http health check banana-check: some error\n"}))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 
@@ -90,11 +76,41 @@ var _ = Describe("HttpHealthChecks", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the http health check", func() {
-				err := httpHealthChecks.Delete(filter)
+			It("does not add it to the list", func() {
+				list, err := httpHealthChecks.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteHttpHealthCheckCall.CallCount).To(Equal(0))
+				Expect(logger.PromptCall.CallCount).To(Equal(1))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var list map[string]string
+
+		BeforeEach(func() {
+			list = map[string]string{"banana-check": ""}
+		})
+
+		It("deletes http health checks", func() {
+			httpHealthChecks.Delete(list)
+
+			Expect(client.DeleteHttpHealthCheckCall.CallCount).To(Equal(1))
+			Expect(client.DeleteHttpHealthCheckCall.Receives.HttpHealthCheck).To(Equal("banana-check"))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting http health check banana-check\n"}))
+		})
+
+		Context("when the client fails to delete a http health check", func() {
+			BeforeEach(func() {
+				client.DeleteHttpHealthCheckCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				httpHealthChecks.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting http health check banana-check: some error\n"}))
 			})
 		})
 	})
