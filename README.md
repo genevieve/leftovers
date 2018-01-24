@@ -30,6 +30,7 @@ infrastructure resources were tragically orphaned
 + ec2 network interfaces
 + elb load balancers
 + elbv2 load balancers
++ elbv2 target groups
 + s3 buckets
 ```
 
