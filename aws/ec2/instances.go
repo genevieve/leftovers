@@ -36,7 +36,7 @@ func (a Instances) Delete(filter string) error {
 				continue
 			}
 
-			n := a.clearerName(*i.InstanceId, i.Tags)
+			n := a.clearerName(*i.InstanceId, i.Tags, *i.KeyName)
 
 			if !strings.Contains(n, filter) {
 				continue
@@ -65,10 +65,14 @@ func (a Instances) alreadyShutdown(state string) bool {
 	return state == "shutting-down" || state == "terminated"
 }
 
-func (a Instances) clearerName(id string, tags []*awsec2.Tag) string {
+func (a Instances) clearerName(id string, tags []*awsec2.Tag, keyName string) string {
 	extra := []string{}
 	for _, t := range tags {
 		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
+	}
+
+	if keyName != "" {
+		extra = append(extra, fmt.Sprintf("KeyPairName:%s", keyName))
 	}
 
 	if len(extra) > 0 {

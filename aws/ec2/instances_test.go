@@ -40,6 +40,7 @@ var _ = Describe("Instances", func() {
 							Value: aws.String("banana-instance"),
 						}},
 						InstanceId: aws.String("the-instance-id"),
+						KeyName:    aws.String(""),
 					}},
 				}},
 			}
@@ -76,6 +77,7 @@ var _ = Describe("Instances", func() {
 						Instances: []*awsec2.Instance{{
 							State:      &awsec2.InstanceState{Name: aws.String("available")},
 							InstanceId: aws.String("the-instance-id"),
+							KeyName:    aws.String(""),
 						}},
 					}},
 				}
@@ -87,6 +89,28 @@ var _ = Describe("Instances", func() {
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id?"))
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id\n"}))
+			})
+		})
+
+		Context("when there is a key name", func() {
+			BeforeEach(func() {
+				client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
+					Reservations: []*awsec2.Reservation{{
+						Instances: []*awsec2.Instance{{
+							State:      &awsec2.InstanceState{Name: aws.String("available")},
+							InstanceId: aws.String("the-instance-id"),
+							KeyName:    aws.String("the-key-pair"),
+						}},
+					}},
+				}
+			})
+
+			It("uses just the instance id in the prompt", func() {
+				err := instances.Delete(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (KeyPairName:the-key-pair)?"))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id (KeyPairName:the-key-pair)\n"}))
 			})
 		})
 
