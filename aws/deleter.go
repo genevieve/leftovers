@@ -90,10 +90,11 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) (Del
 
 	l1 := elb.NewLoadBalancers(elbClient, logger)
 	l2 := elbv2.NewLoadBalancers(elbv2Client, logger)
+	tg := elbv2.NewTargetGroups(elbv2Client, logger)
 
 	bu := s3.NewBuckets(s3Client, logger, bucketManager)
 
-	resources := []resource{ip, ro, us, us, po, l1, l2, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
+	resources := []resource{ip, ro, us, us, po, l1, l2, tg, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
 
 	return Deleter{
 		resources: resources,
