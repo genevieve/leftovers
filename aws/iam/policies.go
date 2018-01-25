@@ -2,6 +2,7 @@ package iam
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
@@ -24,7 +25,7 @@ func NewPolicies(client policiesClient, logger logger) Policies {
 	}
 }
 
-func (o Policies) Delete() error {
+func (o Policies) Delete(filter string) error {
 	policies, err := o.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
 	if err != nil {
 		return fmt.Errorf("Listing policies: %s", err)
@@ -32,6 +33,10 @@ func (o Policies) Delete() error {
 
 	for _, p := range policies.Policies {
 		n := *p.PolicyName
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete policy %s?", n))
 		if !proceed {

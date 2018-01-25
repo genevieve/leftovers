@@ -2,6 +2,7 @@ package iam
 
 import (
 	"fmt"
+	"strings"
 
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
@@ -27,7 +28,7 @@ func NewUsers(client usersClient, logger logger, policies userPolicies, accessKe
 	}
 }
 
-func (o Users) Delete() error {
+func (o Users) Delete(filter string) error {
 	users, err := o.client.ListUsers(&awsiam.ListUsersInput{})
 	if err != nil {
 		return fmt.Errorf("Listing users: %s", err)
@@ -35,6 +36,10 @@ func (o Users) Delete() error {
 
 	for _, r := range users.Users {
 		n := *r.UserName
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user %s?", n))
 		if !proceed {

@@ -16,17 +16,19 @@ var _ = Describe("Addresses", func() {
 		client *fakes.AddressesClient
 		logger *fakes.Logger
 
-		keys ec2.Addresses
+		addresses ec2.Addresses
 	)
 
 	BeforeEach(func() {
 		client = &fakes.AddressesClient{}
 		logger = &fakes.Logger{}
 
-		keys = ec2.NewAddresses(client, logger)
+		addresses = ec2.NewAddresses(client, logger)
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeAddressesCall.Returns.Output = &awsec2.DescribeAddressesOutput{
@@ -36,10 +38,11 @@ var _ = Describe("Addresses", func() {
 					InstanceId:   aws.String(""),
 				}},
 			}
+			filter = "ban"
 		})
 
 		It("releases ec2 addresses", func() {
-			err := keys.Delete()
+			err := addresses.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
@@ -48,6 +51,19 @@ var _ = Describe("Addresses", func() {
 			Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
 			Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(aws.String("the-allocation-id")))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS releasing address banana\n"}))
+		})
+
+		Context("when the address name does not contain the filter", func() {
+			// It may not be named after the environment
+			PIt("does not try to release it", func() {
+				err := addresses.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.ReleaseAddressCall.CallCount).To(Equal(0))
+			})
 		})
 
 		Context("when the address is in use by an instance", func() {
@@ -61,7 +77,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not try to release it", func() {
-				err := keys.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
@@ -76,7 +92,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not try releasing them", func() {
-				err := keys.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).To(MatchError("Describing addresses: some error"))
 
 				Expect(client.ReleaseAddressCall.CallCount).To(Equal(0))
@@ -89,7 +105,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("returns the error", func() {
-				err := keys.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR releasing address banana: some error\n"}))
@@ -102,7 +118,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not release the address", func() {
-				err := keys.Delete()
+				err := addresses.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to release address banana?"))

@@ -2,6 +2,7 @@ package ec2
 
 import (
 	"fmt"
+	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -23,7 +24,7 @@ func NewKeyPairs(client keyPairClient, logger logger) KeyPairs {
 	}
 }
 
-func (a KeyPairs) Delete() error {
+func (a KeyPairs) Delete(filter string) error {
 	keyPairs, err := a.client.DescribeKeyPairs(&awsec2.DescribeKeyPairsInput{})
 	if err != nil {
 		return fmt.Errorf("Describing key pairs: %s", err)
@@ -31,6 +32,10 @@ func (a KeyPairs) Delete() error {
 
 	for _, t := range keyPairs.KeyPairs {
 		n := *t.KeyName
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete key pair %s?", n))
 		if !proceed {

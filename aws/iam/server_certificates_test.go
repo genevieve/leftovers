@@ -27,22 +27,27 @@ var _ = Describe("ServerCertificates", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListServerCertificatesCall.Returns.Output = &awsiam.ListServerCertificatesOutput{
 				ServerCertificateMetadataList: []*awsiam.ServerCertificateMetadata{{
-					ServerCertificateName: aws.String("banana"),
+					ServerCertificateName: aws.String("banana-cert"),
 				}},
 			}
 		})
 
 		It("deletes iam server certificates", func() {
-			err := serverCertificates.Delete()
+			err := serverCertificates.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
+			Expect(logger.PromptCall.CallCount).To(Equal(1))
+
 			Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
-			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana")))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana\n"}))
+			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana-cert")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana-cert\n"}))
 		})
 
 		Context("when the client fails to list server certificates", func() {
@@ -51,9 +56,19 @@ var _ = Describe("ServerCertificates", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := serverCertificates.Delete()
+				err := serverCertificates.Delete(filter)
 				Expect(err).To(MatchError("Listing server certificates: some error"))
 
+				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the certificate name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := serverCertificates.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})
 		})
@@ -64,10 +79,10 @@ var _ = Describe("ServerCertificates", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := serverCertificates.Delete()
+				err := serverCertificates.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana-cert: some error\n"}))
 			})
 		})
 
@@ -77,10 +92,10 @@ var _ = Describe("ServerCertificates", func() {
 			})
 
 			It("does not delete the server certificate", func() {
-				err := serverCertificates.Delete()
+				err := serverCertificates.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete server certificate banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete server certificate banana-cert?"))
 				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})
 		})

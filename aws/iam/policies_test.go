@@ -27,24 +27,29 @@ var _ = Describe("Policies", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListPoliciesCall.Returns.Output = &awsiam.ListPoliciesOutput{
 				Policies: []*awsiam.Policy{{
 					Arn:        aws.String("the-policy-arn"),
-					PolicyName: aws.String("banana"),
+					PolicyName: aws.String("banana-policy"),
 				}},
 			}
+			filter = "banana"
 		})
 
 		It("deletes iam policies and associated policies", func() {
-			err := policies.Delete()
+			err := policies.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListPoliciesCall.CallCount).To(Equal(1))
+
 			Expect(client.DeletePolicyCall.CallCount).To(Equal(1))
 			Expect(client.DeletePolicyCall.Receives.Input.PolicyArn).To(Equal(aws.String("the-policy-arn")))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting policy banana\n"}))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting policy banana-policy\n"}))
 		})
 
 		Context("when the client fails to list policies", func() {
@@ -53,9 +58,19 @@ var _ = Describe("Policies", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := policies.Delete()
+				err := policies.Delete(filter)
 				Expect(err).To(MatchError("Listing policies: some error"))
 
+				Expect(client.DeletePolicyCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the policy name does not contain the filter", func() {
+			It("does not try to delete it", func() {
+				err := policies.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeletePolicyCall.CallCount).To(Equal(0))
 			})
 		})
@@ -66,10 +81,10 @@ var _ = Describe("Policies", func() {
 			})
 
 			It("logs the error", func() {
-				err := policies.Delete()
+				err := policies.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting policy banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting policy banana-policy: some error\n"}))
 			})
 		})
 
@@ -79,10 +94,10 @@ var _ = Describe("Policies", func() {
 			})
 
 			It("does not delete the policy", func() {
-				err := policies.Delete()
+				err := policies.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete policy banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete policy banana-policy?"))
 				Expect(client.DeletePolicyCall.CallCount).To(Equal(0))
 			})
 		})

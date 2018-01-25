@@ -2,6 +2,7 @@ package elbv2
 
 import (
 	"fmt"
+	"strings"
 
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 )
@@ -23,7 +24,7 @@ func NewTargetGroups(client targetGroupsClient, logger logger) TargetGroups {
 	}
 }
 
-func (t TargetGroups) Delete() error {
+func (t TargetGroups) Delete(filter string) error {
 	targetGroups, err := t.client.DescribeTargetGroups(&awselbv2.DescribeTargetGroupsInput{})
 	if err != nil {
 		return fmt.Errorf("Describing target groups: %s", err)
@@ -31,6 +32,10 @@ func (t TargetGroups) Delete() error {
 
 	for _, g := range targetGroups.TargetGroups {
 		n := *g.TargetGroupName
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target group %s?", n))
 		if !proceed {

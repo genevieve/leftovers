@@ -27,6 +27,8 @@ var _ = Describe("Volumes", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
@@ -35,15 +37,24 @@ var _ = Describe("Volumes", func() {
 					State:    aws.String("available"),
 				}},
 			}
+			filter = "ban"
 		})
 
 		It("deletes ec2 volumes", func() {
-			err := volumes.Delete()
+			err := volumes.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
+
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete volume banana?"))
 
 			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
 			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(aws.String("banana")))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting volume banana\n"}))
+		})
+
+		PContext("when the volume name does not contain the filter", func() {
+			//Volumes do not have names/tags from the environment
 		})
 
 		Context("when the client fails to list volumes", func() {
@@ -52,7 +63,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := volumes.Delete()
+				err := volumes.Delete(filter)
 				Expect(err).To(MatchError("Describing volumes: some error"))
 
 				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
@@ -65,7 +76,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("logs the error", func() {
-				err := volumes.Delete()
+				err := volumes.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting volume banana: some error\n"}))
@@ -78,7 +89,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("does not delete the volume", func() {
-				err := volumes.Delete()
+				err := volumes.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete volume banana?"))
@@ -97,7 +108,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("does not prompt the user and it does not delete it", func() {
-				err := volumes.Delete()
+				err := volumes.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))

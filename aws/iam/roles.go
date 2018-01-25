@@ -2,6 +2,7 @@ package iam
 
 import (
 	"fmt"
+	"strings"
 
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
@@ -25,7 +26,7 @@ func NewRoles(client rolesClient, logger logger, policies rolePolicies) Roles {
 	}
 }
 
-func (o Roles) Delete() error {
+func (o Roles) Delete(filter string) error {
 	roles, err := o.client.ListRoles(&awsiam.ListRolesInput{})
 	if err != nil {
 		return fmt.Errorf("Listing roles: %s", err)
@@ -33,6 +34,10 @@ func (o Roles) Delete() error {
 
 	for _, r := range roles.Roles {
 		n := *r.RoleName
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role %s?", n))
 		if !proceed {

@@ -27,6 +27,8 @@ var _ = Describe("KeyPairs", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeKeyPairsCall.Returns.Output = &awsec2.DescribeKeyPairsOutput{
@@ -34,10 +36,11 @@ var _ = Describe("KeyPairs", func() {
 					KeyName: aws.String("banana"),
 				}},
 			}
+			filter = "ban"
 		})
 
 		It("deletes ec2 key pairs", func() {
-			err := keys.Delete()
+			err := keys.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeKeyPairsCall.CallCount).To(Equal(1))
@@ -53,9 +56,20 @@ var _ = Describe("KeyPairs", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := keys.Delete()
+				err := keys.Delete(filter)
 				Expect(err).To(MatchError("Describing key pairs: some error"))
 
+				Expect(client.DeleteKeyPairCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the key pair name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := keys.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeKeyPairsCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteKeyPairCall.CallCount).To(Equal(0))
 			})
 		})
@@ -66,7 +80,7 @@ var _ = Describe("KeyPairs", func() {
 			})
 
 			It("returns the error", func() {
-				err := keys.Delete()
+				err := keys.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting key pair banana: some error\n"}))
@@ -79,7 +93,7 @@ var _ = Describe("KeyPairs", func() {
 			})
 
 			It("does not delete the key pair", func() {
-				err := keys.Delete()
+				err := keys.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete key pair banana?"))

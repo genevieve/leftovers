@@ -33,6 +33,8 @@ var _ = Describe("Vpcs", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeVpcsCall.Returns.Output = &awsec2.DescribeVpcsOutput{
@@ -45,10 +47,11 @@ var _ = Describe("Vpcs", func() {
 					VpcId: aws.String("the-vpc-id"),
 				}},
 			}
+			filter = "ban"
 		})
 
 		It("deletes ec2 vpcs", func() {
-			err := vpcs.Delete()
+			err := vpcs.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVpcsCall.CallCount).To(Equal(1))
@@ -69,6 +72,20 @@ var _ = Describe("Vpcs", func() {
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting vpc the-vpc-id (Name:banana)\n"}))
 		})
 
+		Context("when the vpc tags contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := vpcs.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeVpcsCall.CallCount).To(Equal(1))
+
+				Expect(routes.DeleteCall.CallCount).To(Equal(0))
+				Expect(subnets.DeleteCall.CallCount).To(Equal(0))
+				Expect(gateways.DeleteCall.CallCount).To(Equal(0))
+				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
+			})
+		})
+
 		Context("when the vpc is a default", func() {
 			BeforeEach(func() {
 				client.DescribeVpcsCall.Returns.Output = &awsec2.DescribeVpcsOutput{
@@ -80,7 +97,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("does not try deleting it", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(gateways.DeleteCall.CallCount).To(Equal(0))
@@ -99,7 +116,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("uses just the vpc id in the prompt", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete vpc the-vpc-id?"))
@@ -113,7 +130,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).To(MatchError("Describing vpcs: some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
@@ -126,7 +143,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("returns the error", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).To(MatchError("Deleting routes for the-vpc-id (Name:banana): some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
@@ -139,7 +156,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("returns the error", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).To(MatchError("Deleting subnets for the-vpc-id (Name:banana): some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
@@ -152,7 +169,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("returns the error", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).To(MatchError("Deleting internet gateways for the-vpc-id (Name:banana): some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
@@ -165,7 +182,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("logs the error", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting vpc the-vpc-id (Name:banana): some error\n"}))
@@ -178,7 +195,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("does not delete the vpc", func() {
-				err := vpcs.Delete()
+				err := vpcs.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete vpc the-vpc-id (Name:banana)?"))

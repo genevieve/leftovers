@@ -2,6 +2,7 @@ package elbv2
 
 import (
 	"fmt"
+	"strings"
 
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 )
@@ -23,7 +24,7 @@ func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	}
 }
 
-func (o LoadBalancers) Delete() error {
+func (o LoadBalancers) Delete(filter string) error {
 	loadBalancers, err := o.client.DescribeLoadBalancers(&awselbv2.DescribeLoadBalancersInput{})
 	if err != nil {
 		return fmt.Errorf("Describing load balancers: %s", err)
@@ -31,6 +32,10 @@ func (o LoadBalancers) Delete() error {
 
 	for _, l := range loadBalancers.LoadBalancers {
 		n := *l.LoadBalancerName
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete load balancer %s?", n))
 		if !proceed {

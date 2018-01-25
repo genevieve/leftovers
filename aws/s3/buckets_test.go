@@ -30,6 +30,8 @@ var _ = Describe("Buckets", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListBucketsCall.Returns.Output = &awss3.ListBucketsOutput{
@@ -38,10 +40,11 @@ var _ = Describe("Buckets", func() {
 				}},
 			}
 			manager.IsInRegionCall.Returns.Output = true
+			filter = "ban"
 		})
 
 		It("deletes s3 buckets", func() {
-			err := buckets.Delete()
+			err := buckets.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
@@ -62,9 +65,20 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := buckets.Delete()
+				err := buckets.Delete(filter)
 				Expect(err).To(MatchError("Listing buckets: some error"))
 
+				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the bucket name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := buckets.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(manager.IsInRegionCall.CallCount).To(Equal(0))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
 			})
 		})
@@ -75,7 +89,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("does not delete the bucket", func() {
-				err := buckets.Delete()
+				err := buckets.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
@@ -88,7 +102,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("logs the error", func() {
-				err := buckets.Delete()
+				err := buckets.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some error\n"}))
@@ -102,7 +116,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("logs the error", func() {
-				err := buckets.Delete()
+				err := buckets.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some other error\n"}))
@@ -115,7 +129,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("does not delete the bucket", func() {
-				err := buckets.Delete()
+				err := buckets.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))

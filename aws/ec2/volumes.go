@@ -23,7 +23,7 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 	}
 }
 
-func (o Volumes) Delete() error {
+func (o Volumes) Delete(filter string) error {
 	volumes, err := o.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
 	if err != nil {
 		return fmt.Errorf("Describing volumes: %s", err)

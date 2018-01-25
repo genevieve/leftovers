@@ -2,6 +2,7 @@ package s3
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
@@ -29,7 +30,7 @@ func NewBuckets(client bucketsClient, logger logger, manager bucketManager) Buck
 	}
 }
 
-func (u Buckets) Delete() error {
+func (u Buckets) Delete(filter string) error {
 	buckets, err := u.client.ListBuckets(&awss3.ListBucketsInput{})
 	if err != nil {
 		return fmt.Errorf("Listing buckets: %s", err)
@@ -37,6 +38,10 @@ func (u Buckets) Delete() error {
 
 	for _, b := range buckets.Buckets {
 		n := *b.Name
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		if !u.manager.IsInRegion(n) {
 			continue

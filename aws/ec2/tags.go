@@ -2,6 +2,7 @@ package ec2
 
 import (
 	"fmt"
+	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -23,7 +24,7 @@ func NewTags(client tagsClient, logger logger) Tags {
 	}
 }
 
-func (a Tags) Delete() error {
+func (a Tags) Delete(filter string) error {
 	tags, err := a.client.DescribeTags(&awsec2.DescribeTagsInput{})
 	if err != nil {
 		return fmt.Errorf("Describing tags: %s", err)
@@ -31,6 +32,11 @@ func (a Tags) Delete() error {
 
 	for _, t := range tags.Tags {
 		n := *t.Value
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
+
 		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete tag %s?", n))
 		if !proceed {
 			continue

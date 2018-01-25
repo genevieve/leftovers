@@ -27,27 +27,33 @@ var _ = Describe("Tags", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeTagsCall.Returns.Output = &awsec2.DescribeTagsOutput{
 				Tags: []*awsec2.TagDescription{{
 					Key:        aws.String("the-key"),
-					Value:      aws.String("banana"),
+					Value:      aws.String("banana-tag"),
 					ResourceId: aws.String("the-resource-id"),
 				}},
 			}
+			filter = "banana"
 		})
 
 		It("deletes ec2 tags", func() {
-			err := tags.Delete()
+			err := tags.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
+
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete tag banana-tag?"))
+
 			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
 			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(aws.String("the-key")))
 			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(aws.String("the-resource-id")))
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete tag banana?"))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting tag banana\n"}))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting tag banana-tag\n"}))
 		})
 
 		Context("when the client fails to list tags", func() {
@@ -55,10 +61,21 @@ var _ = Describe("Tags", func() {
 				client.DescribeTagsCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try deleting them", func() {
-				err := tags.Delete()
+			It("returns the error", func() {
+				err := tags.Delete(filter)
 				Expect(err).To(MatchError("Describing tags: some error"))
 
+				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the tag name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := tags.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
 			})
 		})
@@ -69,10 +86,10 @@ var _ = Describe("Tags", func() {
 			})
 
 			It("logs the error", func() {
-				err := tags.Delete()
+				err := tags.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting tag banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting tag banana-tag: some error\n"}))
 			})
 		})
 
@@ -82,10 +99,10 @@ var _ = Describe("Tags", func() {
 			})
 
 			It("does not delete the tag", func() {
-				err := tags.Delete()
+				err := tags.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete tag banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete tag banana-tag?"))
 				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
 			})
 		})

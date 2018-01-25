@@ -27,6 +27,8 @@ var _ = Describe("NetworkInterfaces", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeNetworkInterfacesCall.Returns.Output = &awsec2.DescribeNetworkInterfacesOutput{
@@ -34,10 +36,11 @@ var _ = Describe("NetworkInterfaces", func() {
 					NetworkInterfaceId: aws.String("banana"),
 				}},
 			}
+			filter = "ban"
 		})
 
 		It("deletes network interfaces", func() {
-			err := networkInterfaces.Delete()
+			err := networkInterfaces.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeNetworkInterfacesCall.CallCount).To(Equal(1))
@@ -46,6 +49,30 @@ var _ = Describe("NetworkInterfaces", func() {
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network interface banana?"))
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network interface banana\n"}))
+		})
+
+		Context("when the client fails to list network interfaces", func() {
+			BeforeEach(func() {
+				client.DescribeNetworkInterfacesCall.Returns.Error = errors.New("some error")
+			})
+
+			It("does not try deleting them", func() {
+				err := networkInterfaces.Delete(filter)
+				Expect(err).To(MatchError("Describing network interfaces: some error"))
+
+				Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the network interface name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := networkInterfaces.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeNetworkInterfacesCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(0))
+			})
 		})
 
 		Context("when the network interface has tags", func() {
@@ -62,24 +89,11 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 
 			It("uses them in the prompt", func() {
-				err := networkInterfaces.Delete()
+				err := networkInterfaces.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network interface banana (the-key:the-value)?"))
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network interface banana (the-key:the-value)\n"}))
-			})
-		})
-
-		Context("when the client fails to list network interfaces", func() {
-			BeforeEach(func() {
-				client.DescribeNetworkInterfacesCall.Returns.Error = errors.New("some error")
-			})
-
-			It("does not try deleting them", func() {
-				err := networkInterfaces.Delete()
-				Expect(err).To(MatchError("Describing network interfaces: some error"))
-
-				Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(0))
 			})
 		})
 
@@ -89,7 +103,7 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 
 			It("returns the error", func() {
-				err := networkInterfaces.Delete()
+				err := networkInterfaces.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network interface banana: some error\n"}))
@@ -102,7 +116,7 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 
 			It("does not delete the network interface", func() {
-				err := networkInterfaces.Delete()
+				err := networkInterfaces.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network interface banana?"))

@@ -25,7 +25,7 @@ func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceP
 	}
 }
 
-func (i InstanceProfiles) Delete() error {
+func (i InstanceProfiles) Delete(filter string) error {
 	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
 	if err != nil {
 		return fmt.Errorf("Listing instance profiles: %s", err)
@@ -33,6 +33,10 @@ func (i InstanceProfiles) Delete() error {
 
 	for _, p := range profiles.InstanceProfiles {
 		n := i.clearerName(*p.InstanceProfileName, p.Roles)
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", n))
 		if !proceed {

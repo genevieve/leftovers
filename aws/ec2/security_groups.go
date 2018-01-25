@@ -26,7 +26,7 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 	}
 }
 
-func (e SecurityGroups) Delete() error {
+func (e SecurityGroups) Delete(filter string) error {
 	groups, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
 		return fmt.Errorf("Describing security groups: %s", err)
@@ -38,6 +38,10 @@ func (e SecurityGroups) Delete() error {
 		}
 
 		n := e.clearerName(*s.GroupName, s.Tags)
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete security group %s?", n))
 		if !proceed {

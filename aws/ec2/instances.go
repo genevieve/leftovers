@@ -24,7 +24,7 @@ func NewInstances(client instancesClient, logger logger) Instances {
 	}
 }
 
-func (a Instances) Delete() error {
+func (a Instances) Delete(filter string) error {
 	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
 	if err != nil {
 		return fmt.Errorf("Describing instances: %s", err)
@@ -37,6 +37,10 @@ func (a Instances) Delete() error {
 			}
 
 			n := a.clearerName(*i.InstanceId, i.Tags)
+
+			if !strings.Contains(n, filter) {
+				continue
+			}
 
 			proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to terminate instance %s?", n))
 			if !proceed {

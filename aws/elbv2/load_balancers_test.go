@@ -27,6 +27,8 @@ var _ = Describe("LoadBalancers", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.DescribeLoadBalancersCall.Returns.Output = &awselbv2.DescribeLoadBalancersOutput{
@@ -35,16 +37,20 @@ var _ = Describe("LoadBalancers", func() {
 					LoadBalancerArn:  aws.String("the-arn"),
 				}},
 			}
+			filter = "banana"
 		})
 
 		It("deletes elbv2 load balancers", func() {
-			err := loadBalancers.Delete()
+			err := loadBalancers.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
+
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))
+
 			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
 			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerArn).To(Equal(aws.String("the-arn")))
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))
+
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting load balancer banana\n"}))
 		})
 
@@ -54,9 +60,20 @@ var _ = Describe("LoadBalancers", func() {
 			})
 
 			It("does not try deleting them", func() {
-				err := loadBalancers.Delete()
+				err := loadBalancers.Delete(filter)
 				Expect(err).To(MatchError("Describing load balancers: some error"))
 
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the load balancer name does not contain the filter", func() {
+			It("does not try deleting it", func() {
+				err := loadBalancers.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
 			})
 		})
@@ -67,7 +84,7 @@ var _ = Describe("LoadBalancers", func() {
 			})
 
 			It("logs the error", func() {
-				err := loadBalancers.Delete()
+				err := loadBalancers.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting load balancer banana: some error\n"}))
@@ -80,7 +97,7 @@ var _ = Describe("LoadBalancers", func() {
 			})
 
 			It("does not delete the load balancer", func() {
-				err := loadBalancers.Delete()
+				err := loadBalancers.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))

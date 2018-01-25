@@ -27,25 +27,40 @@ var _ = Describe("InstanceProfiles", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListInstanceProfilesCall.Returns.Output = &awsiam.ListInstanceProfilesOutput{
 				InstanceProfiles: []*awsiam.InstanceProfile{{
-					InstanceProfileName: aws.String("banana"),
+					InstanceProfileName: aws.String("banana-profile"),
 				}},
 			}
+			filter = "banana"
 		})
 
 		It("deletes iam instance profiles and detaches roles", func() {
-			err := instanceProfiles.Delete()
+			err := instanceProfiles.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
+			Expect(logger.PromptCall.CallCount).To(Equal(1))
+
 			Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
-			Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana")))
+			Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana-profile")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting instance profile banana\n",
+				"SUCCESS deleting instance profile banana-profile\n",
 			}))
+		})
+
+		Context("when the instance profile name does not contain the filter", func() {
+			It("does not delete it", func() {
+				err := instanceProfiles.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(0))
+			})
 		})
 
 		Context("when the client fails to list instance profiles", func() {
@@ -54,7 +69,7 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := instanceProfiles.Delete()
+				err := instanceProfiles.Delete(filter)
 				Expect(err).To(MatchError("Listing instance profiles: listing error"))
 
 				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(0))
@@ -65,26 +80,26 @@ var _ = Describe("InstanceProfiles", func() {
 			BeforeEach(func() {
 				client.ListInstanceProfilesCall.Returns.Output = &awsiam.ListInstanceProfilesOutput{
 					InstanceProfiles: []*awsiam.InstanceProfile{{
-						InstanceProfileName: aws.String("banana"),
+						InstanceProfileName: aws.String("banana-profile"),
 						Roles:               []*awsiam.Role{{RoleName: aws.String("the-role")}},
 					}},
 				}
 			})
 
 			It("removes the roles and uses them in the name", func() {
-				err := instanceProfiles.Delete()
+				err := instanceProfiles.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.RemoveRoleFromInstanceProfileCall.CallCount).To(Equal(1))
-				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana")))
+				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana-profile")))
 				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.RoleName).To(Equal(aws.String("the-role")))
 
 				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
-				Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana")))
+				Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana-profile")))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"SUCCESS removing role the-role from instance profile banana (Role:the-role)\n",
-					"SUCCESS deleting instance profile banana (Role:the-role)\n",
+					"SUCCESS removing role the-role from instance profile banana-profile (Role:the-role)\n",
+					"SUCCESS deleting instance profile banana-profile (Role:the-role)\n",
 				}))
 			})
 		})
@@ -93,7 +108,7 @@ var _ = Describe("InstanceProfiles", func() {
 			BeforeEach(func() {
 				client.ListInstanceProfilesCall.Returns.Output = &awsiam.ListInstanceProfilesOutput{
 					InstanceProfiles: []*awsiam.InstanceProfile{{
-						InstanceProfileName: aws.String("banana"),
+						InstanceProfileName: aws.String("banana-profile"),
 						Roles:               []*awsiam.Role{{RoleName: aws.String("the-role")}},
 					}},
 				}
@@ -101,12 +116,12 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 
 			It("logs the error and continues", func() {
-				err := instanceProfiles.Delete()
+				err := instanceProfiles.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR removing role the-role from instance profile banana (Role:the-role): some error\n",
-					"SUCCESS deleting instance profile banana (Role:the-role)\n",
+					"ERROR removing role the-role from instance profile banana-profile (Role:the-role): some error\n",
+					"SUCCESS deleting instance profile banana-profile (Role:the-role)\n",
 				}))
 				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
 			})
@@ -118,12 +133,12 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 
 			It("logs the error", func() {
-				err := instanceProfiles.Delete()
+				err := instanceProfiles.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting instance profile banana: deleting error\n",
+					"ERROR deleting instance profile banana-profile: deleting error\n",
 				}))
 			})
 		})
@@ -134,10 +149,10 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 
 			It("does not delete the instance profile", func() {
-				err := instanceProfiles.Delete()
+				err := instanceProfiles.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance profile banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance profile banana-profile?"))
 				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(0))
 			})
 		})

@@ -24,7 +24,7 @@ func NewNetworkInterfaces(client networkInterfacesClient, logger logger) Network
 	}
 }
 
-func (e NetworkInterfaces) Delete() error {
+func (e NetworkInterfaces) Delete(filter string) error {
 	networkInterfaces, err := e.client.DescribeNetworkInterfaces(&awsec2.DescribeNetworkInterfacesInput{})
 	if err != nil {
 		return fmt.Errorf("Describing network interfaces: %s", err)
@@ -32,6 +32,10 @@ func (e NetworkInterfaces) Delete() error {
 
 	for _, i := range networkInterfaces.NetworkInterfaces {
 		n := e.clearerName(*i.NetworkInterfaceId, i.TagSet)
+
+		if !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete network interface %s?", n))
 		if !proceed {

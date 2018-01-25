@@ -29,25 +29,33 @@ var _ = Describe("Roles", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListRolesCall.Returns.Output = &awsiam.ListRolesOutput{
 				Roles: []*awsiam.Role{{
-					RoleName: aws.String("banana"),
+					RoleName: aws.String("banana-role"),
 				}},
 			}
+			filter = "banana"
 		})
 
 		It("deletes iam roles and associated policies", func() {
-			err := roles.Delete()
+			err := roles.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListRolesCall.CallCount).To(Equal(1))
+
+			Expect(logger.PromptCall.CallCount).To(Equal(1))
+
 			Expect(policies.DeleteCall.CallCount).To(Equal(1))
-			Expect(policies.DeleteCall.Receives.RoleName).To(Equal("banana"))
+			Expect(policies.DeleteCall.Receives.RoleName).To(Equal("banana-role"))
+
 			Expect(client.DeleteRoleCall.CallCount).To(Equal(1))
-			Expect(client.DeleteRoleCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting role banana\n"}))
+			Expect(client.DeleteRoleCall.Receives.Input.RoleName).To(Equal(aws.String("banana-role")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting role banana-role\n"}))
 		})
 
 		Context("when the client fails to list roles", func() {
@@ -56,9 +64,19 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := roles.Delete()
+				err := roles.Delete(filter)
 				Expect(err).To(MatchError("Listing roles: some error"))
 
+				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the role name does not contain the filter", func() {
+			It("does not try to delete it", func() {
+				err := roles.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
 			})
 		})
@@ -69,8 +87,8 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("returns the error", func() {
-				err := roles.Delete()
-				Expect(err).To(MatchError("Deleting policies for banana: some error"))
+				err := roles.Delete(filter)
+				Expect(err).To(MatchError("Deleting policies for banana-role: some error"))
 
 				Expect(policies.DeleteCall.CallCount).To(Equal(1))
 			})
@@ -82,10 +100,10 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("logs the error", func() {
-				err := roles.Delete()
+				err := roles.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting role banana: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting role banana-role: some error\n"}))
 			})
 		})
 
@@ -95,10 +113,10 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("does not delete the role", func() {
-				err := roles.Delete()
+				err := roles.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role banana-role?"))
 				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
 			})
 		})

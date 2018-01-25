@@ -31,31 +31,36 @@ var _ = Describe("Users", func() {
 	})
 
 	Describe("Delete", func() {
+		var filter string
+
 		BeforeEach(func() {
 			logger.PromptCall.Returns.Proceed = true
 			client.ListUsersCall.Returns.Output = &awsiam.ListUsersOutput{
 				Users: []*awsiam.User{{
-					UserName: aws.String("banana"),
+					UserName: aws.String("banana-user"),
 				}},
 			}
+			filter = "banana"
 		})
 
 		It("deletes iam users and associated policies", func() {
-			err := users.Delete()
+			err := users.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListUsersCall.CallCount).To(Equal(1))
 
+			Expect(logger.PromptCall.CallCount).To(Equal(1))
+
 			Expect(keys.DeleteCall.CallCount).To(Equal(1))
-			Expect(keys.DeleteCall.Receives.UserName).To(Equal("banana"))
+			Expect(keys.DeleteCall.Receives.UserName).To(Equal("banana-user"))
 
 			Expect(policies.DeleteCall.CallCount).To(Equal(1))
-			Expect(policies.DeleteCall.Receives.UserName).To(Equal("banana"))
+			Expect(policies.DeleteCall.Receives.UserName).To(Equal("banana-user"))
 
 			Expect(client.DeleteUserCall.CallCount).To(Equal(1))
-			Expect(client.DeleteUserCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
+			Expect(client.DeleteUserCall.Receives.Input.UserName).To(Equal(aws.String("banana-user")))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting user banana\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting user banana-user\n"}))
 		})
 
 		Context("when the client fails to list users", func() {
@@ -64,9 +69,20 @@ var _ = Describe("Users", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := users.Delete()
+				err := users.Delete(filter)
 				Expect(err).To(MatchError("Listing users: some error"))
 
+				Expect(client.DeleteUserCall.CallCount).To(Equal(0))
+			})
+		})
+
+		Context("when the user name does not contain the filter", func() {
+			It("returns the error", func() {
+				err := users.Delete("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(keys.DeleteCall.CallCount).To(Equal(0))
 				Expect(client.DeleteUserCall.CallCount).To(Equal(0))
 			})
 		})
@@ -77,8 +93,8 @@ var _ = Describe("Users", func() {
 			})
 
 			It("returns the error", func() {
-				err := users.Delete()
-				Expect(err).To(MatchError("Deleting access keys for banana: some error"))
+				err := users.Delete(filter)
+				Expect(err).To(MatchError("Deleting access keys for banana-user: some error"))
 
 				Expect(keys.DeleteCall.CallCount).To(Equal(1))
 			})
@@ -90,8 +106,8 @@ var _ = Describe("Users", func() {
 			})
 
 			It("returns the error", func() {
-				err := users.Delete()
-				Expect(err).To(MatchError("Deleting policies for banana: some error"))
+				err := users.Delete(filter)
+				Expect(err).To(MatchError("Deleting policies for banana-user: some error"))
 
 				Expect(policies.DeleteCall.CallCount).To(Equal(1))
 			})
@@ -103,10 +119,11 @@ var _ = Describe("Users", func() {
 			})
 
 			It("logs the error", func() {
-				err := users.Delete()
+				err := users.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting user banana: some error\n"}))
+				Expect(client.DeleteUserCall.CallCount).To(Equal(1))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting user banana-user: some error\n"}))
 			})
 		})
 
@@ -116,10 +133,10 @@ var _ = Describe("Users", func() {
 			})
 
 			It("does not delete the user", func() {
-				err := users.Delete()
+				err := users.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete user banana?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete user banana-user?"))
 				Expect(client.DeleteUserCall.CallCount).To(Equal(0))
 			})
 		})

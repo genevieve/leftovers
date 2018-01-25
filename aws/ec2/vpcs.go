@@ -34,7 +34,7 @@ func NewVpcs(client vpcClient,
 	}
 }
 
-func (p Vpcs) Delete() error {
+func (p Vpcs) Delete(filter string) error {
 	vpcs, err := p.client.DescribeVpcs(&awsec2.DescribeVpcsInput{})
 	if err != nil {
 		return fmt.Errorf("Describing vpcs: %s", err)
@@ -48,6 +48,10 @@ func (p Vpcs) Delete() error {
 		vpcId := *v.VpcId
 
 		n := p.clearerName(vpcId, v.Tags)
+
+		if n != vpcId && !strings.Contains(n, filter) {
+			continue
+		}
 
 		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s?", n))
 		if !proceed {

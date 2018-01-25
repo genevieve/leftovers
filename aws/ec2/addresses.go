@@ -23,7 +23,7 @@ func NewAddresses(client addressesClient, logger logger) Addresses {
 	}
 }
 
-func (d Addresses) Delete() error {
+func (d Addresses) Delete(filter string) error {
 	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
 	if err != nil {
 		return fmt.Errorf("Describing addresses: %s", err)
