@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -56,13 +57,23 @@ func (t TargetPools) List(filter string) (map[string]string, error) {
 }
 
 func (t TargetPools) Delete(pools map[string]string) {
-	for name, region := range pools {
-		err := t.client.DeleteTargetPool(region, name)
+	var wg sync.WaitGroup
 
-		if err != nil {
-			t.logger.Printf("ERROR deleting target pool %s: %s\n", name, err)
-		} else {
-			t.logger.Printf("SUCCESS deleting target pool %s\n", name)
-		}
+	for name, region := range pools {
+		wg.Add(1)
+
+		go func(name, region string) {
+			err := t.client.DeleteTargetPool(region, name)
+
+			if err != nil {
+				t.logger.Printf("ERROR deleting target pool %s: %s\n", name, err)
+			} else {
+				t.logger.Printf("SUCCESS deleting target pool %s\n", name)
+			}
+
+			wg.Done()
+		}(name, region)
 	}
+
+	wg.Wait()
 }

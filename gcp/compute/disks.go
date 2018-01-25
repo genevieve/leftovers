@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -59,13 +60,23 @@ func (d Disks) List(filter string) (map[string]string, error) {
 }
 
 func (d Disks) Delete(disks map[string]string) {
-	for name, zone := range disks {
-		err := d.client.DeleteDisk(zone, name)
+	var wg sync.WaitGroup
 
-		if err != nil {
-			d.logger.Printf("ERROR deleting disk %s: %s\n", name, err)
-		} else {
-			d.logger.Printf("SUCCESS deleting disk %s\n", name)
-		}
+	for name, zone := range disks {
+		wg.Add(1)
+
+		go func(name, zone string) {
+			err := d.client.DeleteDisk(zone, name)
+
+			if err != nil {
+				d.logger.Printf("ERROR deleting disk %s: %s\n", name, err)
+			} else {
+				d.logger.Printf("SUCCESS deleting disk %s\n", name)
+			}
+
+			wg.Done()
+		}(name, zone)
 	}
+
+	wg.Wait()
 }

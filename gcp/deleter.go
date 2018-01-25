@@ -36,6 +36,7 @@ func (d Deleter) Delete(filter string) error {
 
 		r.Delete(list)
 	}
+
 	return nil
 }
 

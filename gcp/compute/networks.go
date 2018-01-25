@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	gcp "google.golang.org/api/compute/v1"
 )
@@ -49,13 +50,23 @@ func (n Networks) List(filter string) (map[string]string, error) {
 }
 
 func (n Networks) Delete(networks map[string]string) {
-	for name, _ := range networks {
-		err := n.client.DeleteNetwork(name)
+	var wg sync.WaitGroup
 
-		if err != nil {
-			n.logger.Printf("ERROR deleting network %s: %s\n", name, err)
-		} else {
-			n.logger.Printf("SUCCESS deleting network %s\n", name)
-		}
+	for name, _ := range networks {
+		wg.Add(1)
+
+		go func(name string) {
+			err := n.client.DeleteNetwork(name)
+
+			if err != nil {
+				n.logger.Printf("ERROR deleting network %s: %s\n", name, err)
+			} else {
+				n.logger.Printf("SUCCESS deleting network %s\n", name)
+			}
+
+			wg.Done()
+		}(name)
 	}
+
+	wg.Wait()
 }

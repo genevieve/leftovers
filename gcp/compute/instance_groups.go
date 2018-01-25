@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -55,16 +56,24 @@ func (i InstanceGroups) List(filter string) (map[string]string, error) {
 	return delete, nil
 }
 
-// Delete takes a map of instance group name to zone name,
-// logs an error if any occurs.
 func (i InstanceGroups) Delete(groups map[string]string) {
-	for name, zone := range groups {
-		err := i.client.DeleteInstanceGroup(zone, name)
+	var wg sync.WaitGroup
 
-		if err != nil {
-			i.logger.Printf("ERROR deleting instance group %s: %s\n", name, err)
-		} else {
-			i.logger.Printf("SUCCESS deleting instance group %s\n", name)
-		}
+	for name, zone := range groups {
+		wg.Add(1)
+
+		go func(name, zone string) {
+			err := i.client.DeleteInstanceGroup(zone, name)
+
+			if err != nil {
+				i.logger.Printf("ERROR deleting instance group %s: %s\n", name, err)
+			} else {
+				i.logger.Printf("SUCCESS deleting instance group %s\n", name)
+			}
+
+			wg.Done()
+		}(name, zone)
 	}
+
+	wg.Wait()
 }

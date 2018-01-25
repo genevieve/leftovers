@@ -3,6 +3,7 @@ package compute
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -59,13 +60,23 @@ func (a Addresses) List(filter string) (map[string]string, error) {
 }
 
 func (a Addresses) Delete(addrs map[string]string) {
-	for name, region := range addrs {
-		err := a.client.DeleteAddress(region, name)
+	var wg sync.WaitGroup
 
-		if err != nil {
-			a.logger.Printf("ERROR deleting address %s: %s\n", name, err)
-		} else {
-			a.logger.Printf("SUCCESS deleting address %s\n", name)
-		}
+	for name, region := range addrs {
+		wg.Add(1)
+
+		go func(name, region string) {
+			err := a.client.DeleteAddress(region, name)
+
+			if err != nil {
+				a.logger.Printf("ERROR deleting address %s: %s\n", name, err)
+			} else {
+				a.logger.Printf("SUCCESS deleting address %s\n", name)
+			}
+
+			wg.Done()
+		}(name, region)
 	}
+
+	wg.Wait()
 }
