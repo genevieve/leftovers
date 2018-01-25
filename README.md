@@ -2,12 +2,20 @@
 
 Go library for cleaning up **orphaned IAAS resources**.
 
-
 ## Why you might be here?
 - You `terraform apply`'d way back when and lost your `terraform.tfstate`
 - You used the console or cli to create some infrastructure and want to clean up
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned
+
+## Command-line utility
+
+[Repo](https://github.com/genevievelesperance/leftovers-cli)
+
+```
+brew tap genevievelesperance/tap
+brew install leftovers
+```
 
 ## AWS
 ### What can you delete with this?
