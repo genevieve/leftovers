@@ -8,9 +8,9 @@ Go library for cleaning up **orphaned IAAS resources**.
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned
 
-## Command-line utility
+## If you're looking for the CLI
 
-[Repo](https://github.com/genevievelesperance/leftovers-cli)
+[Repo](https://github.com/genevievelesperance/leftovers-cli) or brew:
 
 ```
 brew tap genevievelesperance/tap
