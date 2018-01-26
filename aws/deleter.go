@@ -23,33 +23,48 @@ type resource interface {
 	Delete(items map[string]string) error
 }
 
-type Deleter struct {
+type deleter struct {
+	resource resource
+	items    map[string]string
+}
+
+type Leftovers struct {
 	resources []resource
 }
 
-func (d Deleter) Delete(filter string) error {
-	for _, r := range d.resources {
+func (l Leftovers) Delete(filter string) error {
+	var deleters []deleter
+
+	for _, r := range l.resources {
 		items, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
-		r.Delete(items)
+		deleters = append(deleters, deleter{
+			resource: r,
+			items:    items,
+		})
 	}
+
+	for _, d := range deleters {
+		d.resource.Delete(d.items)
+	}
+
 	return nil
 }
 
-func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) (Deleter, error) {
+func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (Leftovers, error) {
 	if accessKeyId == "" {
-		return Deleter{}, errors.New("Missing aws access key id.")
+		return Leftovers{}, errors.New("Missing aws access key id.")
 	}
 
 	if secretAccessKey == "" {
-		return Deleter{}, errors.New("Missing secret access key.")
+		return Leftovers{}, errors.New("Missing secret access key.")
 	}
 
 	if region == "" {
-		return Deleter{}, errors.New("Missing region.")
+		return Leftovers{}, errors.New("Missing region.")
 	}
 
 	config := &awslib.Config{
@@ -72,7 +87,7 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) (Del
 	subnets := ec2.NewSubnets(ec2Client, logger)
 	bucketManager := s3.NewBucketManager(region)
 
-	return Deleter{
+	return Leftovers{
 		resources: []resource{
 			iam.NewRoles(iamClient, logger, rolePolicies),
 			iam.NewUsers(iamClient, logger, userPolicies, accessKeys),
