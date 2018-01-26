@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -24,10 +25,12 @@ func NewTags(client tagsClient, logger logger) Tags {
 	}
 }
 
-func (a Tags) Delete(filter string) error {
+func (a Tags) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	tags, err := a.client.DescribeTags(&awsec2.DescribeTagsInput{})
 	if err != nil {
-		return fmt.Errorf("Describing tags: %s", err)
+		return delete, fmt.Errorf("Describing tags: %s", err)
 	}
 
 	for _, t := range tags.Tags {
@@ -42,14 +45,23 @@ func (a Tags) Delete(filter string) error {
 			continue
 		}
 
-		_, err := a.client.DeleteTags(&awsec2.DeleteTagsInput{
-			Tags:      []*awsec2.Tag{{Key: t.Key}},
-			Resources: []*string{t.ResourceId},
+		delete[*t.Key] = *t.ResourceId
+	}
+
+	return delete, nil
+}
+
+func (t Tags) Delete(tags map[string]string) error {
+	for key, resourceId := range tags {
+		_, err := t.client.DeleteTags(&awsec2.DeleteTagsInput{
+			Tags:      []*awsec2.Tag{{Key: aws.String(key)}},
+			Resources: []*string{aws.String(resourceId)},
 		})
+
 		if err == nil {
-			a.logger.Printf("SUCCESS deleting tag %s\n", n)
+			t.logger.Printf("SUCCESS deleting tag %s\n", key)
 		} else {
-			a.logger.Printf("ERROR deleting tag %s: %s\n", n, err)
+			t.logger.Printf("ERROR deleting tag %s: %s\n", key, err)
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 )
 
@@ -24,29 +25,42 @@ func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	}
 }
 
-func (o LoadBalancers) Delete(filter string) error {
-	loadBalancers, err := o.client.DescribeLoadBalancers(&awselbv2.DescribeLoadBalancersInput{})
+func (l LoadBalancers) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	loadBalancers, err := l.client.DescribeLoadBalancers(&awselbv2.DescribeLoadBalancersInput{})
 	if err != nil {
-		return fmt.Errorf("Describing load balancers: %s", err)
+		return delete, fmt.Errorf("Describing load balancers: %s", err)
 	}
 
-	for _, l := range loadBalancers.LoadBalancers {
-		n := *l.LoadBalancerName
+	for _, lb := range loadBalancers.LoadBalancers {
+		n := *lb.LoadBalancerName
 
 		if !strings.Contains(n, filter) {
 			continue
 		}
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete load balancer %s?", n))
+		proceed := l.logger.Prompt(fmt.Sprintf("Are you sure you want to delete load balancer %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := o.client.DeleteLoadBalancer(&awselbv2.DeleteLoadBalancerInput{LoadBalancerArn: l.LoadBalancerArn})
+		delete[n] = *lb.LoadBalancerArn
+	}
+
+	return delete, nil
+}
+
+func (l LoadBalancers) Delete(loadBalancers map[string]string) error {
+	for name, arn := range loadBalancers {
+		_, err := l.client.DeleteLoadBalancer(&awselbv2.DeleteLoadBalancerInput{
+			LoadBalancerArn: aws.String(arn),
+		})
+
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting load balancer %s\n", n)
+			l.logger.Printf("SUCCESS deleting load balancer %s\n", name)
 		} else {
-			o.logger.Printf("ERROR deleting load balancer %s: %s\n", n, err)
+			l.logger.Printf("ERROR deleting load balancer %s: %s\n", name, err)
 		}
 	}
 

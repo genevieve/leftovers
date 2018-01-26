@@ -3,6 +3,7 @@ package ec2
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -23,32 +24,43 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 	}
 }
 
-func (o Volumes) Delete(filter string) error {
-	volumes, err := o.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
+func (v Volumes) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	volumes, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
 	if err != nil {
-		return fmt.Errorf("Describing volumes: %s", err)
+		return delete, fmt.Errorf("Describing volumes: %s", err)
 	}
 
-	for _, v := range volumes.Volumes {
-		state := *v.State
+	for _, volume := range volumes.Volumes {
+		state := *volume.State
 		if state != "available" {
 			continue
 		}
 
-		n := *v.VolumeId
+		n := *volume.VolumeId
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete volume %s?", n))
+		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete volume %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := o.client.DeleteVolume(&awsec2.DeleteVolumeInput{
-			VolumeId: v.VolumeId,
+		delete[n] = ""
+	}
+
+	return delete, nil
+}
+
+func (v Volumes) Delete(volumes map[string]string) error {
+	for id, _ := range volumes {
+		_, err := v.client.DeleteVolume(&awsec2.DeleteVolumeInput{
+			VolumeId: aws.String(id),
 		})
+
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting volume %s\n", n)
+			v.logger.Printf("SUCCESS deleting volume %s\n", id)
 		} else {
-			o.logger.Printf("ERROR deleting volume %s: %s\n", n, err)
+			v.logger.Printf("ERROR deleting volume %s: %s\n", id, err)
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -26,33 +27,44 @@ func NewRoles(client rolesClient, logger logger, policies rolePolicies) Roles {
 	}
 }
 
-func (o Roles) Delete(filter string) error {
-	roles, err := o.client.ListRoles(&awsiam.ListRolesInput{})
+func (r Roles) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	roles, err := r.client.ListRoles(&awsiam.ListRolesInput{})
 	if err != nil {
-		return fmt.Errorf("Listing roles: %s", err)
+		return delete, fmt.Errorf("Listing roles: %s", err)
 	}
 
-	for _, r := range roles.Roles {
-		n := *r.RoleName
+	for _, role := range roles.Roles {
+		n := *role.RoleName
 
 		if !strings.Contains(n, filter) {
 			continue
 		}
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role %s?", n))
+		proceed := r.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role %s?", n))
 		if !proceed {
 			continue
 		}
 
-		if err := o.policies.Delete(n); err != nil {
-			return fmt.Errorf("Deleting policies for %s: %s", n, err)
+		delete[n] = ""
+	}
+
+	return delete, nil
+}
+
+func (r Roles) Delete(roles map[string]string) error {
+	for name, _ := range roles {
+		err := r.policies.Delete(name)
+		if err != nil {
+			return fmt.Errorf("Deleting policies for %s: %s", name, err)
 		}
 
-		_, err = o.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: r.RoleName})
+		_, err = r.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: aws.String(name)})
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting role %s\n", n)
+			r.logger.Printf("SUCCESS deleting role %s\n", name)
 		} else {
-			o.logger.Printf("ERROR deleting role %s: %s\n", n, err)
+			r.logger.Printf("ERROR deleting role %s: %s\n", name, err)
 		}
 	}
 

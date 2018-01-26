@@ -28,7 +28,6 @@ var _ = Describe("UserPolicies", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
 			client.ListAttachedUserPoliciesCall.Returns.Output = &awsiam.ListAttachedUserPoliciesOutput{
 				AttachedPolicies: []*awsiam.AttachedPolicy{{
 					PolicyName: aws.String("the-policy"),
@@ -102,21 +101,6 @@ var _ = Describe("UserPolicies", func() {
 					"SUCCESS detaching user policy the-policy\n",
 					"ERROR deleting user policy the-policy: some error\n",
 				}))
-			})
-		})
-
-		Context("when the user responds no to the prompt", func() {
-			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
-			})
-
-			It("does not delete the user policy", func() {
-				err := policies.Delete("banana")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete user policy the-policy?"))
-				Expect(client.DetachUserPolicyCall.CallCount).To(Equal(0))
-				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
 			})
 		})
 	})

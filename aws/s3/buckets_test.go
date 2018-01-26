@@ -29,7 +29,7 @@ var _ = Describe("Buckets", func() {
 		buckets = s3.NewBuckets(client, logger, manager)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -43,8 +43,8 @@ var _ = Describe("Buckets", func() {
 			filter = "ban"
 		})
 
-		It("deletes s3 buckets", func() {
-			err := buckets.Delete(filter)
+		It("returns a list of s3 buckets to delete", func() {
+			items, err := buckets.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
@@ -53,10 +53,8 @@ var _ = Describe("Buckets", func() {
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
 
-			Expect(client.DeleteBucketCall.CallCount).To(Equal(1))
-			Expect(client.DeleteBucketCall.Receives.Input.Bucket).To(Equal(aws.String("banana")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting bucket banana\n"}))
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("banana", ""))
 		})
 
 		Context("when the client fails to list buckets", func() {
@@ -65,21 +63,20 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := buckets.Delete(filter)
+				_, err := buckets.List(filter)
 				Expect(err).To(MatchError("Listing buckets: some error"))
-
-				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the bucket name does not contain the filter", func() {
-			It("does not try deleting it", func() {
-				err := buckets.Delete("kiwi")
+			It("does not return it in the list", func() {
+				items, err := buckets.List("kiwi")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(manager.IsInRegionCall.CallCount).To(Equal(0))
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
+
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -88,12 +85,45 @@ var _ = Describe("Buckets", func() {
 				manager.IsInRegionCall.Returns.Output = false
 			})
 
-			It("does not delete the bucket", func() {
-				err := buckets.Delete(filter)
+			It("does not return it in the list", func() {
+				items, err := buckets.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
 			})
+		})
+
+		Context("when the user responds no to the prompt", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = false
+			})
+
+			It("does not delete the bucket", func() {
+				items, err := buckets.List(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
+
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana": ""}
+		})
+
+		It("deletes s3 buckets", func() {
+			err := buckets.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteBucketCall.CallCount).To(Equal(1))
+			Expect(client.DeleteBucketCall.Receives.Input.Bucket).To(Equal(aws.String("banana")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting bucket banana\n"}))
 		})
 
 		Context("when the client fails to delete the bucket", func() {
@@ -102,7 +132,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("logs the error", func() {
-				err := buckets.Delete(filter)
+				err := buckets.Delete(items)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some error\n"}))
@@ -116,24 +146,10 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("logs the error", func() {
-				err := buckets.Delete(filter)
+				err := buckets.Delete(items)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some other error\n"}))
-			})
-		})
-
-		Context("when the user responds no to the prompt", func() {
-			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
-			})
-
-			It("does not delete the bucket", func() {
-				err := buckets.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
-				Expect(client.DeleteBucketCall.CallCount).To(Equal(0))
 			})
 		})
 	})

@@ -27,7 +27,7 @@ var _ = Describe("SecurityGroups", func() {
 		securityGroups = ec2.NewSecurityGroups(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -41,29 +41,15 @@ var _ = Describe("SecurityGroups", func() {
 		})
 
 		It("deletes ec2 security groups", func() {
-			err := securityGroups.Delete(filter)
+			items, err := securityGroups.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group?"))
 
-			Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana-group\n"}))
-		})
-
-		Context("when the security group name does not contain the filter", func() {
-			It("does not try deleting them", func() {
-				err := securityGroups.Delete("kiwi")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
-
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(0))
-			})
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("banana-group", "the-group-id"))
 		})
 
 		Context("when the client fails to describe security groups", func() {
@@ -71,11 +57,20 @@ var _ = Describe("SecurityGroups", func() {
 				client.DescribeSecurityGroupsCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try deleting them", func() {
-				err := securityGroups.Delete(filter)
+			It("returns the error", func() {
+				_, err := securityGroups.List(filter)
 				Expect(err).To(MatchError("Describing security groups: some error"))
+			})
+		})
 
-				Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(0))
+		Context("when the security group name does not contain the filter", func() {
+			It("does not try deleting them", func() {
+				items, err := securityGroups.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -90,12 +85,12 @@ var _ = Describe("SecurityGroups", func() {
 				}
 			})
 
-			It("deletes ec2 security groups", func() {
-				err := securityGroups.Delete(filter)
+			It("uses the tag in the prompt", func() {
+				items, err := securityGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group (the-key:the-value)?"))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana-group (the-key:the-value)\n"}))
+				Expect(items).To(HaveKeyWithValue("banana-group (the-key:the-value)", "the-group-id"))
 			})
 		})
 
@@ -113,20 +108,14 @@ var _ = Describe("SecurityGroups", func() {
 			})
 
 			It("revokes them", func() {
-				err := securityGroups.Delete(filter)
+				items, err := securityGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
 
 				Expect(client.RevokeSecurityGroupIngressCall.CallCount).To(Equal(1))
 				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
 				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
 
-				Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
-				Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group?"))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana-group\n"}))
+				Expect(items).To(HaveKeyWithValue("banana-group", "the-group-id"))
 			})
 
 			Context("when the client fails to revoke ingress rules", func() {
@@ -135,13 +124,12 @@ var _ = Describe("SecurityGroups", func() {
 				})
 
 				It("logs the error", func() {
-					err := securityGroups.Delete(filter)
+					items, err := securityGroups.List(filter)
 					Expect(err).NotTo(HaveOccurred())
 
-					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"ERROR revoking security group ingress for banana-group: some error\n",
-						"SUCCESS deleting security group banana-group\n",
-					}))
+					Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR revoking security group ingress for banana-group: some error\n"}))
+
+					Expect(items).To(HaveKeyWithValue("banana-group", "the-group-id"))
 				})
 			})
 		})
@@ -160,20 +148,14 @@ var _ = Describe("SecurityGroups", func() {
 			})
 
 			It("revokes them", func() {
-				err := securityGroups.Delete(filter)
+				items, err := securityGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
 
 				Expect(client.RevokeSecurityGroupEgressCall.CallCount).To(Equal(1))
 				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
 				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
 
-				Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
-				Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group?"))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana-group\n"}))
+				Expect(items).To(HaveKeyWithValue("banana-group", "the-group-id"))
 			})
 
 			Context("when the client fails to revoke egress rules", func() {
@@ -182,27 +164,13 @@ var _ = Describe("SecurityGroups", func() {
 				})
 
 				It("logs the error", func() {
-					err := securityGroups.Delete(filter)
+					items, err := securityGroups.List(filter)
 					Expect(err).NotTo(HaveOccurred())
 
-					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"ERROR revoking security group egress for banana-group: some error\n",
-						"SUCCESS deleting security group banana-group\n",
-					}))
+					Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR revoking security group egress for banana-group: some error\n"}))
+
+					Expect(items).To(HaveKeyWithValue("banana-group", "the-group-id"))
 				})
-			})
-		})
-
-		Context("when the client fails to delete the security group", func() {
-			BeforeEach(func() {
-				client.DeleteSecurityGroupCall.Returns.Error = errors.New("some error")
-			})
-
-			It("returns the error", func() {
-				err := securityGroups.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting security group banana-group: some error\n"}))
 			})
 		})
 
@@ -212,11 +180,42 @@ var _ = Describe("SecurityGroups", func() {
 			})
 
 			It("does not delete the security group", func() {
-				err := securityGroups.Delete(filter)
+				items, err := securityGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group?"))
-				Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana-group": "the-group-id"}
+		})
+
+		It("deletes ec2 security groups", func() {
+			err := securityGroups.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
+			Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana-group\n"}))
+		})
+
+		Context("when the client fails to delete the security group", func() {
+			BeforeEach(func() {
+				client.DeleteSecurityGroupCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				err := securityGroups.Delete(items)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting security group banana-group: some error\n"}))
 			})
 		})
 	})

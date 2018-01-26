@@ -18,13 +18,9 @@ import (
 	"github.com/genevievelesperance/leftovers/aws/s3"
 )
 
-type logger interface {
-	Printf(m string, a ...interface{})
-	Prompt(m string) bool
-}
-
 type resource interface {
-	Delete(filter string) error
+	List(filter string) (map[string]string, error)
+	Delete(items map[string]string) error
 }
 
 type Deleter struct {
@@ -33,9 +29,12 @@ type Deleter struct {
 
 func (d Deleter) Delete(filter string) error {
 	for _, r := range d.resources {
-		if err := r.Delete(filter); err != nil {
+		items, err := r.List(filter)
+		if err != nil {
 			return err
 		}
+
+		r.Delete(items)
 	}
 	return nil
 }
@@ -73,30 +72,28 @@ func NewDeleter(logger logger, accessKeyId, secretAccessKey, region string) (Del
 	subnets := ec2.NewSubnets(ec2Client, logger)
 	bucketManager := s3.NewBucketManager(region)
 
-	ro := iam.NewRoles(iamClient, logger, rolePolicies)
-	us := iam.NewUsers(iamClient, logger, userPolicies, accessKeys)
-	po := iam.NewPolicies(iamClient, logger)
-	ip := iam.NewInstanceProfiles(iamClient, logger)
-	sc := iam.NewServerCertificates(iamClient, logger)
-
-	ad := ec2.NewAddresses(ec2Client, logger)
-	ke := ec2.NewKeyPairs(ec2Client, logger)
-	in := ec2.NewInstances(ec2Client, logger)
-	se := ec2.NewSecurityGroups(ec2Client, logger)
-	ta := ec2.NewTags(ec2Client, logger)
-	vo := ec2.NewVolumes(ec2Client, logger)
-	ni := ec2.NewNetworkInterfaces(ec2Client, logger)
-	vp := ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways)
-
-	l1 := elb.NewLoadBalancers(elbClient, logger)
-	l2 := elbv2.NewLoadBalancers(elbv2Client, logger)
-	tg := elbv2.NewTargetGroups(elbv2Client, logger)
-
-	bu := s3.NewBuckets(s3Client, logger, bucketManager)
-
-	resources := []resource{ip, ro, us, us, po, l1, l2, tg, sc, vo, ta, ad, ke, in, se, bu, ni, vp}
-
 	return Deleter{
-		resources: resources,
+		resources: []resource{
+			iam.NewRoles(iamClient, logger, rolePolicies),
+			iam.NewUsers(iamClient, logger, userPolicies, accessKeys),
+			iam.NewPolicies(iamClient, logger),
+			iam.NewInstanceProfiles(iamClient, logger),
+			iam.NewServerCertificates(iamClient, logger),
+
+			ec2.NewAddresses(ec2Client, logger),
+			ec2.NewKeyPairs(ec2Client, logger),
+			ec2.NewInstances(ec2Client, logger),
+			ec2.NewSecurityGroups(ec2Client, logger),
+			ec2.NewTags(ec2Client, logger),
+			ec2.NewVolumes(ec2Client, logger),
+			ec2.NewNetworkInterfaces(ec2Client, logger),
+			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways),
+
+			elb.NewLoadBalancers(elbClient, logger),
+			elbv2.NewLoadBalancers(elbv2Client, logger),
+			elbv2.NewTargetGroups(elbv2Client, logger),
+
+			s3.NewBuckets(s3Client, logger, bucketManager),
+		},
 	}, nil
 }

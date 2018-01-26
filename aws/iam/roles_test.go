@@ -28,7 +28,7 @@ var _ = Describe("Roles", func() {
 		roles = iam.NewRoles(client, logger, policies)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -41,13 +41,64 @@ var _ = Describe("Roles", func() {
 			filter = "banana"
 		})
 
-		It("deletes iam roles and associated policies", func() {
-			err := roles.Delete(filter)
+		It("returns a list of iam roles and associated policies to delete", func() {
+			items, err := roles.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListRolesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.CallCount).To(Equal(1))
+
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("banana-role", ""))
+		})
+
+		Context("when the client fails to list roles", func() {
+			BeforeEach(func() {
+				client.ListRolesCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				_, err := roles.List(filter)
+				Expect(err).To(MatchError("Listing roles: some error"))
+			})
+		})
+
+		Context("when the role name does not contain the filter", func() {
+			It("does not return it in the list", func() {
+				items, err := roles.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+
+		Context("when the user responds no to the prompt", func() {
+			BeforeEach(func() {
+				logger.PromptCall.Returns.Proceed = false
+			})
+
+			It("does not return it in the list", func() {
+				items, err := roles.List(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role banana-role?"))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana-role": ""}
+		})
+
+		It("deletes iam roles and associated policies", func() {
+			err := roles.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(policies.DeleteCall.CallCount).To(Equal(1))
 			Expect(policies.DeleteCall.Receives.RoleName).To(Equal("banana-role"))
@@ -58,36 +109,13 @@ var _ = Describe("Roles", func() {
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting role banana-role\n"}))
 		})
 
-		Context("when the client fails to list roles", func() {
-			BeforeEach(func() {
-				client.ListRolesCall.Returns.Error = errors.New("some error")
-			})
-
-			It("returns the error and does not try deleting them", func() {
-				err := roles.Delete(filter)
-				Expect(err).To(MatchError("Listing roles: some error"))
-
-				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the role name does not contain the filter", func() {
-			It("does not try to delete it", func() {
-				err := roles.Delete("kiwi")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
-			})
-		})
-
 		Context("when policies fails to delete", func() {
 			BeforeEach(func() {
 				policies.DeleteCall.Returns.Error = errors.New("some error")
 			})
 
 			It("returns the error", func() {
-				err := roles.Delete(filter)
+				err := roles.Delete(items)
 				Expect(err).To(MatchError("Deleting policies for banana-role: some error"))
 
 				Expect(policies.DeleteCall.CallCount).To(Equal(1))
@@ -100,24 +128,10 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("logs the error", func() {
-				err := roles.Delete(filter)
+				err := roles.Delete(items)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting role banana-role: some error\n"}))
-			})
-		})
-
-		Context("when the user responds no to the prompt", func() {
-			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
-			})
-
-			It("does not delete the role", func() {
-				err := roles.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete role banana-role?"))
-				Expect(client.DeleteRoleCall.CallCount).To(Equal(0))
 			})
 		})
 	})

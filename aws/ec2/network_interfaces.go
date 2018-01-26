@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -24,10 +25,12 @@ func NewNetworkInterfaces(client networkInterfacesClient, logger logger) Network
 	}
 }
 
-func (e NetworkInterfaces) Delete(filter string) error {
+func (e NetworkInterfaces) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	networkInterfaces, err := e.client.DescribeNetworkInterfaces(&awsec2.DescribeNetworkInterfacesInput{})
 	if err != nil {
-		return fmt.Errorf("Describing network interfaces: %s", err)
+		return delete, fmt.Errorf("Describing network interfaces: %s", err)
 	}
 
 	for _, i := range networkInterfaces.NetworkInterfaces {
@@ -42,13 +45,22 @@ func (e NetworkInterfaces) Delete(filter string) error {
 			continue
 		}
 
-		_, err := e.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{
-			NetworkInterfaceId: i.NetworkInterfaceId,
+		delete[n] = *i.NetworkInterfaceId
+	}
+
+	return delete, nil
+}
+
+func (n NetworkInterfaces) Delete(networkInterfaces map[string]string) error {
+	for name, id := range networkInterfaces {
+		_, err := n.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{
+			NetworkInterfaceId: aws.String(id),
 		})
+
 		if err == nil {
-			e.logger.Printf("SUCCESS deleting network interface %s\n", n)
+			n.logger.Printf("SUCCESS deleting network interface %s\n", name)
 		} else {
-			e.logger.Printf("ERROR deleting network interface %s: %s\n", n, err)
+			n.logger.Printf("ERROR deleting network interface %s: %s\n", name, err)
 		}
 	}
 

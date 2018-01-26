@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -24,10 +25,12 @@ func NewServerCertificates(client serverCertificatesClient, logger logger) Serve
 	}
 }
 
-func (s ServerCertificates) Delete(filter string) error {
+func (s ServerCertificates) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	certificates, err := s.client.ListServerCertificates(&awsiam.ListServerCertificatesInput{})
 	if err != nil {
-		return fmt.Errorf("Listing server certificates: %s", err)
+		return delete, fmt.Errorf("Listing server certificates: %s", err)
 	}
 
 	for _, c := range certificates.ServerCertificateMetadataList {
@@ -42,11 +45,22 @@ func (s ServerCertificates) Delete(filter string) error {
 			continue
 		}
 
-		_, err := s.client.DeleteServerCertificate(&awsiam.DeleteServerCertificateInput{ServerCertificateName: c.ServerCertificateName})
+		delete[n] = ""
+	}
+
+	return delete, nil
+}
+
+func (s ServerCertificates) Delete(serverCertificates map[string]string) error {
+	for name, _ := range serverCertificates {
+		_, err := s.client.DeleteServerCertificate(&awsiam.DeleteServerCertificateInput{
+			ServerCertificateName: aws.String(name),
+		})
+
 		if err == nil {
-			s.logger.Printf("SUCCESS deleting server certificate %s\n", n)
+			s.logger.Printf("SUCCESS deleting server certificate %s\n", name)
 		} else {
-			s.logger.Printf("ERROR deleting server certificate %s: %s\n", n, err)
+			s.logger.Printf("ERROR deleting server certificate %s: %s\n", name, err)
 		}
 	}
 

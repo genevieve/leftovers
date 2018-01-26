@@ -39,11 +39,6 @@ func (o RolePolicies) Delete(roleName string) error {
 	for _, p := range attachedPolicies.AttachedPolicies {
 		n := *p.PolicyName
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to detach and delete role policy %s?", n))
-		if !proceed {
-			continue
-		}
-
 		_, err := o.client.DetachRolePolicy(&awsiam.DetachRolePolicyInput{
 			RoleName:  aws.String(roleName),
 			PolicyArn: p.PolicyArn,
@@ -72,11 +67,6 @@ func (o RolePolicies) Delete(roleName string) error {
 
 	for _, p := range policies.PolicyNames {
 		n := *p
-
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete role policy %s?", n))
-		if !proceed {
-			continue
-		}
 
 		_, err = o.client.DeleteRolePolicy(&awsiam.DeleteRolePolicyInput{
 			RoleName:   aws.String(roleName),

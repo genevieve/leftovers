@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -24,10 +25,12 @@ func NewInstances(client instancesClient, logger logger) Instances {
 	}
 }
 
-func (a Instances) Delete(filter string) error {
+func (a Instances) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
 	if err != nil {
-		return fmt.Errorf("Describing instances: %s", err)
+		return delete, fmt.Errorf("Describing instances: %s", err)
 	}
 
 	for _, r := range instances.Reservations {
@@ -47,14 +50,23 @@ func (a Instances) Delete(filter string) error {
 				continue
 			}
 
-			_, err := a.client.TerminateInstances(&awsec2.TerminateInstancesInput{
-				InstanceIds: []*string{i.InstanceId},
-			})
-			if err == nil {
-				a.logger.Printf("SUCCESS terminating instance %s\n", n)
-			} else {
-				a.logger.Printf("ERROR terminating instance %s: %s\n", n, err)
-			}
+			delete[n] = *i.InstanceId
+		}
+	}
+
+	return delete, nil
+}
+
+func (i Instances) Delete(instances map[string]string) error {
+	for name, id := range instances {
+		_, err := i.client.TerminateInstances(&awsec2.TerminateInstancesInput{
+			InstanceIds: []*string{aws.String(id)},
+		})
+
+		if err == nil {
+			i.logger.Printf("SUCCESS terminating instance %s\n", name)
+		} else {
+			i.logger.Printf("ERROR terminating instance %s: %s\n", name, err)
 		}
 	}
 

@@ -37,11 +37,6 @@ func (k AccessKeys) Delete(userName string) error {
 	for _, a := range accessKeys.AccessKeyMetadata {
 		n := *a.AccessKeyId
 
-		proceed := k.logger.Prompt(fmt.Sprintf("Are you sure you want to delete access key %s?", n))
-		if !proceed {
-			continue
-		}
-
 		_, err = k.client.DeleteAccessKey(&awsiam.DeleteAccessKeyInput{
 			UserName:    aws.String(userName),
 			AccessKeyId: a.AccessKeyId,

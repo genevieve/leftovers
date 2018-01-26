@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -24,29 +25,40 @@ func NewKeyPairs(client keyPairClient, logger logger) KeyPairs {
 	}
 }
 
-func (a KeyPairs) Delete(filter string) error {
-	keyPairs, err := a.client.DescribeKeyPairs(&awsec2.DescribeKeyPairsInput{})
+func (k KeyPairs) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	keyPairs, err := k.client.DescribeKeyPairs(&awsec2.DescribeKeyPairsInput{})
 	if err != nil {
-		return fmt.Errorf("Describing key pairs: %s", err)
+		return delete, fmt.Errorf("Describing key pairs: %s", err)
 	}
 
-	for _, t := range keyPairs.KeyPairs {
-		n := *t.KeyName
+	for _, key := range keyPairs.KeyPairs {
+		n := *key.KeyName
 
 		if !strings.Contains(n, filter) {
 			continue
 		}
 
-		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete key pair %s?", n))
+		proceed := k.logger.Prompt(fmt.Sprintf("Are you sure you want to delete key pair %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err := a.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{KeyName: t.KeyName})
+		delete[n] = ""
+	}
+
+	return delete, nil
+}
+
+func (k KeyPairs) Delete(keyPairs map[string]string) error {
+	for name, _ := range keyPairs {
+		_, err := k.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{KeyName: aws.String(name)})
+
 		if err == nil {
-			a.logger.Printf("SUCCESS deleting key pair %s\n", n)
+			k.logger.Printf("SUCCESS deleting key pair %s\n", name)
 		} else {
-			a.logger.Printf("ERROR deleting key pair %s: %s\n", n, err)
+			k.logger.Printf("ERROR deleting key pair %s: %s\n", name, err)
 		}
 	}
 

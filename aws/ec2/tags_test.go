@@ -26,7 +26,7 @@ var _ = Describe("Tags", func() {
 		tags = ec2.NewTags(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -41,19 +41,16 @@ var _ = Describe("Tags", func() {
 			filter = "banana"
 		})
 
-		It("deletes ec2 tags", func() {
-			err := tags.Delete(filter)
+		It("returns a list of ec2 tags to delete", func() {
+			items, err := tags.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete tag banana-tag?"))
 
-			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(aws.String("the-key")))
-			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(aws.String("the-resource-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting tag banana-tag\n"}))
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("the-key", "the-resource-id"))
 		})
 
 		Context("when the client fails to list tags", func() {
@@ -62,34 +59,19 @@ var _ = Describe("Tags", func() {
 			})
 
 			It("returns the error", func() {
-				err := tags.Delete(filter)
+				_, err := tags.List(filter)
 				Expect(err).To(MatchError("Describing tags: some error"))
-
-				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the tag name does not contain the filter", func() {
-			It("does not try deleting it", func() {
-				err := tags.Delete("kiwi")
+			It("does not return it in the list", func() {
+				items, err := tags.List("kiwi")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the tag", func() {
-			BeforeEach(func() {
-				client.DeleteTagsCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := tags.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting tag banana-tag: some error\n"}))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -98,12 +80,44 @@ var _ = Describe("Tags", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the tag", func() {
-				err := tags.Delete(filter)
+			It("does not return it in the list", func() {
+				items, err := tags.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete tag banana-tag?"))
-				Expect(client.DeleteTagsCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"the-key": "the-resource-id"}
+		})
+
+		It("deletes ec2 tags", func() {
+			err := tags.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
+			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(aws.String("the-key")))
+			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(aws.String("the-resource-id")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting tag the-key\n"}))
+		})
+
+		Context("when the client fails to delete the tag", func() {
+			BeforeEach(func() {
+				client.DeleteTagsCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				err := tags.Delete(items)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting tag the-key: some error\n"}))
 			})
 		})
 	})

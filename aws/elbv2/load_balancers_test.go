@@ -26,7 +26,7 @@ var _ = Describe("LoadBalancers", func() {
 		loadBalancers = elbv2.NewLoadBalancers(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -40,18 +40,16 @@ var _ = Describe("LoadBalancers", func() {
 			filter = "banana"
 		})
 
-		It("deletes elbv2 load balancers", func() {
-			err := loadBalancers.Delete(filter)
+		It("returns a list of elbv2 load balancers to delete", func() {
+			items, err := loadBalancers.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))
 
-			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
-			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerArn).To(Equal(aws.String("the-arn")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting load balancer banana\n"}))
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("banana", "the-arn"))
 		})
 
 		Context("when the client fails to list load balancers", func() {
@@ -59,35 +57,19 @@ var _ = Describe("LoadBalancers", func() {
 				client.DescribeLoadBalancersCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try deleting them", func() {
-				err := loadBalancers.Delete(filter)
+			It("returns the error", func() {
+				_, err := loadBalancers.List(filter)
 				Expect(err).To(MatchError("Describing load balancers: some error"))
-
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the load balancer name does not contain the filter", func() {
-			It("does not try deleting it", func() {
-				err := loadBalancers.Delete("kiwi")
+			It("does not return it in the list", func() {
+				items, err := loadBalancers.List("kiwi")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the load balancer", func() {
-			BeforeEach(func() {
-				client.DeleteLoadBalancerCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := loadBalancers.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting load balancer banana: some error\n"}))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -96,12 +78,43 @@ var _ = Describe("LoadBalancers", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the load balancer", func() {
-				err := loadBalancers.Delete(filter)
+			It("does not return it in the list", func() {
+				items, err := loadBalancers.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete load balancer banana?"))
-				Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana": "the-arn"}
+		})
+
+		It("deletes elbv2 load balancers", func() {
+			err := loadBalancers.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
+			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerArn).To(Equal(aws.String("the-arn")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting load balancer banana\n"}))
+		})
+
+		Context("when the client fails to delete the load balancer", func() {
+			BeforeEach(func() {
+				client.DeleteLoadBalancerCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				err := loadBalancers.Delete(items)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting load balancer banana: some error\n"}))
 			})
 		})
 	})

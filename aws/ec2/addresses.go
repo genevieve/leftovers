@@ -3,6 +3,7 @@ package ec2
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -23,10 +24,12 @@ func NewAddresses(client addressesClient, logger logger) Addresses {
 	}
 }
 
-func (d Addresses) Delete(filter string) error {
+func (d Addresses) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
 	if err != nil {
-		return fmt.Errorf("Describing addresses: %s", err)
+		return delete, fmt.Errorf("Describing addresses: %s", err)
 	}
 
 	for _, a := range addresses.Addresses {
@@ -41,13 +44,20 @@ func (d Addresses) Delete(filter string) error {
 			continue
 		}
 
-		_, err := d.client.ReleaseAddress(&awsec2.ReleaseAddressInput{
-			AllocationId: a.AllocationId,
-		})
+		delete[n] = *a.AllocationId
+	}
+
+	return delete, nil
+}
+
+func (a Addresses) Delete(addresses map[string]string) error {
+	for ip, id := range addresses {
+		_, err := a.client.ReleaseAddress(&awsec2.ReleaseAddressInput{AllocationId: aws.String(id)})
+
 		if err == nil {
-			d.logger.Printf("SUCCESS releasing address %s\n", n)
+			a.logger.Printf("SUCCESS releasing address %s\n", ip)
 		} else {
-			d.logger.Printf("ERROR releasing address %s: %s\n", n, err)
+			a.logger.Printf("ERROR releasing address %s: %s\n", ip, err)
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -25,20 +26,24 @@ func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceP
 	}
 }
 
-func (i InstanceProfiles) Delete(filter string) error {
+func (i InstanceProfiles) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
 	if err != nil {
-		return fmt.Errorf("Listing instance profiles: %s", err)
+		return delete, fmt.Errorf("Listing instance profiles: %s", err)
 	}
 
 	for _, p := range profiles.InstanceProfiles {
-		n := i.clearerName(*p.InstanceProfileName, p.Roles)
+		n := *p.InstanceProfileName
 
-		if !strings.Contains(n, filter) {
+		clearerName := i.clearerName(n, p.Roles)
+
+		if !strings.Contains(clearerName, filter) {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", n))
+		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", clearerName))
 		if !proceed {
 			continue
 		}
@@ -51,17 +56,26 @@ func (i InstanceProfiles) Delete(filter string) error {
 				RoleName:            r.RoleName,
 			})
 			if err == nil {
-				i.logger.Printf("SUCCESS removing role %s from instance profile %s\n", role, n)
+				i.logger.Printf("SUCCESS removing role %s from instance profile %s\n", role, clearerName)
 			} else {
-				i.logger.Printf("ERROR removing role %s from instance profile %s: %s\n", role, n, err)
+				i.logger.Printf("ERROR removing role %s from instance profile %s: %s\n", role, clearerName, err)
 			}
 		}
 
-		_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{InstanceProfileName: p.InstanceProfileName})
+		delete[n] = ""
+	}
+
+	return delete, nil
+}
+
+func (i InstanceProfiles) Delete(profiles map[string]string) error {
+	for name, _ := range profiles {
+		_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{InstanceProfileName: aws.String(name)})
+
 		if err == nil {
-			i.logger.Printf("SUCCESS deleting instance profile %s\n", n)
+			i.logger.Printf("SUCCESS deleting instance profile %s\n", name)
 		} else {
-			i.logger.Printf("ERROR deleting instance profile %s: %s\n", n, err)
+			i.logger.Printf("ERROR deleting instance profile %s: %s\n", name, err)
 		}
 	}
 

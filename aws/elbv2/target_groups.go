@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 )
 
@@ -24,10 +25,12 @@ func NewTargetGroups(client targetGroupsClient, logger logger) TargetGroups {
 	}
 }
 
-func (t TargetGroups) Delete(filter string) error {
+func (t TargetGroups) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	targetGroups, err := t.client.DescribeTargetGroups(&awselbv2.DescribeTargetGroupsInput{})
 	if err != nil {
-		return fmt.Errorf("Describing target groups: %s", err)
+		return delete, fmt.Errorf("Describing target groups: %s", err)
 	}
 
 	for _, g := range targetGroups.TargetGroups {
@@ -42,11 +45,22 @@ func (t TargetGroups) Delete(filter string) error {
 			continue
 		}
 
-		_, err := t.client.DeleteTargetGroup(&awselbv2.DeleteTargetGroupInput{TargetGroupArn: g.TargetGroupArn})
+		delete[n] = *g.TargetGroupArn
+	}
+
+	return delete, nil
+}
+
+func (t TargetGroups) Delete(targetGroups map[string]string) error {
+	for name, arn := range targetGroups {
+		_, err := t.client.DeleteTargetGroup(&awselbv2.DeleteTargetGroupInput{
+			TargetGroupArn: aws.String(arn),
+		})
+
 		if err == nil {
-			t.logger.Printf("SUCCESS deleting target group %s\n", n)
+			t.logger.Printf("SUCCESS deleting target group %s\n", name)
 		} else {
-			t.logger.Printf("ERROR deleting target group %s: %s\n", n, err)
+			t.logger.Printf("ERROR deleting target group %s: %s\n", name, err)
 		}
 	}
 

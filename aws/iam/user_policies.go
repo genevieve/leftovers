@@ -38,11 +38,6 @@ func (o UserPolicies) Delete(userName string) error {
 	for _, p := range policies.AttachedPolicies {
 		n := *p.PolicyName
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user policy %s?", n))
-		if !proceed {
-			continue
-		}
-
 		_, err = o.client.DetachUserPolicy(&awsiam.DetachUserPolicyInput{
 			UserName:  aws.String(userName),
 			PolicyArn: p.PolicyArn,

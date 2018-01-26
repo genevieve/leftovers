@@ -25,29 +25,40 @@ func NewPolicies(client policiesClient, logger logger) Policies {
 	}
 }
 
-func (o Policies) Delete(filter string) error {
-	policies, err := o.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
+func (p Policies) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	policies, err := p.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
 	if err != nil {
-		return fmt.Errorf("Listing policies: %s", err)
+		return delete, fmt.Errorf("Listing policies: %s", err)
 	}
 
-	for _, p := range policies.Policies {
-		n := *p.PolicyName
+	for _, o := range policies.Policies {
+		n := *o.PolicyName
 
 		if !strings.Contains(n, filter) {
 			continue
 		}
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete policy %s?", n))
+		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete policy %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, err = o.client.DeletePolicy(&awsiam.DeletePolicyInput{PolicyArn: p.Arn})
+		delete[n] = *o.Arn
+	}
+
+	return delete, nil
+}
+
+func (p Policies) Delete(policies map[string]string) error {
+	for name, arn := range policies {
+		_, err := p.client.DeletePolicy(&awsiam.DeletePolicyInput{PolicyArn: aws.String(arn)})
+
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting policy %s\n", n)
+			p.logger.Printf("SUCCESS deleting policy %s\n", name)
 		} else {
-			o.logger.Printf("ERROR deleting policy %s: %s\n", n, err)
+			p.logger.Printf("ERROR deleting policy %s: %s\n", name, err)
 		}
 	}
 

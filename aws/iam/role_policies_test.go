@@ -28,7 +28,6 @@ var _ = Describe("RolePolicies", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
 			client.ListAttachedRolePoliciesCall.Returns.Output = &awsiam.ListAttachedRolePoliciesOutput{
 				AttachedPolicies: []*awsiam.AttachedPolicy{{
 					PolicyName: aws.String("the-policy"),
@@ -145,20 +144,6 @@ var _ = Describe("RolePolicies", func() {
 					"SUCCESS detaching role policy the-policy\n",
 					"ERROR deleting role policy the-policy: some error\n",
 				}))
-			})
-		})
-
-		Context("when the user responds no to the prompt", func() {
-			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
-			})
-
-			It("does not delete the role policy", func() {
-				err := policies.Delete("banana")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to detach and delete role policy the-policy?"))
-				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(0))
 			})
 		})
 	})

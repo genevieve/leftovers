@@ -26,7 +26,7 @@ var _ = Describe("ServerCertificates", func() {
 		serverCertificates = iam.NewServerCertificates(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -39,15 +39,15 @@ var _ = Describe("ServerCertificates", func() {
 		})
 
 		It("deletes iam server certificates", func() {
-			err := serverCertificates.Delete(filter)
+			items, err := serverCertificates.List(filter)
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.ListServerCertificatesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.CallCount).To(Equal(1))
 
-			Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
-			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana-cert")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana-cert\n"}))
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("banana-cert", ""))
 		})
 
 		Context("when the client fails to list server certificates", func() {
@@ -55,34 +55,19 @@ var _ = Describe("ServerCertificates", func() {
 				client.ListServerCertificatesCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try deleting them", func() {
-				err := serverCertificates.Delete(filter)
+			It("returns the error", func() {
+				_, err := serverCertificates.List(filter)
 				Expect(err).To(MatchError("Listing server certificates: some error"))
-
-				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
 			})
 		})
 
 		Context("when the certificate name does not contain the filter", func() {
-			It("does not try deleting it", func() {
-				err := serverCertificates.Delete("kiwi")
+			It("does not return it in the list", func() {
+				items, err := serverCertificates.List("kiwi")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the server certificate", func() {
-			BeforeEach(func() {
-				client.DeleteServerCertificateCall.Returns.Error = errors.New("some error")
-			})
-
-			It("does not try deleting them", func() {
-				err := serverCertificates.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana-cert: some error\n"}))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -91,12 +76,43 @@ var _ = Describe("ServerCertificates", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the server certificate", func() {
-				err := serverCertificates.Delete(filter)
+			It("does not return it in the list", func() {
+				items, err := serverCertificates.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete server certificate banana-cert?"))
-				Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana-cert": ""}
+		})
+
+		It("deletes iam server certificates", func() {
+			err := serverCertificates.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
+			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana-cert")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana-cert\n"}))
+		})
+
+		Context("when the client fails to delete the server certificate", func() {
+			BeforeEach(func() {
+				client.DeleteServerCertificateCall.Returns.Error = errors.New("some error")
+			})
+
+			It("does not try deleting them", func() {
+				err := serverCertificates.Delete(items)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana-cert: some error\n"}))
 			})
 		})
 	})

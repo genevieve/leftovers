@@ -42,9 +42,8 @@ func (u Subnets) Delete(vpcId string) error {
 	for _, s := range subnets.Subnets {
 		n := *s.SubnetId
 
-		_, err = u.client.DeleteSubnet(&awsec2.DeleteSubnetInput{
-			SubnetId: s.SubnetId,
-		})
+		_, err = u.client.DeleteSubnet(&awsec2.DeleteSubnetInput{SubnetId: s.SubnetId})
+
 		if err == nil {
 			u.logger.Printf("SUCCESS deleting subnet %s\n", n)
 		} else {
@@ -53,5 +52,4 @@ func (u Subnets) Delete(vpcId string) error {
 	}
 
 	return nil
-
 }

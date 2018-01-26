@@ -22,41 +22,37 @@ var _ = Describe("TargetGroups", func() {
 
 	BeforeEach(func() {
 		client = &fakes.TargetGroupsClient{}
-		client.DescribeTargetGroupsCall.Returns.Output = &awselbv2.DescribeTargetGroupsOutput{
-			TargetGroups: []*awselbv2.TargetGroup{{
-				TargetGroupName: aws.String("precursor-banana"),
-				TargetGroupArn:  aws.String("precursor-arn"),
-			}, {
-				TargetGroupName: aws.String("banana"),
-				TargetGroupArn:  aws.String("arn"),
-			}},
-		}
 		logger = &fakes.Logger{}
-		logger.PromptCall.Returns.Proceed = true
 
 		targetGroups = elbv2.NewTargetGroups(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
+			logger.PromptCall.Returns.Proceed = true
+			client.DescribeTargetGroupsCall.Returns.Output = &awselbv2.DescribeTargetGroupsOutput{
+				TargetGroups: []*awselbv2.TargetGroup{{
+					TargetGroupName: aws.String("precursor-banana"),
+					TargetGroupArn:  aws.String("precursor-arn"),
+				}, {
+					TargetGroupName: aws.String("banana"),
+					TargetGroupArn:  aws.String("arn"),
+				}},
+			}
 			filter = "banana"
 		})
 
-		It("deletes target groups", func() {
-			err := targetGroups.Delete(filter)
+		It("returns a list of target groups to delete", func() {
+			items, err := targetGroups.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(logger.PromptCall.CallCount).To(Equal(2))
 
-			Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(2))
-			Expect(*client.DeleteTargetGroupCall.Receives.Input.TargetGroupArn).To(Equal("arn"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting target group precursor-banana\n",
-				"SUCCESS deleting target group banana\n",
-			}))
+			Expect(items).To(HaveLen(2))
+			Expect(items).To(HaveKeyWithValue("banana", "arn"))
+			Expect(items).To(HaveKeyWithValue("precursor-banana", "precursor-arn"))
 		})
 
 		Context("when the client fails to describe target groups", func() {
@@ -65,18 +61,19 @@ var _ = Describe("TargetGroups", func() {
 			})
 
 			It("returns the error", func() {
-				err := targetGroups.Delete(filter)
+				_, err := targetGroups.List(filter)
 				Expect(err).To(MatchError("Describing target groups: banana"))
 			})
 		})
 
 		Context("when the target group name does not contain the filter", func() {
-			It("does not try to delete it", func() {
-				err := targetGroups.Delete("kiwi")
+			It("does not return it in the list", func() {
+				items, err := targetGroups.List("kiwi")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -85,24 +82,45 @@ var _ = Describe("TargetGroups", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not delete the target group", func() {
-				err := targetGroups.Delete(filter)
+			It("does not return it in the list", func() {
+				items, err := targetGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptCall.CallCount).To(Equal(2))
 				Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
 			})
 		})
+	})
 
-		Context("when we fail to delete target groups", func() {
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana": "arn"}
+		})
+
+		It("deletes target groups", func() {
+			err := targetGroups.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(1))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				"SUCCESS deleting target group banana\n",
+			}))
+		})
+
+		Context("when the client fails to delete a target group", func() {
 			BeforeEach(func() {
 				client.DeleteTargetGroupCall.Returns.Error = errors.New("anana")
 			})
 
-			It("logs the error, but doesn't return", func() {
-				err := targetGroups.Delete(filter)
+			It("logs the error", func() {
+				err := targetGroups.Delete(items)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting target group precursor-banana: anana\n",
 					"ERROR deleting target group banana: anana\n",
 				}))
 			})

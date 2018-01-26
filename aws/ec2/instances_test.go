@@ -27,7 +27,7 @@ var _ = Describe("Instances", func() {
 		instances = ec2.NewInstances(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -46,27 +46,28 @@ var _ = Describe("Instances", func() {
 			}
 		})
 
-		It("terminates ec2 instances", func() {
-			err := instances.Delete(filter)
+		It("returns a list of ec2 instances to delete", func() {
+			items, err := instances.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
-			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
-			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
-			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
+
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana-instance)?"))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id (Name:banana-instance)\n"}))
+
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("the-instance-id (Name:banana-instance)", "the-instance-id"))
 		})
 
 		Context("when the instance name does not contain the filter", func() {
 			It("does not try to delete it", func() {
-				err := instances.Delete("kiwi")
+				items, err := instances.List("kiwi")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
+
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -84,11 +85,13 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("uses just the instance id in the prompt", func() {
-				err := instances.Delete(filter)
+				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id?"))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id\n"}))
+
+				Expect(items).To(HaveLen(1))
+				Expect(items).To(HaveKeyWithValue("the-instance-id", "the-instance-id"))
 			})
 		})
 
@@ -106,11 +109,13 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("uses just the instance id in the prompt", func() {
-				err := instances.Delete(filter)
+				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (KeyPairName:the-key-pair)?"))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id (KeyPairName:the-key-pair)\n"}))
+
+				Expect(items).To(HaveLen(1))
+				Expect(items).To(HaveKeyWithValue("the-instance-id (KeyPairName:the-key-pair)", "the-instance-id"))
 			})
 		})
 
@@ -126,13 +131,14 @@ var _ = Describe("Instances", func() {
 				}
 			})
 
-			It("does not try terminating it", func() {
-				err := instances.Delete(filter)
+			It("does not return it in the list", func() {
+				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
 				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -141,24 +147,9 @@ var _ = Describe("Instances", func() {
 				client.DescribeInstancesCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try terminating them", func() {
-				err := instances.Delete(filter)
+			It("returns the error", func() {
+				_, err := instances.List(filter)
 				Expect(err).To(MatchError("Describing instances: some error"))
-
-				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to terminate the instance", func() {
-			BeforeEach(func() {
-				client.TerminateInstancesCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := instances.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id (Name:banana-instance): some error\n"}))
 			})
 		})
 
@@ -167,12 +158,44 @@ var _ = Describe("Instances", func() {
 				logger.PromptCall.Returns.Proceed = false
 			})
 
-			It("does not terminate the instance", func() {
-				err := instances.Delete(filter)
+			It("does not return it to the list", func() {
+				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana-instance)?"))
-				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"the-instance-id (Name:banana-instance)": "the-instance-id"}
+		})
+
+		It("terminates ec2 instances", func() {
+			err := instances.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
+			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
+			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id (Name:banana-instance)\n"}))
+		})
+
+		Context("when the client fails to terminate the instance", func() {
+			BeforeEach(func() {
+				client.TerminateInstancesCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				err := instances.Delete(items)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id (Name:banana-instance): some error\n"}))
 			})
 		})
 	})

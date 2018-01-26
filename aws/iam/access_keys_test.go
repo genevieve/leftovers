@@ -28,7 +28,6 @@ var _ = Describe("AccessKeys", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
 			client.ListAccessKeysCall.Returns.Output = &awsiam.ListAccessKeysOutput{
 				AccessKeyMetadata: []*awsiam.AccessKeyMetadata{{
 					AccessKeyId: aws.String("banana"),
@@ -75,20 +74,6 @@ var _ = Describe("AccessKeys", func() {
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
 					"ERROR deleting access key banana: some error\n",
 				}))
-			})
-		})
-
-		Context("when the user responds no to the prompt", func() {
-			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
-			})
-
-			It("does not delete the access key", func() {
-				err := accessKeys.Delete("banana")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete access key banana?"))
-				Expect(client.DeleteAccessKeyCall.CallCount).To(Equal(0))
 			})
 		})
 	})

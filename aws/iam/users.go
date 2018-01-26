@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -28,10 +29,12 @@ func NewUsers(client usersClient, logger logger, policies userPolicies, accessKe
 	}
 }
 
-func (o Users) Delete(filter string) error {
-	users, err := o.client.ListUsers(&awsiam.ListUsersInput{})
+func (u Users) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
+	users, err := u.client.ListUsers(&awsiam.ListUsersInput{})
 	if err != nil {
-		return fmt.Errorf("Listing users: %s", err)
+		return delete, fmt.Errorf("Listing users: %s", err)
 	}
 
 	for _, r := range users.Users {
@@ -41,24 +44,34 @@ func (o Users) Delete(filter string) error {
 			continue
 		}
 
-		proceed := o.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user %s?", n))
+		proceed := u.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user %s?", n))
 		if !proceed {
 			continue
 		}
 
-		if err := o.accessKeys.Delete(n); err != nil {
-			return fmt.Errorf("Deleting access keys for %s: %s", n, err)
+		delete[n] = ""
+	}
+
+	return delete, nil
+}
+
+func (u Users) Delete(users map[string]string) error {
+	for name, _ := range users {
+		err := u.accessKeys.Delete(name)
+		if err != nil {
+			return fmt.Errorf("Deleting access keys for %s: %s", name, err)
 		}
 
-		if err := o.policies.Delete(n); err != nil {
-			return fmt.Errorf("Deleting policies for %s: %s", n, err)
+		err = u.policies.Delete(name)
+		if err != nil {
+			return fmt.Errorf("Deleting policies for %s: %s", name, err)
 		}
 
-		_, err = o.client.DeleteUser(&awsiam.DeleteUserInput{UserName: r.UserName})
+		_, err = u.client.DeleteUser(&awsiam.DeleteUserInput{UserName: aws.String(name)})
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting user %s\n", n)
+			u.logger.Printf("SUCCESS deleting user %s\n", name)
 		} else {
-			o.logger.Printf("ERROR deleting user %s: %s\n", n, err)
+			u.logger.Printf("ERROR deleting user %s: %s\n", name, err)
 		}
 	}
 

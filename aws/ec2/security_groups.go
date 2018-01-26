@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -26,10 +27,12 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 	}
 }
 
-func (e SecurityGroups) Delete(filter string) error {
+func (e SecurityGroups) List(filter string) (map[string]string, error) {
+	delete := map[string]string{}
+
 	groups, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
-		return fmt.Errorf("Describing security groups: %s", err)
+		return delete, fmt.Errorf("Describing security groups: %s", err)
 	}
 
 	for _, s := range groups.SecurityGroups {
@@ -50,13 +53,22 @@ func (e SecurityGroups) Delete(filter string) error {
 
 		e.revoke(s)
 
-		_, err := e.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
-			GroupId: s.GroupId,
+		delete[n] = *s.GroupId
+	}
+
+	return delete, nil
+}
+
+func (s SecurityGroups) Delete(securityGroups map[string]string) error {
+	for name, id := range securityGroups {
+		_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
+			GroupId: aws.String(id),
 		})
+
 		if err == nil {
-			e.logger.Printf("SUCCESS deleting security group %s\n", n)
+			s.logger.Printf("SUCCESS deleting security group %s\n", name)
 		} else {
-			e.logger.Printf("ERROR deleting security group %s: %s\n", n, err)
+			s.logger.Printf("ERROR deleting security group %s: %s\n", name, err)
 		}
 	}
 

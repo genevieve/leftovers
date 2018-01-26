@@ -26,7 +26,7 @@ var _ = Describe("Volumes", func() {
 		volumes = ec2.NewVolumes(client, logger)
 	})
 
-	Describe("Delete", func() {
+	Describe("List", func() {
 		var filter string
 
 		BeforeEach(func() {
@@ -37,20 +37,19 @@ var _ = Describe("Volumes", func() {
 					State:    aws.String("available"),
 				}},
 			}
-			filter = "ban"
+			filter = ""
 		})
 
 		It("deletes ec2 volumes", func() {
-			err := volumes.Delete(filter)
+			items, err := volumes.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete volume banana?"))
 
-			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
-			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(aws.String("banana")))
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting volume banana\n"}))
+			Expect(items).To(HaveLen(1))
+			Expect(items).To(HaveKeyWithValue("banana", ""))
 		})
 
 		PContext("when the volume name does not contain the filter", func() {
@@ -62,24 +61,9 @@ var _ = Describe("Volumes", func() {
 				client.DescribeVolumesCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try deleting them", func() {
-				err := volumes.Delete(filter)
+			It("returns the error", func() {
+				_, err := volumes.List(filter)
 				Expect(err).To(MatchError("Describing volumes: some error"))
-
-				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to delete the volume", func() {
-			BeforeEach(func() {
-				client.DeleteVolumeCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := volumes.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting volume banana: some error\n"}))
 			})
 		})
 
@@ -89,11 +73,11 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("does not delete the volume", func() {
-				err := volumes.Delete(filter)
+				items, err := volumes.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete volume banana?"))
-				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
 			})
 		})
 
@@ -107,12 +91,43 @@ var _ = Describe("Volumes", func() {
 				}
 			})
 
-			It("does not prompt the user and it does not delete it", func() {
-				err := volumes.Delete(filter)
+			It("does not prompt the user and it does not return it in the list", func() {
+				items, err := volumes.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(client.DeleteVolumeCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+	})
+
+	Describe("Delete", func() {
+		var items map[string]string
+
+		BeforeEach(func() {
+			items = map[string]string{"banana": ""}
+		})
+
+		It("deletes ec2 volumes", func() {
+			err := volumes.Delete(items)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
+			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(aws.String("banana")))
+
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting volume banana\n"}))
+		})
+
+		Context("when the client fails to delete the volume", func() {
+			BeforeEach(func() {
+				client.DeleteVolumeCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				err := volumes.Delete(items)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting volume banana: some error\n"}))
 			})
 		})
 	})
