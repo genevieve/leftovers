@@ -12,76 +12,84 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
-type logger interface {
-	Printf(message string, a ...interface{})
-	Println(message string)
-	Prompt(message string) bool
-}
-
 type resource interface {
 	List(filter string) (map[string]string, error)
-	Delete(resources map[string]string)
+	Delete(items map[string]string)
 }
 
-type Deleter struct {
+type deleter struct {
+	resource resource
+	items    map[string]string
+}
+
+type Leftovers struct {
 	resources []resource
 }
 
-func (d Deleter) Delete(filter string) error {
-	for _, r := range d.resources {
-		list, err := r.List(filter)
+func (l Leftovers) Delete(filter string) error {
+	var deleters []deleter
+
+	for _, r := range l.resources {
+		i, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
-		r.Delete(list)
+		deleters = append(deleters, deleter{
+			resource: r,
+			items:    i,
+		})
+	}
+
+	for _, d := range deleters {
+		d.resource.Delete(d.items)
 	}
 
 	return nil
 }
 
-func NewDeleter(logger logger, keyPath string) (Deleter, error) {
+func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	if keyPath == "" {
-		return Deleter{}, errors.New("Missing service account key path.")
+		return Leftovers{}, errors.New("Missing service account key path.")
 	}
 
 	key, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Reading service account key path %s: %s", keyPath, err)
+		return Leftovers{}, fmt.Errorf("Reading service account key path %s: %s", keyPath, err)
 	}
 
 	p := struct {
 		ProjectId string `json:"project_id"`
 	}{}
 	if err := json.Unmarshal(key, &p); err != nil {
-		return Deleter{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
+		return Leftovers{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
 	}
 
 	logger.Println(fmt.Sprintf("Cleaning gcp project: %s.", p.ProjectId))
 
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Creating jwt config: %s", err)
+		return Leftovers{}, fmt.Errorf("Creating jwt config: %s", err)
 	}
 
 	service, err := gcpcompute.New(config.Client(context.Background()))
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Creating gcp client: %s", err)
+		return Leftovers{}, fmt.Errorf("Creating gcp client: %s", err)
 	}
 
 	client := compute.NewClient(p.ProjectId, service, logger)
 
 	regions, err := client.ListRegions()
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Listing regions: %s", err)
+		return Leftovers{}, fmt.Errorf("Listing regions: %s", err)
 	}
 
 	zones, err := client.ListZones()
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Listing zones: %s", err)
+		return Leftovers{}, fmt.Errorf("Listing zones: %s", err)
 	}
 
-	return Deleter{
+	return Leftovers{
 		resources: []resource{
 			compute.NewForwardingRules(client, logger, regions),
 			compute.NewGlobalForwardingRules(client, logger),
