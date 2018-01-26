@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/genevievelesperance/leftovers"
 	"github.com/genevievelesperance/leftovers/acceptance"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/aws"
@@ -29,7 +28,7 @@ var _ = Describe("AWS", func() {
 			stdout  *bytes.Buffer
 			logger  *app.Logger
 			filter  string
-			deleter leftovers.Deleter
+			deleter aws.Leftovers
 		)
 
 		BeforeEach(func() {
@@ -41,7 +40,7 @@ var _ = Describe("AWS", func() {
 			acc.CreateKeyPair(filter)
 
 			var err error
-			deleter, err = aws.NewDeleter(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
+			deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
 			Expect(err).NotTo(HaveOccurred())
 		})
 

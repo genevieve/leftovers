@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/genevievelesperance/leftovers"
 	"github.com/genevievelesperance/leftovers/acceptance"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/gcp"
@@ -29,7 +28,7 @@ var _ = Describe("GCP", func() {
 			stdout  *bytes.Buffer
 			logger  *app.Logger
 			filter  string
-			deleter leftovers.Deleter
+			deleter gcp.Leftovers
 		)
 
 		BeforeEach(func() {
