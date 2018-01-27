@@ -20,18 +20,32 @@ type resource interface {
 	Delete(items []string) error
 }
 
+type deleter struct {
+	resource resource
+	items    []string
+}
+
 type Leftovers struct {
 	resources []resource
 }
 
 func (l Leftovers) Delete(filter string) error {
+	var deleters []deleter
+
 	for _, r := range l.resources {
 		items, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
-		r.Delete(items)
+		deleters = append(deleters, deleter{
+			resource: r,
+			items:    items,
+		})
+	}
+
+	for _, d := range deleters {
+		d.resource.Delete(d.items)
 	}
 
 	return nil

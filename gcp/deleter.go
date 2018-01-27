@@ -30,14 +30,14 @@ func (l Leftovers) Delete(filter string) error {
 	var deleters []deleter
 
 	for _, r := range l.resources {
-		i, err := r.List(filter)
+		items, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
 		deleters = append(deleters, deleter{
 			resource: r,
-			items:    i,
+			items:    items,
 		})
 	}
 
