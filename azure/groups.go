@@ -25,30 +25,42 @@ func NewGroups(client groupsClient, logger logger) Groups {
 	}
 }
 
-func (r Groups) Delete(filter string) error {
-	groups, err := r.client.List("", nil)
+func (g Groups) List(filter string) ([]string, error) {
+	delete := []string{}
+
+	groups, err := g.client.List("", nil)
 	if err != nil {
-		return fmt.Errorf("Listing resource groups: %s", err)
+		return delete, fmt.Errorf("Listing resource groups: %s", err)
 	}
 
-	for _, g := range *groups.Value {
-		n := *g.Name
+	for _, group := range *groups.Value {
+		n := *group.Name
 
 		if !strings.Contains(n, filter) {
 			continue
 		}
 
-		proceed := r.logger.Prompt(fmt.Sprintf("Are you sure you want to delete resource group %s?", n))
+		proceed := g.logger.Prompt(fmt.Sprintf("Are you sure you want to delete resource group %s?", n))
 		if !proceed {
 			continue
 		}
 
-		_, errChan := r.client.Delete(n, nil)
-		err = <-errChan
+		delete = append(delete, n)
+	}
+
+	return delete, nil
+}
+
+func (g Groups) Delete(groups []string) error {
+	for _, name := range groups {
+		_, errChan := g.client.Delete(name, nil)
+
+		err := <-errChan
+
 		if err == nil {
-			r.logger.Printf("SUCCESS deleting resource group %s\n", n)
+			g.logger.Printf("SUCCESS deleting resource group %s\n", name)
 		} else {
-			r.logger.Printf("ERROR deleting resource group %s: %s\n", n, err)
+			g.logger.Printf("ERROR deleting resource group %s: %s\n", name, err)
 		}
 	}
 
