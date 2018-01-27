@@ -28,7 +28,7 @@ var _ = Describe("Azure", func() {
 			stdout  *bytes.Buffer
 			logger  *app.Logger
 			filter  string
-			deleter azure.Deleter
+			deleter azure.Leftovers
 		)
 
 		BeforeEach(func() {
@@ -40,7 +40,7 @@ var _ = Describe("Azure", func() {
 			acc.CreateResourceGroup(filter)
 
 			var err error
-			deleter, err = azure.NewDeleter(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
+			deleter, err = azure.NewLeftovers(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
 			Expect(err).NotTo(HaveOccurred())
 		})
 

@@ -20,12 +20,12 @@ type resource interface {
 	Delete(items []string) error
 }
 
-type Deleter struct {
+type Leftovers struct {
 	resources []resource
 }
 
-func (d Deleter) Delete(filter string) error {
-	for _, r := range d.resources {
+func (l Leftovers) Delete(filter string) error {
+	for _, r := range l.resources {
 		items, err := r.List(filter)
 		if err != nil {
 			return err
@@ -37,37 +37,37 @@ func (d Deleter) Delete(filter string) error {
 	return nil
 }
 
-func NewDeleter(logger logger, clientId, clientSecret, subscriptionId, tenantId string) (Deleter, error) {
+func NewLeftovers(logger logger, clientId, clientSecret, subscriptionId, tenantId string) (Leftovers, error) {
 	if clientId == "" {
-		return Deleter{}, errors.New("Missing client id.")
+		return Leftovers{}, errors.New("Missing client id.")
 	}
 
 	if clientSecret == "" {
-		return Deleter{}, errors.New("Missing client secret.")
+		return Leftovers{}, errors.New("Missing client secret.")
 	}
 
 	if subscriptionId == "" {
-		return Deleter{}, errors.New("Missing subscription id.")
+		return Leftovers{}, errors.New("Missing subscription id.")
 	}
 
 	if tenantId == "" {
-		return Deleter{}, errors.New("Missing tenant id.")
+		return Leftovers{}, errors.New("Missing tenant id.")
 	}
 
 	oauthConfig, err := adal.NewOAuthConfig(azurelib.PublicCloud.ActiveDirectoryEndpoint, tenantId)
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Creating oauth config: %s\n", err)
+		return Leftovers{}, fmt.Errorf("Creating oauth config: %s\n", err)
 	}
 
 	servicePrincipalToken, err := adal.NewServicePrincipalToken(*oauthConfig, clientId, clientSecret, azurelib.PublicCloud.ResourceManagerEndpoint)
 	if err != nil {
-		return Deleter{}, fmt.Errorf("Creating service principal token: %s\n", err)
+		return Leftovers{}, fmt.Errorf("Creating service principal token: %s\n", err)
 	}
 
 	gc := resources.NewGroupsClient(subscriptionId)
 	gc.ManagementClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 
-	return Deleter{
+	return Leftovers{
 		resources: []resource{NewGroups(gc, logger)},
 	}, nil
 }
