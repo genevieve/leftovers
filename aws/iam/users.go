@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -69,24 +68,31 @@ func (u Users) list(filter string) ([]User, error) {
 }
 
 func (u Users) Delete(users map[string]string) error {
+	var resources []User
 	for name, _ := range users {
-		err := u.accessKeys.Delete(name)
+		resources = append(resources, NewUser(u.client, &name))
+	}
+
+	return u.cleanup(resources)
+}
+
+func (u Users) cleanup(resources []User) error {
+	for _, resource := range resources {
+		err := u.accessKeys.Delete(*resource.name)
 		if err != nil {
-			return fmt.Errorf("Deleting access keys for %s: %s", name, err)
+			return fmt.Errorf("Deleting access keys for %s: %s", resource.identifier, err)
 		}
 
-		err = u.policies.Delete(name)
+		err = u.policies.Delete(*resource.name)
 		if err != nil {
-			return fmt.Errorf("Deleting policies for %s: %s", name, err)
+			return fmt.Errorf("Deleting policies for %s: %s", resource.identifier, err)
 		}
 
-		_, err = u.client.DeleteUser(&awsiam.DeleteUserInput{
-			UserName: aws.String(name),
-		})
+		err = resource.Delete()
 		if err == nil {
-			u.logger.Printf("SUCCESS deleting user %s\n", name)
+			u.logger.Printf("SUCCESS deleting user %s\n", resource.identifier)
 		} else {
-			u.logger.Printf("ERROR deleting user %s: %s\n", name, err)
+			u.logger.Printf("ERROR deleting user %s: %s\n", resource.identifier, err)
 		}
 	}
 

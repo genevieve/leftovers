@@ -65,13 +65,22 @@ func (p Policies) list(filter string) ([]Policy, error) {
 }
 
 func (p Policies) Delete(policies map[string]string) error {
+	var resources []Policy
 	for name, arn := range policies {
-		_, err := p.client.DeletePolicy(&awsiam.DeletePolicyInput{PolicyArn: aws.String(arn)})
+		resources = append(resources, NewPolicy(p.client, &name, &arn))
+	}
+
+	return p.cleanup(resources)
+}
+
+func (p Policies) cleanup(resources []Policy) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			p.logger.Printf("SUCCESS deleting policy %s\n", name)
+			p.logger.Printf("SUCCESS deleting policy %s\n", resource.identifier)
 		} else {
-			p.logger.Printf("ERROR deleting policy %s: %s\n", name, err)
+			p.logger.Printf("ERROR deleting policy %s: %s\n", resource.identifier, err)
 		}
 	}
 

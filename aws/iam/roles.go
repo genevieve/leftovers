@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -67,17 +66,26 @@ func (r Roles) list(filter string) ([]Role, error) {
 }
 
 func (r Roles) Delete(roles map[string]string) error {
+	var resources []Role
 	for name, _ := range roles {
-		err := r.policies.Delete(name)
+		resources = append(resources, NewRole(r.client, &name))
+	}
+
+	return r.cleanup(resources)
+}
+
+func (r Roles) cleanup(resources []Role) error {
+	for _, resource := range resources {
+		err := r.policies.Delete(*resource.name)
 		if err != nil {
-			return fmt.Errorf("Deleting policies for %s: %s", name, err)
+			return fmt.Errorf("Deleting policies for %s: %s", resource.identifier, err)
 		}
 
-		_, err = r.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: aws.String(name)})
+		err = resource.Delete()
 		if err == nil {
-			r.logger.Printf("SUCCESS deleting role %s\n", name)
+			r.logger.Printf("SUCCESS deleting role %s\n", resource.identifier)
 		} else {
-			r.logger.Printf("ERROR deleting role %s: %s\n", name, err)
+			r.logger.Printf("ERROR deleting role %s: %s\n", resource.identifier, err)
 		}
 	}
 

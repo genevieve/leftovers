@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -80,15 +79,22 @@ func (i InstanceProfiles) list(filter string) ([]InstanceProfile, error) {
 }
 
 func (i InstanceProfiles) Delete(profiles map[string]string) error {
+	var resources []InstanceProfile
 	for name, _ := range profiles {
-		_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{
-			InstanceProfileName: aws.String(name),
-		})
+		resources = append(resources, NewInstanceProfile(i.client, &name, []*awsiam.Role{}))
+	}
+
+	return i.cleanup(resources)
+}
+
+func (i InstanceProfiles) cleanup(resources []InstanceProfile) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			i.logger.Printf("SUCCESS deleting instance profile %s\n", name)
+			i.logger.Printf("SUCCESS deleting instance profile %s\n", resource.identifier)
 		} else {
-			i.logger.Printf("ERROR deleting instance profile %s: %s\n", name, err)
+			i.logger.Printf("ERROR deleting instance profile %s: %s\n", resource.identifier, err)
 		}
 	}
 

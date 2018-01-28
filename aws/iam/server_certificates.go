@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -65,15 +64,22 @@ func (s ServerCertificates) list(filter string) ([]ServerCertificate, error) {
 }
 
 func (s ServerCertificates) Delete(serverCertificates map[string]string) error {
+	var resources []ServerCertificate
 	for name, _ := range serverCertificates {
-		_, err := s.client.DeleteServerCertificate(&awsiam.DeleteServerCertificateInput{
-			ServerCertificateName: aws.String(name),
-		})
+		resources = append(resources, NewServerCertificate(s.client, &name))
+	}
+
+	return s.cleanup(resources)
+}
+
+func (s ServerCertificates) cleanup(resources []ServerCertificate) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			s.logger.Printf("SUCCESS deleting server certificate %s\n", name)
+			s.logger.Printf("SUCCESS deleting server certificate %s\n", resource.identifier)
 		} else {
-			s.logger.Printf("ERROR deleting server certificate %s: %s\n", name, err)
+			s.logger.Printf("ERROR deleting server certificate %s: %s\n", resource.identifier, err)
 		}
 	}
 

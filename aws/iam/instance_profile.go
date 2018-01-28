@@ -31,3 +31,10 @@ func NewInstanceProfile(client instanceProfilesClient, name *string, roles []*aw
 		identifier: identifier,
 	}
 }
+
+func (i InstanceProfile) Delete() error {
+	_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{
+		InstanceProfileName: i.name,
+	})
+	return err
+}
