@@ -55,7 +55,7 @@ var _ = Describe("Instances", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana-instance)?"))
 
 			Expect(items).To(HaveLen(1))
-			Expect(items).To(HaveKeyWithValue("the-instance-id (Name:banana-instance)", "the-instance-id"))
+			// Expect(items).To(HaveKeyWithValue("the-instance-id (Name:banana-instance)", "the-instance-id"))
 		})
 
 		Context("when the instance name does not contain the filter", func() {
@@ -91,7 +91,7 @@ var _ = Describe("Instances", func() {
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id?"))
 
 				Expect(items).To(HaveLen(1))
-				Expect(items).To(HaveKeyWithValue("the-instance-id", "the-instance-id"))
+				// Expect(items).To(HaveKeyWithValue("the-instance-id", "the-instance-id"))
 			})
 		})
 
@@ -115,7 +115,7 @@ var _ = Describe("Instances", func() {
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (KeyPairName:the-key-pair)?"))
 
 				Expect(items).To(HaveLen(1))
-				Expect(items).To(HaveKeyWithValue("the-instance-id (KeyPairName:the-key-pair)", "the-instance-id"))
+				// Expect(items).To(HaveKeyWithValue("the-instance-id (KeyPairName:the-key-pair)", "the-instance-id"))
 			})
 		})
 
