@@ -28,35 +28,48 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 }
 
 func (e SecurityGroups) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	groups, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
+	securityGroups, err := e.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing security groups: %s", err)
+		return nil, err
 	}
 
-	for _, s := range groups.SecurityGroups {
-		if *s.GroupName == "default" {
+	delete := map[string]string{}
+	for _, s := range securityGroups {
+		delete[s.identifier] = *s.id
+	}
+
+	return delete, nil
+}
+
+func (e SecurityGroups) list(filter string) ([]SecurityGroup, error) {
+	output, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing security groups: %s", err)
+	}
+
+	var resources []SecurityGroup
+	for _, sg := range output.SecurityGroups {
+		resource := NewSecurityGroup(e.client, sg.GroupId, sg.GroupName, sg.Tags)
+
+		if *sg.GroupName == "default" {
 			continue
 		}
 
-		n := e.clearerName(*s.GroupName, s.Tags)
-
-		if !strings.Contains(n, filter) {
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete security group %s?", n))
+		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete security group %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		e.revoke(s)
+		e.revoke(sg)
 
-		delete[n] = *s.GroupId
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (s SecurityGroups) Delete(securityGroups map[string]string) error {
@@ -73,19 +86,6 @@ func (s SecurityGroups) Delete(securityGroups map[string]string) error {
 	}
 
 	return nil
-}
-
-func (e SecurityGroups) clearerName(n string, tags []*awsec2.Tag) string {
-	extra := []string{}
-	for _, t := range tags {
-		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
-	}
-
-	if len(extra) > 0 {
-		return fmt.Sprintf("%s (%s)", n, strings.Join(extra, ", "))
-	}
-
-	return n
 }
 
 func (e SecurityGroups) revoke(s *awsec2.SecurityGroup) {

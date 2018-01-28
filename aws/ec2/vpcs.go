@@ -8,20 +8,20 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type vpcClient interface {
+type vpcsClient interface {
 	DescribeVpcs(*awsec2.DescribeVpcsInput) (*awsec2.DescribeVpcsOutput, error)
 	DeleteVpc(*awsec2.DeleteVpcInput) (*awsec2.DeleteVpcOutput, error)
 }
 
 type Vpcs struct {
-	client   vpcClient
+	client   vpcsClient
 	logger   logger
 	routes   routeTables
 	subnets  subnets
 	gateways internetGateways
 }
 
-func NewVpcs(client vpcClient,
+func NewVpcs(client vpcsClient,
 	logger logger,
 	routes routeTables,
 	subnets subnets,
@@ -36,35 +36,46 @@ func NewVpcs(client vpcClient,
 }
 
 func (v Vpcs) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	vpcs, err := v.client.DescribeVpcs(&awsec2.DescribeVpcsInput{})
+	vpcs, err := v.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing vpcs: %s", err)
+		return nil, err
 	}
 
-	for _, vpc := range vpcs.Vpcs {
+	delete := map[string]string{}
+	for _, vpc := range vpcs {
+		delete[vpc.name] = *vpc.id
+	}
+
+	return delete, nil
+}
+
+func (v Vpcs) list(filter string) ([]Vpc, error) {
+	output, err := v.client.DescribeVpcs(&awsec2.DescribeVpcsInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing vpcs: %s", err)
+	}
+
+	var resources []Vpc
+	for _, vpc := range output.Vpcs {
+		resource := NewVpc(v.client, vpc.VpcId, vpc.Tags)
+
 		if *vpc.IsDefault {
 			continue
 		}
 
-		vpcId := *vpc.VpcId
-
-		n := v.clearerName(vpcId, vpc.Tags)
-
-		if n != vpcId && !strings.Contains(n, filter) {
+		if !strings.Contains(resource.name, filter) {
 			continue
 		}
 
-		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s?", n))
+		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s?", resource.name))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = vpcId
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (v Vpcs) Delete(vpcs map[string]string) error {
@@ -94,17 +105,4 @@ func (v Vpcs) Delete(vpcs map[string]string) error {
 	}
 
 	return nil
-}
-
-func (p Vpcs) clearerName(id string, tags []*awsec2.Tag) string {
-	extra := []string{}
-	for _, t := range tags {
-		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
-	}
-
-	if len(extra) > 0 {
-		return fmt.Sprintf("%s (%s)", id, strings.Join(extra, ","))
-	}
-
-	return id
 }

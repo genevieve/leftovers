@@ -20,13 +20,28 @@ import (
 
 type resource interface {
 	List(filter string) (map[string]string, error)
-	Delete(items map[string]string) error
+	Delete(resources map[string]string) error
 }
+
+//TODO: Replace resource interfaces with deletable inputs instead of primitives.
+// type resource interface {
+// 	List(filter string) ([]deletable, error)
+// 	Delete([]deletable) error
+// }
+
+// type deletable interface {
+// 	Delete() error
+// }
 
 type deleter struct {
 	resource resource
 	items    map[string]string
 }
+
+// type deleter struct {
+// 	resource   resource
+// 	deletables []deletable
+// }
 
 type Leftovers struct {
 	resources []resource

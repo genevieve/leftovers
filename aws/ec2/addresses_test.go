@@ -63,6 +63,7 @@ var _ = Describe("Addresses", func() {
 				logger.PromptCall.Returns.Proceed = true
 				client.DescribeAddressesCall.Returns.Output = &awsec2.DescribeAddressesOutput{
 					Addresses: []*awsec2.Address{{
+						PublicIp:   aws.String("banana"),
 						InstanceId: aws.String("the-instance-using-it"),
 					}},
 				}

@@ -25,30 +25,40 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 }
 
 func (v Volumes) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	volumes, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
+	volumes, err := v.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing volumes: %s", err)
+		return nil, err
 	}
 
-	for _, volume := range volumes.Volumes {
-		state := *volume.State
-		if state != "available" {
+	delete := map[string]string{}
+	for _, volume := range volumes {
+		delete[*volume.id] = ""
+	}
+
+	return delete, nil
+}
+
+func (v Volumes) list(filter string) ([]Volume, error) {
+	output, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing volumes: %s", err)
+	}
+
+	var volumes []Volume
+	for _, volume := range output.Volumes {
+		if *volume.State != "available" {
 			continue
 		}
 
-		n := *volume.VolumeId
-
-		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete volume %s?", n))
+		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete volume %s?", *volume.VolumeId))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = ""
+		volumes = append(volumes, NewVolume(v.client, volume.VolumeId))
 	}
 
-	return delete, nil
+	return volumes, nil
 }
 
 func (v Volumes) Delete(volumes map[string]string) error {

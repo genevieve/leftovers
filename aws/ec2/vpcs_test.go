@@ -100,7 +100,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("uses just the vpc id in the prompt", func() {
-				items, err := vpcs.List(filter)
+				items, err := vpcs.List("the-vpc")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete vpc the-vpc-id?"))

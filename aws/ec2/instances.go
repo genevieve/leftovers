@@ -26,35 +26,48 @@ func NewInstances(client instancesClient, logger logger) Instances {
 }
 
 func (a Instances) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
+	instances, err := a.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing instances: %s", err)
+		return nil, err
 	}
 
+	delete := map[string]string{}
+	for _, i := range instances {
+		delete[i.identifier] = *i.id
+	}
+
+	return delete, nil
+}
+
+func (a Instances) list(filter string) ([]Instance, error) {
+	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing instances: %s", err)
+	}
+
+	var resources []Instance
 	for _, r := range instances.Reservations {
 		for _, i := range r.Instances {
+			resource := NewInstance(a.client, i.InstanceId, i.KeyName, i.Tags)
+
 			if a.alreadyShutdown(*i.State.Name) {
 				continue
 			}
 
-			n := a.clearerName(*i.InstanceId, i.Tags, *i.KeyName)
-
-			if !strings.Contains(n, filter) {
+			if !strings.Contains(resource.identifier, filter) {
 				continue
 			}
 
-			proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to terminate instance %s?", n))
+			proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to terminate instance %s?", resource.identifier))
 			if !proceed {
 				continue
 			}
 
-			delete[n] = *i.InstanceId
+			resources = append(resources, resource)
 		}
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (i Instances) Delete(instances map[string]string) error {
@@ -75,21 +88,4 @@ func (i Instances) Delete(instances map[string]string) error {
 
 func (a Instances) alreadyShutdown(state string) bool {
 	return state == "shutting-down" || state == "terminated"
-}
-
-func (a Instances) clearerName(id string, tags []*awsec2.Tag, keyName string) string {
-	extra := []string{}
-	for _, t := range tags {
-		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
-	}
-
-	if keyName != "" {
-		extra = append(extra, fmt.Sprintf("KeyPairName:%s", keyName))
-	}
-
-	if len(extra) > 0 {
-		return fmt.Sprintf("%s (%s)", id, strings.Join(extra, ", "))
-	}
-
-	return id
 }

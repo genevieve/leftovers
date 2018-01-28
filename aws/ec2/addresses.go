@@ -25,29 +25,42 @@ func NewAddresses(client addressesClient, logger logger) Addresses {
 }
 
 func (d Addresses) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
+	addresses, err := d.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing addresses: %s", err)
+		return nil, err
 	}
 
+	delete := map[string]string{}
+	for _, a := range addresses {
+		delete[*a.publicIp] = *a.allocationId
+	}
+
+	return delete, nil
+}
+
+func (d Addresses) list(filter string) ([]Address, error) {
+	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing addresses: %s", err)
+	}
+
+	var resources []Address
 	for _, a := range addresses.Addresses {
+		resource := NewAddress(d.client, a.PublicIp, a.AllocationId)
+
 		if d.inUse(a) {
 			continue
 		}
 
-		n := *a.PublicIp
-
-		proceed := d.logger.Prompt(fmt.Sprintf("Are you sure you want to release address %s?", n))
+		proceed := d.logger.Prompt(fmt.Sprintf("Are you sure you want to release address %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = *a.AllocationId
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (a Addresses) Delete(addresses map[string]string) error {

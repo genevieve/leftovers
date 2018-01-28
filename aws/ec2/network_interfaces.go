@@ -26,29 +26,42 @@ func NewNetworkInterfaces(client networkInterfacesClient, logger logger) Network
 }
 
 func (e NetworkInterfaces) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	networkInterfaces, err := e.client.DescribeNetworkInterfaces(&awsec2.DescribeNetworkInterfacesInput{})
+	networkInterfaces, err := e.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing network interfaces: %s", err)
+		return nil, err
 	}
 
-	for _, i := range networkInterfaces.NetworkInterfaces {
-		n := e.clearerName(*i.NetworkInterfaceId, i.TagSet)
+	delete := map[string]string{}
+	for _, n := range networkInterfaces {
+		delete[n.identifier] = *n.id
+	}
 
-		if !strings.Contains(n, filter) {
+	return delete, nil
+}
+
+func (e NetworkInterfaces) list(filter string) ([]NetworkInterface, error) {
+	networkInterfaces, err := e.client.DescribeNetworkInterfaces(&awsec2.DescribeNetworkInterfacesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing network interfaces: %s", err)
+	}
+
+	var resources []NetworkInterface
+	for _, i := range networkInterfaces.NetworkInterfaces {
+		resource := NewNetworkInterface(e.client, i.NetworkInterfaceId, i.TagSet)
+
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete network interface %s?", n))
+		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete network interface %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = *i.NetworkInterfaceId
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (n NetworkInterfaces) Delete(networkInterfaces map[string]string) error {
@@ -65,17 +78,4 @@ func (n NetworkInterfaces) Delete(networkInterfaces map[string]string) error {
 	}
 
 	return nil
-}
-
-func (e NetworkInterfaces) clearerName(id string, tags []*awsec2.Tag) string {
-	extra := []string{}
-	for _, t := range tags {
-		extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
-	}
-
-	if len(extra) > 0 {
-		return fmt.Sprintf("%s (%s)", id, strings.Join(extra, ", "))
-	}
-
-	return id
 }
