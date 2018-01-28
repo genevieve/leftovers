@@ -26,29 +26,42 @@ func NewPolicies(client policiesClient, logger logger) Policies {
 }
 
 func (p Policies) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	policies, err := p.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
+	policies, err := p.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Listing policies: %s", err)
+		return nil, err
 	}
 
-	for _, o := range policies.Policies {
-		n := *o.PolicyName
+	delete := map[string]string{}
+	for _, o := range policies {
+		delete[*o.name] = *o.arn
+	}
 
-		if !strings.Contains(n, filter) {
+	return delete, nil
+}
+
+func (p Policies) list(filter string) ([]Policy, error) {
+	policies, err := p.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
+	if err != nil {
+		return nil, fmt.Errorf("Listing policies: %s", err)
+	}
+
+	var resources []Policy
+	for _, o := range policies.Policies {
+		resource := NewPolicy(p.client, o.PolicyName, o.Arn)
+
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete policy %s?", n))
+		proceed := p.logger.Prompt(fmt.Sprintf("Are you sure you want to delete policy %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = *o.Arn
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (p Policies) Delete(policies map[string]string) error {

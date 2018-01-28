@@ -26,29 +26,42 @@ func NewServerCertificates(client serverCertificatesClient, logger logger) Serve
 }
 
 func (s ServerCertificates) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	certificates, err := s.client.ListServerCertificates(&awsiam.ListServerCertificatesInput{})
+	certificates, err := s.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Listing server certificates: %s", err)
+		return nil, err
 	}
 
-	for _, c := range certificates.ServerCertificateMetadataList {
-		n := *c.ServerCertificateName
+	delete := map[string]string{}
+	for _, c := range certificates {
+		delete[*c.name] = ""
+	}
 
-		if !strings.Contains(n, filter) {
+	return delete, nil
+}
+
+func (s ServerCertificates) list(filter string) ([]ServerCertificate, error) {
+	certificates, err := s.client.ListServerCertificates(&awsiam.ListServerCertificatesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Listing server certificates: %s", err)
+	}
+
+	var resources []ServerCertificate
+	for _, c := range certificates.ServerCertificateMetadataList {
+		resource := NewServerCertificate(s.client, c.ServerCertificateName)
+
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := s.logger.Prompt(fmt.Sprintf("Are you sure you want to delete server certificate %s?", n))
+		proceed := s.logger.Prompt(fmt.Sprintf("Are you sure you want to delete server certificate %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (s ServerCertificates) Delete(serverCertificates map[string]string) error {

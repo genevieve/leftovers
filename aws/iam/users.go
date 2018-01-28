@@ -30,29 +30,42 @@ func NewUsers(client usersClient, logger logger, policies userPolicies, accessKe
 }
 
 func (u Users) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	users, err := u.client.ListUsers(&awsiam.ListUsersInput{})
+	users, err := u.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Listing users: %s", err)
+		return nil, err
 	}
 
-	for _, r := range users.Users {
-		n := *r.UserName
+	delete := map[string]string{}
+	for _, r := range users {
+		delete[*r.name] = ""
+	}
 
-		if !strings.Contains(n, filter) {
+	return delete, nil
+}
+
+func (u Users) list(filter string) ([]User, error) {
+	users, err := u.client.ListUsers(&awsiam.ListUsersInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Listing users: %s", err)
+	}
+
+	var resources []User
+	for _, r := range users.Users {
+		resource := NewUser(u.client, r.UserName)
+
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := u.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user %s?", n))
+		proceed := u.logger.Prompt(fmt.Sprintf("Are you sure you want to delete user %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (u Users) Delete(users map[string]string) error {
@@ -67,7 +80,9 @@ func (u Users) Delete(users map[string]string) error {
 			return fmt.Errorf("Deleting policies for %s: %s", name, err)
 		}
 
-		_, err = u.client.DeleteUser(&awsiam.DeleteUserInput{UserName: aws.String(name)})
+		_, err = u.client.DeleteUser(&awsiam.DeleteUserInput{
+			UserName: aws.String(name),
+		})
 		if err == nil {
 			u.logger.Printf("SUCCESS deleting user %s\n", name)
 		} else {

@@ -27,23 +27,34 @@ func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceP
 }
 
 func (i InstanceProfiles) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
+	profiles, err := i.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Listing instance profiles: %s", err)
+		return nil, err
 	}
 
+	delete := map[string]string{}
+	for _, p := range profiles {
+		delete[*p.name] = ""
+	}
+
+	return delete, nil
+}
+
+func (i InstanceProfiles) list(filter string) ([]InstanceProfile, error) {
+	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Listing instance profiles: %s", err)
+	}
+
+	var resources []InstanceProfile
 	for _, p := range profiles.InstanceProfiles {
-		n := *p.InstanceProfileName
+		resource := NewInstanceProfile(i.client, p.InstanceProfileName, p.Roles)
 
-		clearerName := i.clearerName(n, p.Roles)
-
-		if !strings.Contains(clearerName, filter) {
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", clearerName))
+		proceed := i.logger.Prompt(fmt.Sprintf("Are you sure you want to delete instance profile %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
@@ -52,25 +63,27 @@ func (i InstanceProfiles) List(filter string) (map[string]string, error) {
 			role := *r.RoleName
 
 			_, err := i.client.RemoveRoleFromInstanceProfile(&awsiam.RemoveRoleFromInstanceProfileInput{
-				InstanceProfileName: p.InstanceProfileName,
+				InstanceProfileName: resource.name,
 				RoleName:            r.RoleName,
 			})
 			if err == nil {
-				i.logger.Printf("SUCCESS removing role %s from instance profile %s\n", role, clearerName)
+				i.logger.Printf("SUCCESS removing role %s from instance profile %s\n", role, resource.identifier)
 			} else {
-				i.logger.Printf("ERROR removing role %s from instance profile %s: %s\n", role, clearerName, err)
+				i.logger.Printf("ERROR removing role %s from instance profile %s: %s\n", role, resource.identifier, err)
 			}
 		}
 
-		delete[n] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (i InstanceProfiles) Delete(profiles map[string]string) error {
 	for name, _ := range profiles {
-		_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{InstanceProfileName: aws.String(name)})
+		_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{
+			InstanceProfileName: aws.String(name),
+		})
 
 		if err == nil {
 			i.logger.Printf("SUCCESS deleting instance profile %s\n", name)
@@ -80,17 +93,4 @@ func (i InstanceProfiles) Delete(profiles map[string]string) error {
 	}
 
 	return nil
-}
-
-func (i InstanceProfiles) clearerName(name string, roles []*awsiam.Role) string {
-	extra := []string{}
-	for _, r := range roles {
-		extra = append(extra, fmt.Sprintf("Role:%s", *r.RoleName))
-	}
-
-	if len(extra) > 0 {
-		return fmt.Sprintf("%s (%s)", name, strings.Join(extra, ", "))
-	}
-
-	return name
 }
