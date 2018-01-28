@@ -1,6 +1,10 @@
 package elbv2
 
-import awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
+import (
+	"fmt"
+
+	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
+)
 
 type LoadBalancer struct {
 	client     loadBalancersClient
@@ -22,5 +26,10 @@ func (l LoadBalancer) Delete() error {
 	_, err := l.client.DeleteLoadBalancer(&awselbv2.DeleteLoadBalancerInput{
 		LoadBalancerArn: l.arn,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting load balancer %s: %s", l.identifier, err)
+	}
+
+	return nil
 }

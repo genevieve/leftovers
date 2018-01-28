@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type vpcsClient interface {
@@ -34,29 +35,15 @@ func NewVpcs(client vpcsClient,
 	}
 }
 
-func (v Vpcs) List(filter string) (map[string]string, error) {
-	vpcs, err := v.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, vpc := range vpcs {
-		delete[vpc.identifier] = *vpc.id
-	}
-
-	return delete, nil
-}
-
-func (v Vpcs) list(filter string) ([]Vpc, error) {
+func (v Vpcs) List(filter string) ([]common.Deletable, error) {
 	output, err := v.client.DescribeVpcs(&awsec2.DescribeVpcsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing vpcs: %s", err)
 	}
 
-	var resources []Vpc
+	var resources []common.Deletable
 	for _, vpc := range output.Vpcs {
-		resource := NewVpc(v.client, vpc.VpcId, vpc.Tags)
+		resource := NewVpc(v.client, v.routes, v.subnets, v.gateways, vpc.VpcId, vpc.Tags)
 
 		if *vpc.IsDefault {
 			continue
@@ -75,42 +62,4 @@ func (v Vpcs) list(filter string) ([]Vpc, error) {
 	}
 
 	return resources, nil
-}
-
-func (v Vpcs) Delete(vpcs map[string]string) error {
-	var resources []Vpc
-	for _, id := range vpcs {
-		resources = append(resources, NewVpc(v.client, &id, []*awsec2.Tag{}))
-	}
-
-	return v.cleanup(resources)
-}
-
-func (v Vpcs) cleanup(resources []Vpc) error {
-	for _, resource := range resources {
-
-		err := v.routes.Delete(*resource.id)
-		if err != nil {
-			return fmt.Errorf("Deleting routes for %s: %s", resource.identifier, err)
-		}
-
-		err = v.subnets.Delete(*resource.id)
-		if err != nil {
-			return fmt.Errorf("Deleting subnets for %s: %s", resource.identifier, err)
-		}
-
-		err = v.gateways.Delete(*resource.id)
-		if err != nil {
-			return fmt.Errorf("Deleting internet gateways for %s: %s", resource.identifier, err)
-		}
-
-		err = resource.Delete()
-		if err == nil {
-			v.logger.Printf("SUCCESS deleting vpc %s\n", resource.identifier)
-		} else {
-			v.logger.Printf("ERROR deleting vpc %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

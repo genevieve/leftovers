@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type networkInterfacesClient interface {
@@ -24,27 +25,13 @@ func NewNetworkInterfaces(client networkInterfacesClient, logger logger) Network
 	}
 }
 
-func (e NetworkInterfaces) List(filter string) (map[string]string, error) {
-	networkInterfaces, err := e.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, n := range networkInterfaces {
-		delete[n.identifier] = *n.id
-	}
-
-	return delete, nil
-}
-
-func (e NetworkInterfaces) list(filter string) ([]NetworkInterface, error) {
+func (e NetworkInterfaces) List(filter string) ([]common.Deletable, error) {
 	networkInterfaces, err := e.client.DescribeNetworkInterfaces(&awsec2.DescribeNetworkInterfacesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing network interfaces: %s", err)
 	}
 
-	var resources []NetworkInterface
+	var resources []common.Deletable
 	for _, i := range networkInterfaces.NetworkInterfaces {
 		resource := NewNetworkInterface(e.client, i.NetworkInterfaceId, i.TagSet)
 
@@ -61,27 +48,4 @@ func (e NetworkInterfaces) list(filter string) ([]NetworkInterface, error) {
 	}
 
 	return resources, nil
-}
-
-func (n NetworkInterfaces) Delete(networkInterfaces map[string]string) error {
-	var resources []NetworkInterface
-	for _, id := range networkInterfaces {
-		resources = append(resources, NewNetworkInterface(n.client, &id, []*awsec2.Tag{}))
-	}
-
-	return n.cleanup(resources)
-}
-
-func (n NetworkInterfaces) cleanup(resources []NetworkInterface) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			n.logger.Printf("SUCCESS deleting network interface %s\n", resource.identifier)
-		} else {
-			n.logger.Printf("ERROR deleting network interface %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

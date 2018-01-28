@@ -1,6 +1,8 @@
 package ec2
 
 import (
+	"fmt"
+
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -28,5 +30,10 @@ func (t Tag) Delete() error {
 		Tags:      []*awsec2.Tag{{Key: t.key}},
 		Resources: []*string{t.resourceId},
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED to delete tag %s: %s", t.identifier, err)
+	}
+
+	return nil
 }

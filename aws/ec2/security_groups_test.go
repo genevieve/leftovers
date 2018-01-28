@@ -188,35 +188,4 @@ var _ = Describe("SecurityGroups", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana-group": "the-group-id"}
-		})
-
-		It("deletes ec2 security groups", func() {
-			err := securityGroups.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting security group banana-group\n"}))
-		})
-
-		Context("when the client fails to delete the security group", func() {
-			BeforeEach(func() {
-				client.DeleteSecurityGroupCall.Returns.Error = errors.New("some error")
-			})
-
-			It("returns the error", func() {
-				err := securityGroups.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting security group banana-group: some error\n"}))
-			})
-		})
-	})
 })

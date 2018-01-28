@@ -1,3 +1,4 @@
-- Split getting/listing/filtering resources from deleting them.
 - Can we filter the disks list api call with len of users eq 0?
 - Logger methods for success/error take resource.type, resource.identifier, err
+- Backfill test coverage for individual resources.
+- Add success logging back.

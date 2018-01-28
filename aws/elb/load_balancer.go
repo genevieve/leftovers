@@ -1,6 +1,8 @@
 package elb
 
 import (
+	"fmt"
+
 	awselb "github.com/aws/aws-sdk-go/service/elb"
 )
 
@@ -22,5 +24,10 @@ func (l LoadBalancer) Delete() error {
 	_, err := l.client.DeleteLoadBalancer(&awselb.DeleteLoadBalancerInput{
 		LoadBalancerName: l.name,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting load balancer %s: %s", l.identifier, err)
+	}
+
+	return nil
 }

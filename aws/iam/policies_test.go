@@ -90,35 +90,4 @@ var _ = Describe("Policies", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana-policy": "the-policy-arn"}
-		})
-
-		It("deletes iam policies and associated policies", func() {
-			err := policies.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeletePolicyCall.CallCount).To(Equal(1))
-			Expect(client.DeletePolicyCall.Receives.Input.PolicyArn).To(Equal(aws.String("the-policy-arn")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting policy banana-policy\n"}))
-		})
-
-		Context("when the client fails to delete the policy", func() {
-			BeforeEach(func() {
-				client.DeletePolicyCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := policies.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting policy banana-policy: some error\n"}))
-			})
-		})
-	})
 })

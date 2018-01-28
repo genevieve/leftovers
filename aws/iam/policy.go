@@ -1,6 +1,10 @@
 package iam
 
-import awsiam "github.com/aws/aws-sdk-go/service/iam"
+import (
+	"fmt"
+
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+)
 
 type Policy struct {
 	client     policiesClient
@@ -22,5 +26,10 @@ func (p Policy) Delete() error {
 	_, err := p.client.DeletePolicy(&awsiam.DeletePolicyInput{
 		PolicyArn: p.arn,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting policy %s: %s", p.identifier, err)
+	}
+
+	return nil
 }

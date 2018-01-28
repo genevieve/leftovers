@@ -1,6 +1,10 @@
 package elbv2
 
-import awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
+import (
+	"fmt"
+
+	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
+)
 
 type TargetGroup struct {
 	client     targetGroupsClient
@@ -22,5 +26,10 @@ func (t TargetGroup) Delete() error {
 	_, err := t.client.DeleteTargetGroup(&awselbv2.DeleteTargetGroupInput{
 		TargetGroupArn: t.arn,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting target group %s: %s", t.identifier, err)
+	}
+
+	return nil
 }

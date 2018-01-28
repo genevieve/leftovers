@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type tagsClient interface {
@@ -24,27 +25,13 @@ func NewTags(client tagsClient, logger logger) Tags {
 	}
 }
 
-func (a Tags) List(filter string) (map[string]string, error) {
-	tags, err := a.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, tag := range tags {
-		delete[*tag.key] = *tag.resourceId
-	}
-
-	return delete, nil
-}
-
-func (a Tags) list(filter string) ([]Tag, error) {
+func (a Tags) List(filter string) ([]common.Deletable, error) {
 	output, err := a.client.DescribeTags(&awsec2.DescribeTagsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing tags: %s", err)
 	}
 
-	var resources []Tag
+	var resources []common.Deletable
 	for _, t := range output.Tags {
 		resource := NewTag(a.client, t.Key, t.Value, t.ResourceId)
 
@@ -62,27 +49,4 @@ func (a Tags) list(filter string) ([]Tag, error) {
 	}
 
 	return resources, nil
-}
-
-func (t Tags) Delete(tags map[string]string) error {
-	var resources []Tag
-	for key, resourceId := range tags {
-		resources = append(resources, NewTag(t.client, &key, &key, &resourceId))
-	}
-
-	return t.cleanup(resources)
-}
-
-func (t Tags) cleanup(resources []Tag) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			t.logger.Printf("SUCCESS deleting tag %s\n", resource.identifier)
-		} else {
-			t.logger.Printf("ERROR deleting tag %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

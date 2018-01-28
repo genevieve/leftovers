@@ -167,36 +167,4 @@ var _ = Describe("Instances", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"the-instance-id": "the-instance-id"}
-		})
-
-		It("terminates ec2 instances", func() {
-			err := instances.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
-			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
-			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id\n"}))
-		})
-
-		Context("when the client fails to terminate the instance", func() {
-			BeforeEach(func() {
-				client.TerminateInstancesCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := instances.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id: some error\n"}))
-			})
-		})
-	})
 })

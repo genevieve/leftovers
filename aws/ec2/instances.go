@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type instancesClient interface {
@@ -25,27 +25,13 @@ func NewInstances(client instancesClient, logger logger) Instances {
 	}
 }
 
-func (a Instances) List(filter string) (map[string]string, error) {
-	instances, err := a.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, i := range instances {
-		delete[i.identifier] = *i.id
-	}
-
-	return delete, nil
-}
-
-func (a Instances) list(filter string) ([]Instance, error) {
+func (a Instances) List(filter string) ([]common.Deletable, error) {
 	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing instances: %s", err)
 	}
 
-	var resources []Instance
+	var resources []common.Deletable
 	for _, r := range instances.Reservations {
 		for _, i := range r.Instances {
 			resource := NewInstance(a.client, i.InstanceId, i.KeyName, i.Tags)
@@ -68,29 +54,6 @@ func (a Instances) list(filter string) ([]Instance, error) {
 	}
 
 	return resources, nil
-}
-
-func (i Instances) Delete(instances map[string]string) error {
-	var resources []Instance
-	for _, id := range instances {
-		resources = append(resources, NewInstance(i.client, &id, aws.String(""), []*awsec2.Tag{}))
-	}
-
-	return i.cleanup(resources)
-}
-
-func (i Instances) cleanup(resources []Instance) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			i.logger.Printf("SUCCESS terminating instance %s\n", resource.identifier)
-		} else {
-			i.logger.Printf("ERROR terminating instance %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }
 
 func (a Instances) alreadyShutdown(state string) bool {

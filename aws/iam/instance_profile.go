@@ -36,5 +36,10 @@ func (i InstanceProfile) Delete() error {
 	_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{
 		InstanceProfileName: i.name,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting instance profile %s: %s", i.identifier, err)
+	}
+
+	return nil
 }

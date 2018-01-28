@@ -92,38 +92,4 @@ var _ = Describe("TargetGroups", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": "arn"}
-		})
-
-		It("deletes target groups", func() {
-			err := targetGroups.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(1))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting target group banana\n",
-			}))
-		})
-
-		Context("when the client fails to delete a target group", func() {
-			BeforeEach(func() {
-				client.DeleteTargetGroupCall.Returns.Error = errors.New("anana")
-			})
-
-			It("logs the error", func() {
-				err := targetGroups.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting target group banana: anana\n",
-				}))
-			})
-		})
-	})
 })

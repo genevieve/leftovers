@@ -36,5 +36,10 @@ func (n NetworkInterface) Delete() error {
 	_, err := n.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{
 		NetworkInterfaceId: n.id,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting network interface %s: %s", n.identifier, err)
+	}
+
+	return nil
 }

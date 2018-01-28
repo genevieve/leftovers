@@ -87,35 +87,4 @@ var _ = Describe("LoadBalancers", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": ""}
-		})
-
-		It("deletes elb load balancers", func() {
-			err := loadBalancers.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
-			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerName).To(Equal(aws.String("banana")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting load balancer banana\n"}))
-		})
-
-		Context("when the client fails to delete the load balancer", func() {
-			BeforeEach(func() {
-				client.DeleteLoadBalancerCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := loadBalancers.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting load balancer banana: some error\n"}))
-			})
-		})
-	})
 })

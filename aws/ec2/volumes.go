@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type volumesClient interface {
@@ -23,27 +24,13 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 	}
 }
 
-func (v Volumes) List(filter string) (map[string]string, error) {
-	volumes, err := v.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, volume := range volumes {
-		delete[*volume.id] = ""
-	}
-
-	return delete, nil
-}
-
-func (v Volumes) list(filter string) ([]Volume, error) {
+func (v Volumes) List(filter string) ([]common.Deletable, error) {
 	output, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing volumes: %s", err)
 	}
 
-	var volumes []Volume
+	var volumes []common.Deletable
 	for _, volume := range output.Volumes {
 		if *volume.State != "available" {
 			continue
@@ -58,27 +45,4 @@ func (v Volumes) list(filter string) ([]Volume, error) {
 	}
 
 	return volumes, nil
-}
-
-func (v Volumes) Delete(volumes map[string]string) error {
-	var resources []Volume
-	for id, _ := range volumes {
-		resources = append(resources, NewVolume(v.client, &id))
-	}
-
-	return v.cleanup(resources)
-}
-
-func (v Volumes) cleanup(resources []Volume) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			v.logger.Printf("SUCCESS deleting volume %s\n", resource.identifier)
-		} else {
-			v.logger.Printf("ERROR deleting volume %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

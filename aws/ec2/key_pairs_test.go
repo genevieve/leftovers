@@ -86,35 +86,4 @@ var _ = Describe("KeyPairs", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": ""}
-		})
-
-		It("deletes ec2 key pairs", func() {
-			err := keys.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteKeyPairCall.CallCount).To(Equal(1))
-			Expect(client.DeleteKeyPairCall.Receives.Input.KeyName).To(Equal(aws.String("banana")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting key pair banana\n"}))
-		})
-
-		Context("when the client fails to delete the key pair", func() {
-			BeforeEach(func() {
-				client.DeleteKeyPairCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := keys.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting key pair banana: some error\n"}))
-			})
-		})
-	})
 })

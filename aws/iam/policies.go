@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type policiesClient interface {
@@ -25,27 +26,13 @@ func NewPolicies(client policiesClient, logger logger) Policies {
 	}
 }
 
-func (p Policies) List(filter string) (map[string]string, error) {
-	policies, err := p.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, o := range policies {
-		delete[*o.name] = *o.arn
-	}
-
-	return delete, nil
-}
-
-func (p Policies) list(filter string) ([]Policy, error) {
+func (p Policies) List(filter string) ([]common.Deletable, error) {
 	policies, err := p.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
 	if err != nil {
 		return nil, fmt.Errorf("Listing policies: %s", err)
 	}
 
-	var resources []Policy
+	var resources []common.Deletable
 	for _, o := range policies.Policies {
 		resource := NewPolicy(p.client, o.PolicyName, o.Arn)
 
@@ -62,27 +49,4 @@ func (p Policies) list(filter string) ([]Policy, error) {
 	}
 
 	return resources, nil
-}
-
-func (p Policies) Delete(policies map[string]string) error {
-	var resources []Policy
-	for name, arn := range policies {
-		resources = append(resources, NewPolicy(p.client, &name, &arn))
-	}
-
-	return p.cleanup(resources)
-}
-
-func (p Policies) cleanup(resources []Policy) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			p.logger.Printf("SUCCESS deleting policy %s\n", resource.identifier)
-		} else {
-			p.logger.Printf("ERROR deleting policy %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

@@ -36,5 +36,10 @@ func (s SecurityGroup) Delete() error {
 	_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
 		GroupId: s.id,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting security group %s: %s", s.identifier, err)
+	}
+
+	return nil
 }

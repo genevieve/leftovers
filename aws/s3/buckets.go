@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type bucketsClient interface {
@@ -29,27 +30,13 @@ func NewBuckets(client bucketsClient, logger logger, manager bucketManager) Buck
 	}
 }
 
-func (b Buckets) List(filter string) (map[string]string, error) {
-	buckets, err := b.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, bucket := range buckets {
-		delete[bucket.identifier] = ""
-	}
-
-	return delete, nil
-}
-
-func (b Buckets) list(filter string) ([]Bucket, error) {
+func (b Buckets) List(filter string) ([]common.Deletable, error) {
 	buckets, err := b.client.ListBuckets(&awss3.ListBucketsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Listing buckets: %s", err)
 	}
 
-	var resources []Bucket
+	var resources []common.Deletable
 	for _, bucket := range buckets.Buckets {
 		resource := NewBucket(b.client, bucket.Name)
 
@@ -72,16 +59,7 @@ func (b Buckets) list(filter string) ([]Bucket, error) {
 	return resources, nil
 }
 
-func (b Buckets) Delete(buckets map[string]string) error {
-	var resources []Bucket
-	for name, _ := range buckets {
-		resources = append(resources, NewBucket(b.client, &name))
-	}
-
-	return b.cleanup(resources)
-}
-
-func (b Buckets) cleanup(resources []Bucket) error {
+func (b Buckets) Delete(resources []Bucket) error {
 	for _, resource := range resources {
 		err := resource.Delete()
 

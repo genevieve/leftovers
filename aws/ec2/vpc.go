@@ -9,11 +9,20 @@ import (
 
 type Vpc struct {
 	client     vpcsClient
+	routes     routeTables
+	subnets    subnets
+	gateways   internetGateways
 	id         *string
 	identifier string
 }
 
-func NewVpc(client vpcsClient, id *string, tags []*awsec2.Tag) Vpc {
+func NewVpc(client vpcsClient,
+	routes routeTables,
+	subnets subnets,
+	gateways internetGateways,
+	id *string,
+	tags []*awsec2.Tag) Vpc {
+
 	identifier := *id
 
 	var extra []string
@@ -27,12 +36,37 @@ func NewVpc(client vpcsClient, id *string, tags []*awsec2.Tag) Vpc {
 
 	return Vpc{
 		client:     client,
+		routes:     routes,
+		subnets:    subnets,
+		gateways:   gateways,
 		id:         id,
 		identifier: identifier,
 	}
 }
 
 func (v Vpc) Delete() error {
-	_, err := v.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: v.id})
-	return err
+	err := v.routes.Delete(*v.id)
+	if err != nil {
+		return fmt.Errorf("FALED deleting routes for %s: %s", v.identifier, err)
+	}
+
+	err = v.subnets.Delete(*v.id)
+	if err != nil {
+		return fmt.Errorf("FALED deleting subnets for %s: %s", v.identifier, err)
+	}
+
+	err = v.gateways.Delete(*v.id)
+	if err != nil {
+		return fmt.Errorf("FALED deleting internet gateways for %s: %s", v.identifier, err)
+	}
+
+	_, err = v.client.DeleteVpc(&awsec2.DeleteVpcInput{
+		VpcId: v.id,
+	})
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting vpc %s: %s", v.identifier, err)
+	}
+
+	return nil
 }

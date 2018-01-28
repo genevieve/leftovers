@@ -1,6 +1,8 @@
 package ec2
 
 import (
+	"fmt"
+
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -24,5 +26,10 @@ func (a Address) Delete() error {
 	_, err := a.client.ReleaseAddress(&awsec2.ReleaseAddressInput{
 		AllocationId: a.allocationId,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED releasing address %s: %s", a.identifier, err)
+	}
+
+	return nil
 }

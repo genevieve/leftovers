@@ -109,35 +109,4 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": "the-id"}
-		})
-
-		It("deletes network interfaces", func() {
-			err := networkInterfaces.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNetworkInterfaceCall.Receives.Input.NetworkInterfaceId).To(Equal(aws.String("the-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network interface the-id\n"}))
-		})
-
-		Context("when the client fails to delete the network interface", func() {
-			BeforeEach(func() {
-				client.DeleteNetworkInterfaceCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := networkInterfaces.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network interface the-id: some error\n"}))
-			})
-		})
-	})
 })

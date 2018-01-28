@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type instanceProfilesClient interface {
@@ -25,27 +26,13 @@ func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceP
 	}
 }
 
-func (i InstanceProfiles) List(filter string) (map[string]string, error) {
-	profiles, err := i.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, p := range profiles {
-		delete[*p.name] = ""
-	}
-
-	return delete, nil
-}
-
-func (i InstanceProfiles) list(filter string) ([]InstanceProfile, error) {
+func (i InstanceProfiles) List(filter string) ([]common.Deletable, error) {
 	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Listing instance profiles: %s", err)
 	}
 
-	var resources []InstanceProfile
+	var resources []common.Deletable
 	for _, p := range profiles.InstanceProfiles {
 		resource := NewInstanceProfile(i.client, p.InstanceProfileName, p.Roles)
 
@@ -76,27 +63,4 @@ func (i InstanceProfiles) list(filter string) ([]InstanceProfile, error) {
 	}
 
 	return resources, nil
-}
-
-func (i InstanceProfiles) Delete(profiles map[string]string) error {
-	var resources []InstanceProfile
-	for name, _ := range profiles {
-		resources = append(resources, NewInstanceProfile(i.client, &name, []*awsiam.Role{}))
-	}
-
-	return i.cleanup(resources)
-}
-
-func (i InstanceProfiles) cleanup(resources []InstanceProfile) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			i.logger.Printf("SUCCESS deleting instance profile %s\n", resource.identifier)
-		} else {
-			i.logger.Printf("ERROR deleting instance profile %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

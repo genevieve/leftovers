@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type securityGroupsClient interface {
@@ -26,27 +27,13 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 	}
 }
 
-func (e SecurityGroups) List(filter string) (map[string]string, error) {
-	securityGroups, err := e.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, s := range securityGroups {
-		delete[s.identifier] = *s.id
-	}
-
-	return delete, nil
-}
-
-func (e SecurityGroups) list(filter string) ([]SecurityGroup, error) {
+func (e SecurityGroups) List(filter string) ([]common.Deletable, error) {
 	output, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing security groups: %s", err)
 	}
 
-	var resources []SecurityGroup
+	var resources []common.Deletable
 	for _, sg := range output.SecurityGroups {
 		resource := NewSecurityGroup(e.client, sg.GroupId, sg.GroupName, sg.Tags)
 
@@ -69,29 +56,6 @@ func (e SecurityGroups) list(filter string) ([]SecurityGroup, error) {
 	}
 
 	return resources, nil
-}
-
-func (s SecurityGroups) Delete(securityGroups map[string]string) error {
-	var resources []SecurityGroup
-	for name, id := range securityGroups {
-		resources = append(resources, NewSecurityGroup(s.client, &id, &name, []*awsec2.Tag{}))
-	}
-
-	return s.cleanup(resources)
-}
-
-func (s SecurityGroups) cleanup(resources []SecurityGroup) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			s.logger.Printf("SUCCESS deleting security group %s\n", resource.identifier)
-		} else {
-			s.logger.Printf("ERROR deleting security group %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }
 
 func (e SecurityGroups) revoke(s *awsec2.SecurityGroup) {

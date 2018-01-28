@@ -104,35 +104,4 @@ var _ = Describe("Addresses", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": "the-allocation-id"}
-		})
-
-		It("releases ec2 addresses", func() {
-			err := addresses.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
-			Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(aws.String("the-allocation-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS releasing address banana\n"}))
-		})
-
-		Context("when the client fails to release the address", func() {
-			BeforeEach(func() {
-				client.ReleaseAddressCall.Returns.Error = errors.New("some error")
-			})
-
-			It("returns the error", func() {
-				err := addresses.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR releasing address banana: some error\n"}))
-			})
-		})
-	})
 })

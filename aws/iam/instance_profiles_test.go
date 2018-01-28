@@ -138,41 +138,4 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana-profile": ""}
-		})
-
-		It("deletes iam instance profiles", func() {
-			err := instanceProfiles.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
-			Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("banana-profile")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting instance profile banana-profile\n",
-			}))
-		})
-
-		Context("when the client fails to delete the instance profile", func() {
-			BeforeEach(func() {
-				client.DeleteInstanceProfileCall.Returns.Error = errors.New("deleting error")
-			})
-
-			It("logs the error", func() {
-				err := instanceProfiles.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting instance profile banana-profile: deleting error\n",
-				}))
-			})
-		})
-	})
 })

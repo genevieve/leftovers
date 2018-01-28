@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/genevievelesperance/leftovers/aws/common"
 )
 
 type keyPairsClient interface {
@@ -24,27 +25,13 @@ func NewKeyPairs(client keyPairsClient, logger logger) KeyPairs {
 	}
 }
 
-func (k KeyPairs) List(filter string) (map[string]string, error) {
-	keyPairs, err := k.list(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	delete := map[string]string{}
-	for _, key := range keyPairs {
-		delete[*key.name] = ""
-	}
-
-	return delete, nil
-}
-
-func (k KeyPairs) list(filter string) ([]KeyPair, error) {
+func (k KeyPairs) List(filter string) ([]common.Deletable, error) {
 	keyPairs, err := k.client.DescribeKeyPairs(&awsec2.DescribeKeyPairsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing key pairs: %s", err)
 	}
 
-	var resources []KeyPair
+	var resources []common.Deletable
 	for _, key := range keyPairs.KeyPairs {
 		resource := NewKeyPair(k.client, key.KeyName)
 
@@ -61,27 +48,4 @@ func (k KeyPairs) list(filter string) ([]KeyPair, error) {
 	}
 
 	return resources, nil
-}
-
-func (k KeyPairs) Delete(keyPairs map[string]string) error {
-	var resources []KeyPair
-	for name, _ := range keyPairs {
-		resources = append(resources, NewKeyPair(k.client, &name))
-	}
-
-	return k.cleanup(resources)
-}
-
-func (k KeyPairs) cleanup(resources []KeyPair) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			k.logger.Printf("SUCCESS deleting key pair %s\n", resource.identifier)
-		} else {
-			k.logger.Printf("ERROR deleting key pair %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
 }

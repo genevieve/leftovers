@@ -1,6 +1,8 @@
 package ec2
 
 import (
+	"fmt"
+
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -19,6 +21,13 @@ func NewKeyPair(client keyPairsClient, name *string) KeyPair {
 }
 
 func (k KeyPair) Delete() error {
-	_, err := k.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{KeyName: k.name})
-	return err
+	_, err := k.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{
+		KeyName: k.name,
+	})
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting key pair %s: %s", k.identifier, err)
+	}
+
+	return nil
 }

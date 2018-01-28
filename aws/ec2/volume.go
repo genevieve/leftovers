@@ -1,6 +1,10 @@
 package ec2
 
-import awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"fmt"
+
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type Volume struct {
 	client     volumesClient
@@ -20,5 +24,10 @@ func (v Volume) Delete() error {
 	_, err := v.client.DeleteVolume(&awsec2.DeleteVolumeInput{
 		VolumeId: v.id,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting volume %s: %s", v.identifier, err)
+	}
+
+	return nil
 }

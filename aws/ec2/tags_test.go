@@ -89,36 +89,4 @@ var _ = Describe("Tags", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"the-key": "the-resource-id"}
-		})
-
-		It("deletes ec2 tags", func() {
-			err := tags.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(aws.String("the-key")))
-			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(aws.String("the-resource-id")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting tag the-key\n"}))
-		})
-
-		Context("when the client fails to delete the tag", func() {
-			BeforeEach(func() {
-				client.DeleteTagsCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := tags.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting tag the-key: some error\n"}))
-			})
-		})
-	})
 })

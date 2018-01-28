@@ -100,35 +100,4 @@ var _ = Describe("Volumes", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": ""}
-		})
-
-		It("deletes ec2 volumes", func() {
-			err := volumes.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
-			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(aws.String("banana")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting volume banana\n"}))
-		})
-
-		Context("when the client fails to delete the volume", func() {
-			BeforeEach(func() {
-				client.DeleteVolumeCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := volumes.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting volume banana: some error\n"}))
-			})
-		})
-	})
 })

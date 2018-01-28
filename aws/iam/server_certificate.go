@@ -1,6 +1,10 @@
 package iam
 
-import awsiam "github.com/aws/aws-sdk-go/service/iam"
+import (
+	"fmt"
+
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+)
 
 type ServerCertificate struct {
 	client     serverCertificatesClient
@@ -20,5 +24,10 @@ func (s ServerCertificate) Delete() error {
 	_, err := s.client.DeleteServerCertificate(&awsiam.DeleteServerCertificateInput{
 		ServerCertificateName: s.name,
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED deleting server certificate %s: %s", s.identifier, err)
+	}
+
+	return nil
 }

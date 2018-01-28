@@ -11,6 +11,7 @@ import (
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/genevievelesperance/leftovers/aws/common"
 	"github.com/genevievelesperance/leftovers/aws/ec2"
 	"github.com/genevievelesperance/leftovers/aws/elb"
 	"github.com/genevievelesperance/leftovers/aws/elbv2"
@@ -19,51 +20,31 @@ import (
 )
 
 type resource interface {
-	List(filter string) (map[string]string, error)
-	Delete(resources map[string]string) error
+	List(filter string) ([]common.Deletable, error)
 }
-
-//TODO: Replace resource interfaces with deletable inputs instead of primitives.
-// type resource interface {
-// 	List(filter string) ([]deletable, error)
-// 	Delete([]deletable) error
-// }
-
-// type deletable interface {
-// 	Delete() error
-// }
-
-type deleter struct {
-	resource resource
-	items    map[string]string
-}
-
-// type deleter struct {
-// 	resource   resource
-// 	deletables []deletable
-// }
 
 type Leftovers struct {
+	logger    logger
 	resources []resource
 }
 
 func (l Leftovers) Delete(filter string) error {
-	var deleters []deleter
+	var deletables []common.Deletable
 
 	for _, r := range l.resources {
-		items, err := r.List(filter)
+		list, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
-		deleters = append(deleters, deleter{
-			resource: r,
-			items:    items,
-		})
+		deletables = append(deletables, list...)
 	}
 
-	for _, d := range deleters {
-		d.resource.Delete(d.items)
+	for _, d := range deletables {
+		err := d.Delete()
+		if err != nil {
+			l.logger.Println(err.Error())
+		}
 	}
 
 	return nil
@@ -103,6 +84,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	bucketManager := s3.NewBucketManager(region)
 
 	return Leftovers{
+		logger: logger,
 		resources: []resource{
 			iam.NewRoles(iamClient, logger, rolePolicies),
 			iam.NewUsers(iamClient, logger, userPolicies, accessKeys),

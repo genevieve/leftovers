@@ -85,35 +85,4 @@ var _ = Describe("ServerCertificates", func() {
 			})
 		})
 	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana-cert": ""}
-		})
-
-		It("deletes iam server certificates", func() {
-			err := serverCertificates.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
-			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(aws.String("banana-cert")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting server certificate banana-cert\n"}))
-		})
-
-		Context("when the client fails to delete the server certificate", func() {
-			BeforeEach(func() {
-				client.DeleteServerCertificateCall.Returns.Error = errors.New("some error")
-			})
-
-			It("does not try deleting them", func() {
-				err := serverCertificates.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting server certificate banana-cert: some error\n"}))
-			})
-		})
-	})
 })

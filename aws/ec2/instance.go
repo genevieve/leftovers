@@ -40,5 +40,10 @@ func (i Instance) Delete() error {
 	_, err := i.client.TerminateInstances(&awsec2.TerminateInstancesInput{
 		InstanceIds: []*string{i.id},
 	})
-	return err
+
+	if err != nil {
+		return fmt.Errorf("FAILED terminating instance %s: %s", i.identifier, err)
+	}
+
+	return nil
 }
