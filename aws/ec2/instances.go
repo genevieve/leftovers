@@ -71,15 +71,22 @@ func (a Instances) list(filter string) ([]Instance, error) {
 }
 
 func (i Instances) Delete(instances map[string]string) error {
-	for name, id := range instances {
-		_, err := i.client.TerminateInstances(&awsec2.TerminateInstancesInput{
-			InstanceIds: []*string{aws.String(id)},
-		})
+	var resources []Instance
+	for _, id := range instances {
+		resources = append(resources, NewInstance(i.client, &id, aws.String(""), []*awsec2.Tag{}))
+	}
+
+	return i.cleanup(resources)
+}
+
+func (i Instances) cleanup(resources []Instance) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			i.logger.Printf("SUCCESS terminating instance %s\n", name)
+			i.logger.Printf("SUCCESS terminating instance %s\n", resource.identifier)
 		} else {
-			i.logger.Printf("ERROR terminating instance %s: %s\n", name, err)
+			i.logger.Printf("ERROR terminating instance %s: %s\n", resource.identifier, err)
 		}
 	}
 

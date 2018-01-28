@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -73,15 +72,22 @@ func (e SecurityGroups) list(filter string) ([]SecurityGroup, error) {
 }
 
 func (s SecurityGroups) Delete(securityGroups map[string]string) error {
+	var resources []SecurityGroup
 	for name, id := range securityGroups {
-		_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
-			GroupId: aws.String(id),
-		})
+		resources = append(resources, NewSecurityGroup(s.client, &id, &name, []*awsec2.Tag{}))
+	}
+
+	return s.cleanup(resources)
+}
+
+func (s SecurityGroups) cleanup(resources []SecurityGroup) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			s.logger.Printf("SUCCESS deleting security group %s\n", name)
+			s.logger.Printf("SUCCESS deleting security group %s\n", resource.identifier)
 		} else {
-			s.logger.Printf("ERROR deleting security group %s: %s\n", name, err)
+			s.logger.Printf("ERROR deleting security group %s: %s\n", resource.identifier, err)
 		}
 	}
 

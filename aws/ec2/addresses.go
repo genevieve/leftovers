@@ -3,7 +3,6 @@ package ec2
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -64,13 +63,22 @@ func (d Addresses) list(filter string) ([]Address, error) {
 }
 
 func (a Addresses) Delete(addresses map[string]string) error {
+	var resources []Address
 	for ip, id := range addresses {
-		_, err := a.client.ReleaseAddress(&awsec2.ReleaseAddressInput{AllocationId: aws.String(id)})
+		resources = append(resources, NewAddress(a.client, &ip, &id))
+	}
+
+	return a.cleanup(resources)
+}
+
+func (a Addresses) cleanup(resources []Address) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			a.logger.Printf("SUCCESS releasing address %s\n", ip)
+			a.logger.Printf("SUCCESS releasing address %s\n", resource.identifier)
 		} else {
-			a.logger.Printf("ERROR releasing address %s: %s\n", ip, err)
+			a.logger.Printf("ERROR releasing address %s: %s\n", resource.identifier, err)
 		}
 	}
 

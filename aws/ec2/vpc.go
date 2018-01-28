@@ -8,13 +8,13 @@ import (
 )
 
 type Vpc struct {
-	id     *string
-	name   string
-	client vpcsClient
+	client     vpcsClient
+	id         *string
+	identifier string
 }
 
 func NewVpc(client vpcsClient, id *string, tags []*awsec2.Tag) Vpc {
-	name := *id
+	identifier := *id
 
 	var extra []string
 	for _, t := range tags {
@@ -22,12 +22,17 @@ func NewVpc(client vpcsClient, id *string, tags []*awsec2.Tag) Vpc {
 	}
 
 	if len(extra) > 0 {
-		name = fmt.Sprintf("%s (%s)", *id, strings.Join(extra, ","))
+		identifier = fmt.Sprintf("%s (%s)", *id, strings.Join(extra, ","))
 	}
 
 	return Vpc{
-		client: client,
-		id:     id,
-		name:   name,
+		client:     client,
+		id:         id,
+		identifier: identifier,
 	}
+}
+
+func (v Vpc) Delete() error {
+	_, err := v.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: v.id})
+	return err
 }

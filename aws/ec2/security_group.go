@@ -31,3 +31,10 @@ func NewSecurityGroup(client securityGroupsClient, id, groupName *string, tags [
 		identifier: identifier,
 	}
 }
+
+func (s SecurityGroup) Delete() error {
+	_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
+		GroupId: s.id,
+	})
+	return err
+}

@@ -43,11 +43,6 @@ func (n InternetGateways) Delete(vpcId string) error {
 	for _, i := range igws.InternetGateways {
 		igwId := *i.InternetGatewayId
 
-		proceed := n.logger.Prompt(fmt.Sprintf("Are you sure you want to delete internet gateway %s?", igwId))
-		if !proceed {
-			continue
-		}
-
 		_, err = n.client.DetachInternetGateway(&awsec2.DetachInternetGatewayInput{
 			InternetGatewayId: i.InternetGatewayId,
 			VpcId:             aws.String(vpcId),

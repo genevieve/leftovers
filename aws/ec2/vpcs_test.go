@@ -138,7 +138,7 @@ var _ = Describe("Vpcs", func() {
 		var items map[string]string
 
 		BeforeEach(func() {
-			items = map[string]string{"the-vpc-id (Name:banana)": "the-vpc-id"}
+			items = map[string]string{"the-vpc-id": "the-vpc-id"}
 		})
 
 		It("deletes ec2 vpcs", func() {
@@ -157,7 +157,7 @@ var _ = Describe("Vpcs", func() {
 			Expect(client.DeleteVpcCall.CallCount).To(Equal(1))
 			Expect(client.DeleteVpcCall.Receives.Input.VpcId).To(Equal(aws.String("the-vpc-id")))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting vpc the-vpc-id (Name:banana)\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting vpc the-vpc-id\n"}))
 		})
 
 		Context("when routes fail to delete", func() {
@@ -167,7 +167,7 @@ var _ = Describe("Vpcs", func() {
 
 			It("returns the error", func() {
 				err := vpcs.Delete(items)
-				Expect(err).To(MatchError("Deleting routes for the-vpc-id (Name:banana): some error"))
+				Expect(err).To(MatchError("Deleting routes for the-vpc-id: some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
 			})
@@ -180,7 +180,7 @@ var _ = Describe("Vpcs", func() {
 
 			It("returns the error", func() {
 				err := vpcs.Delete(items)
-				Expect(err).To(MatchError("Deleting subnets for the-vpc-id (Name:banana): some error"))
+				Expect(err).To(MatchError("Deleting subnets for the-vpc-id: some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
 			})
@@ -193,7 +193,7 @@ var _ = Describe("Vpcs", func() {
 
 			It("returns the error", func() {
 				err := vpcs.Delete(items)
-				Expect(err).To(MatchError("Deleting internet gateways for the-vpc-id (Name:banana): some error"))
+				Expect(err).To(MatchError("Deleting internet gateways for the-vpc-id: some error"))
 
 				Expect(client.DeleteVpcCall.CallCount).To(Equal(0))
 			})
@@ -208,7 +208,7 @@ var _ = Describe("Vpcs", func() {
 				err := vpcs.Delete(items)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting vpc the-vpc-id (Name:banana): some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting vpc the-vpc-id: some error\n"}))
 			})
 		})
 	})

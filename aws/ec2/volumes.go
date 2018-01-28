@@ -3,7 +3,6 @@ package ec2
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -62,15 +61,22 @@ func (v Volumes) list(filter string) ([]Volume, error) {
 }
 
 func (v Volumes) Delete(volumes map[string]string) error {
+	var resources []Volume
 	for id, _ := range volumes {
-		_, err := v.client.DeleteVolume(&awsec2.DeleteVolumeInput{
-			VolumeId: aws.String(id),
-		})
+		resources = append(resources, NewVolume(v.client, &id))
+	}
+
+	return v.cleanup(resources)
+}
+
+func (v Volumes) cleanup(resources []Volume) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			v.logger.Printf("SUCCESS deleting volume %s\n", id)
+			v.logger.Printf("SUCCESS deleting volume %s\n", resource.identifier)
 		} else {
-			v.logger.Printf("ERROR deleting volume %s: %s\n", id, err)
+			v.logger.Printf("ERROR deleting volume %s: %s\n", resource.identifier, err)
 		}
 	}
 

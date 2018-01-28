@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -43,7 +42,7 @@ func (v Vpcs) List(filter string) (map[string]string, error) {
 
 	delete := map[string]string{}
 	for _, vpc := range vpcs {
-		delete[vpc.name] = *vpc.id
+		delete[vpc.identifier] = *vpc.id
 	}
 
 	return delete, nil
@@ -63,11 +62,11 @@ func (v Vpcs) list(filter string) ([]Vpc, error) {
 			continue
 		}
 
-		if !strings.Contains(resource.name, filter) {
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s?", resource.name))
+		proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete vpc %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
@@ -79,28 +78,37 @@ func (v Vpcs) list(filter string) ([]Vpc, error) {
 }
 
 func (v Vpcs) Delete(vpcs map[string]string) error {
-	for name, id := range vpcs {
-		err := v.routes.Delete(id)
+	var resources []Vpc
+	for _, id := range vpcs {
+		resources = append(resources, NewVpc(v.client, &id, []*awsec2.Tag{}))
+	}
+
+	return v.cleanup(resources)
+}
+
+func (v Vpcs) cleanup(resources []Vpc) error {
+	for _, resource := range resources {
+
+		err := v.routes.Delete(*resource.id)
 		if err != nil {
-			return fmt.Errorf("Deleting routes for %s: %s", name, err)
+			return fmt.Errorf("Deleting routes for %s: %s", resource.identifier, err)
 		}
 
-		err = v.subnets.Delete(id)
+		err = v.subnets.Delete(*resource.id)
 		if err != nil {
-			return fmt.Errorf("Deleting subnets for %s: %s", name, err)
+			return fmt.Errorf("Deleting subnets for %s: %s", resource.identifier, err)
 		}
 
-		err = v.gateways.Delete(id)
+		err = v.gateways.Delete(*resource.id)
 		if err != nil {
-			return fmt.Errorf("Deleting internet gateways for %s: %s", name, err)
+			return fmt.Errorf("Deleting internet gateways for %s: %s", resource.identifier, err)
 		}
 
-		_, err = v.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: aws.String(id)})
-
+		err = resource.Delete()
 		if err == nil {
-			v.logger.Printf("SUCCESS deleting vpc %s\n", name)
+			v.logger.Printf("SUCCESS deleting vpc %s\n", resource.identifier)
 		} else {
-			v.logger.Printf("ERROR deleting vpc %s: %s\n", name, err)
+			v.logger.Printf("ERROR deleting vpc %s: %s\n", resource.identifier, err)
 		}
 	}
 

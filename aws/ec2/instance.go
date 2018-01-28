@@ -35,3 +35,10 @@ func NewInstance(client instancesClient, id, keyName *string, tags []*awsec2.Tag
 		identifier: identifier,
 	}
 }
+
+func (i Instance) Delete() error {
+	_, err := i.client.TerminateInstances(&awsec2.TerminateInstancesInput{
+		InstanceIds: []*string{i.id},
+	})
+	return err
+}

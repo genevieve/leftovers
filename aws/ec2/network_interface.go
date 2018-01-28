@@ -31,3 +31,10 @@ func NewNetworkInterface(client networkInterfacesClient, id *string, tags []*aws
 		identifier: identifier,
 	}
 }
+
+func (n NetworkInterface) Delete() error {
+	_, err := n.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{
+		NetworkInterfaceId: n.id,
+	})
+	return err
+}

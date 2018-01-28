@@ -28,7 +28,6 @@ var _ = Describe("InternetGateways", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
 			client.DescribeInternetGatewaysCall.Returns.Output = &awsec2.DescribeInternetGatewaysOutput{
 				InternetGateways: []*awsec2.InternetGateway{{
 					InternetGatewayId: aws.String("the-gateway-id"),
@@ -104,20 +103,6 @@ var _ = Describe("InternetGateways", func() {
 					"SUCCESS detaching internet gateway the-gateway-id\n",
 					"ERROR deleting internet gateway the-gateway-id: some error\n",
 				}))
-			})
-		})
-
-		Context("when the user responds no to the prompt", func() {
-			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
-			})
-
-			It("does not delete the internet gateway", func() {
-				err := gateways.Delete("banana")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete internet gateway the-gateway-id?"))
-				Expect(client.DeleteInternetGatewayCall.CallCount).To(Equal(0))
 			})
 		})
 	})

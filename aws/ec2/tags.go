@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -66,17 +65,22 @@ func (a Tags) list(filter string) ([]Tag, error) {
 }
 
 func (t Tags) Delete(tags map[string]string) error {
+	var resources []Tag
 	for key, resourceId := range tags {
-		_, err := t.client.DeleteTags(&awsec2.DeleteTagsInput{
-			//TODO: Delete with key:value
-			Tags:      []*awsec2.Tag{{Key: aws.String(key)}},
-			Resources: []*string{aws.String(resourceId)},
-		})
+		resources = append(resources, NewTag(t.client, &key, &key, &resourceId))
+	}
+
+	return t.cleanup(resources)
+}
+
+func (t Tags) cleanup(resources []Tag) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			t.logger.Printf("SUCCESS deleting tag %s\n", key)
+			t.logger.Printf("SUCCESS deleting tag %s\n", resource.identifier)
 		} else {
-			t.logger.Printf("ERROR deleting tag %s: %s\n", key, err)
+			t.logger.Printf("ERROR deleting tag %s: %s\n", resource.identifier, err)
 		}
 	}
 

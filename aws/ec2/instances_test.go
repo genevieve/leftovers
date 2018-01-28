@@ -172,7 +172,7 @@ var _ = Describe("Instances", func() {
 		var items map[string]string
 
 		BeforeEach(func() {
-			items = map[string]string{"the-instance-id (Name:banana-instance)": "the-instance-id"}
+			items = map[string]string{"the-instance-id": "the-instance-id"}
 		})
 
 		It("terminates ec2 instances", func() {
@@ -183,7 +183,7 @@ var _ = Describe("Instances", func() {
 			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
 			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(aws.String("the-instance-id")))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id (Name:banana-instance)\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS terminating instance the-instance-id\n"}))
 		})
 
 		Context("when the client fails to terminate the instance", func() {
@@ -195,7 +195,7 @@ var _ = Describe("Instances", func() {
 				err := instances.Delete(items)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id (Name:banana-instance): some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR terminating instance the-instance-id: some error\n"}))
 			})
 		})
 	})

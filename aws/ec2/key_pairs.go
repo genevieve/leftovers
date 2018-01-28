@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -65,13 +64,22 @@ func (k KeyPairs) list(filter string) ([]KeyPair, error) {
 }
 
 func (k KeyPairs) Delete(keyPairs map[string]string) error {
+	var resources []KeyPair
 	for name, _ := range keyPairs {
-		_, err := k.client.DeleteKeyPair(&awsec2.DeleteKeyPairInput{KeyName: aws.String(name)})
+		resources = append(resources, NewKeyPair(k.client, &name))
+	}
+
+	return k.cleanup(resources)
+}
+
+func (k KeyPairs) cleanup(resources []KeyPair) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			k.logger.Printf("SUCCESS deleting key pair %s\n", name)
+			k.logger.Printf("SUCCESS deleting key pair %s\n", resource.identifier)
 		} else {
-			k.logger.Printf("ERROR deleting key pair %s: %s\n", name, err)
+			k.logger.Printf("ERROR deleting key pair %s: %s\n", resource.identifier, err)
 		}
 	}
 

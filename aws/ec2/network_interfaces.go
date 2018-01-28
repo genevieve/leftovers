@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -65,15 +64,22 @@ func (e NetworkInterfaces) list(filter string) ([]NetworkInterface, error) {
 }
 
 func (n NetworkInterfaces) Delete(networkInterfaces map[string]string) error {
-	for name, id := range networkInterfaces {
-		_, err := n.client.DeleteNetworkInterface(&awsec2.DeleteNetworkInterfaceInput{
-			NetworkInterfaceId: aws.String(id),
-		})
+	var resources []NetworkInterface
+	for _, id := range networkInterfaces {
+		resources = append(resources, NewNetworkInterface(n.client, &id, []*awsec2.Tag{}))
+	}
+
+	return n.cleanup(resources)
+}
+
+func (n NetworkInterfaces) cleanup(resources []NetworkInterface) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			n.logger.Printf("SUCCESS deleting network interface %s\n", name)
+			n.logger.Printf("SUCCESS deleting network interface %s\n", resource.identifier)
 		} else {
-			n.logger.Printf("ERROR deleting network interface %s: %s\n", name, err)
+			n.logger.Printf("ERROR deleting network interface %s: %s\n", resource.identifier, err)
 		}
 	}
 
