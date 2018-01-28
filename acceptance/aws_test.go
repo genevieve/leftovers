@@ -1,10 +1,9 @@
-package acceptance_test
+package acceptance
 
 import (
 	"bytes"
 	"os"
 
-	"github.com/genevievelesperance/leftovers/acceptance"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/aws"
 
@@ -13,10 +12,10 @@ import (
 )
 
 var _ = Describe("AWS", func() {
-	var acc *acceptance.AWSAcceptance
+	var acc *AWSAcceptance
 
 	BeforeEach(func() {
-		acc = acceptance.NewAWSAcceptance()
+		acc = NewAWSAcceptance()
 
 		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")

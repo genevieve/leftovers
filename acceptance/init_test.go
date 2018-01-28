@@ -1,4 +1,4 @@
-package acceptance_test
+package acceptance
 
 import (
 	. "github.com/onsi/ginkgo"

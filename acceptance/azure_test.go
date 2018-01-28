@@ -1,10 +1,9 @@
-package acceptance_test
+package acceptance
 
 import (
 	"bytes"
 	"os"
 
-	"github.com/genevievelesperance/leftovers/acceptance"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/azure"
 
@@ -13,10 +12,10 @@ import (
 )
 
 var _ = Describe("Azure", func() {
-	var acc *acceptance.AzureAcceptance
+	var acc *AzureAcceptance
 
 	BeforeEach(func() {
-		acc = acceptance.NewAzureAcceptance()
+		acc = NewAzureAcceptance()
 
 		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")

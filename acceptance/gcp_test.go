@@ -1,10 +1,9 @@
-package acceptance_test
+package acceptance
 
 import (
 	"bytes"
 	"os"
 
-	"github.com/genevievelesperance/leftovers/acceptance"
 	"github.com/genevievelesperance/leftovers/app"
 	"github.com/genevievelesperance/leftovers/gcp"
 
@@ -13,10 +12,10 @@ import (
 )
 
 var _ = Describe("GCP", func() {
-	var acc *acceptance.GCPAcceptance
+	var acc *GCPAcceptance
 
 	BeforeEach(func() {
-		acc = acceptance.NewGCPAcceptance()
+		acc = NewGCPAcceptance()
 
 		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")
