@@ -26,29 +26,42 @@ func NewTargetGroups(client targetGroupsClient, logger logger) TargetGroups {
 }
 
 func (t TargetGroups) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
-	targetGroups, err := t.client.DescribeTargetGroups(&awselbv2.DescribeTargetGroupsInput{})
+	targetGroups, err := t.list(filter)
 	if err != nil {
-		return delete, fmt.Errorf("Describing target groups: %s", err)
+		return nil, err
 	}
 
-	for _, g := range targetGroups.TargetGroups {
-		n := *g.TargetGroupName
+	delete := map[string]string{}
+	for _, g := range targetGroups {
+		delete[g.identifier] = *g.arn
+	}
 
-		if !strings.Contains(n, filter) {
+	return delete, nil
+}
+
+func (t TargetGroups) list(filter string) ([]TargetGroup, error) {
+	targetGroups, err := t.client.DescribeTargetGroups(&awselbv2.DescribeTargetGroupsInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Describing target groups: %s", err)
+	}
+
+	var resources []TargetGroup
+	for _, g := range targetGroups.TargetGroups {
+		resource := NewTargetGroup(t.client, g.TargetGroupName, g.TargetGroupArn)
+
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target group %s?", n))
+		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target group %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete[n] = *g.TargetGroupArn
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
+	return resources, nil
 }
 
 func (t TargetGroups) Delete(targetGroups map[string]string) error {
