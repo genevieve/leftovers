@@ -29,16 +29,16 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 
 func (a Addresses) List(filter string) (map[string]string, error) {
 	addresses := []*gcpcompute.Address{}
-	delete := map[string]string{}
-
 	for _, region := range a.regions {
 		l, err := a.client.ListAddresses(region)
 		if err != nil {
-			return delete, fmt.Errorf("Listing addresses for region %s: %s", region, err)
+			return nil, fmt.Errorf("Listing addresses for region %s: %s", region, err)
 		}
+
 		addresses = append(addresses, l.Items...)
 	}
 
+	delete := map[string]string{}
 	for _, address := range addresses {
 		if len(address.Users) > 0 {
 			continue

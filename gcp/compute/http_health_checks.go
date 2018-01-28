@@ -26,13 +26,12 @@ func NewHttpHealthChecks(client httpHealthChecksClient, logger logger) HttpHealt
 }
 
 func (h HttpHealthChecks) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	checks, err := h.client.ListHttpHealthChecks()
 	if err != nil {
-		return delete, fmt.Errorf("Listing http health checks: %s", err)
+		return nil, fmt.Errorf("Listing http health checks: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, check := range checks.Items {
 		if !strings.Contains(check.Name, filter) {
 			continue

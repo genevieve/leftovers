@@ -26,13 +26,12 @@ func NewNetworks(client networksClient, logger logger) Networks {
 }
 
 func (n Networks) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	networks, err := n.client.ListNetworks()
 	if err != nil {
-		return delete, fmt.Errorf("Listing networks: %s", err)
+		return nil, fmt.Errorf("Listing networks: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, network := range networks.Items {
 		if !strings.Contains(network.Name, filter) {
 			continue

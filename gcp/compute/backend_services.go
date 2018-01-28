@@ -26,13 +26,12 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 }
 
 func (b BackendServices) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	backendServices, err := b.client.ListBackendServices()
 	if err != nil {
-		return delete, fmt.Errorf("Listing backend services: %s", err)
+		return nil, fmt.Errorf("Listing backend services: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, backend := range backendServices.Items {
 		if !strings.Contains(backend.Name, filter) {
 			continue

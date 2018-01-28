@@ -26,13 +26,12 @@ func NewTargetHttpProxies(client targetHttpProxiesClient, logger logger) TargetH
 }
 
 func (t TargetHttpProxies) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	targetHttpProxies, err := t.client.ListTargetHttpProxies()
 	if err != nil {
-		return delete, fmt.Errorf("Listing target http proxies: %s", err)
+		return nil, fmt.Errorf("Listing target http proxies: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, targetHttpProxy := range targetHttpProxies.Items {
 		if !strings.Contains(targetHttpProxy.Name, filter) {
 			continue

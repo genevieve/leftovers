@@ -29,16 +29,16 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 
 func (f ForwardingRules) List(filter string) (map[string]string, error) {
 	rules := []*gcpcompute.ForwardingRule{}
-	delete := map[string]string{}
-
 	for _, region := range f.regions {
 		l, err := f.client.ListForwardingRules(region)
 		if err != nil {
-			return delete, fmt.Errorf("Listing forwarding rules for region %s: %s", region, err)
+			return nil, fmt.Errorf("Listing forwarding rules for region %s: %s", region, err)
 		}
+
 		rules = append(rules, l.Items...)
 	}
 
+	delete := map[string]string{}
 	for _, rule := range rules {
 		if !strings.Contains(rule.Name, filter) {
 			continue

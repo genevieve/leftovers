@@ -29,17 +29,16 @@ func NewInstanceGroups(client instanceGroupsClient, logger logger, zones map[str
 
 func (i InstanceGroups) List(filter string) (map[string]string, error) {
 	groups := []*gcpcompute.InstanceGroup{}
-	delete := map[string]string{}
-
 	for _, zone := range i.zones {
 		l, err := i.client.ListInstanceGroups(zone)
 		if err != nil {
-			return delete, fmt.Errorf("Listing instance groups for zone %s: %s", zone, err)
+			return nil, fmt.Errorf("Listing instance groups for zone %s: %s", zone, err)
 		}
 
 		groups = append(groups, l.Items...)
 	}
 
+	delete := map[string]string{}
 	for _, group := range groups {
 		if !strings.Contains(group.Name, filter) {
 			continue

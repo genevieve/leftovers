@@ -26,13 +26,12 @@ func NewGlobalForwardingRules(client globalForwardingRulesClient, logger logger)
 }
 
 func (g GlobalForwardingRules) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	rules, err := g.client.ListGlobalForwardingRules()
 	if err != nil {
-		return delete, fmt.Errorf("Listing global forwarding rules: %s", err)
+		return nil, fmt.Errorf("Listing global forwarding rules: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, rule := range rules.Items {
 		if !strings.Contains(rule.Name, filter) {
 			continue

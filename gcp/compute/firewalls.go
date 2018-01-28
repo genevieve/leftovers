@@ -26,13 +26,12 @@ func NewFirewalls(client firewallsClient, logger logger) Firewalls {
 }
 
 func (f Firewalls) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	firewalls, err := f.client.ListFirewalls()
 	if err != nil {
-		return delete, fmt.Errorf("Listing firewalls: %s", err)
+		return nil, fmt.Errorf("Listing firewalls: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, firewall := range firewalls.Items {
 		if !strings.Contains(firewall.Name, filter) {
 			continue

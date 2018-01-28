@@ -26,13 +26,12 @@ func NewUrlMaps(client urlMapsClient, logger logger) UrlMaps {
 }
 
 func (u UrlMaps) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	urlMaps, err := u.client.ListUrlMaps()
 	if err != nil {
-		return delete, fmt.Errorf("Listing url maps: %s", err)
+		return nil, fmt.Errorf("Listing url maps: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, urlMap := range urlMaps.Items {
 		if !strings.Contains(urlMap.Name, filter) {
 			continue

@@ -26,13 +26,12 @@ func NewGlobalHealthChecks(client globalHealthChecksClient, logger logger) Globa
 }
 
 func (h GlobalHealthChecks) List(filter string) (map[string]string, error) {
-	delete := map[string]string{}
-
 	checks, err := h.client.ListGlobalHealthChecks()
 	if err != nil {
-		return delete, fmt.Errorf("Listing global health checks: %s", err)
+		return nil, fmt.Errorf("Listing global health checks: %s", err)
 	}
 
+	delete := map[string]string{}
 	for _, check := range checks.Items {
 		if !strings.Contains(check.Name, filter) {
 			continue

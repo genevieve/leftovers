@@ -29,16 +29,16 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 
 func (d Disks) List(filter string) (map[string]string, error) {
 	disks := []*gcpcompute.Disk{}
-	delete := map[string]string{}
-
 	for _, zone := range d.zones {
 		l, err := d.client.ListDisks(zone)
 		if err != nil {
-			return delete, fmt.Errorf("Listing disks for zone %s: %s", zone, err)
+			return nil, fmt.Errorf("Listing disks for zone %s: %s", zone, err)
 		}
+
 		disks = append(disks, l.Items...)
 	}
 
+	delete := map[string]string{}
 	for _, disk := range disks {
 		if !strings.Contains(disk.Name, filter) {
 			continue

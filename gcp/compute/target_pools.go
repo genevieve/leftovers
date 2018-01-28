@@ -29,17 +29,16 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 
 func (t TargetPools) List(filter string) (map[string]string, error) {
 	pools := []*gcpcompute.TargetPool{}
-	delete := map[string]string{}
-
 	for _, region := range t.regions {
 		l, err := t.client.ListTargetPools(region)
 		if err != nil {
-			return delete, fmt.Errorf("Listing target pools for region %s: %s", region, err)
+			return nil, fmt.Errorf("Listing target pools for region %s: %s", region, err)
 		}
 
 		pools = append(pools, l.Items...)
 	}
 
+	delete := map[string]string{}
 	for _, pool := range pools {
 		if !strings.Contains(pool.Name, filter) {
 			continue
