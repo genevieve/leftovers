@@ -26,6 +26,7 @@ type deleter struct {
 }
 
 type Leftovers struct {
+	logger    logger
 	resources []resource
 }
 
@@ -82,6 +83,7 @@ func NewLeftovers(logger logger, clientId, clientSecret, subscriptionId, tenantI
 	gc.ManagementClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 
 	return Leftovers{
+		logger:    logger,
 		resources: []resource{NewGroups(gc, logger)},
 	}, nil
 }

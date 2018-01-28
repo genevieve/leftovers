@@ -23,6 +23,7 @@ type deleter struct {
 }
 
 type Leftovers struct {
+	logger    logger
 	resources []resource
 }
 
@@ -90,6 +91,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	}
 
 	return Leftovers{
+		logger: logger,
 		resources: []resource{
 			compute.NewForwardingRules(client, logger, regions),
 			compute.NewGlobalForwardingRules(client, logger),
