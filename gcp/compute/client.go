@@ -2,6 +2,7 @@ package compute
 
 import (
 	gcpcompute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/googleapi"
 )
 
 type client struct {
@@ -60,12 +61,7 @@ func (c client) ListAddresses(region string) (*gcpcompute.AddressList, error) {
 }
 
 func (c client) DeleteAddress(region, address string) error {
-	op, err := c.addresses.Delete(c.project, region, address).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.addresses.Delete(c.project, region, address))
 }
 
 func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
@@ -73,12 +69,7 @@ func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
 }
 
 func (c client) DeleteBackendService(backendService string) error {
-	op, err := c.backendServices.Delete(c.project, backendService).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.backendServices.Delete(c.project, backendService))
 }
 
 func (c client) ListDisks(zone string) (*gcpcompute.DiskList, error) {
@@ -86,12 +77,7 @@ func (c client) ListDisks(zone string) (*gcpcompute.DiskList, error) {
 }
 
 func (c client) DeleteDisk(zone, disk string) error {
-	op, err := c.disks.Delete(c.project, zone, disk).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.disks.Delete(c.project, zone, disk))
 }
 
 func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
@@ -99,12 +85,7 @@ func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
 }
 
 func (c client) DeleteInstance(zone, instance string) error {
-	op, err := c.instances.Delete(c.project, zone, instance).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.instances.Delete(c.project, zone, instance))
 }
 
 func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, error) {
@@ -112,12 +93,7 @@ func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, 
 }
 
 func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
-	op, err := c.instanceGroups.Delete(c.project, zone, instanceGroup).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.instanceGroups.Delete(c.project, zone, instanceGroup))
 }
 
 func (c client) ListGlobalHealthChecks() (*gcpcompute.HealthCheckList, error) {
@@ -125,12 +101,7 @@ func (c client) ListGlobalHealthChecks() (*gcpcompute.HealthCheckList, error) {
 }
 
 func (c client) DeleteGlobalHealthCheck(globalHealthCheck string) error {
-	op, err := c.globalHealthChecks.Delete(c.project, globalHealthCheck).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.globalHealthChecks.Delete(c.project, globalHealthCheck))
 }
 
 func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) {
@@ -138,12 +109,7 @@ func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) 
 }
 
 func (c client) DeleteHttpHealthCheck(httpHealthCheck string) error {
-	op, err := c.httpHealthChecks.Delete(c.project, httpHealthCheck).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.httpHealthChecks.Delete(c.project, httpHealthCheck))
 }
 
 func (c client) ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error) {
@@ -151,12 +117,7 @@ func (c client) ListHttpsHealthChecks() (*gcpcompute.HttpsHealthCheckList, error
 }
 
 func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
-	op, err := c.httpsHealthChecks.Delete(c.project, httpsHealthCheck).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.httpsHealthChecks.Delete(c.project, httpsHealthCheck))
 }
 
 func (c client) ListFirewalls() (*gcpcompute.FirewallList, error) {
@@ -164,12 +125,7 @@ func (c client) ListFirewalls() (*gcpcompute.FirewallList, error) {
 }
 
 func (c client) DeleteFirewall(firewall string) error {
-	op, err := c.firewalls.Delete(c.project, firewall).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.firewalls.Delete(c.project, firewall))
 }
 
 func (c client) ListGlobalForwardingRules() (*gcpcompute.ForwardingRuleList, error) {
@@ -177,12 +133,7 @@ func (c client) ListGlobalForwardingRules() (*gcpcompute.ForwardingRuleList, err
 }
 
 func (c client) DeleteGlobalForwardingRule(globalForwardingRule string) error {
-	op, err := c.globalForwardingRules.Delete(c.project, globalForwardingRule).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.globalForwardingRules.Delete(c.project, globalForwardingRule))
 }
 
 func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleList, error) {
@@ -190,12 +141,7 @@ func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleLi
 }
 
 func (c client) DeleteForwardingRule(region, forwardingRule string) error {
-	op, err := c.forwardingRules.Delete(c.project, region, forwardingRule).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.forwardingRules.Delete(c.project, region, forwardingRule))
 }
 
 func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
@@ -203,12 +149,7 @@ func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
 }
 
 func (c client) DeleteNetwork(network string) error {
-	op, err := c.networks.Delete(c.project, network).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.networks.Delete(c.project, network))
 }
 
 func (c client) ListTargetHttpProxies() (*gcpcompute.TargetHttpProxyList, error) {
@@ -216,12 +157,7 @@ func (c client) ListTargetHttpProxies() (*gcpcompute.TargetHttpProxyList, error)
 }
 
 func (c client) DeleteTargetHttpProxy(targetHttpProxy string) error {
-	op, err := c.targetHttpProxies.Delete(c.project, targetHttpProxy).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.targetHttpProxies.Delete(c.project, targetHttpProxy))
 }
 
 func (c client) ListTargetHttpsProxies() (*gcpcompute.TargetHttpsProxyList, error) {
@@ -229,12 +165,7 @@ func (c client) ListTargetHttpsProxies() (*gcpcompute.TargetHttpsProxyList, erro
 }
 
 func (c client) DeleteTargetHttpsProxy(targetHttpsProxy string) error {
-	op, err := c.targetHttpsProxies.Delete(c.project, targetHttpsProxy).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.targetHttpsProxies.Delete(c.project, targetHttpsProxy))
 }
 
 func (c client) ListTargetPools(region string) (*gcpcompute.TargetPoolList, error) {
@@ -242,12 +173,7 @@ func (c client) ListTargetPools(region string) (*gcpcompute.TargetPoolList, erro
 }
 
 func (c client) DeleteTargetPool(region string, targetPool string) error {
-	op, err := c.targetPools.Delete(c.project, region, targetPool).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.targetPools.Delete(c.project, region, targetPool))
 }
 
 func (c client) ListUrlMaps() (*gcpcompute.UrlMapList, error) {
@@ -255,12 +181,7 @@ func (c client) ListUrlMaps() (*gcpcompute.UrlMapList, error) {
 }
 
 func (c client) DeleteUrlMap(urlMap string) error {
-	op, err := c.urlMaps.Delete(c.project, urlMap).Do()
-	if err != nil {
-		return err
-	}
-
-	return c.waitOnDelete(op)
+	return c.wait(c.urlMaps.Delete(c.project, urlMap))
 }
 
 func (c client) ListRegions() (map[string]string, error) {
@@ -291,7 +212,16 @@ func (c client) ListZones() (map[string]string, error) {
 	return zones, nil
 }
 
-func (c client) waitOnDelete(op *gcpcompute.Operation) error {
+type request interface {
+	Do(...googleapi.CallOption) (*gcpcompute.Operation, error)
+}
+
+func (c client) wait(request request) error {
+	op, err := request.Do()
+	if err != nil {
+		return err
+	}
+
 	waiter := &operationWaiter{
 		op:      op,
 		service: c.service,
