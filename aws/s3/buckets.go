@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -75,63 +73,23 @@ func (b Buckets) list(filter string) ([]Bucket, error) {
 }
 
 func (b Buckets) Delete(buckets map[string]string) error {
+	var resources []Bucket
 	for name, _ := range buckets {
-		err := b.emptyAndDelete(name)
-
-		if err == nil {
-			b.logger.Printf("SUCCESS deleting bucket %s\n", name)
-		} else {
-			b.logger.Printf("ERROR deleting bucket %s: %s\n", name, err)
-		}
+		resources = append(resources, NewBucket(b.client, &name))
 	}
 
-	return nil
+	return b.cleanup(resources)
 }
 
-func (u Buckets) emptyAndDelete(name string) error {
-	_, err := u.client.DeleteBucket(&awss3.DeleteBucketInput{Bucket: aws.String(name)})
+func (b Buckets) cleanup(resources []Bucket) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
-	if err != nil {
-		ec2err, ok := err.(awserr.Error)
-
-		if ok && ec2err.Code() == "BucketNotEmpty" {
-			resp, err := u.client.ListObjectVersions(&awss3.ListObjectVersionsInput{Bucket: aws.String(name)})
-			if err != nil {
-				return err
-			}
-
-			objects := make([]*awss3.ObjectIdentifier, 0)
-
-			if len(resp.DeleteMarkers) != 0 {
-				for _, v := range resp.DeleteMarkers {
-					objects = append(objects, &awss3.ObjectIdentifier{
-						Key:       v.Key,
-						VersionId: v.VersionId,
-					})
-				}
-			}
-
-			if len(resp.Versions) != 0 {
-				for _, v := range resp.Versions {
-					objects = append(objects, &awss3.ObjectIdentifier{
-						Key:       v.Key,
-						VersionId: v.VersionId,
-					})
-				}
-			}
-
-			_, err = u.client.DeleteObjects(&awss3.DeleteObjectsInput{
-				Bucket: aws.String(name),
-				Delete: &awss3.Delete{Objects: objects},
-			})
-			if err != nil {
-				return err
-			}
-
-			return u.emptyAndDelete(name)
+		if err == nil {
+			b.logger.Printf("SUCCESS deleting bucket %s\n", resource.identifier)
+		} else {
+			b.logger.Printf("ERROR deleting bucket %s: %s\n", resource.identifier, err)
 		}
-
-		return err
 	}
 
 	return nil

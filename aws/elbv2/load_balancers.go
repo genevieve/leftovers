@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 )
 
@@ -65,15 +64,22 @@ func (l LoadBalancers) list(filter string) ([]LoadBalancer, error) {
 }
 
 func (l LoadBalancers) Delete(loadBalancers map[string]string) error {
+	var resources []LoadBalancer
 	for name, arn := range loadBalancers {
-		_, err := l.client.DeleteLoadBalancer(&awselbv2.DeleteLoadBalancerInput{
-			LoadBalancerArn: aws.String(arn),
-		})
+		resources = append(resources, NewLoadBalancer(l.client, &name, &arn))
+	}
+
+	return l.cleanup(resources)
+}
+
+func (l LoadBalancers) cleanup(resources []LoadBalancer) error {
+	for _, resource := range resources {
+		err := resource.Delete()
 
 		if err == nil {
-			l.logger.Printf("SUCCESS deleting load balancer %s\n", name)
+			l.logger.Printf("SUCCESS deleting load balancer %s\n", resource.identifier)
 		} else {
-			l.logger.Printf("ERROR deleting load balancer %s: %s\n", name, err)
+			l.logger.Printf("ERROR deleting load balancer %s: %s\n", resource.identifier, err)
 		}
 	}
 

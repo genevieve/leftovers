@@ -1,5 +1,7 @@
 package elbv2
 
+import awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
+
 type TargetGroup struct {
 	client     targetGroupsClient
 	name       *string
@@ -14,4 +16,11 @@ func NewTargetGroup(client targetGroupsClient, name, arn *string) TargetGroup {
 		arn:        arn,
 		identifier: *name,
 	}
+}
+
+func (t TargetGroup) Delete() error {
+	_, err := t.client.DeleteTargetGroup(&awselbv2.DeleteTargetGroupInput{
+		TargetGroupArn: t.arn,
+	})
+	return err
 }
