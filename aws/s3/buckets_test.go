@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/genevievelesperance/leftovers/aws/s3"
 	"github.com/genevievelesperance/leftovers/aws/s3/fakes"
@@ -54,7 +53,7 @@ var _ = Describe("Buckets", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
 
 			Expect(items).To(HaveLen(1))
-			Expect(items).To(HaveKeyWithValue("banana", ""))
+			// Expect(items).To(HaveKeyWithValue("banana", ""))
 		})
 
 		Context("when the client fails to list buckets", func() {
@@ -105,51 +104,6 @@ var _ = Describe("Buckets", func() {
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete bucket banana?"))
 
 				Expect(items).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var items map[string]string
-
-		BeforeEach(func() {
-			items = map[string]string{"banana": ""}
-		})
-
-		It("deletes s3 buckets", func() {
-			err := buckets.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteBucketCall.CallCount).To(Equal(1))
-			Expect(client.DeleteBucketCall.Receives.Input.Bucket).To(Equal(aws.String("banana")))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting bucket banana\n"}))
-		})
-
-		Context("when the client fails to delete the bucket", func() {
-			BeforeEach(func() {
-				client.DeleteBucketCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				err := buckets.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some error\n"}))
-			})
-		})
-
-		Context("when the client fails to delete the bucket and list object versions", func() {
-			BeforeEach(func() {
-				client.DeleteBucketCall.Returns.Error = awserr.New("BucketNotEmpty", "some error", errors.New("some error"))
-				client.ListObjectVersionsCall.Returns.Error = errors.New("some other error")
-			})
-
-			It("logs the error", func() {
-				err := buckets.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting bucket banana: some other error\n"}))
 			})
 		})
 	})

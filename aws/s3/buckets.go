@@ -58,17 +58,3 @@ func (b Buckets) List(filter string) ([]common.Deletable, error) {
 
 	return resources, nil
 }
-
-func (b Buckets) Delete(resources []Bucket) error {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err == nil {
-			b.logger.Printf("SUCCESS deleting bucket %s\n", resource.identifier)
-		} else {
-			b.logger.Printf("ERROR deleting bucket %s: %s\n", resource.identifier, err)
-		}
-	}
-
-	return nil
-}
