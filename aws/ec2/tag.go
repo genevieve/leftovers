@@ -25,14 +25,13 @@ func NewTag(client tagsClient, key, value, resourceId *string) Tag {
 }
 
 func (t Tag) Delete() error {
-	//TODO: Delete with key:value
 	_, err := t.client.DeleteTags(&awsec2.DeleteTagsInput{
-		Tags:      []*awsec2.Tag{{Key: t.key}},
+		Tags:      []*awsec2.Tag{{Key: t.key, Value: t.value}},
 		Resources: []*string{t.resourceId},
 	})
 
 	if err != nil {
-		return fmt.Errorf("FAILED to delete tag %s: %s", t.identifier, err)
+		return fmt.Errorf("FAILED deleting tag %s: %s", t.identifier, err)
 	}
 
 	return nil
