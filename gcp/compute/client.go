@@ -21,6 +21,7 @@ type client struct {
 	firewalls             *gcpcompute.FirewallsService
 	forwardingRules       *gcpcompute.ForwardingRulesService
 	globalForwardingRules *gcpcompute.GlobalForwardingRulesService
+	subnetworks           *gcpcompute.SubnetworksService
 	networks              *gcpcompute.NetworksService
 	targetHttpProxies     *gcpcompute.TargetHttpProxiesService
 	targetHttpsProxies    *gcpcompute.TargetHttpsProxiesService
@@ -46,6 +47,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		firewalls:             service.Firewalls,
 		forwardingRules:       service.ForwardingRules,
 		globalForwardingRules: service.GlobalForwardingRules,
+		subnetworks:           service.Subnetworks,
 		networks:              service.Networks,
 		targetHttpProxies:     service.TargetHttpProxies,
 		targetHttpsProxies:    service.TargetHttpsProxies,
@@ -150,6 +152,14 @@ func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
 
 func (c client) DeleteNetwork(network string) error {
 	return c.wait(c.networks.Delete(c.project, network))
+}
+
+func (c client) ListSubnetworks(region string) (*gcpcompute.SubnetworkList, error) {
+	return c.subnetworks.List(c.project, region).Do()
+}
+
+func (c client) DeleteSubnetwork(subnetwork, region string) error {
+	return c.wait(c.subnetworks.Delete(c.project, region, subnetwork))
 }
 
 func (c client) ListTargetHttpProxies() (*gcpcompute.TargetHttpProxyList, error) {

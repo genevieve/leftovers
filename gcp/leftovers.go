@@ -107,6 +107,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewHttpHealthChecks(client, logger),
 			compute.NewHttpsHealthChecks(client, logger),
 			compute.NewDisks(client, logger, zones),
+			compute.NewSubnetworks(client, logger, regions),
 			compute.NewNetworks(client, logger),
 			compute.NewAddresses(client, logger, regions),
 		},

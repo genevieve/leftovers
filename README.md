@@ -69,6 +69,7 @@ brew install leftovers
 + compute global health checks
 + compute http health checks
 + compute https health checks
++ compute subnetworks
 + compute networks
 + compute target pools
 + compute target https proxies
