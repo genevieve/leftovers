@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	awslib "github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
@@ -52,5 +53,10 @@ func (a *AWSAcceptance) CreateKeyPair(name string) {
 	client := awsec2.New(session.New(config))
 
 	_, err := client.CreateKeyPair(&awsec2.CreateKeyPairInput{KeyName: awslib.String(name)})
+	if cast, ok := err.(awserr.Error); ok {
+		if cast.Code() == "InvalidKeyPair.Duplicate" {
+			return
+		}
+	}
 	Expect(err).NotTo(HaveOccurred())
 }
