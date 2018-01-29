@@ -1,6 +1,8 @@
 package s3
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 )
@@ -64,7 +66,7 @@ func (b Bucket) Delete() error {
 			return b.Delete()
 		}
 
-		return err
+		return fmt.Errorf("FAILED deleting bucket %s: %s", *b.name, err)
 	}
 
 	return nil
