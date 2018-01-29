@@ -158,7 +158,7 @@ func (c client) ListSubnetworks(region string) (*gcpcompute.SubnetworkList, erro
 	return c.subnetworks.List(c.project, region).Do()
 }
 
-func (c client) DeleteSubnetwork(subnetwork, region string) error {
+func (c client) DeleteSubnetwork(region, subnetwork string) error {
 	return c.wait(c.subnetworks.Delete(c.project, region, subnetwork))
 }
 
