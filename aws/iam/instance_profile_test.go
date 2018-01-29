@@ -35,7 +35,7 @@ var _ = Describe("InstanceProfile", func() {
 		Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(name))
 	})
 
-	Context("the client fails", func() {
+	Context("when the client fails", func() {
 		BeforeEach(func() {
 			client.DeleteInstanceProfileCall.Returns.Error = errors.New("banana")
 		})

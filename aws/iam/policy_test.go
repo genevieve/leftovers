@@ -35,7 +35,7 @@ var _ = Describe("Policy", func() {
 		Expect(client.DeletePolicyCall.Receives.Input.PolicyArn).To(Equal(arn))
 	})
 
-	Context("the client fails", func() {
+	Context("when the client fails", func() {
 		BeforeEach(func() {
 			client.DeletePolicyCall.Returns.Error = errors.New("banana")
 		})
