@@ -12,20 +12,19 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Instace", func() {
+var _ = Describe("Instance", func() {
 	var (
 		instance ec2.Instance
 		client   *fakes.InstancesClient
 		id       *string
 		keyName  *string
-		tags     []*awsec2.Tag
 	)
 
 	BeforeEach(func() {
 		client = &fakes.InstancesClient{}
 		id = aws.String("the-id")
 		keyName = aws.String("the-key-name")
-		tags = []*awsec2.Tag{}
+		tags := []*awsec2.Tag{}
 
 		instance = ec2.NewInstance(client, id, keyName, tags)
 	})
