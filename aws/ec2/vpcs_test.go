@@ -13,11 +13,8 @@ import (
 
 var _ = Describe("Vpcs", func() {
 	var (
-		client   *fakes.VpcClient
-		logger   *fakes.Logger
-		routes   *fakes.RouteTables
-		subnets  *fakes.Subnets
-		gateways *fakes.InternetGateways
+		client *fakes.VpcClient
+		logger *fakes.Logger
 
 		vpcs ec2.Vpcs
 	)
@@ -25,9 +22,9 @@ var _ = Describe("Vpcs", func() {
 	BeforeEach(func() {
 		client = &fakes.VpcClient{}
 		logger = &fakes.Logger{}
-		routes = &fakes.RouteTables{}
-		subnets = &fakes.Subnets{}
-		gateways = &fakes.InternetGateways{}
+		routes := &fakes.RouteTables{}
+		subnets := &fakes.Subnets{}
+		gateways := &fakes.InternetGateways{}
 
 		vpcs = ec2.NewVpcs(client, logger, routes, subnets, gateways)
 	})
