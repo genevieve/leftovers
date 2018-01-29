@@ -29,7 +29,7 @@ var _ = Describe("SecurityGroup", func() {
 		securityGroup = ec2.NewSecurityGroup(client, id, groupName, tags)
 	})
 
-	It("releases the security group", func() {
+	It("deletes the security group", func() {
 		err := securityGroup.Delete()
 		Expect(err).NotTo(HaveOccurred())
 

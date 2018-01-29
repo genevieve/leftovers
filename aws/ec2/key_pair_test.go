@@ -25,7 +25,7 @@ var _ = Describe("KeyPair", func() {
 		keyPair = ec2.NewKeyPair(client, name)
 	})
 
-	It("releases the key pair", func() {
+	It("deletes the key pair", func() {
 		err := keyPair.Delete()
 		Expect(err).NotTo(HaveOccurred())
 

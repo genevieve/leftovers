@@ -29,7 +29,7 @@ var _ = Describe("Tag", func() {
 		tag = ec2.NewTag(client, key, value, resourceId)
 	})
 
-	It("releases the tag", func() {
+	It("deletes the tag", func() {
 		err := tag.Delete()
 		Expect(err).NotTo(HaveOccurred())
 
