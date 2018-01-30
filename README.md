@@ -1,6 +1,32 @@
 # Leftovers
 
-Go library for cleaning up **orphaned IAAS resources**.
+Go cli/library for cleaning up **orphaned IAAS resources**.
+
+It will **prompt you before deleting** any resource, ie:
+
+```
+$ leftovers --filter reindeer
+
+Are you sure you want to delete firewall bbl-env-reindeer? (y/N)
+```
+
+
+## Installation
+
+[Install go.](https://golang.org/doc/install) Then:
+
+```
+$  go get -u github.com/genevievelesperance/leftovers/cmd/leftovers
+```
+
+**OR**
+
+```
+brew tap genevievelesperance/tap
+brew install leftovers
+```
+
+
 
 ## Why you might be here?
 - You `terraform apply`'d way back when and lost your `terraform.tfstate`
@@ -8,14 +34,6 @@ Go library for cleaning up **orphaned IAAS resources**.
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned
 
-## If you're looking for the CLI
-
-[Repo](https://github.com/genevievelesperance/leftovers-cli) or brew:
-
-```
-brew tap genevievelesperance/tap
-brew install leftovers
-```
 
 ## AWS
 ### What can you delete with this?
@@ -85,6 +103,7 @@ brew install leftovers
 - compute vm instance templates
 - compute snapshots
 - compute images
+- dns zones
 ```
 
 ## vSphere
