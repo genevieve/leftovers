@@ -1,4 +1,3 @@
 - Can we filter the disks list api call with len of users eq 0?
-- Logger methods for success/error take resource.type, resource.identifier, err
-- Backfill test coverage for individual resources.
 - Add success logging back.
+- Take a project id in case the project to be cleaned is different from the service account key that has permissions to do these actions.
