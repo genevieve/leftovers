@@ -48,20 +48,15 @@ func (a *GCPAcceptance) ReadyToTest() bool {
 	key, err := ioutil.ReadFile(path)
 	Expect(err).NotTo(HaveOccurred())
 
-	projectId := os.Getenv("BBL_GCP_PROJECT_ID")
-	if projectId == "" {
-		p := struct {
-			ProjectId string `json:"project_id"`
-		}{}
-		err = json.Unmarshal(key, &p)
-		Expect(err).NotTo(HaveOccurred())
-
-		projectId = p.ProjectId
-	}
+	p := struct {
+		ProjectId string `json:"project_id"`
+	}{}
+	err = json.Unmarshal(key, &p)
+	Expect(err).NotTo(HaveOccurred())
 
 	a.Key = key
 	a.KeyPath = path
-	a.ProjectId = projectId
+	a.ProjectId = p.ProjectId
 	a.Zone = BBL_GCP_ZONE
 
 	logger := app.NewLogger(os.Stdin, os.Stdout, true)
