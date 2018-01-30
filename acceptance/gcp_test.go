@@ -39,7 +39,7 @@ var _ = Describe("GCP", func() {
 			acc.InsertDisk(filter)
 
 			var err error
-			deleter, err = gcp.NewLeftovers(logger, acc.KeyPath)
+			deleter, err = gcp.NewLeftovers(logger, acc.KeyPath, acc.ProjectId)
 			Expect(err).NotTo(HaveOccurred())
 		})
 

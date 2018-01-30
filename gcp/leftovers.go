@@ -51,7 +51,7 @@ func (l Leftovers) Delete(filter string) error {
 	return nil
 }
 
-func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
+func NewLeftovers(logger logger, keyPath, projectId string) (Leftovers, error) {
 	if keyPath == "" {
 		return Leftovers{}, errors.New("Missing service account key path.")
 	}
@@ -61,14 +61,18 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, fmt.Errorf("Reading service account key path %s: %s", keyPath, err)
 	}
 
-	p := struct {
-		ProjectId string `json:"project_id"`
-	}{}
-	if err := json.Unmarshal(key, &p); err != nil {
-		return Leftovers{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
+	if projectId == "" {
+		p := struct {
+			ProjectId string `json:"project_id"`
+		}{}
+		if err := json.Unmarshal(key, &p); err != nil {
+			return Leftovers{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
+		}
+
+		projectId = p.ProjectId
 	}
 
-	logger.Println(fmt.Sprintf("Cleaning gcp project: %s.", p.ProjectId))
+	logger.Println(fmt.Sprintf("Cleaning gcp project: %s.", projectId))
 
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
 	if err != nil {
@@ -80,14 +84,14 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, fmt.Errorf("Creating gcp client: %s", err)
 	}
 
-	client := compute.NewClient(p.ProjectId, service, logger)
+	client := compute.NewClient(projectId, service, logger)
 
 	dnsService, err := gcpdns.New(config.Client(context.Background()))
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating gcp client: %s", err)
 	}
 
-	dnsClient := dns.NewClient(p.ProjectId, dnsService, logger)
+	dnsClient := dns.NewClient(projectId, dnsService, logger)
 
 	regions, err := client.ListRegions()
 	if err != nil {

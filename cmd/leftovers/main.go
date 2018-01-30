@@ -24,6 +24,7 @@ type opts struct {
 	AzureTenantID        string `long:"azure-tenant-id"          env:"BBL_AZURE_TENANT_ID"          description:"Azure tenant id."`
 	AzureSubscriptionID  string `long:"azure-subscription-id"    env:"BBL_AZURE_SUBSCRIPTION_ID"    description:"Azure subscription id."`
 	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"BBL_GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
+	GCPProjectId         string `long:"gcp-project-id"           env:"BBL_GCP_PROJECT_ID"           description:"GCP project id if different from service account key project id."`
 }
 
 type leftovers interface {
@@ -50,7 +51,7 @@ func main() {
 	case "azure":
 		l, err = azure.NewLeftovers(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
 	case "gcp":
-		l, err = gcp.NewLeftovers(logger, c.GCPServiceAccountKey)
+		l, err = gcp.NewLeftovers(logger, c.GCPServiceAccountKey, c.GCPProjectId)
 	default:
 		log.Fatalf("Missing BBL_IAAS.")
 	}
