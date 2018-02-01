@@ -70,7 +70,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 
 	logger.Println(fmt.Sprintf("Cleaning gcp project: %s.", p.ProjectId))
 
-	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope)
+	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope, gcpdns.NdevClouddnsReadwriteScope)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating jwt config: %s", err)
 	}
