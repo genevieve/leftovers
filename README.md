@@ -119,6 +119,7 @@ Help Options:
   + compute global health checks
   + compute http health checks
   + compute https health checks
+  + compute images
   + compute subnetworks
   + compute networks
   + compute target pools
@@ -136,7 +137,6 @@ Help Options:
   - compute routes
   - compute vm instance templates
   - compute snapshots
-  - compute images
   ```
 
 ### vSphere
