@@ -126,15 +126,17 @@ Help Options:
   + compute url maps
   + compute vm instances
   + compute vm instance groups
+  + dns managed zones
+  + dns record sets
   ```
 #### What's up next?
 
   ```diff
+  - compute global addresses
   - compute routes
   - compute vm instance templates
   - compute snapshots
   - compute images
-  - dns zones
   ```
 
 ### vSphere
