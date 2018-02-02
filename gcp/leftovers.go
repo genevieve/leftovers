@@ -119,7 +119,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewSubnetworks(client, logger, regions),
 			compute.NewNetworks(client, logger),
 			compute.NewAddresses(client, logger, regions),
-			dns.NewManagedZones(dnsClient, logger),
+			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
 		},
 	}, nil
 }

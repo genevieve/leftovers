@@ -13,15 +13,21 @@ type managedZonesClient interface {
 	DeleteManagedZone(zone string) error
 }
 
-type ManagedZones struct {
-	client managedZonesClient
-	logger logger
+type recordSets interface {
+	Delete(managedZone string) error
 }
 
-func NewManagedZones(client managedZonesClient, logger logger) ManagedZones {
+type ManagedZones struct {
+	client     managedZonesClient
+	recordSets recordSets
+	logger     logger
+}
+
+func NewManagedZones(client managedZonesClient, recordSets recordSets, logger logger) ManagedZones {
 	return ManagedZones{
-		client: client,
-		logger: logger,
+		client:     client,
+		recordSets: recordSets,
+		logger:     logger,
 	}
 }
 
@@ -55,7 +61,15 @@ func (m ManagedZones) Delete(zones map[string]string) {
 		wg.Add(1)
 
 		go func(name string) {
-			err := m.client.DeleteManagedZone(name)
+			err := m.recordSets.Delete(name)
+
+			if err != nil {
+				m.logger.Printf("ERROR deleting record sets for zone %s: %s\n", name, err)
+			} else {
+				m.logger.Printf("SUCCESS deleting record sets for zone %s\n", name)
+			}
+
+			err = m.client.DeleteManagedZone(name)
 
 			if err != nil {
 				m.logger.Printf("ERROR deleting managed zone %s: %s\n", name, err)

@@ -13,19 +13,21 @@ import (
 
 var _ = Describe("ManagedZones", func() {
 	var (
-		client *fakes.ManagedZonesClient
-		logger *fakes.Logger
+		client     *fakes.ManagedZonesClient
+		recordSets *fakes.RecordSets
+		logger     *fakes.Logger
 
 		managedZones dns.ManagedZones
 	)
 
 	BeforeEach(func() {
 		client = &fakes.ManagedZonesClient{}
+		recordSets = &fakes.RecordSets{}
 		logger = &fakes.Logger{}
 
 		logger.PromptCall.Returns.Proceed = true
 
-		managedZones = dns.NewManagedZones(client, logger)
+		managedZones = dns.NewManagedZones(client, recordSets, logger)
 	})
 
 	Describe("List", func() {
@@ -97,10 +99,31 @@ var _ = Describe("ManagedZones", func() {
 		It("deletes managed zones", func() {
 			managedZones.Delete(list)
 
+			Expect(recordSets.DeleteCall.CallCount).To(Equal(1))
+			Expect(recordSets.DeleteCall.Receives.ManagedZone).To(Equal("banana-managed-zone"))
+
 			Expect(client.DeleteManagedZoneCall.CallCount).To(Equal(1))
 			Expect(client.DeleteManagedZoneCall.Receives.ManagedZone).To(Equal("banana-managed-zone"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting managed zone banana-managed-zone\n"}))
+			Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				"SUCCESS deleting record sets for zone banana-managed-zone\n",
+				"SUCCESS deleting managed zone banana-managed-zone\n",
+			}))
+		})
+
+		Context("when the client fails to delete the record sets for the zone", func() {
+			BeforeEach(func() {
+				recordSets.DeleteCall.Returns.Error = errors.New("some error")
+			})
+
+			It("logs the error", func() {
+				managedZones.Delete(list)
+
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					"ERROR deleting record sets for zone banana-managed-zone: some error\n",
+					"SUCCESS deleting managed zone banana-managed-zone\n",
+				}))
+			})
 		})
 
 		Context("when the client fails to delete the managed zone", func() {
@@ -111,7 +134,10 @@ var _ = Describe("ManagedZones", func() {
 			It("logs the error", func() {
 				managedZones.Delete(list)
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting managed zone banana-managed-zone: some error\n"}))
+				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					"SUCCESS deleting record sets for zone banana-managed-zone\n",
+					"ERROR deleting managed zone banana-managed-zone: some error\n",
+				}))
 			})
 		})
 	})
