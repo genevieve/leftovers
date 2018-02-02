@@ -110,6 +110,7 @@ Help Options:
 
   ```diff
   + compute addresses
+  + compute global addresses
   + compute backend services
   + compute disks
   + compute firewalls
@@ -132,7 +133,6 @@ Help Options:
 #### What's up next?
 
   ```diff
-  - compute global addresses
   - compute routes
   - compute vm instance templates
   - compute snapshots
