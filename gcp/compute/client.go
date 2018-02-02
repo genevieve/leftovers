@@ -11,6 +11,7 @@ type client struct {
 
 	service               *gcpcompute.Service
 	addresses             *gcpcompute.AddressesService
+	globalAddresses       *gcpcompute.GlobalAddressesService
 	backendServices       *gcpcompute.BackendServicesService
 	disks                 *gcpcompute.DisksService
 	globalHealthChecks    *gcpcompute.HealthChecksService
@@ -37,6 +38,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		logger:                logger,
 		service:               service,
 		addresses:             service.Addresses,
+		globalAddresses:       service.GlobalAddresses,
 		backendServices:       service.BackendServices,
 		disks:                 service.Disks,
 		globalHealthChecks:    service.HealthChecks,
@@ -64,6 +66,14 @@ func (c client) ListAddresses(region string) (*gcpcompute.AddressList, error) {
 
 func (c client) DeleteAddress(region, address string) error {
 	return c.wait(c.addresses.Delete(c.project, region, address))
+}
+
+func (c client) ListGlobalAddresses() (*gcpcompute.AddressList, error) {
+	return c.globalAddresses.List(c.project).Do()
+}
+
+func (c client) DeleteGlobalAddress(address string) error {
+	return c.wait(c.globalAddresses.Delete(c.project, address))
 }
 
 func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
