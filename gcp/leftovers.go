@@ -115,6 +115,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewGlobalHealthChecks(client, logger),
 			compute.NewHttpHealthChecks(client, logger),
 			compute.NewHttpsHealthChecks(client, logger),
+			compute.NewImages(client, logger),
 			compute.NewDisks(client, logger, zones),
 			compute.NewSubnetworks(client, logger, regions),
 			compute.NewNetworks(client, logger),
