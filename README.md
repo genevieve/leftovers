@@ -88,13 +88,13 @@ Help Options:
   + elbv2 target groups
   + s3 buckets
   + rds db instances
+  + rds db subnet groups
   ```
 
 #### What's up next?
 
   ```diff
   - iam group policies
-  - rds db subnet groups
   - ec2 eips
   ```
 
