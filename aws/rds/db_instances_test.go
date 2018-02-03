@@ -35,7 +35,6 @@ var _ = Describe("DBInstances", func() {
 			client.DescribeDBInstancesCall.Returns.Output = &awsrds.DescribeDBInstancesOutput{
 				DBInstances: []*awsrds.DBInstance{{
 					DBInstanceIdentifier: aws.String("banana"),
-					DBName:               aws.String("the-name"),
 				}},
 			}
 			filter = "ban"
