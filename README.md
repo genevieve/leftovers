@@ -25,13 +25,13 @@ infrastructure resources were tragically orphaned
 [Install go.](https://golang.org/doc/install) Then:
 
 ```
-$  go get -u github.com/genevievelesperance/leftovers/cmd/leftovers
+$  go get -u github.com/genevieve/leftovers/cmd/leftovers
 ```
 
 **OR**
 
 ```
-brew tap genevievelesperance/tap
+brew tap genevieve/tap
 brew install leftovers
 ```
 
@@ -92,6 +92,7 @@ Help Options:
 #### What's up next?
 
   ```diff
+  - rds instances
   - iam group policies
   - ec2 eips
   ```
