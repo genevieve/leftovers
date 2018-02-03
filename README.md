@@ -87,12 +87,12 @@ Help Options:
   + elbv2 load balancers
   + elbv2 target groups
   + s3 buckets
+  + rds instances
   ```
 
 #### What's up next?
 
   ```diff
-  - rds instances
   - iam group policies
   - ec2 eips
   ```
