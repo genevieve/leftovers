@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
-	"github.com/genevievelesperance/leftovers/aws/common"
+	"github.com/genevieve/leftovers/aws/common"
 )
 
 type serverCertificatesClient interface {

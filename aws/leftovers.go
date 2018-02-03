@@ -11,12 +11,12 @@ import (
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
-	"github.com/genevievelesperance/leftovers/aws/common"
-	"github.com/genevievelesperance/leftovers/aws/ec2"
-	"github.com/genevievelesperance/leftovers/aws/elb"
-	"github.com/genevievelesperance/leftovers/aws/elbv2"
-	"github.com/genevievelesperance/leftovers/aws/iam"
-	"github.com/genevievelesperance/leftovers/aws/s3"
+	"github.com/genevieve/leftovers/aws/common"
+	"github.com/genevieve/leftovers/aws/ec2"
+	"github.com/genevieve/leftovers/aws/elb"
+	"github.com/genevieve/leftovers/aws/elbv2"
+	"github.com/genevieve/leftovers/aws/iam"
+	"github.com/genevieve/leftovers/aws/s3"
 )
 
 type resource interface {

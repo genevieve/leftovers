@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/genevievelesperance/leftovers/aws/ec2"
-	"github.com/genevievelesperance/leftovers/aws/ec2/fakes"
+	"github.com/genevieve/leftovers/aws/ec2"
+	"github.com/genevieve/leftovers/aws/ec2/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

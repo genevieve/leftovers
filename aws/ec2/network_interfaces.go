@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/genevievelesperance/leftovers/aws/common"
+	"github.com/genevieve/leftovers/aws/common"
 )
 
 type networkInterfacesClient interface {

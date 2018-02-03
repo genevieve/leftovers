@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	awselb "github.com/aws/aws-sdk-go/service/elb"
-	"github.com/genevievelesperance/leftovers/aws/common"
+	"github.com/genevieve/leftovers/aws/common"
 )
 
 type loadBalancersClient interface {

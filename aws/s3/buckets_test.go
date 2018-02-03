@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
-	"github.com/genevievelesperance/leftovers/aws/s3"
-	"github.com/genevievelesperance/leftovers/aws/s3/fakes"
+	"github.com/genevieve/leftovers/aws/s3"
+	"github.com/genevieve/leftovers/aws/s3/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
