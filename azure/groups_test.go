@@ -5,8 +5,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/genevievelesperance/leftovers/azure"
-	"github.com/genevievelesperance/leftovers/azure/fakes"
+	"github.com/genevieve/leftovers/azure"
+	"github.com/genevieve/leftovers/azure/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
