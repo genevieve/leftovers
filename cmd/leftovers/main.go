@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/genevievelesperance/leftovers/app"
-	"github.com/genevievelesperance/leftovers/aws"
-	"github.com/genevievelesperance/leftovers/azure"
-	"github.com/genevievelesperance/leftovers/gcp"
+	"github.com/genevieve/leftovers/app"
+	"github.com/genevieve/leftovers/aws"
+	"github.com/genevieve/leftovers/azure"
+	"github.com/genevieve/leftovers/gcp"
 	flags "github.com/jessevdk/go-flags"
 )
 
