@@ -10,12 +10,14 @@ import (
 	awselb "github.com/aws/aws-sdk-go/service/elb"
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+	awsrds "github.com/aws/aws-sdk-go/service/rds"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/genevieve/leftovers/aws/common"
 	"github.com/genevieve/leftovers/aws/ec2"
 	"github.com/genevieve/leftovers/aws/elb"
 	"github.com/genevieve/leftovers/aws/elbv2"
 	"github.com/genevieve/leftovers/aws/iam"
+	"github.com/genevieve/leftovers/aws/rds"
 	"github.com/genevieve/leftovers/aws/s3"
 )
 
@@ -74,6 +76,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	elbClient := awselb.New(sess)
 	elbv2Client := awselbv2.New(sess)
 	s3Client := awss3.New(sess)
+	rdsClient := awsrds.New(sess)
 
 	rolePolicies := iam.NewRolePolicies(iamClient, logger)
 	userPolicies := iam.NewUserPolicies(iamClient, logger)
@@ -106,6 +109,8 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			elbv2.NewTargetGroups(elbv2Client, logger),
 
 			s3.NewBuckets(s3Client, logger, bucketManager),
+
+			rds.NewDBInstances(rdsClient, logger),
 		},
 	}, nil
 }
