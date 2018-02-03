@@ -3,8 +3,8 @@ package compute_test
 import (
 	"errors"
 
-	"github.com/genevievelesperance/leftovers/gcp/compute"
-	"github.com/genevievelesperance/leftovers/gcp/compute/fakes"
+	"github.com/genevieve/leftovers/gcp/compute"
+	"github.com/genevieve/leftovers/gcp/compute/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	gcpcompute "google.golang.org/api/compute/v1"

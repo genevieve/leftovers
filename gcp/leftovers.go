@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/genevievelesperance/leftovers/gcp/compute"
-	"github.com/genevievelesperance/leftovers/gcp/dns"
+	"github.com/genevieve/leftovers/gcp/compute"
+	"github.com/genevieve/leftovers/gcp/dns"
 	"golang.org/x/oauth2/google"
 	gcpcompute "google.golang.org/api/compute/v1"
 	gcpdns "google.golang.org/api/dns/v1"
