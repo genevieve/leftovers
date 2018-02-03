@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/genevievelesperance/leftovers/app"
-	"github.com/genevievelesperance/leftovers/aws"
+	"github.com/genevieve/leftovers/app"
+	"github.com/genevieve/leftovers/aws"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/genevievelesperance/leftovers/app"
+	"github.com/genevieve/leftovers/app"
 	. "github.com/onsi/gomega"
 )
 

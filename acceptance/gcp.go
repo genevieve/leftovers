@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/genevievelesperance/leftovers/app"
-	"github.com/genevievelesperance/leftovers/gcp/compute"
+	"github.com/genevieve/leftovers/app"
+	"github.com/genevieve/leftovers/gcp/compute"
 	"golang.org/x/oauth2/google"
 	gcpcompute "google.golang.org/api/compute/v1"
 
