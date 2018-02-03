@@ -110,6 +110,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 
 			s3.NewBuckets(s3Client, logger, bucketManager),
 
+			rds.NewDBSubnetGroups(rdsClient, logger),
 			rds.NewDBInstances(rdsClient, logger),
 		},
 	}, nil
