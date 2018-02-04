@@ -25,22 +25,30 @@ var _ = Describe("KeyPair", func() {
 		keyPair = ec2.NewKeyPair(client, name)
 	})
 
-	It("deletes the key pair", func() {
-		err := keyPair.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the key pair", func() {
+			err := keyPair.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteKeyPairCall.CallCount).To(Equal(1))
-		Expect(client.DeleteKeyPairCall.Receives.Input.KeyName).To(Equal(name))
-	})
-
-	Context("the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteKeyPairCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteKeyPairCall.CallCount).To(Equal(1))
+			Expect(client.DeleteKeyPairCall.Receives.Input.KeyName).To(Equal(name))
 		})
 
-		It("returns the error", func() {
-			err := keyPair.Delete()
-			Expect(err).To(MatchError("FAILED deleting key pair the-name: banana"))
+		Context("the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteKeyPairCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := keyPair.Delete()
+				Expect(err).To(MatchError("FAILED deleting key pair the-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(keyPair.Name()).To(Equal("the-name"))
 		})
 	})
 })

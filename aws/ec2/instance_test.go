@@ -29,23 +29,31 @@ var _ = Describe("Instance", func() {
 		instance = ec2.NewInstance(client, id, keyName, tags)
 	})
 
-	It("terminates the instance", func() {
-		err := instance.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("terminates the instance", func() {
+			err := instance.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
-		Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
-		Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(id))
-	})
-
-	Context("the client fails", func() {
-		BeforeEach(func() {
-			client.TerminateInstancesCall.Returns.Error = errors.New("banana")
+			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
+			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
+			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(id))
 		})
 
-		It("returns the error", func() {
-			err := instance.Delete()
-			Expect(err).To(MatchError("FAILED terminating instance the-id (KeyPairName:the-key-name): banana"))
+		Context("the client fails", func() {
+			BeforeEach(func() {
+				client.TerminateInstancesCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := instance.Delete()
+				Expect(err).To(MatchError("FAILED terminating instance the-id (KeyPairName:the-key-name): banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(instance.Name()).To(Equal("the-id (KeyPairName:the-key-name)"))
 		})
 	})
 })

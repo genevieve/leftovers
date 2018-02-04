@@ -43,3 +43,7 @@ func (s SecurityGroup) Delete() error {
 
 	return nil
 }
+
+func (s SecurityGroup) Name() string {
+	return s.identifier
+}

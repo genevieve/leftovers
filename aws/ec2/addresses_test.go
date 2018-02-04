@@ -49,11 +49,10 @@ var _ = Describe("Addresses", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to release address banana?"))
 
 			Expect(items).To(HaveLen(1))
-			// Expect(items).To(HaveKeyWithValue("banana", "the-allocation-id"))
 		})
 
 		Context("when the address name does not contain the filter", func() {
-			PIt("does not try to release it", func() {
+			It("does not try to release it", func() {
 				// The address resource may not be named after the environment
 			})
 		})

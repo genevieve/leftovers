@@ -31,3 +31,7 @@ func (v Volume) Delete() error {
 
 	return nil
 }
+
+func (v Volume) Name() string {
+	return v.identifier
+}

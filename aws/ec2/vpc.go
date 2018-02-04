@@ -70,3 +70,7 @@ func (v Vpc) Delete() error {
 
 	return nil
 }
+
+func (v Vpc) Name() string {
+	return v.identifier
+}

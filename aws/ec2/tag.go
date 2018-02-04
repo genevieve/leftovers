@@ -36,3 +36,7 @@ func (t Tag) Delete() error {
 
 	return nil
 }
+
+func (t Tag) Name() string {
+	return t.identifier
+}

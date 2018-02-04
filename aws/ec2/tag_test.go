@@ -29,26 +29,34 @@ var _ = Describe("Tag", func() {
 		tag = ec2.NewTag(client, key, value, resourceId)
 	})
 
-	It("deletes the tag", func() {
-		err := tag.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the tag", func() {
+			err := tag.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
-		Expect(client.DeleteTagsCall.Receives.Input.Tags).To(HaveLen(1))
-		Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(key))
-		Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Value).To(Equal(value))
-		Expect(client.DeleteTagsCall.Receives.Input.Resources).To(HaveLen(1))
-		Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(resourceId))
-	})
-
-	Context("the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteTagsCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
+			Expect(client.DeleteTagsCall.Receives.Input.Tags).To(HaveLen(1))
+			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(key))
+			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Value).To(Equal(value))
+			Expect(client.DeleteTagsCall.Receives.Input.Resources).To(HaveLen(1))
+			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(resourceId))
 		})
 
-		It("returns the error", func() {
-			err := tag.Delete()
-			Expect(err).To(MatchError("FAILED deleting tag the-value: banana"))
+		Context("the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteTagsCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := tag.Delete()
+				Expect(err).To(MatchError("FAILED deleting tag the-value: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(tag.Name()).To(Equal("the-value"))
 		})
 	})
 })

@@ -29,22 +29,30 @@ var _ = Describe("SecurityGroup", func() {
 		securityGroup = ec2.NewSecurityGroup(client, id, groupName, tags)
 	})
 
-	It("deletes the security group", func() {
-		err := securityGroup.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the security group", func() {
+			err := securityGroup.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
-		Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(id))
-	})
-
-	Context("the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteSecurityGroupCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
+			Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(id))
 		})
 
-		It("returns the error", func() {
-			err := securityGroup.Delete()
-			Expect(err).To(MatchError("FAILED deleting security group the-group-name: banana"))
+		Context("the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteSecurityGroupCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := securityGroup.Delete()
+				Expect(err).To(MatchError("FAILED deleting security group the-group-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(securityGroup.Name()).To(Equal("the-group-name"))
 		})
 	})
 })

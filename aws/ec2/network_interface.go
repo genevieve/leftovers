@@ -43,3 +43,7 @@ func (n NetworkInterface) Delete() error {
 
 	return nil
 }
+
+func (n NetworkInterface) Name() string {
+	return n.identifier
+}

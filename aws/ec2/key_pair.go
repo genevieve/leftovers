@@ -31,3 +31,7 @@ func (k KeyPair) Delete() error {
 
 	return nil
 }
+
+func (k KeyPair) Name() string {
+	return k.identifier
+}

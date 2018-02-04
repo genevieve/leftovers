@@ -26,22 +26,30 @@ var _ = Describe("NetworkInterface", func() {
 		networkInterface = ec2.NewNetworkInterface(client, id, tags)
 	})
 
-	It("deletes the network interface", func() {
-		err := networkInterface.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the network interface", func() {
+			err := networkInterface.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(1))
-		Expect(client.DeleteNetworkInterfaceCall.Receives.Input.NetworkInterfaceId).To(Equal(id))
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteNetworkInterfaceCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(1))
+			Expect(client.DeleteNetworkInterfaceCall.Receives.Input.NetworkInterfaceId).To(Equal(id))
 		})
 
-		It("returns the error", func() {
-			err := networkInterface.Delete()
-			Expect(err).To(MatchError("FAILED deleting network interface the-id: banana"))
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteNetworkInterfaceCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := networkInterface.Delete()
+				Expect(err).To(MatchError("FAILED deleting network interface the-id: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(networkInterface.Name()).To(Equal("the-id"))
 		})
 	})
 })

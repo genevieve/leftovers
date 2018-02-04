@@ -25,22 +25,30 @@ var _ = Describe("Volume", func() {
 		volume = ec2.NewVolume(client, id)
 	})
 
-	It("deletes the volume", func() {
-		err := volume.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the volume", func() {
+			err := volume.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
-		Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(id))
-	})
-
-	Context("the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteVolumeCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
+			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(id))
 		})
 
-		It("returns the error", func() {
-			err := volume.Delete()
-			Expect(err).To(MatchError("FAILED deleting volume the-id: banana"))
+		Context("the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteVolumeCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := volume.Delete()
+				Expect(err).To(MatchError("FAILED deleting volume the-id: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(volume.Name()).To(Equal("the-id"))
 		})
 	})
 })

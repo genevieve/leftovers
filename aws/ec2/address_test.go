@@ -27,22 +27,30 @@ var _ = Describe("Address", func() {
 		address = ec2.NewAddress(client, publicIp, allocationId)
 	})
 
-	It("releases the address", func() {
-		err := address.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("releases the address", func() {
+			err := address.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
-		Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(allocationId))
-	})
-
-	Context("the client fails", func() {
-		BeforeEach(func() {
-			client.ReleaseAddressCall.Returns.Error = errors.New("banana")
+			Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
+			Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(allocationId))
 		})
 
-		It("returns the error", func() {
-			err := address.Delete()
-			Expect(err).To(MatchError("FAILED releasing address the-public-ip: banana"))
+		Context("the client fails", func() {
+			BeforeEach(func() {
+				client.ReleaseAddressCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := address.Delete()
+				Expect(err).To(MatchError("FAILED releasing address the-public-ip: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(address.Name()).To(Equal("the-public-ip"))
 		})
 	})
 })
