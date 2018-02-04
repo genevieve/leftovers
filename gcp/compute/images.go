@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -24,14 +25,16 @@ func NewImages(client imagesClient, logger logger) Images {
 	}
 }
 
-func (d Images) List(filter string) (map[string]string, error) {
+func (d Images) List(filter string) ([]common.Deletable, error) {
 	images, err := d.client.ListImages()
 	if err != nil {
 		return nil, fmt.Errorf("Listing images: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, image := range images.Items {
+		resource := NewImage(d.client, image.Name)
+
 		if !strings.Contains(image.Name, filter) {
 			continue
 		}
@@ -41,29 +44,8 @@ func (d Images) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[image.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (i Images) Delete(images map[string]string) {
-	var resources []Image
-	for name, _ := range images {
-		resources = append(resources, NewImage(i.client, name))
-	}
-
-	i.delete(resources)
-}
-
-func (i Images) delete(resources []Image) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			i.logger.Printf("%s\n", err)
-		} else {
-			i.logger.Printf("SUCCESS deleting image %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

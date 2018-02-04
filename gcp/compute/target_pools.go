@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -26,7 +27,7 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 	}
 }
 
-func (t TargetPools) List(filter string) (map[string]string, error) {
+func (t TargetPools) List(filter string) ([]common.Deletable, error) {
 	pools := []*gcpcompute.TargetPool{}
 	for _, region := range t.regions {
 		l, err := t.client.ListTargetPools(region)
@@ -37,40 +38,21 @@ func (t TargetPools) List(filter string) (map[string]string, error) {
 		pools = append(pools, l.Items...)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, pool := range pools {
-		if !strings.Contains(pool.Name, filter) {
+		resource := NewTargetPool(t.client, pool.Name, t.regions[pool.Region])
+
+		if !strings.Contains(resource.name, filter) {
 			continue
 		}
 
-		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target pool %s?", pool.Name))
+		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target pool %s?", resource.name))
 		if !proceed {
 			continue
 		}
 
-		delete[pool.Name] = t.regions[pool.Region]
+		resources = append(resources)
 	}
 
-	return delete, nil
-}
-
-func (t TargetPools) Delete(pools map[string]string) {
-	var resources []TargetPool
-	for name, region := range pools {
-		resources = append(resources, NewTargetPool(t.client, name, region))
-	}
-
-	t.delete(resources)
-}
-
-func (t TargetPools) delete(resources []TargetPool) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			t.logger.Printf("%s\n", err)
-		} else {
-			t.logger.Printf("SUCCESS deleting target pool %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

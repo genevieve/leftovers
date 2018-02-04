@@ -47,7 +47,6 @@ var _ = Describe("HttpHealthChecks", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete http health check banana-check?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-check", ""))
 		})
 
 		Context("when the client fails to list http health checks", func() {
@@ -82,35 +81,6 @@ var _ = Describe("HttpHealthChecks", func() {
 
 				Expect(logger.PromptCall.CallCount).To(Equal(1))
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-check": ""}
-		})
-
-		It("deletes http health checks", func() {
-			httpHealthChecks.Delete(list)
-
-			Expect(client.DeleteHttpHealthCheckCall.CallCount).To(Equal(1))
-			Expect(client.DeleteHttpHealthCheckCall.Receives.HttpHealthCheck).To(Equal("banana-check"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting http health check banana-check\n"}))
-		})
-
-		Context("when the client fails to delete a http health check", func() {
-			BeforeEach(func() {
-				client.DeleteHttpHealthCheckCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				httpHealthChecks.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting http health check banana-check: some error\n"}))
 			})
 		})
 	})

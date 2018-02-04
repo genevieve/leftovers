@@ -51,7 +51,6 @@ var _ = Describe("ForwardingRules", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete forwarding rule banana-rule?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-rule", "region-1"))
 		})
 
 		Context("when the client fails to list forwarding rules", func() {
@@ -85,36 +84,6 @@ var _ = Describe("ForwardingRules", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-rule": "region-1"}
-		})
-
-		It("deletes forwarding rules", func() {
-			forwardingRules.Delete(list)
-
-			Expect(client.DeleteForwardingRuleCall.CallCount).To(Equal(1))
-			Expect(client.DeleteForwardingRuleCall.Receives.Region).To(Equal("region-1"))
-			Expect(client.DeleteForwardingRuleCall.Receives.ForwardingRule).To(Equal("banana-rule"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting forwarding rule banana-rule\n"}))
-		})
-
-		Context("when the client fails to delete a forwarding rule", func() {
-			BeforeEach(func() {
-				client.DeleteForwardingRuleCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				forwardingRules.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting forwarding rule banana-rule: some error\n"}))
 			})
 		})
 	})

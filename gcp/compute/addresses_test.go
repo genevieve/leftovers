@@ -52,7 +52,6 @@ var _ = Describe("Addresses", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete address banana-address?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-address", "region-1"))
 		})
 
 		Context("when the client fails to list addresses", func() {
@@ -106,36 +105,6 @@ var _ = Describe("Addresses", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-address": "region-1"}
-		})
-
-		It("deletes addresses", func() {
-			addresses.Delete(list)
-
-			Expect(client.DeleteAddressCall.CallCount).To(Equal(1))
-			Expect(client.DeleteAddressCall.Receives.Region).To(Equal("region-1"))
-			Expect(client.DeleteAddressCall.Receives.Address).To(Equal("banana-address"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting address banana-address\n"}))
-		})
-
-		Context("when the client fails to delete the address", func() {
-			BeforeEach(func() {
-				client.DeleteAddressCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				addresses.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting address banana-address: some error\n"}))
 			})
 		})
 	})

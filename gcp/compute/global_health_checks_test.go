@@ -47,7 +47,6 @@ var _ = Describe("GlobalHealthChecks", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete global health check banana-check?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-check", ""))
 		})
 
 		Context("when the client fails to list global health checks", func() {
@@ -82,35 +81,6 @@ var _ = Describe("GlobalHealthChecks", func() {
 
 				Expect(logger.PromptCall.CallCount).To(Equal(1))
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-check": ""}
-		})
-
-		It("deletes global health checks", func() {
-			globalHealthChecks.Delete(list)
-
-			Expect(client.DeleteGlobalHealthCheckCall.CallCount).To(Equal(1))
-			Expect(client.DeleteGlobalHealthCheckCall.Receives.GlobalHealthCheck).To(Equal("banana-check"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting global health check banana-check\n"}))
-		})
-
-		Context("when the client fails to delete a global health check", func() {
-			BeforeEach(func() {
-				client.DeleteGlobalHealthCheckCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				globalHealthChecks.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting global health check banana-check: some error\n"}))
 			})
 		})
 	})

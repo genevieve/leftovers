@@ -47,7 +47,6 @@ var _ = Describe("BackendServices", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete backend service banana-backend-service?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-backend-service", ""))
 		})
 
 		Context("when the client fails to list backend services", func() {
@@ -81,35 +80,6 @@ var _ = Describe("BackendServices", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-backend-service": ""}
-		})
-
-		It("deletes every backend service in the list", func() {
-			backendServices.Delete(list)
-
-			Expect(client.DeleteBackendServiceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteBackendServiceCall.Receives.BackendService).To(Equal("banana-backend-service"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting backend service banana-backend-service\n"}))
-		})
-
-		Context("when the client fails to delete the backend service", func() {
-			BeforeEach(func() {
-				client.DeleteBackendServiceCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				backendServices.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting backend service banana-backend-service: some error\n"}))
 			})
 		})
 	})

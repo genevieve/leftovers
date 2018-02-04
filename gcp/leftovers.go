@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/dns"
 	"golang.org/x/oauth2/google"
@@ -15,13 +16,7 @@ import (
 )
 
 type resource interface {
-	List(filter string) (map[string]string, error)
-	Delete(items map[string]string)
-}
-
-type deleter struct {
-	resource resource
-	items    map[string]string
+	List(filter string) ([]common.Deletable, error)
 }
 
 type Leftovers struct {
@@ -30,22 +25,22 @@ type Leftovers struct {
 }
 
 func (l Leftovers) Delete(filter string) error {
-	var deleters []deleter
+	var deletables []common.Deletable
 
 	for _, r := range l.resources {
-		items, err := r.List(filter)
+		list, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
-		deleters = append(deleters, deleter{
-			resource: r,
-			items:    items,
-		})
+		deletables = append(deletables, list...)
 	}
 
-	for _, d := range deleters {
-		d.resource.Delete(d.items)
+	for _, d := range deletables {
+		err := d.Delete()
+		if err != nil {
+			l.logger.Println(err.Error())
+		}
 	}
 
 	return nil

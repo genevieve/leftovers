@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -24,14 +25,16 @@ func NewGlobalAddresses(client globalAddressesClient, logger logger) GlobalAddre
 	}
 }
 
-func (a GlobalAddresses) List(filter string) (map[string]string, error) {
+func (a GlobalAddresses) List(filter string) ([]common.Deletable, error) {
 	addresses, err := a.client.ListGlobalAddresses()
 	if err != nil {
 		return nil, fmt.Errorf("Listing global addresses: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, address := range addresses.Items {
+		resource := NewGlobalAddress(a.client, address.Name)
+
 		if len(address.Users) > 0 {
 			continue
 		}
@@ -45,29 +48,8 @@ func (a GlobalAddresses) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[address.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (a GlobalAddresses) Delete(addrs map[string]string) {
-	var resources []GlobalAddress
-	for name, _ := range addrs {
-		resources = append(resources, NewGlobalAddress(a.client, name))
-	}
-
-	a.delete(resources)
-}
-
-func (g GlobalAddresses) delete(resources []GlobalAddress) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			g.logger.Printf("%s\n", err)
-		} else {
-			g.logger.Printf("SUCCESS deleting global address %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

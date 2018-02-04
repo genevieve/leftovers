@@ -47,7 +47,6 @@ var _ = Describe("Networks", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network banana-network?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-network", ""))
 		})
 
 		Context("when the client fails to list networks", func() {
@@ -99,35 +98,6 @@ var _ = Describe("Networks", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-network": ""}
-		})
-
-		It("deletes networks", func() {
-			networks.Delete(list)
-
-			Expect(client.DeleteNetworkCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNetworkCall.Receives.Network).To(Equal("banana-network"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting network banana-network\n"}))
-		})
-
-		Context("when the client fails to delete a network", func() {
-			BeforeEach(func() {
-				client.DeleteNetworkCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				networks.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting network banana-network: some error\n"}))
 			})
 		})
 	})

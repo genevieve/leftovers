@@ -47,7 +47,6 @@ var _ = Describe("Images", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete image banana-image?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-image", ""))
 		})
 
 		Context("when the client fails to list images", func() {
@@ -83,35 +82,6 @@ var _ = Describe("Images", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-image": ""}
-		})
-
-		It("deletes images", func() {
-			images.Delete(list)
-
-			Expect(client.DeleteImageCall.CallCount).To(Equal(1))
-			Expect(client.DeleteImageCall.Receives.Image).To(Equal("banana-image"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting image banana-image\n"}))
-		})
-
-		Context("when the client fails to delete the image", func() {
-			BeforeEach(func() {
-				client.DeleteImageCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				images.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting image banana-image: some error\n"}))
 			})
 		})
 	})

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -26,7 +27,7 @@ func NewInstanceGroups(client instanceGroupsClient, logger logger, zones map[str
 	}
 }
 
-func (i InstanceGroups) List(filter string) (map[string]string, error) {
+func (i InstanceGroups) List(filter string) ([]common.Deletable, error) {
 	groups := []*gcpcompute.InstanceGroup{}
 	for _, zone := range i.zones {
 		l, err := i.client.ListInstanceGroups(zone)
@@ -37,8 +38,10 @@ func (i InstanceGroups) List(filter string) (map[string]string, error) {
 		groups = append(groups, l.Items...)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, group := range groups {
+		resource := NewInstanceGroup(i.client, group.Name, i.zones[group.Zone])
+
 		if !strings.Contains(group.Name, filter) {
 			continue
 		}
@@ -48,29 +51,8 @@ func (i InstanceGroups) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[group.Name] = i.zones[group.Zone]
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (i InstanceGroups) Delete(groups map[string]string) {
-	var resources []InstanceGroup
-	for name, zone := range groups {
-		resources = append(resources, NewInstanceGroup(i.client, name, zone))
-	}
-
-	i.delete(resources)
-}
-
-func (i InstanceGroups) delete(resources []InstanceGroup) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			i.logger.Printf("%s\n", err)
-		} else {
-			i.logger.Printf("SUCCESS deleting instance group %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

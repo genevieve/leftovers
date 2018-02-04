@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpdns "google.golang.org/api/dns/v1"
 )
 
@@ -30,46 +31,27 @@ func NewManagedZones(client managedZonesClient, recordSets recordSets, logger lo
 	}
 }
 
-func (m ManagedZones) List(filter string) (map[string]string, error) {
+func (m ManagedZones) List(filter string) ([]common.Deletable, error) {
 	managedZones, err := m.client.ListManagedZones()
 	if err != nil {
 		return nil, fmt.Errorf("Listing managed zones: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, zone := range managedZones.ManagedZones {
-		if !strings.Contains(zone.Name, filter) {
+		resource := NewManagedZone(m.client, m.recordSets, zone.Name)
+
+		if !strings.Contains(resource.name, filter) {
 			continue
 		}
 
-		proceed := m.logger.Prompt(fmt.Sprintf("Are you sure you want to delete managed zone %s?", zone.Name))
+		proceed := m.logger.Prompt(fmt.Sprintf("Are you sure you want to delete managed zone %s?", resource.name))
 		if !proceed {
 			continue
 		}
 
-		delete[zone.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (m ManagedZones) Delete(zones map[string]string) {
-	var resources []ManagedZone
-	for name, _ := range zones {
-		resources = append(resources, NewManagedZone(m.client, m.recordSets, name))
-	}
-
-	m.delete(resources)
-}
-
-func (m ManagedZones) delete(resources []ManagedZone) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			m.logger.Printf("%s\n", err)
-		} else {
-			m.logger.Printf("SUCCESS deleting managed zone %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

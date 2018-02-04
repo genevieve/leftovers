@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -24,14 +25,16 @@ func NewHttpsHealthChecks(client httpsHealthChecksClient, logger logger) HttpsHe
 	}
 }
 
-func (h HttpsHealthChecks) List(filter string) (map[string]string, error) {
+func (h HttpsHealthChecks) List(filter string) ([]common.Deletable, error) {
 	checks, err := h.client.ListHttpsHealthChecks()
 	if err != nil {
 		return nil, fmt.Errorf("Listing https health checks: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, check := range checks.Items {
+		resource := NewHttpsHealthCheck(h.client, check.Name)
+
 		if !strings.Contains(check.Name, filter) {
 			continue
 		}
@@ -41,29 +44,8 @@ func (h HttpsHealthChecks) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[check.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (h HttpsHealthChecks) Delete(checks map[string]string) {
-	var resources []HttpsHealthCheck
-	for name, _ := range checks {
-		resources = append(resources, NewHttpsHealthCheck(h.client, name))
-	}
-
-	h.delete(resources)
-}
-
-func (h HttpsHealthChecks) delete(resources []HttpsHealthCheck) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			h.logger.Printf("%s\n", err)
-		} else {
-			h.logger.Printf("SUCCESS deleting https health check %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

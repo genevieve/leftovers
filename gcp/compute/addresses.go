@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -26,7 +27,7 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 	}
 }
 
-func (a Addresses) List(filter string) (map[string]string, error) {
+func (a Addresses) List(filter string) ([]common.Deletable, error) {
 	addresses := []*gcpcompute.Address{}
 	for _, region := range a.regions {
 		l, err := a.client.ListAddresses(region)
@@ -37,8 +38,10 @@ func (a Addresses) List(filter string) (map[string]string, error) {
 		addresses = append(addresses, l.Items...)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, address := range addresses {
+		resource := NewAddress(a.client, address.Name, a.regions[address.Region])
+
 		if len(address.Users) > 0 {
 			continue
 		}
@@ -52,28 +55,8 @@ func (a Addresses) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[address.Name] = a.regions[address.Region]
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (a Addresses) Delete(addrs map[string]string) {
-	var resources []Address
-	for name, region := range addrs {
-		resources = append(resources, NewAddress(a.client, name, region))
-	}
-
-	a.delete(resources)
-}
-
-func (a Addresses) delete(resources []Address) {
-	for _, resource := range resources {
-		err := resource.Delete()
-		if err != nil {
-			a.logger.Printf("%s\n", err.Error())
-		} else {
-			a.logger.Printf("SUCCESS deleting address %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

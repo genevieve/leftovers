@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -26,7 +27,7 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 	}
 }
 
-func (d Disks) List(filter string) (map[string]string, error) {
+func (d Disks) List(filter string) ([]common.Deletable, error) {
 	disks := []*gcpcompute.Disk{}
 	for _, zone := range d.zones {
 		l, err := d.client.ListDisks(zone)
@@ -37,8 +38,10 @@ func (d Disks) List(filter string) (map[string]string, error) {
 		disks = append(disks, l.Items...)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, disk := range disks {
+		resource := NewDisk(d.client, disk.Name, d.zones[disk.Zone])
+
 		if !strings.Contains(disk.Name, filter) {
 			continue
 		}
@@ -52,29 +55,8 @@ func (d Disks) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[disk.Name] = d.zones[disk.Zone]
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (d Disks) Delete(disks map[string]string) {
-	var resources []Disk
-	for name, zone := range disks {
-		resources = append(resources, NewDisk(d.client, name, zone))
-	}
-
-	d.delete(resources)
-}
-
-func (d Disks) delete(resources []Disk) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			d.logger.Printf("%s\n", err)
-		} else {
-			d.logger.Printf("SUCCESS deleting disk %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

@@ -51,7 +51,6 @@ var _ = Describe("ManagedZones", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete managed zone banana-managed-zone?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-managed-zone", ""))
 		})
 
 		Context("when the client fails to list managed zones", func() {
@@ -85,56 +84,6 @@ var _ = Describe("ManagedZones", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-managed-zone": ""}
-		})
-
-		It("deletes managed zones", func() {
-			managedZones.Delete(list)
-
-			Expect(recordSets.DeleteCall.CallCount).To(Equal(1))
-			Expect(recordSets.DeleteCall.Receives.ManagedZone).To(Equal("banana-managed-zone"))
-
-			Expect(client.DeleteManagedZoneCall.CallCount).To(Equal(1))
-			Expect(client.DeleteManagedZoneCall.Receives.ManagedZone).To(Equal("banana-managed-zone"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting managed zone banana-managed-zone\n",
-			}))
-		})
-
-		Context("when the client fails to delete the record sets for the zone", func() {
-			BeforeEach(func() {
-				recordSets.DeleteCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				managedZones.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting record sets for zone banana-managed-zone: some error\n",
-				}))
-			})
-		})
-
-		Context("when the client fails to delete the managed zone", func() {
-			BeforeEach(func() {
-				client.DeleteManagedZoneCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				managedZones.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting managed zone banana-managed-zone: some error\n",
-				}))
 			})
 		})
 	})

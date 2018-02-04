@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcp "google.golang.org/api/compute/v1"
 )
 
@@ -24,14 +25,16 @@ func NewNetworks(client networksClient, logger logger) Networks {
 	}
 }
 
-func (n Networks) List(filter string) (map[string]string, error) {
+func (n Networks) List(filter string) ([]common.Deletable, error) {
 	networks, err := n.client.ListNetworks()
 	if err != nil {
 		return nil, fmt.Errorf("Listing networks: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, network := range networks.Items {
+		resource := NewNetwork(n.client, network.Name)
+
 		if !strings.Contains(network.Name, filter) {
 			continue
 		}
@@ -41,29 +44,8 @@ func (n Networks) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[network.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (n Networks) Delete(networks map[string]string) {
-	var resources []Network
-	for name, _ := range networks {
-		resources = append(resources, NewNetwork(n.client, name))
-	}
-
-	n.delete(resources)
-}
-
-func (n Networks) delete(resources []Network) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			n.logger.Printf("%s\n", err)
-		} else {
-			n.logger.Printf("SUCCESS deleting network %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

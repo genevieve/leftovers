@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -24,46 +25,27 @@ func NewTargetHttpsProxies(client targetHttpsProxiesClient, logger logger) Targe
 	}
 }
 
-func (t TargetHttpsProxies) List(filter string) (map[string]string, error) {
+func (t TargetHttpsProxies) List(filter string) ([]common.Deletable, error) {
 	targetHttpsProxies, err := t.client.ListTargetHttpsProxies()
 	if err != nil {
 		return nil, fmt.Errorf("Listing target https proxies: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, targetHttpsProxy := range targetHttpsProxies.Items {
-		if !strings.Contains(targetHttpsProxy.Name, filter) {
+		resource := NewTargetHttpsProxy(t.client, targetHttpsProxy.Name)
+
+		if !strings.Contains(resource.name, filter) {
 			continue
 		}
 
-		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target https proxy %s?", targetHttpsProxy.Name))
+		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete target https proxy %s?", resource.name))
 		if !proceed {
 			continue
 		}
 
-		delete[targetHttpsProxy.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (t TargetHttpsProxies) Delete(targetHttpsProxies map[string]string) {
-	var resources []TargetHttpsProxy
-	for name, _ := range targetHttpsProxies {
-		resources = append(resources, NewTargetHttpsProxy(t.client, name))
-	}
-
-	t.delete(resources)
-}
-
-func (t TargetHttpsProxies) delete(resources []TargetHttpsProxy) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			t.logger.Printf("%s\n", err)
-		} else {
-			t.logger.Printf("SUCCESS deleting target https proxy %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

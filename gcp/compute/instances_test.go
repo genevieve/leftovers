@@ -51,7 +51,6 @@ var _ = Describe("Instances", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance banana-instance?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-instance", "zone-1"))
 		})
 
 		Context("when the instance has tags", func() {
@@ -103,36 +102,6 @@ var _ = Describe("Instances", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-instance": "zone-1"}
-		})
-
-		It("deletes instances", func() {
-			instances.Delete(list)
-
-			Expect(client.DeleteInstanceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteInstanceCall.Receives.Zone).To(Equal("zone-1"))
-			Expect(client.DeleteInstanceCall.Receives.Instance).To(Equal("banana-instance"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting instance banana-instance\n"}))
-		})
-
-		Context("when the client fails to delete an instance", func() {
-			BeforeEach(func() {
-				client.DeleteInstanceCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				instances.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting instance banana-instance: some error\n"}))
 			})
 		})
 	})

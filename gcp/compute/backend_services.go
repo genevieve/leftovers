@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -24,14 +25,16 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 	}
 }
 
-func (b BackendServices) List(filter string) (map[string]string, error) {
+func (b BackendServices) List(filter string) ([]common.Deletable, error) {
 	backendServices, err := b.client.ListBackendServices()
 	if err != nil {
 		return nil, fmt.Errorf("Listing backend services: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, backend := range backendServices.Items {
+		resource := NewBackendService(b.client, backend.Name)
+
 		if !strings.Contains(backend.Name, filter) {
 			continue
 		}
@@ -41,29 +44,8 @@ func (b BackendServices) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[backend.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (b BackendServices) delete(resources []BackendService) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			b.logger.Printf("ERROR deleting backend service %s: %s\n", resource.name, err)
-		} else {
-			b.logger.Printf("SUCCESS deleting backend service %s\n", resource.name)
-		}
-	}
-}
-
-func (b BackendServices) Delete(backendServices map[string]string) {
-	var resources []BackendService
-	for name, _ := range backendServices {
-		resources = append(resources, NewBackendService(b.client, name))
-	}
-
-	b.delete(resources)
+	return resources, nil
 }

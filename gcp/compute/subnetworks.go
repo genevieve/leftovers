@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -26,7 +27,7 @@ func NewSubnetworks(client subnetworksClient, logger logger, regions map[string]
 	}
 }
 
-func (n Subnetworks) List(filter string) (map[string]string, error) {
+func (n Subnetworks) List(filter string) ([]common.Deletable, error) {
 	subnetworks := []*gcpcompute.Subnetwork{}
 	for _, region := range n.regions {
 		l, err := n.client.ListSubnetworks(region)
@@ -37,8 +38,10 @@ func (n Subnetworks) List(filter string) (map[string]string, error) {
 		subnetworks = append(subnetworks, l.Items...)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, subnetwork := range subnetworks {
+		resource := NewSubnetwork(n.client, subnetwork.Name, n.regions[subnetwork.Region])
+
 		if !strings.Contains(subnetwork.Name, filter) {
 			continue
 		}
@@ -48,29 +51,8 @@ func (n Subnetworks) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[subnetwork.Name] = n.regions[subnetwork.Region]
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (n Subnetworks) Delete(subnetworks map[string]string) {
-	var resources []Subnetwork
-	for name, region := range subnetworks {
-		resources = append(resources, NewSubnetwork(n.client, name, region))
-	}
-
-	n.delete(resources)
-}
-
-func (s Subnetworks) delete(resources []Subnetwork) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			s.logger.Printf("%s\n", err)
-		} else {
-			s.logger.Printf("SUCCESS deleting subnetwork %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

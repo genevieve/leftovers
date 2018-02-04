@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -26,7 +27,7 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 	}
 }
 
-func (f ForwardingRules) List(filter string) (map[string]string, error) {
+func (f ForwardingRules) List(filter string) ([]common.Deletable, error) {
 	rules := []*gcpcompute.ForwardingRule{}
 	for _, region := range f.regions {
 		l, err := f.client.ListForwardingRules(region)
@@ -37,8 +38,10 @@ func (f ForwardingRules) List(filter string) (map[string]string, error) {
 		rules = append(rules, l.Items...)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, rule := range rules {
+		resource := NewForwardingRule(f.client, rule.Name, f.regions[rule.Region])
+
 		if !strings.Contains(rule.Name, filter) {
 			continue
 		}
@@ -48,29 +51,8 @@ func (f ForwardingRules) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[rule.Name] = f.regions[rule.Region]
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (f ForwardingRules) Delete(forwardingRules map[string]string) {
-	var resources []ForwardingRule
-	for name, region := range forwardingRules {
-		resources = append(resources, NewForwardingRule(f.client, name, region))
-	}
-
-	f.delete(resources)
-}
-
-func (f ForwardingRules) delete(resources []ForwardingRule) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			f.logger.Printf("%s\n", err)
-		} else {
-			f.logger.Printf("SUCCESS deleting forwarding rule %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

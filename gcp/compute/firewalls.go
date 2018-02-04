@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/genevieve/leftovers/gcp/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
@@ -24,14 +25,16 @@ func NewFirewalls(client firewallsClient, logger logger) Firewalls {
 	}
 }
 
-func (f Firewalls) List(filter string) (map[string]string, error) {
+func (f Firewalls) List(filter string) ([]common.Deletable, error) {
 	firewalls, err := f.client.ListFirewalls()
 	if err != nil {
 		return nil, fmt.Errorf("Listing firewalls: %s", err)
 	}
 
-	delete := map[string]string{}
+	var resources []common.Deletable
 	for _, firewall := range firewalls.Items {
+		resource := NewFirewall(f.client, firewall.Name)
+
 		if !strings.Contains(firewall.Name, filter) {
 			continue
 		}
@@ -41,29 +44,8 @@ func (f Firewalls) List(filter string) (map[string]string, error) {
 			continue
 		}
 
-		delete[firewall.Name] = ""
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (f Firewalls) Delete(firewalls map[string]string) {
-	var resources []Firewall
-	for name, _ := range firewalls {
-		resources = append(resources, NewFirewall(f.client, name))
-	}
-
-	f.delete(resources)
-}
-
-func (f Firewalls) delete(resources []Firewall) {
-	for _, resource := range resources {
-		err := resource.Delete()
-
-		if err != nil {
-			f.logger.Printf("%s\n", err)
-		} else {
-			f.logger.Printf("SUCCESS deleting firewall %s\n", resource.name)
-		}
-	}
+	return resources, nil
 }

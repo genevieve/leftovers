@@ -47,7 +47,6 @@ var _ = Describe("UrlMaps", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete url map banana-url-map?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-url-map", ""))
 		})
 
 		Context("when the client fails to list url maps", func() {
@@ -81,35 +80,6 @@ var _ = Describe("UrlMaps", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-url-map": ""}
-		})
-
-		It("deletes url maps", func() {
-			urlMaps.Delete(list)
-
-			Expect(client.DeleteUrlMapCall.CallCount).To(Equal(1))
-			Expect(client.DeleteUrlMapCall.Receives.UrlMap).To(Equal("banana-url-map"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting url map banana-url-map\n"}))
-		})
-
-		Context("when the client fails to delete a url map", func() {
-			BeforeEach(func() {
-				client.DeleteUrlMapCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				urlMaps.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting url map banana-url-map: some error\n"}))
 			})
 		})
 	})

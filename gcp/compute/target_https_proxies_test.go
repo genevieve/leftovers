@@ -47,7 +47,6 @@ var _ = Describe("TargetHttpsProxies", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete target https proxy banana-target-https-proxy?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-target-https-proxy", ""))
 		})
 
 		Context("when the client fails to list target https proxies", func() {
@@ -81,35 +80,6 @@ var _ = Describe("TargetHttpsProxies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-target-https-proxy": ""}
-		})
-
-		It("deletes target https proxies", func() {
-			targetHttpsProxies.Delete(list)
-
-			Expect(client.DeleteTargetHttpsProxyCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTargetHttpsProxyCall.Receives.TargetHttpsProxy).To(Equal("banana-target-https-proxy"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting target https proxy banana-target-https-proxy\n"}))
-		})
-
-		Context("when the client fails to delete a target https proxy", func() {
-			BeforeEach(func() {
-				client.DeleteTargetHttpsProxyCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				targetHttpsProxies.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting target https proxy banana-target-https-proxy: some error\n"}))
 			})
 		})
 	})

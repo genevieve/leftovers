@@ -51,7 +51,6 @@ var _ = Describe("Subnetworks", func() {
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete subnetwork banana-subnetwork?"))
 
 			Expect(list).To(HaveLen(1))
-			Expect(list).To(HaveKeyWithValue("banana-subnetwork", "region-1"))
 		})
 
 		Context("when the client fails to list subnetworks", func() {
@@ -104,36 +103,6 @@ var _ = Describe("Subnetworks", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var list map[string]string
-
-		BeforeEach(func() {
-			list = map[string]string{"banana-subnetwork": "region-1"}
-		})
-
-		It("deletes subnetworks", func() {
-			subnetworks.Delete(list)
-
-			Expect(client.DeleteSubnetworkCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSubnetworkCall.Receives.Region).To(Equal("region-1"))
-			Expect(client.DeleteSubnetworkCall.Receives.Subnetwork).To(Equal("banana-subnetwork"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting subnetwork banana-subnetwork\n"}))
-		})
-
-		Context("when the client fails to delete a subnetwork", func() {
-			BeforeEach(func() {
-				client.DeleteSubnetworkCall.Returns.Error = errors.New("some error")
-			})
-
-			It("logs the error", func() {
-				subnetworks.Delete(list)
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting subnetwork banana-subnetwork: some error\n"}))
 			})
 		})
 	})
