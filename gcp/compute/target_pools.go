@@ -51,7 +51,7 @@ func (t TargetPools) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		resources = append(resources)
+		resources = append(resources, resource)
 	}
 
 	return resources, nil
