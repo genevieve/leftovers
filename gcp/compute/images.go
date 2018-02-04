@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -48,24 +47,23 @@ func (d Images) List(filter string) (map[string]string, error) {
 	return delete, nil
 }
 
-func (d Images) Delete(images map[string]string) {
-	var wg sync.WaitGroup
-
+func (i Images) Delete(images map[string]string) {
+	var resources []Image
 	for name, _ := range images {
-		wg.Add(1)
-
-		go func(name string) {
-			err := d.client.DeleteImage(name)
-
-			if err != nil {
-				d.logger.Printf("ERROR deleting image %s: %s\n", name, err)
-			} else {
-				d.logger.Printf("SUCCESS deleting image %s\n", name)
-			}
-
-			wg.Done()
-		}(name)
+		resources = append(resources, NewImage(i.client, name))
 	}
 
-	wg.Wait()
+	i.delete(resources)
+}
+
+func (i Images) delete(resources []Image) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			i.logger.Printf("%s\n", err)
+		} else {
+			i.logger.Printf("SUCCESS deleting image %s\n", resource.name)
+		}
+	}
 }

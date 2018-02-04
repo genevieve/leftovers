@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -53,23 +52,22 @@ func (a GlobalAddresses) List(filter string) (map[string]string, error) {
 }
 
 func (a GlobalAddresses) Delete(addrs map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []GlobalAddress
 	for name, _ := range addrs {
-		wg.Add(1)
-
-		go func(name string) {
-			err := a.client.DeleteGlobalAddress(name)
-
-			if err != nil {
-				a.logger.Printf("ERROR deleting global address %s: %s\n", name, err)
-			} else {
-				a.logger.Printf("SUCCESS deleting global address %s\n", name)
-			}
-
-			wg.Done()
-		}(name)
+		resources = append(resources, NewGlobalAddress(a.client, name))
 	}
 
-	wg.Wait()
+	a.delete(resources)
+}
+
+func (g GlobalAddresses) delete(resources []GlobalAddress) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			g.logger.Printf("%s\n", err)
+		} else {
+			g.logger.Printf("SUCCESS deleting global address %s\n", resource.name)
+		}
+	}
 }

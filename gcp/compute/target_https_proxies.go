@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -49,23 +48,22 @@ func (t TargetHttpsProxies) List(filter string) (map[string]string, error) {
 }
 
 func (t TargetHttpsProxies) Delete(targetHttpsProxies map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []TargetHttpsProxy
 	for name, _ := range targetHttpsProxies {
-		wg.Add(1)
-
-		go func(name string) {
-			err := t.client.DeleteTargetHttpsProxy(name)
-
-			if err != nil {
-				t.logger.Printf("ERROR deleting target https proxy %s: %s\n", name, err)
-			} else {
-				t.logger.Printf("SUCCESS deleting target https proxy %s\n", name)
-			}
-
-			wg.Done()
-		}(name)
+		resources = append(resources, NewTargetHttpsProxy(t.client, name))
 	}
 
-	wg.Wait()
+	t.delete(resources)
+}
+
+func (t TargetHttpsProxies) delete(resources []TargetHttpsProxy) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			t.logger.Printf("%s\n", err)
+		} else {
+			t.logger.Printf("SUCCESS deleting target https proxy %s\n", resource.name)
+		}
+	}
 }

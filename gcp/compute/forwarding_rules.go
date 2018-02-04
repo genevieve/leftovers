@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -56,23 +55,22 @@ func (f ForwardingRules) List(filter string) (map[string]string, error) {
 }
 
 func (f ForwardingRules) Delete(forwardingRules map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []ForwardingRule
 	for name, region := range forwardingRules {
-		wg.Add(1)
-
-		go func(name, region string) {
-			err := f.client.DeleteForwardingRule(region, name)
-
-			if err != nil {
-				f.logger.Printf("ERROR deleting forwarding rule %s: %s\n", name, err)
-			} else {
-				f.logger.Printf("SUCCESS deleting forwarding rule %s\n", name)
-			}
-
-			wg.Done()
-		}(name, region)
+		resources = append(resources, NewForwardingRule(f.client, name, region))
 	}
 
-	wg.Wait()
+	f.delete(resources)
+}
+
+func (f ForwardingRules) delete(resources []ForwardingRule) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			f.logger.Printf("%s\n", err)
+		} else {
+			f.logger.Printf("SUCCESS deleting forwarding rule %s\n", resource.name)
+		}
+	}
 }

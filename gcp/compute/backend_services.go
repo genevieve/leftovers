@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -48,24 +47,23 @@ func (b BackendServices) List(filter string) (map[string]string, error) {
 	return delete, nil
 }
 
+func (b BackendServices) delete(resources []BackendService) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			b.logger.Printf("ERROR deleting backend service %s: %s\n", resource.name, err)
+		} else {
+			b.logger.Printf("SUCCESS deleting backend service %s\n", resource.name)
+		}
+	}
+}
+
 func (b BackendServices) Delete(backendServices map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []BackendService
 	for name, _ := range backendServices {
-		wg.Add(1)
-
-		go func(name string) {
-			err := b.client.DeleteBackendService(name)
-
-			if err != nil {
-				b.logger.Printf("ERROR deleting backend service %s: %s\n", name, err)
-			} else {
-				b.logger.Printf("SUCCESS deleting backend service %s\n", name)
-			}
-
-			wg.Done()
-		}(name)
+		resources = append(resources, NewBackendService(b.client, name))
 	}
 
-	wg.Wait()
+	b.delete(resources)
 }

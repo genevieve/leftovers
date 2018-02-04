@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -49,23 +48,22 @@ func (h HttpsHealthChecks) List(filter string) (map[string]string, error) {
 }
 
 func (h HttpsHealthChecks) Delete(checks map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []HttpsHealthCheck
 	for name, _ := range checks {
-		wg.Add(1)
-
-		go func(name string) {
-			err := h.client.DeleteHttpsHealthCheck(name)
-
-			if err != nil {
-				h.logger.Printf("ERROR deleting https health check %s: %s\n", name, err)
-			} else {
-				h.logger.Printf("SUCCESS deleting https health check %s\n", name)
-			}
-
-			wg.Done()
-		}(name)
+		resources = append(resources, NewHttpsHealthCheck(h.client, name))
 	}
 
-	wg.Wait()
+	h.delete(resources)
+}
+
+func (h HttpsHealthChecks) delete(resources []HttpsHealthCheck) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			h.logger.Printf("%s\n", err)
+		} else {
+			h.logger.Printf("SUCCESS deleting https health check %s\n", resource.name)
+		}
+	}
 }

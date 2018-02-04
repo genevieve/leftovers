@@ -3,7 +3,6 @@ package compute
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -49,23 +48,22 @@ func (f Firewalls) List(filter string) (map[string]string, error) {
 }
 
 func (f Firewalls) Delete(firewalls map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []Firewall
 	for name, _ := range firewalls {
-		wg.Add(1)
-
-		go func(name string) {
-			err := f.client.DeleteFirewall(name)
-
-			if err != nil {
-				f.logger.Printf("ERROR deleting firewall %s: %s\n", name, err)
-			} else {
-				f.logger.Printf("SUCCESS deleting firewall %s\n", name)
-			}
-
-			wg.Done()
-		}(name)
+		resources = append(resources, NewFirewall(f.client, name))
 	}
 
-	wg.Wait()
+	f.delete(resources)
+}
+
+func (f Firewalls) delete(resources []Firewall) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			f.logger.Printf("%s\n", err)
+		} else {
+			f.logger.Printf("SUCCESS deleting firewall %s\n", resource.name)
+		}
+	}
 }
