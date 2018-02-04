@@ -47,7 +47,8 @@ var _ = Describe("Azure", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout).To(ContainSubstring("SUCCESS deleting resource group"))
+			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance"))
+			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting resource group"))
 		})
 	})
 })

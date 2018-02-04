@@ -47,7 +47,8 @@ var _ = Describe("AWS", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair"))
+			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance"))
+			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair leftovers-acceptance"))
 		})
 	})
 })

@@ -47,7 +47,8 @@ var _ = Describe("GCP", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout).NotTo(ContainSubstring("ERROR deleting disk"))
+			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance"))
+			Expect(stdout.String()).NotTo(ContainSubstring("ERROR deleting disk"))
 		})
 	})
 })
