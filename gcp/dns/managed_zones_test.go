@@ -106,7 +106,6 @@ var _ = Describe("ManagedZones", func() {
 			Expect(client.DeleteManagedZoneCall.Receives.ManagedZone).To(Equal("banana-managed-zone"))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting record sets for zone banana-managed-zone\n",
 				"SUCCESS deleting managed zone banana-managed-zone\n",
 			}))
 		})
@@ -121,7 +120,6 @@ var _ = Describe("ManagedZones", func() {
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
 					"ERROR deleting record sets for zone banana-managed-zone: some error\n",
-					"SUCCESS deleting managed zone banana-managed-zone\n",
 				}))
 			})
 		})
@@ -135,7 +133,6 @@ var _ = Describe("ManagedZones", func() {
 				managedZones.Delete(list)
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"SUCCESS deleting record sets for zone banana-managed-zone\n",
 					"ERROR deleting managed zone banana-managed-zone: some error\n",
 				}))
 			})

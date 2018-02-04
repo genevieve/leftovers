@@ -3,7 +3,6 @@ package dns
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	gcpdns "google.golang.org/api/dns/v1"
 )
@@ -55,30 +54,22 @@ func (m ManagedZones) List(filter string) (map[string]string, error) {
 }
 
 func (m ManagedZones) Delete(zones map[string]string) {
-	var wg sync.WaitGroup
-
+	var resources []ManagedZone
 	for name, _ := range zones {
-		wg.Add(1)
-
-		go func(name string) {
-			err := m.recordSets.Delete(name)
-
-			if err != nil {
-				m.logger.Printf("ERROR deleting record sets for zone %s: %s\n", name, err)
-			} else {
-				m.logger.Printf("SUCCESS deleting record sets for zone %s\n", name)
-			}
-
-			err = m.client.DeleteManagedZone(name)
-
-			if err != nil {
-				m.logger.Printf("ERROR deleting managed zone %s: %s\n", name, err)
-			} else {
-				m.logger.Printf("SUCCESS deleting managed zone %s\n", name)
-			}
-			wg.Done()
-		}(name)
+		resources = append(resources, NewManagedZone(m.client, m.recordSets, name))
 	}
 
-	wg.Wait()
+	m.delete(resources)
+}
+
+func (m ManagedZones) delete(resources []ManagedZone) {
+	for _, resource := range resources {
+		err := resource.Delete()
+
+		if err != nil {
+			m.logger.Printf("%s\n", err)
+		} else {
+			m.logger.Printf("SUCCESS deleting managed zone %s\n", resource.name)
+		}
+	}
 }
