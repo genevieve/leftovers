@@ -25,44 +25,27 @@ func NewGroups(client groupsClient, logger logger) Groups {
 	}
 }
 
-func (g Groups) List(filter string) ([]string, error) {
-	delete := []string{}
-
+func (g Groups) List(filter string) ([]Deletable, error) {
 	groups, err := g.client.List("", nil)
 	if err != nil {
-		return delete, fmt.Errorf("Listing resource groups: %s", err)
+		return nil, fmt.Errorf("Listing resource groups: %s", err)
 	}
 
+	var resources []Deletable
 	for _, group := range *groups.Value {
-		n := *group.Name
+		resource := NewGroup(g.client, group.Name)
 
-		if !strings.Contains(n, filter) {
+		if !strings.Contains(resource.identifier, filter) {
 			continue
 		}
 
-		proceed := g.logger.Prompt(fmt.Sprintf("Are you sure you want to delete resource group %s?", n))
+		proceed := g.logger.Prompt(fmt.Sprintf("Are you sure you want to delete resource group %s?", resource.identifier))
 		if !proceed {
 			continue
 		}
 
-		delete = append(delete, n)
+		resources = append(resources, resource)
 	}
 
-	return delete, nil
-}
-
-func (g Groups) Delete(groups []string) error {
-	for _, name := range groups {
-		_, errChan := g.client.Delete(name, nil)
-
-		err := <-errChan
-
-		if err == nil {
-			g.logger.Printf("SUCCESS deleting resource group %s\n", name)
-		} else {
-			g.logger.Printf("ERROR deleting resource group %s: %s\n", name, err)
-		}
-	}
-
-	return nil
+	return resources, nil
 }

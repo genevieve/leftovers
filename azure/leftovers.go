@@ -10,19 +10,8 @@ import (
 	azurelib "github.com/Azure/go-autorest/autorest/azure"
 )
 
-type logger interface {
-	Printf(m string, a ...interface{})
-	Prompt(m string) bool
-}
-
 type resource interface {
-	List(filter string) ([]string, error)
-	Delete(items []string) error
-}
-
-type deleter struct {
-	resource resource
-	items    []string
+	List(filter string) ([]Deletable, error)
 }
 
 type Leftovers struct {
@@ -31,22 +20,25 @@ type Leftovers struct {
 }
 
 func (l Leftovers) Delete(filter string) error {
-	var deleters []deleter
+	var deletables []Deletable
 
 	for _, r := range l.resources {
-		items, err := r.List(filter)
+		list, err := r.List(filter)
 		if err != nil {
 			return err
 		}
 
-		deleters = append(deleters, deleter{
-			resource: r,
-			items:    items,
-		})
+		deletables = append(deletables, list...)
 	}
 
-	for _, d := range deleters {
-		d.resource.Delete(d.items)
+	for _, d := range deletables {
+		err := d.Delete()
+
+		if err != nil {
+			l.logger.Println(err.Error())
+		} else {
+			l.logger.Printf("SUCCESS deleting %s\n", d.Name())
+		}
 	}
 
 	return nil

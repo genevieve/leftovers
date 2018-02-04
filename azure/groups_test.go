@@ -45,7 +45,6 @@ var _ = Describe("Groups", func() {
 			Expect(client.ListCall.CallCount).To(Equal(1))
 
 			Expect(items).To(HaveLen(1))
-			Expect(items[0]).To(Equal("banana-group"))
 		})
 
 		Context("when client fails to list resource groups", func() {
@@ -80,45 +79,6 @@ var _ = Describe("Groups", func() {
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
 				Expect(items).To(HaveLen(0))
-			})
-		})
-	})
-
-	Describe("Delete", func() {
-		var items []string
-
-		BeforeEach(func() {
-			items = []string{"banana-group"}
-			errChan := make(chan error, 1)
-			errChan <- nil
-			client.DeleteCall.Returns.Error = errChan
-		})
-
-		It("deletes resource groups", func() {
-			err := groups.Delete(items)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(client.DeleteCall.CallCount).To(Equal(1))
-			Expect(client.DeleteCall.Receives.Name).To(Equal("banana-group"))
-
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{"SUCCESS deleting resource group banana-group\n"}))
-		})
-
-		Context("when client fails to delete the resource group", func() {
-			BeforeEach(func() {
-				errChan := make(chan error, 1)
-				errChan <- errors.New("some error")
-				client.DeleteCall.Returns.Error = errChan
-			})
-
-			It("logs the error", func() {
-				err := groups.Delete(items)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.DeleteCall.CallCount).To(Equal(1))
-				Expect(client.DeleteCall.Receives.Name).To(Equal("banana-group"))
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{"ERROR deleting resource group banana-group: some error\n"}))
 			})
 		})
 	})
