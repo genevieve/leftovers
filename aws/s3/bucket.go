@@ -71,3 +71,7 @@ func (b Bucket) Delete() error {
 
 	return nil
 }
+
+func (b Bucket) Name() string {
+	return b.identifier
+}
