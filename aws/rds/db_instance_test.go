@@ -45,4 +45,10 @@ var _ = Describe("DBInstance", func() {
 			})
 		})
 	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(dbInstance.Name()).To(Equal("the-name"))
+		})
+	})
 })

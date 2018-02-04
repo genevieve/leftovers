@@ -31,3 +31,7 @@ func (d DBSubnetGroup) Delete() error {
 
 	return nil
 }
+
+func (d DBSubnetGroup) Name() string {
+	return d.identifier
+}
