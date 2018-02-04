@@ -29,50 +29,58 @@ var _ = Describe("User", func() {
 		user = iam.NewUser(client, policies, accessKeys, name)
 	})
 
-	It("deletes the user", func() {
-		err := user.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the user", func() {
+			err := user.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(policies.DeleteCall.CallCount).To(Equal(1))
-		Expect(policies.DeleteCall.Receives.UserName).To(Equal(*name))
+			Expect(policies.DeleteCall.CallCount).To(Equal(1))
+			Expect(policies.DeleteCall.Receives.UserName).To(Equal(*name))
 
-		Expect(accessKeys.DeleteCall.CallCount).To(Equal(1))
-		Expect(accessKeys.DeleteCall.Receives.UserName).To(Equal(*name))
+			Expect(accessKeys.DeleteCall.CallCount).To(Equal(1))
+			Expect(accessKeys.DeleteCall.Receives.UserName).To(Equal(*name))
 
-		Expect(client.DeleteUserCall.CallCount).To(Equal(1))
-		Expect(client.DeleteUserCall.Receives.Input.UserName).To(Equal(name))
+			Expect(client.DeleteUserCall.CallCount).To(Equal(1))
+			Expect(client.DeleteUserCall.Receives.Input.UserName).To(Equal(name))
+		})
+
+		Context("when deleting the user's access keys fails", func() {
+			BeforeEach(func() {
+				accessKeys.DeleteCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := user.Delete()
+				Expect(err).To(MatchError("FAILED deleting access keys for the-name: banana"))
+			})
+		})
+
+		Context("when deleting the user's policies fails", func() {
+			BeforeEach(func() {
+				policies.DeleteCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := user.Delete()
+				Expect(err).To(MatchError("FAILED deleting policies for the-name: banana"))
+			})
+		})
+
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteUserCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := user.Delete()
+				Expect(err).To(MatchError("FAILED deleting user the-name: banana"))
+			})
+		})
 	})
 
-	Context("when deleting the user's access keys fails", func() {
-		BeforeEach(func() {
-			accessKeys.DeleteCall.Returns.Error = errors.New("banana")
-		})
-
-		It("returns the error", func() {
-			err := user.Delete()
-			Expect(err).To(MatchError("FAILED deleting access keys for the-name: banana"))
-		})
-	})
-
-	Context("when deleting the user's policies fails", func() {
-		BeforeEach(func() {
-			policies.DeleteCall.Returns.Error = errors.New("banana")
-		})
-
-		It("returns the error", func() {
-			err := user.Delete()
-			Expect(err).To(MatchError("FAILED deleting policies for the-name: banana"))
-		})
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteUserCall.Returns.Error = errors.New("banana")
-		})
-
-		It("returns the error", func() {
-			err := user.Delete()
-			Expect(err).To(MatchError("FAILED deleting user the-name: banana"))
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(user.Name()).To(Equal("the-name"))
 		})
 	})
 })

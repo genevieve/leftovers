@@ -33,3 +33,7 @@ func (p Policy) Delete() error {
 
 	return nil
 }
+
+func (p Policy) Name() string {
+	return p.identifier
+}

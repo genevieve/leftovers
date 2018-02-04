@@ -38,3 +38,7 @@ func (r Role) Delete() error {
 
 	return nil
 }
+
+func (r Role) Name() string {
+	return r.identifier
+}

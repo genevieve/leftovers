@@ -25,22 +25,30 @@ var _ = Describe("ServerCertificate", func() {
 		serverCertificate = iam.NewServerCertificate(client, name)
 	})
 
-	It("deletes the server certificate", func() {
-		err := serverCertificate.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the server certificate", func() {
+			err := serverCertificate.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
-		Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(name))
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteServerCertificateCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteServerCertificateCall.CallCount).To(Equal(1))
+			Expect(client.DeleteServerCertificateCall.Receives.Input.ServerCertificateName).To(Equal(name))
 		})
 
-		It("returns the error", func() {
-			err := serverCertificate.Delete()
-			Expect(err).To(MatchError("FAILED deleting server certificate the-name: banana"))
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteServerCertificateCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := serverCertificate.Delete()
+				Expect(err).To(MatchError("FAILED deleting server certificate the-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(serverCertificate.Name()).To(Equal("the-name"))
 		})
 	})
 })

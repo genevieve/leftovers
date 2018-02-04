@@ -27,22 +27,30 @@ var _ = Describe("Policy", func() {
 		policy = iam.NewPolicy(client, name, arn)
 	})
 
-	It("deletes the policy", func() {
-		err := policy.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the policy", func() {
+			err := policy.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeletePolicyCall.CallCount).To(Equal(1))
-		Expect(client.DeletePolicyCall.Receives.Input.PolicyArn).To(Equal(arn))
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeletePolicyCall.Returns.Error = errors.New("banana")
+			Expect(client.DeletePolicyCall.CallCount).To(Equal(1))
+			Expect(client.DeletePolicyCall.Receives.Input.PolicyArn).To(Equal(arn))
 		})
 
-		It("returns the error", func() {
-			err := policy.Delete()
-			Expect(err).To(MatchError("FAILED deleting policy the-name: banana"))
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeletePolicyCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := policy.Delete()
+				Expect(err).To(MatchError("FAILED deleting policy the-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(policy.Name()).To(Equal("the-name"))
 		})
 	})
 })

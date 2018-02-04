@@ -43,3 +43,7 @@ func (i InstanceProfile) Delete() error {
 
 	return nil
 }
+
+func (i InstanceProfile) Name() string {
+	return i.identifier
+}

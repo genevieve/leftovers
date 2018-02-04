@@ -27,22 +27,30 @@ var _ = Describe("InstanceProfile", func() {
 		instanceProfile = iam.NewInstanceProfile(client, name, roles)
 	})
 
-	It("deletes the instance profile", func() {
-		err := instanceProfile.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the instance profile", func() {
+			err := instanceProfile.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
-		Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(name))
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteInstanceProfileCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
+			Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(name))
 		})
 
-		It("returns the error", func() {
-			err := instanceProfile.Delete()
-			Expect(err).To(MatchError("FAILED deleting instance profile the-name: banana"))
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteInstanceProfileCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := instanceProfile.Delete()
+				Expect(err).To(MatchError("FAILED deleting instance profile the-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(instanceProfile.Name()).To(Equal("the-name"))
 		})
 	})
 })

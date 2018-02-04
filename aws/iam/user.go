@@ -45,3 +45,7 @@ func (u User) Delete() error {
 
 	return err
 }
+
+func (u User) Name() string {
+	return u.identifier
+}

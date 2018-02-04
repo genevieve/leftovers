@@ -31,3 +31,7 @@ func (s ServerCertificate) Delete() error {
 
 	return nil
 }
+
+func (s ServerCertificate) Name() string {
+	return s.identifier
+}
