@@ -27,22 +27,30 @@ var _ = Describe("TargetGroup", func() {
 		targetGroup = elbv2.NewTargetGroup(client, name, arn)
 	})
 
-	It("deletes the target group", func() {
-		err := targetGroup.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the target group", func() {
+			err := targetGroup.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(1))
-		Expect(client.DeleteTargetGroupCall.Receives.Input.TargetGroupArn).To(Equal(arn))
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteTargetGroupCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(1))
+			Expect(client.DeleteTargetGroupCall.Receives.Input.TargetGroupArn).To(Equal(arn))
 		})
 
-		It("returns the error", func() {
-			err := targetGroup.Delete()
-			Expect(err).To(MatchError("FAILED deleting target group the-name: banana"))
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteTargetGroupCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := targetGroup.Delete()
+				Expect(err).To(MatchError("FAILED deleting target group the-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(targetGroup.Name()).To(Equal("the-name"))
 		})
 	})
 })

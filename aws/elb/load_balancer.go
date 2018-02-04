@@ -31,3 +31,7 @@ func (l LoadBalancer) Delete() error {
 
 	return nil
 }
+
+func (l LoadBalancer) Name() string {
+	return l.identifier
+}

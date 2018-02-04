@@ -25,22 +25,30 @@ var _ = Describe("LoadBalancer", func() {
 		loadBalancer = elb.NewLoadBalancer(client, name)
 	})
 
-	It("deletes the load balancer", func() {
-		err := loadBalancer.Delete()
-		Expect(err).NotTo(HaveOccurred())
+	Describe("Delete", func() {
+		It("deletes the load balancer", func() {
+			err := loadBalancer.Delete()
+			Expect(err).NotTo(HaveOccurred())
 
-		Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
-		Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerName).To(Equal(name))
-	})
-
-	Context("when the client fails", func() {
-		BeforeEach(func() {
-			client.DeleteLoadBalancerCall.Returns.Error = errors.New("banana")
+			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
+			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerName).To(Equal(name))
 		})
 
-		It("returns the error", func() {
-			err := loadBalancer.Delete()
-			Expect(err).To(MatchError("FAILED deleting load balancer the-name: banana"))
+		Context("when the client fails", func() {
+			BeforeEach(func() {
+				client.DeleteLoadBalancerCall.Returns.Error = errors.New("banana")
+			})
+
+			It("returns the error", func() {
+				err := loadBalancer.Delete()
+				Expect(err).To(MatchError("FAILED deleting load balancer the-name: banana"))
+			})
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the identifier", func() {
+			Expect(loadBalancer.Name()).To(Equal("the-name"))
 		})
 	})
 })

@@ -33,3 +33,7 @@ func (t TargetGroup) Delete() error {
 
 	return nil
 }
+
+func (t TargetGroup) Name() string {
+	return t.identifier
+}
