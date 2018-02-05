@@ -63,8 +63,6 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
 	}
 
-	logger.Println(fmt.Sprintf("Cleaning gcp project: %s.", p.ProjectId))
-
 	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope, gcpdns.NdevClouddnsReadwriteScope)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating jwt config: %s", err)
