@@ -2,6 +2,7 @@ package aws
 
 import (
 	"errors"
+	"fmt"
 
 	awslib "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -43,12 +44,14 @@ func (l Leftovers) Delete(filter string) error {
 	}
 
 	for _, d := range deletables {
+		l.logger.Println(fmt.Sprintf("Deleting %s.", d.Name()))
+
 		err := d.Delete()
 
 		if err != nil {
 			l.logger.Println(err.Error())
 		} else {
-			l.logger.Printf("SUCCESS deleting %s\n", d.Name())
+			l.logger.Println(fmt.Sprintf("SUCCESS deleting %s!", d.Name()))
 		}
 	}
 
