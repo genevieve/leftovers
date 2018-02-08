@@ -30,7 +30,7 @@ func (l Leftovers) Delete(filter string) error {
 	for _, r := range l.resources {
 		list, err := r.List(filter)
 		if err != nil {
-			return err
+			l.logger.Println(err.Error())
 		}
 
 		deletables = append(deletables, list...)
