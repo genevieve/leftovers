@@ -17,8 +17,8 @@ type AddressesClient struct {
 	DeleteAddressCall struct {
 		CallCount int
 		Receives  struct {
-			Region  string
 			Address string
+			Region  string
 		}
 		Returns struct {
 			Error error
