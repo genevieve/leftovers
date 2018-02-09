@@ -13,8 +13,7 @@ type Logger struct {
 
 	PrintlnCall struct {
 		Receives struct {
-			Message   string
-			Arguments []interface{}
+			Message string
 		}
 		Messages []string
 	}
@@ -37,11 +36,10 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	l.PrintfCall.Messages = append(l.PrintfCall.Messages, fmt.Sprintf(message, a...))
 }
 
-func (l *Logger) Println(message string, a ...interface{}) {
+func (l *Logger) Println(message string) {
 	l.PrintlnCall.Receives.Message = message
-	l.PrintlnCall.Receives.Arguments = a
 
-	l.PrintlnCall.Messages = append(l.PrintlnCall.Messages, fmt.Sprintf(message, a...))
+	l.PrintlnCall.Messages = append(l.PrintlnCall.Messages, message)
 }
 
 func (l *Logger) Prompt(message string) bool {
