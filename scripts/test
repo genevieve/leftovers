@@ -1,11 +1,14 @@
 #!/bin/bash -eu
 
 function main() {
+	local package
+	package=${@}
+
 	local root_dir
 	root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
 	pushd "${root_dir}" > /dev/null
-		ginkgo -p -r -race -randomizeAllSpecs -randomizeSuites
+		ginkgo -p -r -race -randomizeAllSpecs -randomizeSuites ${package}
 	popd > /dev/null
 }
 
