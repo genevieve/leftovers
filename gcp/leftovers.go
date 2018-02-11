@@ -30,6 +30,7 @@ func (l Leftovers) Delete(filter string) error {
 
 	for _, r := range l.resources {
 		list, err := r.List(filter)
+
 		if err != nil {
 			l.logger.Println(err.Error())
 		}
@@ -74,7 +75,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 
 	key, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		return Leftovers{}, fmt.Errorf("Reading service account key path %s: %s", keyPath, err)
+		key = []byte(keyPath)
 	}
 
 	p := struct {
