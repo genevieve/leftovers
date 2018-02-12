@@ -46,7 +46,9 @@ func (a *GCPAcceptance) ReadyToTest() bool {
 	}
 
 	key, err := ioutil.ReadFile(path)
-	Expect(err).NotTo(HaveOccurred())
+	if err != nil {
+		key = []byte(path)
+	}
 
 	p := struct {
 		ProjectId string `json:"project_id"`
