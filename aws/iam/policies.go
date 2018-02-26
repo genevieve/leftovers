@@ -47,18 +47,6 @@ func (p Policies) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		versions, err := p.client.ListPolicyVersions(&awsiam.ListPolicyVersionsInput{PolicyArn: o.Arn})
-		if err != nil {
-			return nil, fmt.Errorf("Listing policy versions: %s", err)
-		}
-
-		for _, v := range versions.Versions {
-			if !*v.IsDefaultVersion {
-				versionResource := NewPolicyVersion(p.client, o.PolicyName, o.Arn, v.VersionId)
-				resources = append(resources, versionResource)
-			}
-		}
-
 		resources = append(resources, resource)
 	}
 

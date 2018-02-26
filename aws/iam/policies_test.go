@@ -37,9 +37,6 @@ var _ = Describe("Policies", func() {
 					PolicyName: aws.String("banana-policy"),
 				}},
 			}
-			client.ListPolicyVersionsCall.Returns.Output = &awsiam.ListPolicyVersionsOutput{
-				Versions: []*awsiam.PolicyVersion{{IsDefaultVersion: aws.Bool(true), VersionId: aws.String("banana-v1")}},
-			}
 			filter = "banana"
 		})
 
@@ -49,41 +46,11 @@ var _ = Describe("Policies", func() {
 
 			Expect(client.ListPoliciesCall.CallCount).To(Equal(1))
 
-			Expect(client.ListPolicyVersionsCall.CallCount).To(Equal(1))
-			Expect(client.DeletePolicyVersionCall.CallCount).To(Equal(0))
-
 			Expect(logger.PromptCall.CallCount).To(Equal(1))
 			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete policy banana-policy?"))
 
 			Expect(items).To(HaveLen(1))
 			// Expect(items).To(HaveKeyWithValue("banana-policy", "the-policy-arn"))
-		})
-
-		Context("when a policy has multiple versions", func() {
-			BeforeEach(func() {
-				client.ListPolicyVersionsCall.Returns.Output = &awsiam.ListPolicyVersionsOutput{
-					Versions: []*awsiam.PolicyVersion{
-						{IsDefaultVersion: aws.Bool(true), VersionId: aws.String("banana-v2")},
-						{IsDefaultVersion: aws.Bool(false), VersionId: aws.String("banana-v1")},
-					},
-				}
-			})
-
-			It("deletes all non-default versions", func() {
-				items, err := policies.List(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.ListPoliciesCall.CallCount).To(Equal(1))
-
-				Expect(client.ListPolicyVersionsCall.CallCount).To(Equal(1))
-
-				Expect(logger.PromptCall.CallCount).To(Equal(1))
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete policy banana-policy?"))
-
-				Expect(items).To(HaveLen(2))
-				Expect(items[0]).To(BeAssignableToTypeOf(iam.PolicyVersion{}))
-				Expect(items[0].Name()).To(Equal("banana-policy-banana-v1"))
-			})
 		})
 
 		Context("when the client fails to list policies", func() {
@@ -96,17 +63,6 @@ var _ = Describe("Policies", func() {
 				Expect(err).To(MatchError("Listing policies: some error"))
 
 				Expect(logger.PromptCall.CallCount).To(Equal(0))
-			})
-		})
-
-		Context("when the client fails to list policy versions", func() {
-			BeforeEach(func() {
-				client.ListPolicyVersionsCall.Returns.Error = errors.New("some error")
-			})
-
-			It("returns the error and does not try deleting them", func() {
-				_, err := policies.List(filter)
-				Expect(err).To(MatchError("Listing policy versions: some error"))
 			})
 		})
 
@@ -129,7 +85,6 @@ var _ = Describe("Policies", func() {
 				items, err := policies.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(client.ListPolicyVersionsCall.CallCount).To(Equal(0))
 				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete policy banana-policy?"))
 				Expect(items).To(HaveLen(0))
 			})
