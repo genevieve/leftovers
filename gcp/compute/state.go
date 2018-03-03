@@ -11,6 +11,7 @@ type state struct {
 
 type stateRefreshFunc func() (result interface{}, state string, err error)
 
+// Copied from terraform-provider-google implementation for compute operation polling.
 func (s *state) Wait() error {
 	notfoundTick := 0
 	targetOccurence := 0
