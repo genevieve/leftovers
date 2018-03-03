@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -77,7 +78,7 @@ func (s *state) Wait() error {
 			if res == nil {
 				notfoundTick++
 				if notfoundTick > notFoundChecks {
-					result.Error = err
+					result.Error = fmt.Errorf("%s", err)
 					resultCh <- result
 					return
 				}
