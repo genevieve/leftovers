@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/aws"
 	"github.com/genevieve/leftovers/azure"
 	"github.com/genevieve/leftovers/gcp"
+	"github.com/genevieve/leftovers/vsphere"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -16,14 +17,18 @@ type opts struct {
 	NoConfirm bool   `short:"n"  long:"no-confirm"                  description:"Destroy resources without prompting. This is dangerous, make good choices!"`
 	Filter    string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
 
-	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
-	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
-	AWSRegion            string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
-	AzureClientID        string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
-	AzureClientSecret    string `long:"azure-client-secret"      env:"BBL_AZURE_CLIENT_SECRET"      description:"Azure client secret."`
-	AzureTenantID        string `long:"azure-tenant-id"          env:"BBL_AZURE_TENANT_ID"          description:"Azure tenant id."`
-	AzureSubscriptionID  string `long:"azure-subscription-id"    env:"BBL_AZURE_SUBSCRIPTION_ID"    description:"Azure subscription id."`
-	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"BBL_GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
+	AWSAccessKeyID         string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
+	AWSSecretAccessKey     string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
+	AWSRegion              string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
+	AzureClientID          string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
+	AzureClientSecret      string `long:"azure-client-secret"      env:"BBL_AZURE_CLIENT_SECRET"      description:"Azure client secret."`
+	AzureTenantID          string `long:"azure-tenant-id"          env:"BBL_AZURE_TENANT_ID"          description:"Azure tenant id."`
+	AzureSubscriptionID    string `long:"azure-subscription-id"    env:"BBL_AZURE_SUBSCRIPTION_ID"    description:"Azure subscription id."`
+	GCPServiceAccountKey   string `long:"gcp-service-account-key"  env:"BBL_GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
+	VSphereVCenterIP       string `long:"vsphere-vcenter-ip"       env:"BBL_VSPHERE_VCENTER_IP"       description:"vSphere vCenter IP address."`
+	VSphereVCenterPassword string `long:"vsphere-vcenter-password" env:"BBL_VSPHERE_VCENTER_PASSWORD" description:"vSphere vCenter password."`
+	VSphereVCenterUser     string `long:"vsphere-vcenter-user"     env:"BBL_VSPHERE_VCENTER_USER"     description:"vSphere vCenter username."`
+	VSphereVCenterDC       string `long:"vsphere-vcenter-dc"       env:"BBL_VSPHERE_VCENTER_DC"       description:"vSphere vCenter datacenter."`
 }
 
 type leftovers interface {
@@ -51,8 +56,16 @@ func main() {
 		l, err = azure.NewLeftovers(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
 	case "gcp":
 		l, err = gcp.NewLeftovers(logger, c.GCPServiceAccountKey)
+	case "vsphere":
+		if c.Filter == "" {
+			log.Fatalf("--filter is required for vSphere.")
+		}
+		if c.NoConfirm {
+			log.Fatalf("--no-confirm is not supported for vSphere.")
+		}
+		l, err = vsphere.NewLeftovers(logger, c.VSphereVCenterIP, c.VSphereVCenterUser, c.VSphereVCenterPassword, c.VSphereVCenterDC)
 	default:
-		log.Fatalf("Missing BBL_IAAS.")
+		log.Fatalf("Missing or unsupported BBL_IAAS.")
 	}
 
 	if err != nil {
