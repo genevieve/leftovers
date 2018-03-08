@@ -15,8 +15,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-const BBL_GCP_ZONE = "us-east1-b"
-
 type GCPAcceptance struct {
 	Key       []byte
 	KeyPath   string
@@ -44,7 +42,7 @@ func NewGCPAcceptance() GCPAcceptance {
 		Key:       key,
 		KeyPath:   path,
 		ProjectId: p.ProjectId,
-		Zone:      BBL_GCP_ZONE,
+		Zone:      "us-east1-b",
 		Logger:    app.NewLogger(os.Stdin, os.Stdout, true),
 	}
 }
