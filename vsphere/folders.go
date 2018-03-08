@@ -5,52 +5,51 @@ import (
 	"fmt"
 
 	"github.com/genevieve/leftovers/aws/common"
-	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 )
 
-type Folders struct {
-	client     *govmomi.Client
-	logger     logger
-	datacenter string
+type client interface {
+	GetRootFolder(filter string) (*object.Folder, error)
 }
 
-func NewFolders(logger logger, client *govmomi.Client, datacenter string) Folders {
+type Folders struct {
+	client client
+	logger logger
+}
+
+func NewFolders(client client, logger logger) Folders {
 	return Folders{
-		logger:     logger,
-		client:     client,
-		datacenter: datacenter,
+		client: client,
+		logger: logger,
 	}
 }
 
 func (v Folders) List(filter string) ([]common.Deletable, error) {
-	dc, err := DatacenterFromID(v.client, v.datacenter)
+	rootFolder, err := v.client.GetRootFolder(filter)
 	if err != nil {
-		return nil, err
-	}
-
-	finder := find.NewFinder(v.client.Client, true)
-	finder.SetDatacenter(dc)
-	ctx := context.Background()
-
-	rootFolder, err := finder.Folder(ctx, filter)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Getting root folder: %s", err)
 	}
 
 	var deletable []common.Deletable
 
+	ctx := context.Background()
+
 	children, err := rootFolder.Children(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, child := range children {
 		childFolder, ok := child.(*object.Folder)
 		if !ok {
 			continue
 		}
+
 		grandchildren, err := childFolder.Children(ctx)
 		if err != nil {
 			return nil, err
 		}
+
 		if len(grandchildren) == 0 {
 			name, err := childFolder.Common.ObjectName(ctx)
 			if err != nil {

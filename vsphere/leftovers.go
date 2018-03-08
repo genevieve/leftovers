@@ -60,6 +60,10 @@ func NewLeftovers(logger logger, vCenterIP, vCenterUser, vCenterPassword, vCente
 		return Leftovers{}, errors.New("Missing vCenter password.")
 	}
 
+	if vCenterDC == "" {
+		return Leftovers{}, errors.New("Missing vCenter datacenter.")
+	}
+
 	vCenterUrl, err := url.Parse("https://" + vCenterIP + "/sdk")
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Could not parse vCenter IP \"%s\" as IP address or URL.", vCenterIP)
@@ -67,18 +71,21 @@ func NewLeftovers(logger logger, vCenterIP, vCenterUser, vCenterPassword, vCente
 
 	vCenterUrl.User = url.UserPassword(vCenterUser, vCenterPassword)
 
-	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
-	vimClient, err := govmomi.NewClient(vContext, vCenterUrl, true)
+
+	vmomi, err := govmomi.NewClient(ctx, vCenterUrl, true)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Error setting up client: %s", err)
 	}
 
+	client := NewClient(vmomi, vCenterDC)
+
 	return Leftovers{
 		logger: logger,
 		resources: []resource{
-			NewVirtualMachines(logger, vimClient, vCenterDC),
-			NewFolders(logger, vimClient, vCenterDC),
+			NewVirtualMachines(client, logger),
+			NewFolders(client, logger),
 		},
 	}, nil
 }
