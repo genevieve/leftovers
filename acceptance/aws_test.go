@@ -3,6 +3,7 @@ package acceptance
 import (
 	"bytes"
 	"os"
+	"strings"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/aws"
@@ -12,14 +13,15 @@ import (
 )
 
 var _ = Describe("AWS", func() {
-	var acc *AWSAcceptance
+	var acc AWSAcceptance
 
 	BeforeEach(func() {
-		acc = NewAWSAcceptance()
-
-		if !acc.ReadyToTest() {
-			Skip("Skipping acceptance tests.")
+		iaas := os.Getenv(LEFTOVERS_ACCEPTANCE)
+		if strings.ToLower(iaas) != "aws" {
+			Skip("Skipping AWS acceptance tests.")
 		}
+
+		acc = NewAWSAcceptance()
 	})
 
 	Describe("Delete", func() {

@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"os"
-	"strings"
 
 	awslib "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -20,31 +19,25 @@ type AWSAcceptance struct {
 	Logger          *app.Logger
 }
 
-func NewAWSAcceptance() *AWSAcceptance {
-	return &AWSAcceptance{}
+func NewAWSAcceptance() AWSAcceptance {
+	accessKeyId := os.Getenv("BBL_AWS_ACCESS_KEY_ID")
+	Expect(accessKeyId).NotTo(Equal(""))
+
+	secretAccessKey := os.Getenv("BBL_AWS_SECRET_ACCESS_KEY")
+	Expect(secretAccessKey).NotTo(Equal(""))
+
+	region := os.Getenv("BBL_AWS_REGION")
+	Expect(region).NotTo(Equal(""))
+
+	return AWSAcceptance{
+		AccessKeyId:     accessKeyId,
+		SecretAccessKey: secretAccessKey,
+		Region:          region,
+		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
+	}
 }
 
-func (a *AWSAcceptance) ReadyToTest() bool {
-	iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
-	if iaas == "" {
-		return false
-	}
-
-	if strings.ToLower(iaas) != "aws" {
-		return false
-	}
-
-	a.AccessKeyId = os.Getenv("BBL_AWS_ACCESS_KEY_ID")
-	a.SecretAccessKey = os.Getenv("BBL_AWS_SECRET_ACCESS_KEY")
-	a.Region = os.Getenv("BBL_AWS_REGION")
-
-	logger := app.NewLogger(os.Stdin, os.Stdout, true)
-	a.Logger = logger
-
-	return true
-}
-
-func (a *AWSAcceptance) CreateKeyPair(name string) {
+func (a AWSAcceptance) CreateKeyPair(name string) {
 	config := &awslib.Config{
 		Credentials: credentials.NewStaticCredentials(a.AccessKeyId, a.SecretAccessKey, ""),
 		Region:      awslib.String(a.Region),

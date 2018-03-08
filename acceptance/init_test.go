@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+const LEFTOVERS_ACCEPTANCE = "LEFTOVERS_ACCEPTANCE"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "acceptance")

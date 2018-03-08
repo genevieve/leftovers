@@ -16,7 +16,7 @@ var _ = Describe("GCP", func() {
 	var acc GCPAcceptance
 
 	BeforeEach(func() {
-		iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
+		iaas := os.Getenv(LEFTOVERS_ACCEPTANCE)
 		if strings.ToLower(iaas) != "gcp" {
 			Skip("Skipping GCP acceptance tests.")
 		}
