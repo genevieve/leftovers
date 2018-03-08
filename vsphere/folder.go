@@ -21,17 +21,17 @@ func NewFolder(folder *object.Folder, name string) Folder {
 }
 
 func (f Folder) Delete() error {
-	tctx, tcancel := context.WithTimeout(context.Background(), time.Minute*5)
-	defer tcancel()
+	tctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
 
 	destroy, err := f.folder.Common.Destroy(tctx)
 	if err != nil {
-		return fmt.Errorf("error destroying folder: %s", err)
+		return fmt.Errorf("Destroy folder %s: %s", f.name, err)
 	}
 
 	err = destroy.Wait(tctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for folder to destroy: %s", err)
+		return fmt.Errorf("Waiting for folder %s to destroy: %s", f.name, err)
 	}
 
 	return nil

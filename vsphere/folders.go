@@ -25,7 +25,7 @@ func NewFolders(client client, logger logger) Folders {
 }
 
 func (v Folders) List(filter string) ([]common.Deletable, error) {
-	rootFolder, err := v.client.GetRootFolder(filter)
+	root, err := v.client.GetRootFolder(filter)
 	if err != nil {
 		return nil, fmt.Errorf("Getting root folder: %s", err)
 	}
@@ -34,9 +34,9 @@ func (v Folders) List(filter string) ([]common.Deletable, error) {
 
 	ctx := context.Background()
 
-	children, err := rootFolder.Children(ctx)
+	children, err := root.Children(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Root folder children: %s", err)
 	}
 
 	for _, child := range children {
@@ -47,13 +47,13 @@ func (v Folders) List(filter string) ([]common.Deletable, error) {
 
 		grandchildren, err := childFolder.Children(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Folder children: %s", err)
 		}
 
 		if len(grandchildren) == 0 {
 			name, err := childFolder.Common.ObjectName(ctx)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Folder name: %s", err)
 			}
 
 			folder := NewFolder(childFolder, name)

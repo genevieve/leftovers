@@ -21,7 +21,7 @@ func NewVirtualMachines(client client, logger logger) VirtualMachines {
 }
 
 func (v VirtualMachines) List(filter string) ([]common.Deletable, error) {
-	folder, err := v.client.GetRootFolder(filter)
+	root, err := v.client.GetRootFolder(filter)
 	if err != nil {
 		return nil, fmt.Errorf("Getting root folder: %s", err)
 	}
@@ -30,9 +30,9 @@ func (v VirtualMachines) List(filter string) ([]common.Deletable, error) {
 
 	ctx := context.Background()
 
-	children, err := folder.Children(ctx)
+	children, err := root.Children(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Root folder children: %s", err)
 	}
 
 	for _, child := range children {
@@ -43,20 +43,23 @@ func (v VirtualMachines) List(filter string) ([]common.Deletable, error) {
 
 		grandchildren, err := childFolder.Children(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Folder children: %s", err)
 		}
 
 		for _, grandchild := range grandchildren {
-			if vmGrandchild, ok := grandchild.(*object.VirtualMachine); ok {
-				vm := NewVirtualMachine(vmGrandchild)
-
-				proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete virtual machine %s?", vm.Name()))
-				if !proceed {
-					continue
-				}
-
-				deletable = append(deletable, vm)
+			g, ok := grandchild.(*object.VirtualMachine)
+			if !ok {
+				continue
 			}
+
+			vm := NewVirtualMachine(g)
+
+			proceed := v.logger.Prompt(fmt.Sprintf("Are you sure you want to delete virtual machine %s?", vm.Name()))
+			if !proceed {
+				continue
+			}
+
+			deletable = append(deletable, vm)
 		}
 	}
 
