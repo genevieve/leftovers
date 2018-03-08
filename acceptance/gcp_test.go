@@ -3,6 +3,7 @@ package acceptance
 import (
 	"bytes"
 	"os"
+	"strings"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/gcp"
@@ -12,14 +13,15 @@ import (
 )
 
 var _ = Describe("GCP", func() {
-	var acc *GCPAcceptance
+	var acc GCPAcceptance
 
 	BeforeEach(func() {
-		acc = NewGCPAcceptance()
-
-		if !acc.ReadyToTest() {
-			Skip("Skipping acceptance tests.")
+		iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
+		if strings.ToLower(iaas) != "gcp" {
+			Skip("Skipping GCP acceptance tests.")
 		}
+
+		acc = NewGCPAcceptance()
 	})
 
 	Describe("Delete", func() {

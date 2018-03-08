@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/gcp/compute"
@@ -26,24 +25,9 @@ type GCPAcceptance struct {
 	Logger    *app.Logger
 }
 
-func NewGCPAcceptance() *GCPAcceptance {
-	return &GCPAcceptance{}
-}
-
-func (a *GCPAcceptance) ReadyToTest() bool {
-	iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
-	if iaas == "" {
-		return false
-	}
-
-	if strings.ToLower(iaas) != "gcp" {
-		return false
-	}
-
+func NewGCPAcceptance() GCPAcceptance {
 	path := os.Getenv("BBL_GCP_SERVICE_ACCOUNT_KEY")
-	if path == "" {
-		return false
-	}
+	Expect(path).NotTo(Equal(""))
 
 	key, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -56,32 +40,30 @@ func (a *GCPAcceptance) ReadyToTest() bool {
 	err = json.Unmarshal(key, &p)
 	Expect(err).NotTo(HaveOccurred())
 
-	a.Key = key
-	a.KeyPath = path
-	a.ProjectId = p.ProjectId
-	a.Zone = BBL_GCP_ZONE
-
-	logger := app.NewLogger(os.Stdin, os.Stdout, true)
-	a.Logger = logger
-
-	return true
+	return GCPAcceptance{
+		Key:       key,
+		KeyPath:   path,
+		ProjectId: p.ProjectId,
+		Zone:      BBL_GCP_ZONE,
+		Logger:    app.NewLogger(os.Stdin, os.Stdout, true),
+	}
 }
 
-func (a *GCPAcceptance) InsertDisk(name string) {
-	config, err := google.JWTConfigFromJSON([]byte(a.Key), gcpcompute.ComputeScope)
+func (g GCPAcceptance) InsertDisk(name string) {
+	config, err := google.JWTConfigFromJSON([]byte(g.Key), gcpcompute.ComputeScope)
 	Expect(err).NotTo(HaveOccurred())
 
 	service, err := gcpcompute.New(config.Client(context.Background()))
 	Expect(err).NotTo(HaveOccurred())
 
-	list, err := service.Disks.List(a.ProjectId, a.Zone).Filter(fmt.Sprintf("name eq %s", name)).Do()
+	list, err := service.Disks.List(g.ProjectId, g.Zone).Filter(fmt.Sprintf("name eq %s", name)).Do()
 	if len(list.Items) > 0 {
 		return
 	}
 
-	operation, err := service.Disks.Insert(a.ProjectId, a.Zone, &gcpcompute.Disk{Name: name}).Do()
+	operation, err := service.Disks.Insert(g.ProjectId, g.Zone, &gcpcompute.Disk{Name: name}).Do()
 
-	waiter := compute.NewOperationWaiter(operation, service, a.ProjectId, a.Logger)
+	waiter := compute.NewOperationWaiter(operation, service, g.ProjectId, g.Logger)
 
 	err = waiter.Wait()
 	Expect(err).NotTo(HaveOccurred())
