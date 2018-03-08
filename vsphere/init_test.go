@@ -9,5 +9,5 @@ import (
 
 func TestVsphere(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Vsphere Suite")
+	RunSpecs(t, "vsphere")
 }
