@@ -24,6 +24,42 @@ var _ = Describe("GCP", func() {
 		acc = NewGCPAcceptance()
 	})
 
+	Describe("Dry run", func() {
+		var (
+			stdout  *bytes.Buffer
+			logger  *app.Logger
+			filter  string
+			deleter gcp.Leftovers
+		)
+
+		BeforeEach(func() {
+			noConfirm := true
+			stdout = bytes.NewBuffer([]byte{})
+			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
+
+			filter = "leftovers-acceptance-dry-run"
+			acc.InsertDisk(filter)
+
+			var err error
+			deleter, err = gcp.NewLeftovers(logger, acc.KeyPath)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			err := deleter.Delete(filter)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("lists resources without deleting", func() {
+			deleter.List(filter)
+
+			Expect(stdout.String()).To(ContainSubstring("disk: leftovers-acceptance-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-acceptance-dry-run."))
+			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance-dry-run!"))
+			Expect(stdout.String()).NotTo(ContainSubstring("ERROR deleting disk"))
+		})
+	})
+
 	Describe("Delete", func() {
 		var (
 			stdout  *bytes.Buffer

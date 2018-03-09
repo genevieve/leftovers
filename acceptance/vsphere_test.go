@@ -21,6 +21,42 @@ var _ = Describe("vSphere", func() {
 		}
 	})
 
+	Describe("Dry run", func() {
+		var (
+			stdout  *bytes.Buffer
+			logger  *app.Logger
+			filter  string
+			deleter vsphere.Leftovers
+		)
+
+		BeforeEach(func() {
+			noConfirm := true
+			stdout = bytes.NewBuffer([]byte{})
+			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
+
+			filter = "khaleesi"
+			name := "leftovers-acceptance-dry-run"
+			acc.CreateFolder(filter, name)
+
+			var err error
+			deleter, err = vsphere.NewLeftovers(logger, acc.VCenterIP, acc.VCenterUser, acc.VCenterPassword, acc.Datacenter)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			err := deleter.Delete(filter)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("lists resources without deleting", func() {
+			deleter.List(filter)
+
+			Expect(stdout.String()).To(ContainSubstring("folder: leftovers-acceptance-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
+			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
+		})
+	})
+
 	Describe("Delete", func() {
 		var (
 			stdout  *bytes.Buffer

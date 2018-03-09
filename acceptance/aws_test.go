@@ -24,6 +24,42 @@ var _ = Describe("AWS", func() {
 		acc = NewAWSAcceptance()
 	})
 
+	Describe("Dry run", func() {
+		var (
+			stdout  *bytes.Buffer
+			logger  *app.Logger
+			filter  string
+			deleter aws.Leftovers
+		)
+
+		BeforeEach(func() {
+			noConfirm := true
+			stdout = bytes.NewBuffer([]byte{})
+			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
+
+			filter = "leftovers-acceptance-dry-run"
+			acc.CreateKeyPair(filter)
+
+			var err error
+			deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			err := deleter.Delete(filter)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("lists resources without deleting", func() {
+			deleter.List(filter)
+
+			Expect(stdout.String()).To(ContainSubstring("key pair: leftovers-acceptance-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-acceptance-dry-run."))
+			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance-dry-run!"))
+			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair leftovers-acceptance-dry-run"))
+		})
+	})
+
 	Describe("Delete", func() {
 		var (
 			stdout  *bytes.Buffer
