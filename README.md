@@ -143,5 +143,12 @@ Help Options:
 
 ### vSphere
 
+#### What can you delete with this?
+
+  ```diff
+  + virtual machines
+  + empty folders
+  ```
+
 #### What's up next?
 
