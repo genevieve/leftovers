@@ -53,4 +53,10 @@ var _ = Describe("InstanceProfile", func() {
 			Expect(instanceProfile.Name()).To(Equal("the-name"))
 		})
 	})
+
+	Describe("Type", func() {
+		It("returns \"instance profile\"", func() {
+			Expect(instanceProfile.Type()).To(Equal("instance profile"))
+		})
+	})
 })

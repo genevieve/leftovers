@@ -7,12 +7,11 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/genevieve/leftovers/aws/common"
 	"github.com/vmware/govmomi"
 )
 
 type resource interface {
-	List(filter string) ([]common.Deletable, error)
+	List(filter string) ([]Deletable, error)
 }
 
 type Leftovers struct {
@@ -21,7 +20,7 @@ type Leftovers struct {
 }
 
 func (l Leftovers) Delete(filter string) error {
-	var deletables []common.Deletable
+	var deletables []Deletable
 
 	for _, r := range l.resources {
 		list, err := r.List(filter)

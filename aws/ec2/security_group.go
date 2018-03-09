@@ -47,3 +47,7 @@ func (s SecurityGroup) Delete() error {
 func (s SecurityGroup) Name() string {
 	return s.identifier
 }
+
+func (s SecurityGroup) Type() string {
+	return "security group"
+}

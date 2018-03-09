@@ -47,3 +47,7 @@ func (i InstanceProfile) Delete() error {
 func (i InstanceProfile) Name() string {
 	return i.identifier
 }
+
+func (i InstanceProfile) Type() string {
+	return "instance profile"
+}
