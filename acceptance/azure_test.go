@@ -35,7 +35,7 @@ var _ = Describe("Azure", func() {
 			stdout = bytes.NewBuffer([]byte{})
 			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
 
-			filter = "leftovers-acceptance-dry-run"
+			filter = "leftovers-dry-run"
 			acc.CreateResourceGroup(filter)
 
 			var err error
@@ -51,8 +51,8 @@ var _ = Describe("Azure", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("resource group: leftovers-acceptance-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance-dry-run"))
+			Expect(stdout.String()).To(ContainSubstring("resource group: leftovers-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run"))
 			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting resource group"))
 		})
 	})

@@ -35,7 +35,7 @@ var _ = Describe("vSphere", func() {
 			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
 
 			filter = "khaleesi"
-			name := "leftovers-acceptance-dry-run"
+			name := "leftovers-dry-run"
 			acc.CreateFolder(filter, name)
 
 			var err error
@@ -51,7 +51,7 @@ var _ = Describe("vSphere", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("folder: leftovers-acceptance-dry-run"))
+			Expect(stdout.String()).To(ContainSubstring("folder: leftovers-dry-run"))
 			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
 			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
 		})

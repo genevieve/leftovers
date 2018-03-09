@@ -37,7 +37,7 @@ var _ = Describe("AWS", func() {
 			stdout = bytes.NewBuffer([]byte{})
 			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
 
-			filter = "leftovers-acceptance-dry-run"
+			filter = "leftovers-dry-run"
 			acc.CreateKeyPair(filter)
 
 			var err error
@@ -53,10 +53,10 @@ var _ = Describe("AWS", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("key pair: leftovers-acceptance-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-acceptance-dry-run."))
-			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance-dry-run!"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair leftovers-acceptance-dry-run"))
+			Expect(stdout.String()).To(ContainSubstring("key pair: leftovers-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-dry-run."))
+			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run!"))
+			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair leftovers-dry-run"))
 		})
 	})
 
