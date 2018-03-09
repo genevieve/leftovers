@@ -27,6 +27,10 @@ type Logger struct {
 			Proceed bool
 		}
 	}
+
+	NoConfirmCall struct {
+		CallCount int
+	}
 }
 
 func (l *Logger) Printf(message string, a ...interface{}) {
@@ -47,4 +51,8 @@ func (l *Logger) Prompt(message string) bool {
 	l.PromptCall.Receives.Message = message
 
 	return l.PromptCall.Returns.Proceed
+}
+
+func (l *Logger) NoConfirm() {
+	l.NoConfirmCall.CallCount++
 }
