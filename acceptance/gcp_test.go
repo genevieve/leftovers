@@ -54,6 +54,7 @@ var _ = Describe("GCP", func() {
 			deleter.List(filter)
 
 			Expect(stdout.String()).To(ContainSubstring("disk: leftovers-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
 			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-dry-run."))
 			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run!"))
 			Expect(stdout.String()).NotTo(ContainSubstring("ERROR deleting disk"))

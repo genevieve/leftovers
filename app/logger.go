@@ -73,3 +73,7 @@ func (l *Logger) Prompt(message string) bool {
 
 	return true
 }
+
+func (l *Logger) NoConfirm() {
+	l.noConfirm = true
+}

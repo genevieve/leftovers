@@ -47,7 +47,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm || c.DryRun)
+	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
 	var l leftovers
 

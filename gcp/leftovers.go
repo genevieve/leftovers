@@ -28,6 +28,8 @@ type Leftovers struct {
 func (l Leftovers) List(filter string) {
 	deletables := []common.Deletable{}
 
+	l.logger.NoConfirm()
+
 	for _, r := range l.resources {
 		list, err := r.List(filter)
 

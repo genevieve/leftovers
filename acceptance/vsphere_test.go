@@ -52,6 +52,7 @@ var _ = Describe("vSphere", func() {
 			deleter.List(filter)
 
 			Expect(stdout.String()).To(ContainSubstring("folder: leftovers-dry-run"))
+			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
 			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
 			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
 		})
