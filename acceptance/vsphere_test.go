@@ -11,7 +11,13 @@ import (
 )
 
 var _ = Describe("vSphere", func() {
-	var acc *VSphereAcceptance
+	var (
+		acc *VSphereAcceptance
+
+		stdout  *bytes.Buffer
+		filter  string
+		deleter vsphere.Leftovers
+	)
 
 	BeforeEach(func() {
 		acc = NewVSphereAcceptance()
@@ -19,28 +25,21 @@ var _ = Describe("vSphere", func() {
 		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")
 		}
+
+		filter = "khaleesi"
+		noConfirm := true
+		stdout = bytes.NewBuffer([]byte{})
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+
+		var err error
+		deleter, err = vsphere.NewLeftovers(logger, acc.VCenterIP, acc.VCenterUser, acc.VCenterPassword, acc.Datacenter)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Describe("Dry run", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter vsphere.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
-			filter = "khaleesi"
 			name := "leftovers-dry-run"
 			acc.CreateFolder(filter, name)
-
-			var err error
-			deleter, err = vsphere.NewLeftovers(logger, acc.VCenterIP, acc.VCenterUser, acc.VCenterPassword, acc.Datacenter)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		AfterEach(func() {
@@ -59,25 +58,9 @@ var _ = Describe("vSphere", func() {
 	})
 
 	Describe("Delete", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter vsphere.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
-			filter = "khaleesi"
 			name := "leftovers-acceptance"
 			acc.CreateFolder(filter, name)
-
-			var err error
-			deleter, err = vsphere.NewLeftovers(logger, acc.VCenterIP, acc.VCenterUser, acc.VCenterPassword, acc.Datacenter)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("deletes resources with the filter", func() {

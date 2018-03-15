@@ -12,7 +12,13 @@ import (
 )
 
 var _ = Describe("Azure", func() {
-	var acc *AzureAcceptance
+	var (
+		acc *AzureAcceptance
+
+		stdout  *bytes.Buffer
+		filter  string
+		deleter azure.Leftovers
+	)
 
 	BeforeEach(func() {
 		acc = NewAzureAcceptance()
@@ -20,27 +26,20 @@ var _ = Describe("Azure", func() {
 		if !acc.ReadyToTest() {
 			Skip("Skipping acceptance tests.")
 		}
+
+		noConfirm := true
+		stdout = bytes.NewBuffer([]byte{})
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+
+		var err error
+		deleter, err = azure.NewLeftovers(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Describe("Dry run", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter azure.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			filter = "leftovers-dry-run"
 			acc.CreateResourceGroup(filter)
-
-			var err error
-			deleter, err = azure.NewLeftovers(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		AfterEach(func() {
@@ -59,24 +58,9 @@ var _ = Describe("Azure", func() {
 	})
 
 	Describe("Delete", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter azure.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			filter = "leftovers-acceptance"
 			acc.CreateResourceGroup(filter)
-
-			var err error
-			deleter, err = azure.NewLeftovers(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("deletes resources with the filter", func() {

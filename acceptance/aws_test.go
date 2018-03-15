@@ -13,7 +13,13 @@ import (
 )
 
 var _ = Describe("AWS", func() {
-	var acc AWSAcceptance
+	var (
+		acc AWSAcceptance
+
+		stdout  *bytes.Buffer
+		filter  string
+		deleter aws.Leftovers
+	)
 
 	BeforeEach(func() {
 		iaas := os.Getenv(LEFTOVERS_ACCEPTANCE)
@@ -22,27 +28,20 @@ var _ = Describe("AWS", func() {
 		}
 
 		acc = NewAWSAcceptance()
+
+		noConfirm := true
+		stdout = bytes.NewBuffer([]byte{})
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+
+		var err error
+		deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Describe("Dry run", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter aws.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			filter = "leftovers-dry-run"
 			acc.CreateKeyPair(filter)
-
-			var err error
-			deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		AfterEach(func() {
@@ -62,24 +61,9 @@ var _ = Describe("AWS", func() {
 	})
 
 	Describe("Delete", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter aws.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			filter = "leftovers-acceptance"
 			acc.CreateKeyPair(filter)
-
-			var err error
-			deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("deletes resources with the filter", func() {

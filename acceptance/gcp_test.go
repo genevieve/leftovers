@@ -13,7 +13,12 @@ import (
 )
 
 var _ = Describe("GCP", func() {
-	var acc GCPAcceptance
+	var (
+		acc     GCPAcceptance
+		stdout  *bytes.Buffer
+		filter  string
+		deleter gcp.Leftovers
+	)
 
 	BeforeEach(func() {
 		iaas := os.Getenv(LEFTOVERS_ACCEPTANCE)
@@ -22,27 +27,20 @@ var _ = Describe("GCP", func() {
 		}
 
 		acc = NewGCPAcceptance()
+
+		noConfirm := true
+		stdout = bytes.NewBuffer([]byte{})
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+
+		var err error
+		deleter, err = gcp.NewLeftovers(logger, acc.KeyPath)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Describe("Dry run", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter gcp.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			filter = "leftovers-dry-run"
 			acc.InsertDisk(filter)
-
-			var err error
-			deleter, err = gcp.NewLeftovers(logger, acc.KeyPath)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		AfterEach(func() {
@@ -62,24 +60,9 @@ var _ = Describe("GCP", func() {
 	})
 
 	Describe("Delete", func() {
-		var (
-			stdout  *bytes.Buffer
-			logger  *app.Logger
-			filter  string
-			deleter gcp.Leftovers
-		)
-
 		BeforeEach(func() {
-			noConfirm := true
-			stdout = bytes.NewBuffer([]byte{})
-			logger = app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			filter = "leftovers-acceptance"
 			acc.InsertDisk(filter)
-
-			var err error
-			deleter, err = gcp.NewLeftovers(logger, acc.KeyPath)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("deletes resources with the filter", func() {
