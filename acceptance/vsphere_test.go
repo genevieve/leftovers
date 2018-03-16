@@ -3,6 +3,7 @@ package acceptance
 import (
 	"bytes"
 	"os"
+	"strings"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/vsphere"
@@ -12,7 +13,7 @@ import (
 
 var _ = Describe("vSphere", func() {
 	var (
-		acc *VSphereAcceptance
+		acc VSphereAcceptance
 
 		stdout  *bytes.Buffer
 		filter  string
@@ -20,11 +21,12 @@ var _ = Describe("vSphere", func() {
 	)
 
 	BeforeEach(func() {
-		acc = NewVSphereAcceptance()
-
-		if !acc.ReadyToTest() {
-			Skip("Skipping acceptance tests.")
+		iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
+		if strings.ToLower(iaas) != "vsphere" {
+			Skip("Skipping vSphere acceptance tests.")
 		}
+
+		acc = NewVSphereAcceptance()
 
 		filter = "khaleesi"
 		noConfirm := true
@@ -38,8 +40,7 @@ var _ = Describe("vSphere", func() {
 
 	Describe("Dry run", func() {
 		BeforeEach(func() {
-			name := "leftovers-dry-run"
-			acc.CreateFolder(filter, name)
+			acc.CreateFolder(filter, "leftovers-dry-run")
 		})
 
 		AfterEach(func() {
@@ -59,16 +60,15 @@ var _ = Describe("vSphere", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			name := "leftovers-acceptance"
-			acc.CreateFolder(filter, name)
+			acc.CreateFolder(filter, "leftovers-acceptance")
 		})
 
 		It("deletes resources with the filter", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
 			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
+			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
 		})
 	})
 })

@@ -2,14 +2,13 @@ package acceptance
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/vsphere"
+	. "github.com/onsi/gomega"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 )
@@ -22,64 +21,47 @@ type VSphereAcceptance struct {
 	Logger          *app.Logger
 }
 
-func NewVSphereAcceptance() *VSphereAcceptance {
-	return &VSphereAcceptance{}
+func NewVSphereAcceptance() VSphereAcceptance {
+	vcenterIP := os.Getenv("BBL_VSPHERE_VCENTER_IP")
+	Expect(vcenterIP).NotTo(Equal(""))
+
+	vcenterUser := os.Getenv("BBL_VSPHERE_VCENTER_USER")
+	Expect(vcenterUser).NotTo(Equal(""))
+
+	vcenterPassword := os.Getenv("BBL_VSPHERE_VCENTER_PASSWORD")
+	Expect(vcenterPassword).NotTo(Equal(""))
+
+	datacenter := os.Getenv("BBL_VSPHERE_VCENTER_DC")
+	Expect(datacenter).NotTo(Equal(""))
+
+	return VSphereAcceptance{
+		VCenterIP: vcenterIP,
+		Logger:    app.NewLogger(os.Stdin, os.Stdout, true),
+	}
 }
 
-func (v *VSphereAcceptance) ReadyToTest() bool {
-	iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
-	if iaas == "" {
-		return false
-	}
-
-	if strings.ToLower(iaas) != "vsphere" {
-		return false
-	}
-
-	v.VCenterIP = os.Getenv("BBL_VSPHERE_VCENTER_IP")
-	v.VCenterUser = os.Getenv("BBL_VSPHERE_VCENTER_USER")
-	v.VCenterPassword = os.Getenv("BBL_VSPHERE_VCENTER_PASSWORD")
-	v.Datacenter = os.Getenv("BBL_VSPHERE_VCENTER_DC")
-
-	logger := app.NewLogger(os.Stdin, os.Stdout, true)
-	v.Logger = logger
-
-	return true
-}
-
-func (v *VSphereAcceptance) CreateFolder(root, name string) error {
+func (v *VSphereAcceptance) CreateFolder(root, name string) {
 	vCenterUrl, err := url.Parse("https://" + v.VCenterIP + "/sdk")
-	if err != nil {
-		return fmt.Errorf("Could not parse vCenter IP \"%s\" as IP address or URL.", v.VCenterIP)
-	}
+	Expect(err).NotTo(HaveOccurred())
 
 	vCenterUrl.User = url.UserPassword(v.VCenterUser, v.VCenterPassword)
 
 	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
+
 	vimClient, err := govmomi.NewClient(vContext, vCenterUrl, true)
-	if err != nil {
-		return fmt.Errorf("Error setting up client: %s", err)
-	}
+	Expect(err).NotTo(HaveOccurred())
 
 	datacenter, err := vsphere.DatacenterFromID(vimClient, v.Datacenter)
-	if err != nil {
-		return fmt.Errorf("Failed to get datacenter: %s", err)
-	}
+	Expect(err).NotTo(HaveOccurred())
 
 	finder := find.NewFinder(vimClient.Client, true)
 	finder.SetDatacenter(datacenter)
 	ctx := context.Background()
 
 	rootFolder, err := finder.Folder(ctx, root)
-	if err != nil {
-		return err
-	}
+	Expect(err).NotTo(HaveOccurred())
 
 	_, err = rootFolder.CreateFolder(ctx, name)
-	if err != nil {
-		return fmt.Errorf("Creating test folder: %s", err)
-	}
-
-	return nil
+	Expect(err).NotTo(HaveOccurred())
 }
