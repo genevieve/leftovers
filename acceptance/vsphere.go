@@ -35,8 +35,11 @@ func NewVSphereAcceptance() VSphereAcceptance {
 	Expect(datacenter).NotTo(Equal(""))
 
 	return VSphereAcceptance{
-		VCenterIP: vcenterIP,
-		Logger:    app.NewLogger(os.Stdin, os.Stdout, true),
+		VCenterIP:       vcenterIP,
+		VCenterUser:     vcenterUser,
+		VCenterPassword: vcenterPassword,
+		Datacenter:      datacenter,
+		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
 	}
 }
 
