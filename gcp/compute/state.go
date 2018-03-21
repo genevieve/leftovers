@@ -1,7 +1,6 @@
 package compute
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -14,7 +13,7 @@ type state struct {
 type stateRefreshFunc func() (result interface{}, state string, err error)
 
 // Copied from terraform-provider-google implementation for compute operation polling.
-func (s *state) Wait() error {
+func (s *state) Wait() (interface{}, error) {
 	notfoundTick := 0
 	targetOccurence := 0
 	notFoundChecks := 20
@@ -122,17 +121,11 @@ func (s *state) Wait() error {
 		select {
 		case r, ok := <-resultCh:
 			if !ok {
-				return lastResult.Error
+				return lastResult.Result, lastResult.Error
 			}
 
 			if r.Done {
-				if r.Error != nil {
-					return fmt.Errorf("Reached DONE state with error: %s", r.Error)
-				}
-				if r.Result == nil {
-					return errors.New("Reached DONE state with no result.")
-				}
-				return nil
+				return r.Result, r.Error
 			}
 
 			lastResult = r
@@ -149,13 +142,7 @@ func (s *state) Wait() error {
 				select {
 				case r, ok := <-resultCh:
 					if r.Done {
-						if r.Error != nil {
-							return fmt.Errorf("Reached DONE state with error: %s", r.Error)
-						}
-						if r.Result == nil {
-							return errors.New("Reached DONE state with no result.")
-						}
-						return nil
+						return r.Result, r.Error
 					}
 
 					if !ok {
@@ -169,7 +156,7 @@ func (s *state) Wait() error {
 				}
 			}
 
-			return fmt.Errorf("Timeout error: %s", lastResult.Error)
+			return nil, fmt.Errorf("Timeout error: %s", lastResult.Error)
 		}
 	}
 }
