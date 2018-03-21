@@ -140,6 +140,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewUrlMaps(client, logger),
 			compute.NewTargetPools(client, logger, regions),
 			compute.NewBackendServices(client, logger),
+			compute.NewInstanceGroupManagers(client, logger, zones),
 			compute.NewInstances(client, logger, zones),
 			compute.NewInstanceGroups(client, logger, zones),
 			compute.NewGlobalHealthChecks(client, logger),

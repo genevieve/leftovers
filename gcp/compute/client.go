@@ -20,6 +20,7 @@ type client struct {
 	images                *gcpcompute.ImagesService
 	instances             *gcpcompute.InstancesService
 	instanceGroups        *gcpcompute.InstanceGroupsService
+	instanceGroupManagers *gcpcompute.InstanceGroupManagersService
 	firewalls             *gcpcompute.FirewallsService
 	forwardingRules       *gcpcompute.ForwardingRulesService
 	globalForwardingRules *gcpcompute.GlobalForwardingRulesService
@@ -48,6 +49,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		images:                service.Images,
 		instances:             service.Instances,
 		instanceGroups:        service.InstanceGroups,
+		instanceGroupManagers: service.InstanceGroupManagers,
 		firewalls:             service.Firewalls,
 		forwardingRules:       service.ForwardingRules,
 		globalForwardingRules: service.GlobalForwardingRules,
@@ -116,6 +118,14 @@ func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, 
 
 func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
 	return c.wait(c.instanceGroups.Delete(c.project, zone, instanceGroup))
+}
+
+func (c client) ListInstanceGroupManagers(zone string) (*gcpcompute.InstanceGroupManagerList, error) {
+	return c.instanceGroupManagers.List(c.project, zone).Do()
+}
+
+func (c client) DeleteInstanceGroupManager(zone, instanceGroupManager string) error {
+	return c.wait(c.instanceGroupManagers.Delete(c.project, zone, instanceGroupManager))
 }
 
 func (c client) ListGlobalHealthChecks() (*gcpcompute.HealthCheckList, error) {
