@@ -67,12 +67,12 @@ func (l Leftovers) Delete(filter string) error {
 			go func(d common.Deletable) {
 				defer wg.Done()
 
-				l.logger.Println(fmt.Sprintf("Deleting %s.", d.Name()))
+				l.logger.Println(fmt.Sprintf("Deleting %s: %s.", d.Type(), d.Name()))
 
 				if err := d.Delete(); err != nil {
 					l.logger.Println(err.Error())
 				} else {
-					l.logger.Println(fmt.Sprintf("SUCCESS deleting %s!", d.Name()))
+					l.logger.Println(fmt.Sprintf("SUCCESS deleting %s: %s!", d.Type(), d.Name()))
 				}
 			}(d)
 		}
