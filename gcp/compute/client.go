@@ -18,6 +18,7 @@ type client struct {
 	httpHealthChecks      *gcpcompute.HttpHealthChecksService
 	httpsHealthChecks     *gcpcompute.HttpsHealthChecksService
 	images                *gcpcompute.ImagesService
+	instanceTemplates     *gcpcompute.InstanceTemplatesService
 	instances             *gcpcompute.InstancesService
 	instanceGroups        *gcpcompute.InstanceGroupsService
 	instanceGroupManagers *gcpcompute.InstanceGroupManagersService
@@ -47,6 +48,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		httpHealthChecks:      service.HttpHealthChecks,
 		httpsHealthChecks:     service.HttpsHealthChecks,
 		images:                service.Images,
+		instanceTemplates:     service.InstanceTemplates,
 		instances:             service.Instances,
 		instanceGroups:        service.InstanceGroups,
 		instanceGroupManagers: service.InstanceGroupManagers,
@@ -110,6 +112,14 @@ func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
 
 func (c client) DeleteInstance(zone, instance string) error {
 	return c.wait(c.instances.Delete(c.project, zone, instance))
+}
+
+func (c client) ListInstanceTemplates() (*gcpcompute.InstanceTemplateList, error) {
+	return c.instanceTemplates.List(c.project).Do()
+}
+
+func (c client) DeleteInstanceTemplate(instanceTemplate string) error {
+	return c.wait(c.instanceTemplates.Delete(c.project, instanceTemplate))
 }
 
 func (c client) ListInstanceGroups(zone string) (*gcpcompute.InstanceGroupList, error) {
