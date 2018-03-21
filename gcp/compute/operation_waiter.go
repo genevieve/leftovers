@@ -31,7 +31,7 @@ func (w *operationWaiter) Wait() error {
 
 	res, err := state.Wait()
 	if err != nil {
-		return err
+		return fmt.Errorf("State wait: %s", err)
 	}
 
 	op, ok := res.(*gcpcompute.Operation)
