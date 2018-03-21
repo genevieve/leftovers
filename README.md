@@ -132,6 +132,7 @@ Help Options:
   + compute target https proxies
   + compute target http proxies
   + compute url maps
+  - compute vm instance templates
   + compute vm instances
   + compute vm instance groups
   + compute vm instance group managers
@@ -142,7 +143,6 @@ Help Options:
 
   ```diff
   - compute routes
-  - compute vm instance templates
   - compute snapshots
   ```
 
