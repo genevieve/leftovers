@@ -134,6 +134,7 @@ Help Options:
   + compute url maps
   + compute vm instances
   + compute vm instance groups
+  + compute vm instance group managers
   + dns managed zones
   + dns record sets
   ```

@@ -32,7 +32,7 @@ func (i InstanceGroupManagers) List(filter string) ([]common.Deletable, error) {
 	for _, zone := range i.zones {
 		l, err := i.client.ListInstanceGroupManagers(zone)
 		if err != nil {
-			return nil, fmt.Errorf("Listing instance group managerss for zone %s: %s", zone, err)
+			return nil, fmt.Errorf("Listing instance group managers for zone %s: %s", zone, err)
 		}
 
 		managers = append(managers, l.Items...)
