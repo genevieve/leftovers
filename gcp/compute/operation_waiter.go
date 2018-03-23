@@ -29,14 +29,14 @@ func (w *operationWaiter) Wait() error {
 		refresh: w.refreshFunc(),
 	}
 
-	res, err := state.Wait()
+	raw, err := state.Wait()
 	if err != nil {
-		return fmt.Errorf("State wait: %s", err)
+		return fmt.Errorf("Waiting for operation to complete: %s", err)
 	}
 
-	op, ok := res.(*gcpcompute.Operation)
-	if ok && op.Error != nil && len(op.Error.Errors) > 0 {
-		return fmt.Errorf("Operation error: %s", op.Error.Errors[0].Message)
+	result, ok := raw.(*gcpcompute.Operation)
+	if ok && result.Error != nil && len(result.Error.Errors) > 0 {
+		return fmt.Errorf("Operation error: %s", result.Error.Errors[0].Message)
 	}
 
 	return nil
