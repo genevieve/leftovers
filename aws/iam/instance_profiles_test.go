@@ -45,7 +45,7 @@ var _ = Describe("InstanceProfiles", func() {
 			Expect(client.ListInstanceProfilesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("instance profile"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Instance Profile"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-profile"))
 
 			Expect(items).To(HaveLen(1))
@@ -82,8 +82,7 @@ var _ = Describe("InstanceProfiles", func() {
 				items, err := instanceProfiles.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("instance profile"))
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-profile"))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 
 				Expect(items).To(HaveLen(0))
 			})

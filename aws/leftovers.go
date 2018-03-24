@@ -33,59 +33,6 @@ type Leftovers struct {
 	resources []resource
 }
 
-func (l Leftovers) List(filter string) {
-	var all []common.Deletable
-	for _, r := range l.resources {
-		list, err := r.ListAll(filter)
-		if err != nil {
-			l.logger.Println(err.Error())
-		}
-
-		all = append(all, list...)
-	}
-
-	for _, r := range all {
-		l.logger.Println(fmt.Sprintf("%s: %s", r.Type(), r.Name()))
-	}
-}
-
-func (l Leftovers) Delete(filter string) error {
-	deletables := [][]common.Deletable{}
-
-	for _, r := range l.resources {
-		list, err := r.List(filter)
-		if err != nil {
-			l.logger.Println(err.Error())
-		}
-
-		deletables = append(deletables, list)
-	}
-
-	var wg sync.WaitGroup
-
-	for _, list := range deletables {
-		for _, d := range list {
-			wg.Add(1)
-
-			go func(d common.Deletable) {
-				defer wg.Done()
-
-				l.logger.Println(fmt.Sprintf("Deleting %s.", d.Name()))
-
-				if err := d.Delete(); err != nil {
-					l.logger.Println(err.Error())
-				} else {
-					l.logger.Println(fmt.Sprintf("SUCCESS deleting %s!", d.Name()))
-				}
-			}(d)
-		}
-
-		wg.Wait()
-	}
-
-	return nil
-}
-
 func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (Leftovers, error) {
 	if accessKeyId == "" {
 		return Leftovers{}, errors.New("Missing aws access key id.")
@@ -148,4 +95,58 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			rds.NewDBSubnetGroups(rdsClient, logger),
 		},
 	}, nil
+}
+
+func (l Leftovers) List(filter string) {
+	var all []common.Deletable
+	for _, r := range l.resources {
+		list, err := r.ListAll(filter)
+		if err != nil {
+			l.logger.Println(err.Error())
+		}
+
+		all = append(all, list...)
+	}
+
+	for _, r := range all {
+		l.logger.Println(fmt.Sprintf("%s: %s", r.Type(), r.Name()))
+	}
+}
+
+func (l Leftovers) Delete(filter string) error {
+	deletables := [][]common.Deletable{}
+
+	for _, r := range l.resources {
+		list, err := r.List(filter)
+		if err != nil {
+			l.logger.Println(err.Error())
+		}
+
+		deletables = append(deletables, list)
+	}
+
+	var wg sync.WaitGroup
+
+	for _, resources := range deletables {
+		for _, r := range resources {
+			wg.Add(1)
+
+			go func(d common.Deletable) {
+				defer wg.Done()
+
+				l.logger.Println(fmt.Sprintf("Deleting %s.", r.Name()))
+
+				err := r.Delete()
+				if err != nil {
+					l.logger.Println(err.Error())
+				} else {
+					l.logger.Println(fmt.Sprintf("SUCCESS deleting %s!", r.Name()))
+				}
+			}(d)
+		}
+
+		wg.Wait()
+	}
+
+	return nil
 }

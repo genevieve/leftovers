@@ -49,7 +49,7 @@ var _ = Describe("Users", func() {
 			Expect(client.ListUsersCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("user"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM User"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-user"))
 
 			Expect(items).To(HaveLen(1))

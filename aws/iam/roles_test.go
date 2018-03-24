@@ -46,7 +46,7 @@ var _ = Describe("Roles", func() {
 
 			Expect(client.ListRolesCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("role"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Role"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-role"))
 
 			Expect(items).To(HaveLen(1))

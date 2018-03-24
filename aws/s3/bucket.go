@@ -77,5 +77,5 @@ func (b Bucket) Name() string {
 }
 
 func (b Bucket) Type() string {
-	return "bucket"
+	return "S3 Bucket"
 }
