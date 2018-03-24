@@ -49,6 +49,7 @@ func (l *Logger) Println(message string) {
 	fmt.Fprintf(l.writer, "%s\n\n", message)
 }
 
+// TODO: Remove this function when PromptWithDetails is the only Prompt.
 // Please note that Prompt will block all other goroutines
 // attempting to print to this logger while
 // waiting for user input.
@@ -72,6 +73,10 @@ func (l *Logger) Prompt(message string) bool {
 	}
 
 	return true
+}
+
+func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
+	return l.Prompt(fmt.Sprintf("Are you sure you want to delete %s: %s?", resourceType, resourceName))
 }
 
 func (l *Logger) NoConfirm() {

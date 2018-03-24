@@ -27,7 +27,30 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 	}
 }
 
+func (e SecurityGroups) ListAll(filter string) ([]common.Deletable, error) {
+	return e.get(filter)
+}
+
 func (e SecurityGroups) List(filter string) ([]common.Deletable, error) {
+	resources, err := e.get(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var delete []common.Deletable
+	for _, r := range resources {
+		proceed := e.logger.PromptWithDetails(r.Type(), r.Name())
+		if !proceed {
+			continue
+		}
+
+		delete = append(delete, r)
+	}
+
+	return delete, nil
+}
+
+func (e SecurityGroups) get(filter string) ([]common.Deletable, error) {
 	output, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing security groups: %s", err)
@@ -42,11 +65,6 @@ func (e SecurityGroups) List(filter string) ([]common.Deletable, error) {
 		}
 
 		if !strings.Contains(resource.identifier, filter) {
-			continue
-		}
-
-		proceed := e.logger.Prompt(fmt.Sprintf("Are you sure you want to delete security group %s?", resource.identifier))
-		if !proceed {
 			continue
 		}
 

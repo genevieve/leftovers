@@ -25,6 +25,7 @@ import (
 
 type resource interface {
 	List(filter string) ([]common.Deletable, error)
+	ListAll(filter string) ([]common.Deletable, error)
 }
 
 type Leftovers struct {
@@ -33,22 +34,18 @@ type Leftovers struct {
 }
 
 func (l Leftovers) List(filter string) {
-	var deletables []common.Deletable
-
-	l.logger.NoConfirm()
-
+	var all []common.Deletable
 	for _, r := range l.resources {
-		list, err := r.List(filter)
-
+		list, err := r.ListAll(filter)
 		if err != nil {
 			l.logger.Println(err.Error())
 		}
 
-		deletables = append(deletables, list...)
+		all = append(all, list...)
 	}
 
-	for _, d := range deletables {
-		l.logger.Println(fmt.Sprintf("%s: %s", d.Type(), d.Name()))
+	for _, r := range all {
+		l.logger.Println(fmt.Sprintf("%s: %s", r.Type(), r.Name()))
 	}
 }
 
@@ -57,7 +54,6 @@ func (l Leftovers) Delete(filter string) error {
 
 	for _, r := range l.resources {
 		list, err := r.List(filter)
-
 		if err != nil {
 			l.logger.Println(err.Error())
 		}

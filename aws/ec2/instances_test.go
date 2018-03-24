@@ -22,7 +22,7 @@ var _ = Describe("Instances", func() {
 	BeforeEach(func() {
 		client = &fakes.InstancesClient{}
 		logger = &fakes.Logger{}
-		logger.PromptCall.Returns.Proceed = true
+		logger.PromptWithDetailsCall.Returns.Proceed = true
 
 		instances = ec2.NewInstances(client, logger)
 	})
@@ -51,11 +51,11 @@ var _ = Describe("Instances", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
-
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana-instance)?"))
+			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("instance"))
+			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-instance-id (Name:banana-instance)"))
 
 			Expect(items).To(HaveLen(1))
-			// Expect(items).To(HaveKeyWithValue("the-instance-id (Name:banana-instance)", "the-instance-id"))
 		})
 
 		Context("when the instance name does not contain the filter", func() {
@@ -64,8 +64,7 @@ var _ = Describe("Instances", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
-
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 
 				Expect(items).To(HaveLen(0))
 			})
@@ -88,10 +87,9 @@ var _ = Describe("Instances", func() {
 				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id?"))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 
 				Expect(items).To(HaveLen(1))
-				// Expect(items).To(HaveKeyWithValue("the-instance-id", "the-instance-id"))
 			})
 		})
 
@@ -112,10 +110,9 @@ var _ = Describe("Instances", func() {
 				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (KeyPairName:the-key-pair)?"))
+				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-instance-id (KeyPairName:the-key-pair)"))
 
 				Expect(items).To(HaveLen(1))
-				// Expect(items).To(HaveKeyWithValue("the-instance-id (KeyPairName:the-key-pair)", "the-instance-id"))
 			})
 		})
 
@@ -137,7 +134,7 @@ var _ = Describe("Instances", func() {
 
 				Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
 				Expect(client.TerminateInstancesCall.CallCount).To(Equal(0))
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(items).To(HaveLen(0))
 			})
 		})
@@ -155,14 +152,14 @@ var _ = Describe("Instances", func() {
 
 		Context("when the user responds no to the prompt", func() {
 			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
+				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
 
 			It("does not return it to the list", func() {
 				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to terminate instance the-instance-id (Name:banana-instance)?"))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 				Expect(items).To(HaveLen(0))
 			})
 		})

@@ -22,7 +22,7 @@ var _ = Describe("SecurityGroups", func() {
 	BeforeEach(func() {
 		client = &fakes.SecurityGroupsClient{}
 		logger = &fakes.Logger{}
-		logger.PromptCall.Returns.Proceed = true
+		logger.PromptWithDetailsCall.Returns.Proceed = true
 
 		securityGroups = ec2.NewSecurityGroups(client, logger)
 	})
@@ -45,11 +45,11 @@ var _ = Describe("SecurityGroups", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
-
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group?"))
+			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("security group"))
+			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group"))
 
 			Expect(items).To(HaveLen(1))
-			// Expect(items).To(HaveKeyWithValue("banana-group", "the-group-id"))
 		})
 
 		Context("when the client fails to describe security groups", func() {
@@ -69,7 +69,7 @@ var _ = Describe("SecurityGroups", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(items).To(HaveLen(0))
 			})
 		})
@@ -89,20 +89,20 @@ var _ = Describe("SecurityGroups", func() {
 				_, err := securityGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group (the-key:the-value)?"))
+				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group (the-key:the-value)"))
 			})
 		})
 
 		Context("when the user responds no to the prompt", func() {
 			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
+				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
 
 			It("does not delete the security group", func() {
 				items, err := securityGroups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete security group banana-group?"))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 				Expect(items).To(HaveLen(0))
 			})
 		})
