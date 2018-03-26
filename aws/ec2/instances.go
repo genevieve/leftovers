@@ -51,7 +51,7 @@ func (a Instances) List(filter string) ([]common.Deletable, error) {
 func (a Instances) get(filter string) ([]common.Deletable, error) {
 	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Describing instances: %s", err)
+		return nil, fmt.Errorf("Describing EC2 Instances: %s", err)
 	}
 
 	var resources []common.Deletable

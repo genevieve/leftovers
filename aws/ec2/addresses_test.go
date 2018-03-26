@@ -46,7 +46,7 @@ var _ = Describe("Addresses", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("address"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Address"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
@@ -86,7 +86,7 @@ var _ = Describe("Addresses", func() {
 
 			It("does not try releasing them", func() {
 				_, err := addresses.List(filter)
-				Expect(err).To(MatchError("Describing addresses: some error"))
+				Expect(err).To(MatchError("Describing EC2 Addresses: some error"))
 			})
 		})
 

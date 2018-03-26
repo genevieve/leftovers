@@ -52,7 +52,7 @@ var _ = Describe("Instances", func() {
 
 			Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("instance"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Instance"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-instance-id (Name:banana-instance)"))
 
 			Expect(items).To(HaveLen(1))
@@ -146,7 +146,7 @@ var _ = Describe("Instances", func() {
 
 			It("returns the error", func() {
 				_, err := instances.List(filter)
-				Expect(err).To(MatchError("Describing instances: some error"))
+				Expect(err).To(MatchError("Describing EC2 Instances: some error"))
 			})
 		})
 

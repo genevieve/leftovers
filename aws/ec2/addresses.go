@@ -50,7 +50,7 @@ func (d Addresses) List(filter string) ([]common.Deletable, error) {
 func (d Addresses) get(filter string) ([]common.Deletable, error) {
 	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Describing addresses: %s", err)
+		return nil, fmt.Errorf("Describing EC2 Addresses: %s", err)
 	}
 
 	var resources []common.Deletable
