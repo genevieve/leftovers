@@ -50,22 +50,42 @@ func (e SecurityGroups) List(filter string) ([]common.Deletable, error) {
 	return delete, nil
 }
 
-func (e SecurityGroups) get(filter string) ([]common.Deletable, error) {
-	output, err := e.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
+func (s SecurityGroups) get(filter string) ([]common.Deletable, error) {
+	output, err := s.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing security groups: %s", err)
 	}
 
 	var resources []common.Deletable
 	for _, sg := range output.SecurityGroups {
-		resource := NewSecurityGroup(e.client, sg.GroupId, sg.GroupName, sg.Tags, sg.IpPermissions, sg.IpPermissionsEgress)
+		resource := NewSecurityGroup(s.client, sg.GroupId, sg.GroupName, sg.Tags)
 
 		if *sg.GroupName == "default" {
 			continue
 		}
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
+		}
+
+		if len(sg.IpPermissions) > 0 {
+			_, err := s.client.RevokeSecurityGroupIngress(&awsec2.RevokeSecurityGroupIngressInput{
+				GroupId:       sg.GroupId,
+				IpPermissions: sg.IpPermissions,
+			})
+			if err != nil {
+				s.logger.Printf("ERROR revoking security group ingress for %s: %s\n", resource.Name(), err)
+			}
+		}
+
+		if len(sg.IpPermissionsEgress) > 0 {
+			_, err := s.client.RevokeSecurityGroupEgress(&awsec2.RevokeSecurityGroupEgressInput{
+				GroupId:       sg.GroupId,
+				IpPermissions: sg.IpPermissionsEgress,
+			})
+			if err != nil {
+				s.logger.Printf("ERROR revoking security group egress for %s: %s\n", resource.Name(), err)
+			}
 		}
 
 		resources = append(resources, resource)

@@ -4,7 +4,8 @@ import "fmt"
 
 type Logger struct {
 	PrintfCall struct {
-		Receives struct {
+		CallCount int
+		Receives  struct {
 			Message   string
 			Arguments []interface{}
 		}
@@ -24,6 +25,7 @@ type Logger struct {
 }
 
 func (l *Logger) Printf(message string, a ...interface{}) {
+	l.PrintfCall.CallCount++
 	l.PrintfCall.Receives.Message = message
 	l.PrintfCall.Receives.Arguments = a
 

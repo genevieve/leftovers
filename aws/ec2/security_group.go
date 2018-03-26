@@ -11,11 +11,9 @@ type SecurityGroup struct {
 	client     securityGroupsClient
 	id         *string
 	identifier string
-	ingress    []*awsec2.IpPermission
-	egress     []*awsec2.IpPermission
 }
 
-func NewSecurityGroup(client securityGroupsClient, id, groupName *string, tags []*awsec2.Tag, ingress []*awsec2.IpPermission, egress []*awsec2.IpPermission) SecurityGroup {
+func NewSecurityGroup(client securityGroupsClient, id, groupName *string, tags []*awsec2.Tag) SecurityGroup {
 	identifier := *groupName
 
 	var extra []string
@@ -31,18 +29,11 @@ func NewSecurityGroup(client securityGroupsClient, id, groupName *string, tags [
 		client:     client,
 		id:         id,
 		identifier: identifier,
-		ingress:    ingress,
-		egress:     egress,
 	}
 }
 
 func (s SecurityGroup) Delete() error {
-	err := s.revoke()
-	if err != nil {
-		return err
-	}
-
-	_, err = s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
+	_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{
 		GroupId: s.id,
 	})
 
@@ -59,28 +50,4 @@ func (s SecurityGroup) Name() string {
 
 func (s SecurityGroup) Type() string {
 	return "security group"
-}
-
-func (s SecurityGroup) revoke() error {
-	if len(s.ingress) > 0 {
-		_, err := s.client.RevokeSecurityGroupIngress(&awsec2.RevokeSecurityGroupIngressInput{
-			GroupId:       s.id,
-			IpPermissions: s.ingress,
-		})
-		if err != nil {
-			return fmt.Errorf("ERROR revoking security group ingress for %s: %s\n", s.identifier, err)
-		}
-	}
-
-	if len(s.egress) > 0 {
-		_, err := s.client.RevokeSecurityGroupEgress(&awsec2.RevokeSecurityGroupEgressInput{
-			GroupId:       s.id,
-			IpPermissions: s.egress,
-		})
-		if err != nil {
-			return fmt.Errorf("ERROR revoking security group egress for %s: %s\n", s.identifier, err)
-		}
-	}
-
-	return nil
 }
