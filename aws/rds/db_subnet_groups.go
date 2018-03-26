@@ -51,7 +51,7 @@ func (d DBSubnetGroups) List(filter string) ([]common.Deletable, error) {
 func (d DBSubnetGroups) get(filter string) ([]common.Deletable, error) {
 	dbSubnetGroups, err := d.client.DescribeDBSubnetGroups(&awsrds.DescribeDBSubnetGroupsInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Describing db subnet groups: %s", err)
+		return nil, fmt.Errorf("Describing RDS DB Subnet Groups: %s", err)
 	}
 
 	var resources []common.Deletable

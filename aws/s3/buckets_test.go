@@ -50,7 +50,7 @@ var _ = Describe("Buckets", func() {
 			Expect(manager.IsInRegionCall.CallCount).To(Equal(1))
 			Expect(manager.IsInRegionCall.Receives.Bucket).To(Equal("banana"))
 
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("bucket"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("S3 Bucket"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
@@ -63,7 +63,7 @@ var _ = Describe("Buckets", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				_, err := buckets.List(filter)
-				Expect(err).To(MatchError("Listing buckets: some error"))
+				Expect(err).To(MatchError("Listing S3 Buckets: some error"))
 			})
 		})
 

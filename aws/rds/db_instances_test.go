@@ -46,7 +46,7 @@ var _ = Describe("DBInstances", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBInstancesCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("db instance"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("RDS DB Instance"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
@@ -59,7 +59,7 @@ var _ = Describe("DBInstances", func() {
 
 			It("returns the error", func() {
 				_, err := dbInstances.List(filter)
-				Expect(err).To(MatchError("Describing db instances: some error"))
+				Expect(err).To(MatchError("Describing RDS DB Instances: some error"))
 			})
 		})
 

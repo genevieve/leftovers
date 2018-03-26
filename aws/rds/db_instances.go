@@ -51,7 +51,7 @@ func (d DBInstances) List(filter string) ([]common.Deletable, error) {
 func (d DBInstances) get(filter string) ([]common.Deletable, error) {
 	dbInstances, err := d.client.DescribeDBInstances(&awsrds.DescribeDBInstancesInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Describing db instances: %s", err)
+		return nil, fmt.Errorf("Describing RDS DB Instances: %s", err)
 	}
 
 	var resources []common.Deletable

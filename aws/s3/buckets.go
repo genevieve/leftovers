@@ -56,7 +56,7 @@ func (b Buckets) List(filter string) ([]common.Deletable, error) {
 func (b Buckets) get(filter string) ([]common.Deletable, error) {
 	buckets, err := b.client.ListBuckets(&awss3.ListBucketsInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Listing buckets: %s", err)
+		return nil, fmt.Errorf("Listing S3 Buckets: %s", err)
 	}
 
 	var resources []common.Deletable

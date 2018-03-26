@@ -45,7 +45,7 @@ var _ = Describe("DBSubnetGroups", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBSubnetGroupsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("db subnet group"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("RDS DB Subnet Group"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
@@ -58,7 +58,7 @@ var _ = Describe("DBSubnetGroups", func() {
 
 			It("returns the error", func() {
 				_, err := dbSubnetGroups.List(filter)
-				Expect(err).To(MatchError("Describing db subnet groups: some error"))
+				Expect(err).To(MatchError("Describing RDS DB Subnet Groups: some error"))
 			})
 		})
 
