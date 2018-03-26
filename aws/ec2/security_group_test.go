@@ -65,7 +65,7 @@ var _ = Describe("SecurityGroup", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.RevokeSecurityGroupIngressCall.CallCount).To(Equal(1))
-				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-name")))
+				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.GroupId).To(Equal(aws.String("the-id")))
 				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
 			})
 
@@ -94,7 +94,7 @@ var _ = Describe("SecurityGroup", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.RevokeSecurityGroupEgressCall.CallCount).To(Equal(1))
-				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.GroupId).To(Equal(aws.String("the-group-name")))
+				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.GroupId).To(Equal(aws.String("the-id")))
 				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
 			})
 
