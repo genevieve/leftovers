@@ -131,7 +131,7 @@ func (l Leftovers) Delete(filter string) error {
 		for _, r := range resources {
 			wg.Add(1)
 
-			go func(d common.Deletable) {
+			go func(r common.Deletable) {
 				defer wg.Done()
 
 				l.logger.Println(fmt.Sprintf("Deleting %s.", r.Name()))
@@ -142,7 +142,7 @@ func (l Leftovers) Delete(filter string) error {
 				} else {
 					l.logger.Println(fmt.Sprintf("SUCCESS deleting %s!", r.Name()))
 				}
-			}(d)
+			}(r)
 		}
 
 		wg.Wait()
