@@ -11,6 +11,7 @@ type TargetGroup struct {
 	name       *string
 	arn        *string
 	identifier string
+	rtype      string
 }
 
 func NewTargetGroup(client targetGroupsClient, name, arn *string) TargetGroup {
@@ -19,6 +20,7 @@ func NewTargetGroup(client targetGroupsClient, name, arn *string) TargetGroup {
 		name:       name,
 		arn:        arn,
 		identifier: *name,
+		rtype:      "ELBV2 Target Group",
 	}
 }
 
@@ -28,7 +30,7 @@ func (t TargetGroup) Delete() error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("FAILED deleting target group %s: %s", t.identifier, err)
+		return fmt.Errorf("FAILED deleting %s %s: %s", t.rtype, t.identifier, err)
 	}
 
 	return nil
@@ -39,5 +41,5 @@ func (t TargetGroup) Name() string {
 }
 
 func (t TargetGroup) Type() string {
-	return "target group"
+	return t.rtype
 }

@@ -45,7 +45,7 @@ var _ = Describe("LoadBalancers", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("load balancer"))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Elastic Load Balancer V2"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
@@ -58,7 +58,7 @@ var _ = Describe("LoadBalancers", func() {
 
 			It("returns the error", func() {
 				_, err := loadBalancers.List(filter)
-				Expect(err).To(MatchError("Describing load balancers: some error"))
+				Expect(err).To(MatchError("Describing Elastic Load Balancers V2: some error"))
 			})
 		})
 
