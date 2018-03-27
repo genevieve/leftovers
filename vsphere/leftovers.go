@@ -103,7 +103,6 @@ func NewLeftovers(logger logger, vCenterIP, vCenterUser, vCenterPassword, vCente
 	return Leftovers{
 		logger: logger,
 		resources: []resource{
-			NewVirtualMachines(client, logger),
 			NewFolders(client, logger),
 		},
 	}, nil
