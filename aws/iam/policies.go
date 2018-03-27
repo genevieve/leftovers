@@ -54,7 +54,7 @@ func (p Policies) List(filter string) ([]common.Deletable, error) {
 func (p Policies) getPolicies(filter string) ([]common.Deletable, error) {
 	policies, err := p.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
 	if err != nil {
-		return nil, fmt.Errorf("Listing policies: %s", err)
+		return nil, fmt.Errorf("Listing IAM Policies: %s", err)
 	}
 
 	var resources []common.Deletable
