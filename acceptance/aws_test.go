@@ -52,7 +52,7 @@ var _ = Describe("AWS", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("key pair: leftovers-dry-run"))
+			Expect(stdout.String()).To(ContainSubstring("EC2 Key Pair: leftovers-dry-run"))
 			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
 			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-dry-run."))
 			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run!"))
