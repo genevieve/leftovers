@@ -70,10 +70,10 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	return Leftovers{
 		logger: logger,
 		resources: []resource{
+			iam.NewInstanceProfiles(iamClient, logger),
 			iam.NewRoles(iamClient, logger, rolePolicies),
 			iam.NewUsers(iamClient, logger, userPolicies, accessKeys),
 			iam.NewPolicies(iamClient, logger),
-			iam.NewInstanceProfiles(iamClient, logger),
 			iam.NewServerCertificates(iamClient, logger),
 
 			ec2.NewAddresses(ec2Client, logger),
