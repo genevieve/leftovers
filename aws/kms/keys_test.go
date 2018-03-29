@@ -100,9 +100,8 @@ var _ = Describe("Keys", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Receives.Message).To(ContainSubstring("ERROR describing key"))
-				Expect(logger.PrintfCall.Receives.Arguments[0]).To(Equal("banana"))
-				Expect(logger.PrintfCall.Receives.Arguments[1]).To(MatchError("some error"))
+				Expect(logger.PrintfCall.Receives.Message).To(ContainSubstring("[WARNING] Describe key"))
+				Expect(logger.PrintfCall.Receives.Arguments[0]).To(MatchError("some error"))
 			})
 		})
 
@@ -116,9 +115,8 @@ var _ = Describe("Keys", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Receives.Message).To(ContainSubstring("ERROR listing tags for key"))
-				Expect(logger.PrintfCall.Receives.Arguments[0]).To(Equal("banana"))
-				Expect(logger.PrintfCall.Receives.Arguments[1]).To(MatchError("some error"))
+				Expect(logger.PrintfCall.Receives.Message).To(ContainSubstring("[WARNING] List resource tags"))
+				Expect(logger.PrintfCall.Receives.Arguments[0]).To(MatchError("some error"))
 			})
 		})
 

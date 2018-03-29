@@ -61,7 +61,7 @@ func (k Keys) get(filter string) ([]common.Deletable, error) {
 	for _, key := range keys.Keys {
 		metadata, err := k.client.DescribeKey(&awskms.DescribeKeyInput{KeyId: key.KeyId})
 		if err != nil {
-			k.logger.Printf("ERROR describing key %s: %s", *key.KeyId, err)
+			k.logger.Printf("[WARNING] Describe key: %s", err)
 		}
 
 		if metadata == nil || *metadata.KeyMetadata.KeyState != awskms.KeyStateEnabled {
@@ -70,7 +70,7 @@ func (k Keys) get(filter string) ([]common.Deletable, error) {
 
 		tags, err := k.client.ListResourceTags(&awskms.ListResourceTagsInput{KeyId: key.KeyId})
 		if err != nil {
-			k.logger.Printf("ERROR listing tags for key %s: %s", *key.KeyId, err)
+			k.logger.Printf("[WARNING] List resource tags: %s", err)
 		}
 
 		resource := NewKey(k.client, key.KeyId, metadata.KeyMetadata, tags.Tags)
