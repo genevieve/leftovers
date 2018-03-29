@@ -56,7 +56,7 @@ func (a Aliases) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, alias := range aliases.Aliases {
-		resource := NewAlias(a.client, alias.AliasArn, alias.AliasName)
+		resource := NewAlias(a.client, alias.AliasArn)
 
 		if !strings.Contains(resource.Name(), filter) {
 			continue

@@ -13,7 +13,7 @@ type Alias struct {
 	rtype      string
 }
 
-func NewAlias(client aliasesClient, name, arn *string) Alias {
+func NewAlias(client aliasesClient, name *string) Alias {
 	return Alias{
 		client:     client,
 		name:       name,
