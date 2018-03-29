@@ -92,6 +92,8 @@ Help Options:
   + s3 buckets
   + rds db instances
   + rds db subnet groups
+  + kms key aliases
+  - kms keys
   - iam group policies
   - ec2 eips
   ```
