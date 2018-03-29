@@ -28,7 +28,7 @@ func NewPolicies(client policiesClient, logger logger) Policies {
 	}
 }
 
-func (p Policies) ListAll(filter string) ([]common.Deletable, error) {
+func (p Policies) ListOnly(filter string) ([]common.Deletable, error) {
 	return p.getPolicies(filter)
 }
 

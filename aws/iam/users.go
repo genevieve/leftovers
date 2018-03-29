@@ -29,7 +29,7 @@ func NewUsers(client usersClient, logger logger, policies userPolicies, accessKe
 	}
 }
 
-func (u Users) ListAll(filter string) ([]common.Deletable, error) {
+func (u Users) ListOnly(filter string) ([]common.Deletable, error) {
 	return u.getUsers(filter)
 }
 

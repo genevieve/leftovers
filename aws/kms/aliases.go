@@ -25,7 +25,7 @@ func NewAliases(client aliasesClient, logger logger) Aliases {
 	}
 }
 
-func (a Aliases) ListAll(filter string) ([]common.Deletable, error) {
+func (a Aliases) ListOnly(filter string) ([]common.Deletable, error) {
 	return a.get(filter)
 }
 

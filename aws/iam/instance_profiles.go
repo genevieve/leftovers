@@ -26,7 +26,7 @@ func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceP
 	}
 }
 
-func (i InstanceProfiles) ListAll(filter string) ([]common.Deletable, error) {
+func (i InstanceProfiles) ListOnly(filter string) ([]common.Deletable, error) {
 	return i.get(filter)
 }
 

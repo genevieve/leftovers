@@ -35,7 +35,7 @@ func NewVpcs(client vpcsClient,
 	}
 }
 
-func (v Vpcs) ListAll(filter string) ([]common.Deletable, error) {
+func (v Vpcs) ListOnly(filter string) ([]common.Deletable, error) {
 	return v.get(filter)
 }
 

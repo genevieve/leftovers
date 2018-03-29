@@ -27,7 +27,7 @@ func NewRoles(client rolesClient, logger logger, policies rolePolicies) Roles {
 	}
 }
 
-func (r Roles) ListAll(filter string) ([]common.Deletable, error) {
+func (r Roles) ListOnly(filter string) ([]common.Deletable, error) {
 	return r.getRoles(filter)
 }
 

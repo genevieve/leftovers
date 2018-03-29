@@ -25,7 +25,7 @@ func NewTags(client tagsClient, logger logger) Tags {
 	}
 }
 
-func (a Tags) ListAll(filter string) ([]common.Deletable, error) {
+func (a Tags) ListOnly(filter string) ([]common.Deletable, error) {
 	return a.get(filter)
 }
 

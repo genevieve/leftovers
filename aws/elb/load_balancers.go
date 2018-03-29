@@ -26,7 +26,7 @@ func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	}
 }
 
-func (l LoadBalancers) ListAll(filter string) ([]common.Deletable, error) {
+func (l LoadBalancers) ListOnly(filter string) ([]common.Deletable, error) {
 	return l.get(filter)
 }
 

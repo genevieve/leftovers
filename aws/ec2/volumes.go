@@ -24,7 +24,7 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 	}
 }
 
-func (v Volumes) ListAll(filter string) ([]common.Deletable, error) {
+func (v Volumes) ListOnly(filter string) ([]common.Deletable, error) {
 	return v.get(filter)
 }
 

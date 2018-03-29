@@ -25,7 +25,7 @@ func NewNetworkInterfaces(client networkInterfacesClient, logger logger) Network
 	}
 }
 
-func (e NetworkInterfaces) ListAll(filter string) ([]common.Deletable, error) {
+func (e NetworkInterfaces) ListOnly(filter string) ([]common.Deletable, error) {
 	return e.get(filter)
 }
 

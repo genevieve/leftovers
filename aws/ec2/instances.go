@@ -25,7 +25,7 @@ func NewInstances(client instancesClient, logger logger) Instances {
 	}
 }
 
-func (a Instances) ListAll(filter string) ([]common.Deletable, error) {
+func (a Instances) ListOnly(filter string) ([]common.Deletable, error) {
 	return a.get(filter)
 }
 

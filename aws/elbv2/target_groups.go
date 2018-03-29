@@ -25,7 +25,7 @@ func NewTargetGroups(client targetGroupsClient, logger logger) TargetGroups {
 	}
 }
 
-func (t TargetGroups) ListAll(filter string) ([]common.Deletable, error) {
+func (t TargetGroups) ListOnly(filter string) ([]common.Deletable, error) {
 	return t.get(filter)
 }
 

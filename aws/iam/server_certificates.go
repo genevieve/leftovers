@@ -25,7 +25,7 @@ func NewServerCertificates(client serverCertificatesClient, logger logger) Serve
 	}
 }
 
-func (s ServerCertificates) ListAll(filter string) ([]common.Deletable, error) {
+func (s ServerCertificates) ListOnly(filter string) ([]common.Deletable, error) {
 	return s.getServerCertificates(filter)
 }
 

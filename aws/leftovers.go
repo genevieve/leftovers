@@ -27,7 +27,7 @@ import (
 
 type resource interface {
 	List(filter string) ([]common.Deletable, error)
-	ListAll(filter string) ([]common.Deletable, error)
+	ListOnly(filter string) ([]common.Deletable, error)
 }
 
 type Leftovers struct {
@@ -107,7 +107,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 func (l Leftovers) List(filter string) {
 	var all []common.Deletable
 	for _, r := range l.resources {
-		list, err := r.ListAll(filter)
+		list, err := r.ListOnly(filter)
 		if err != nil {
 			l.logger.Println(err.Error())
 		}

@@ -28,7 +28,7 @@ func NewKeys(client keysClient, logger logger) Keys {
 	}
 }
 
-func (k Keys) ListAll(filter string) ([]common.Deletable, error) {
+func (k Keys) ListOnly(filter string) ([]common.Deletable, error) {
 	return k.get(filter)
 }
 

@@ -27,7 +27,7 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 	}
 }
 
-func (e SecurityGroups) ListAll(filter string) ([]common.Deletable, error) {
+func (e SecurityGroups) ListOnly(filter string) ([]common.Deletable, error) {
 	return e.get(filter)
 }
 
