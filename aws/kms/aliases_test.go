@@ -39,7 +39,7 @@ var _ = Describe("Aliases", func() {
 			filter = "ban"
 		})
 
-		It("releases kms aliases", func() {
+		It("returns a list of kms aliases to delete", func() {
 			items, err := aliases.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -76,7 +76,7 @@ var _ = Describe("Aliases", func() {
 				client.ListAliasesCall.Returns.Error = errors.New("some error")
 			})
 
-			It("does not try releasing them", func() {
+			It("returns the error", func() {
 				_, err := aliases.List(filter)
 				Expect(err).To(MatchError("Listing KMS Aliases: some error"))
 			})
@@ -87,7 +87,7 @@ var _ = Describe("Aliases", func() {
 				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
 
-			It("does not release the alias", func() {
+			It("does not return it in the list", func() {
 				items, err := aliases.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 

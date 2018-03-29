@@ -64,7 +64,7 @@ func (k Keys) get(filter string) ([]common.Deletable, error) {
 			k.logger.Printf("ERROR describing key %s: %s", *key.KeyId, err)
 		}
 
-		if alreadyDeleted(metadata.KeyMetadata) {
+		if metadata == nil || *metadata.KeyMetadata.KeyState != awskms.KeyStateEnabled {
 			continue
 		}
 
@@ -83,14 +83,4 @@ func (k Keys) get(filter string) ([]common.Deletable, error) {
 	}
 
 	return resources, nil
-}
-
-func alreadyDeleted(metadata *awskms.KeyMetadata) bool {
-	if metadata == nil ||
-		*metadata.KeyState == awskms.KeyStatePendingDeletion ||
-		*metadata.KeyState == awskms.KeyStateDisabled {
-		return true
-	}
-
-	return false
 }
