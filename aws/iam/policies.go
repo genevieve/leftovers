@@ -59,7 +59,7 @@ func (p Policies) getPolicies(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, o := range policies.Policies {
-		resource := NewPolicy(p.client, o.PolicyName, o.Arn)
+		resource := NewPolicy(p.client, p.logger, o.PolicyName, o.Arn)
 
 		if !strings.Contains(resource.Name(), filter) {
 			continue

@@ -27,15 +27,12 @@ func NewRole(client rolesClient, policies rolePolicies, name *string) Role {
 func (r Role) Delete() error {
 	err := r.policies.Delete(*r.name)
 	if err != nil {
-		return fmt.Errorf("FAILED deleting policies for %s %s: %s", r.rtype, r.identifier, err)
+		return fmt.Errorf("Delete policies for %s %s: %s", r.rtype, r.identifier, err)
 	}
 
-	_, err = r.client.DeleteRole(&awsiam.DeleteRoleInput{
-		RoleName: r.name,
-	})
-
+	_, err = r.client.DeleteRole(&awsiam.DeleteRoleInput{RoleName: r.name})
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", r.rtype, r.identifier, err)
+		return fmt.Errorf("Delete %s %s: %s", r.rtype, r.identifier, err)
 	}
 
 	return nil

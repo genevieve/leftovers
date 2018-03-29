@@ -33,7 +33,7 @@ func NewRolePolicies(client rolePoliciesClient, logger logger) RolePolicies {
 func (o RolePolicies) Delete(roleName string) error {
 	attachedPolicies, err := o.client.ListAttachedRolePolicies(&awsiam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)})
 	if err != nil {
-		return fmt.Errorf("Listing IAM Attached Role Policies: %s", err)
+		return fmt.Errorf("List IAM Attached Role Policies: %s", err)
 	}
 
 	for _, p := range attachedPolicies.AttachedPolicies {
@@ -44,9 +44,9 @@ func (o RolePolicies) Delete(roleName string) error {
 			PolicyArn: p.PolicyArn,
 		})
 		if err == nil {
-			o.logger.Printf("SUCCESS detaching IAM Role Policy %s for IAM Role %s!\n", n, roleName)
+			o.logger.Printf("[INFO] Detached IAM Role Policy %s for IAM Role %s\n", n, roleName)
 		} else {
-			o.logger.Printf("ERROR detaching IAM Role Policy %s for IAM Role %s: %s\n", n, roleName, err)
+			o.logger.Printf("[WARNING] Detach IAM Role Policy %s for IAM Role %s: %s\n", n, roleName, err)
 		}
 
 		_, err = o.client.DeleteRolePolicy(&awsiam.DeleteRolePolicyInput{
@@ -54,15 +54,15 @@ func (o RolePolicies) Delete(roleName string) error {
 			PolicyName: p.PolicyName,
 		})
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting IAM Role Policy %s for IAM Role %s!\n", n, roleName)
+			o.logger.Printf("[INFO] Deleted IAM Role Policy %s for IAM Role %s\n", n, roleName)
 		} else {
-			o.logger.Printf("ERROR deleting IAM Role Policy %s for IAM Role %s: %s\n", n, roleName, err)
+			o.logger.Printf("[WARNING] Delete IAM Role Policy %s for IAM Role %s: %s\n", n, roleName, err)
 		}
 	}
 
 	policies, err := o.client.ListRolePolicies(&awsiam.ListRolePoliciesInput{RoleName: aws.String(roleName)})
 	if err != nil {
-		return fmt.Errorf("Listing IAM Role Policies: %s", err)
+		return fmt.Errorf("List IAM Role Policies: %s", err)
 	}
 
 	for _, p := range policies.PolicyNames {
@@ -73,9 +73,9 @@ func (o RolePolicies) Delete(roleName string) error {
 			PolicyName: p,
 		})
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting IAM Role Policy %s for IAM Role %s!\n", n, roleName)
+			o.logger.Printf("[INFO] Deleted IAM Role Policy %s for IAM Role %s\n", n, roleName)
 		} else {
-			o.logger.Printf("ERROR deleting IAM Role Policy %s for IAM Role %s: %s\n", n, roleName, err)
+			o.logger.Printf("[WARNING] Delete IAM Role Policy %s for IAM Role %s: %s\n", n, roleName, err)
 		}
 	}
 
