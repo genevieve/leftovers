@@ -18,6 +18,7 @@ type LoadBalancers struct {
 	logger logger
 }
 
+//TODO: Remove unused logger
 func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	return LoadBalancers{
 		client: client,
@@ -58,7 +59,7 @@ func (l LoadBalancers) get(filter string) ([]common.Deletable, error) {
 	for _, lb := range loadBalancers.LoadBalancerDescriptions {
 		resource := NewLoadBalancer(l.client, lb.LoadBalancerName)
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
 		}
 

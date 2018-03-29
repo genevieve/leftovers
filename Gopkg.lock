@@ -21,7 +21,7 @@
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
-  packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/ec2query","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/restxml","private/protocol/xml/xmlutil","service/ec2","service/elb","service/elbv2","service/iam","service/rds","service/s3","service/s3/s3iface","service/s3/s3manager","service/sts"]
+  packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/ec2query","private/protocol/json/jsonutil","private/protocol/jsonrpc","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/restxml","private/protocol/xml/xmlutil","service/ec2","service/elb","service/elbv2","service/iam","service/kms","service/rds","service/s3","service/s3/s3iface","service/s3/s3manager","service/sts"]
   revision = "66ca5909f9d7ee2253b756ece0aa3c4970ce04e1"
   version = "v1.12.43"
 
@@ -117,6 +117,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2a3df26d177d668be24053798ac130318fae79f4dcabf833df4589da6501bc8e"
+  inputs-digest = "39037686e009eb5aba7edf72b8d2a4599fe78b4a892a4a2cf87e5013cd122896"
   solver-name = "gps-cdcl"
   solver-version = 1
