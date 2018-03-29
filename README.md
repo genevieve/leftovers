@@ -93,7 +93,7 @@ Help Options:
   + rds db instances
   + rds db subnet groups
   + kms key aliases
-  - kms keys
+  + kms keys
   - iam group policies
   - ec2 eips
   ```
