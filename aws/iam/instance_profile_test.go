@@ -45,7 +45,7 @@ var _ = Describe("InstanceProfile", func() {
 
 			It("returns the error", func() {
 				err := instanceProfile.Delete()
-				Expect(err).To(MatchError("FAILED deleting IAM Instance Profile the-name: banana"))
+				Expect(err).To(MatchError("Delete IAM Instance Profile the-name: banana"))
 			})
 		})
 
@@ -64,7 +64,7 @@ var _ = Describe("InstanceProfile", func() {
 				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.RoleName).To(Equal(aws.String("the-role")))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"SUCCESS removing role the-role from IAM Instance Profile the-name (Role:the-role)\n",
+					"[INFO] Removed role the-role from IAM Instance Profile the-name (Role:the-role)\n",
 				}))
 			})
 
@@ -73,9 +73,13 @@ var _ = Describe("InstanceProfile", func() {
 					client.RemoveRoleFromInstanceProfileCall.Returns.Error = errors.New("some error")
 				})
 
-				It("logs the error and returns the profile in the list", func() {
+				It("logs the error", func() {
 					err := instanceProfile.Delete()
-					Expect(err).To(MatchError("ERROR removing role the-role from IAM Instance Profile the-name (Role:the-role): some error\n"))
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(logger.PrintfCall.Messages).To(Equal([]string{
+						"[WARNING] Remove role the-role from IAM Instance Profile the-name (Role:the-role): some error\n",
+					}))
 				})
 			})
 		})
@@ -88,7 +92,7 @@ var _ = Describe("InstanceProfile", func() {
 	})
 
 	Describe("Type", func() {
-		It("returns \"instance profile\"", func() {
+		It("returns the type", func() {
 			Expect(instanceProfile.Type()).To(Equal("IAM Instance Profile"))
 		})
 	})

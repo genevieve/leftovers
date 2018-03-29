@@ -52,7 +52,7 @@ func (i InstanceProfiles) List(filter string) ([]common.Deletable, error) {
 func (i InstanceProfiles) get(filter string) ([]common.Deletable, error) {
 	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Listing IAM Instance Profiles: %s", err)
+		return nil, fmt.Errorf("List IAM Instance Profiles: %s", err)
 	}
 
 	var resources []common.Deletable

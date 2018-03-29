@@ -47,18 +47,15 @@ func (i InstanceProfile) Delete() error {
 			RoleName:            r.RoleName,
 		})
 		if err == nil {
-			i.logger.Printf("SUCCESS removing role %s from %s %s\n", role, i.rtype, i.identifier)
+			i.logger.Printf("[INFO] Removed role %s from %s %s\n", role, i.rtype, i.identifier)
 		} else {
-			return fmt.Errorf("ERROR removing role %s from %s %s: %s\n", role, i.rtype, i.identifier, err)
+			i.logger.Printf("[WARNING] Remove role %s from %s %s: %s\n", role, i.rtype, i.identifier, err)
 		}
 	}
 
-	_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{
-		InstanceProfileName: i.name,
-	})
-
+	_, err := i.client.DeleteInstanceProfile(&awsiam.DeleteInstanceProfileInput{InstanceProfileName: i.name})
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", i.rtype, i.identifier, err)
+		return fmt.Errorf("Delete %s %s: %s", i.rtype, i.identifier, err)
 	}
 
 	return nil

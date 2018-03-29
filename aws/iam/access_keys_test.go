@@ -47,7 +47,7 @@ var _ = Describe("AccessKeys", func() {
 			Expect(client.DeleteAccessKeyCall.Receives.Input.AccessKeyId).To(Equal(aws.String("banana")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting access key banana\n",
+				"[INFO] Deleted access key banana\n",
 			}))
 		})
 
@@ -58,7 +58,7 @@ var _ = Describe("AccessKeys", func() {
 
 			It("returns the error", func() {
 				err := accessKeys.Delete("banana")
-				Expect(err).To(MatchError("Listing access keys: some error"))
+				Expect(err).To(MatchError("List access keys: some error"))
 			})
 		})
 
@@ -72,7 +72,7 @@ var _ = Describe("AccessKeys", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting access key banana: some error\n",
+					"[WARNING] Delete access key banana: some error\n",
 				}))
 			})
 		})
