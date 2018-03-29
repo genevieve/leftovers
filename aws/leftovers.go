@@ -99,6 +99,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			iam.NewServerCertificates(iamClient, logger),
 
 			kms.NewAliases(kmsClient, logger),
+			kms.NewKeys(kmsClient, logger),
 		},
 	}, nil
 }
