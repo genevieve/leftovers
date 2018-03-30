@@ -36,12 +36,14 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	l.PrintfCall.Messages = append(l.PrintfCall.Messages, fmt.Sprintf(message, a...))
 }
 
+func (l *Logger) Prompt(message string) bool {
+	l.PromptCall.Receives.Message = message
+
+	return l.PromptCall.Returns.Proceed
+}
+
 func (l *Logger) Println(message string) {
 	l.PrintfCall.Receives.Message = message
 
 	l.PrintfCall.Messages = append(l.PrintfCall.Messages, message)
-}
-
-func (l *Logger) NoConfirm() {
-	l.NoConfirmCall.CallCount++
 }
