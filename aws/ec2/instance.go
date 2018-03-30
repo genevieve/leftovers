@@ -8,13 +8,14 @@ import (
 )
 
 type Instance struct {
-	client     instancesClient
-	id         *string
-	identifier string
-	rtype      string
+	client       instancesClient
+	resourceTags resourceTags
+	id           *string
+	identifier   string
+	rtype        string
 }
 
-func NewInstance(client instancesClient, id, keyName *string, tags []*awsec2.Tag) Instance {
+func NewInstance(client instancesClient, resourceTags resourceTags, id, keyName *string, tags []*awsec2.Tag) Instance {
 	identifier := *id
 
 	extra := []string{}
@@ -31,10 +32,11 @@ func NewInstance(client instancesClient, id, keyName *string, tags []*awsec2.Tag
 	}
 
 	return Instance{
-		client:     client,
-		id:         id,
-		identifier: identifier,
-		rtype:      "EC2 Instance",
+		client:       client,
+		resourceTags: resourceTags,
+		id:           id,
+		identifier:   identifier,
+		rtype:        "EC2 Instance",
 	}
 }
 
@@ -44,7 +46,10 @@ func (i Instance) Delete() error {
 		return fmt.Errorf("Terminate: %s", err)
 	}
 
-	// TODO: Delete tags
+	err = i.resourceTags.Delete("instance", *i.id)
+	if err != nil {
+		return fmt.Errorf("Delete resource tags: %s", err)
+	}
 
 	return nil
 }

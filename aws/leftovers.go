@@ -85,7 +85,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 
 			ec2.NewAddresses(ec2Client, logger),
 			ec2.NewKeyPairs(ec2Client, logger),
-			ec2.NewInstances(ec2Client, logger),
+			ec2.NewInstances(ec2Client, logger, resourceTags),
 			ec2.NewSecurityGroups(ec2Client, logger),
 			ec2.NewTags(ec2Client, logger),
 			ec2.NewVolumes(ec2Client, logger),
