@@ -41,7 +41,7 @@ var _ = Describe("Alias", func() {
 
 			It("returns the error", func() {
 				err := alias.Delete()
-				Expect(err).To(MatchError("FAILED deleting KMS Alias the-name: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 	})

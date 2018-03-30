@@ -41,12 +41,12 @@ func NewKey(client keysClient, id *string, metadata *awskms.KeyMetadata, tags []
 func (k Key) Delete() error {
 	_, err := k.client.DisableKey(&awskms.DisableKeyInput{KeyId: k.name})
 	if err != nil {
-		return fmt.Errorf("FAILED disabling %s %s: %s", k.rtype, k.identifier, err)
+		return fmt.Errorf("Disable: %s", err)
 	}
 
 	_, err = k.client.ScheduleKeyDeletion(&awskms.ScheduleKeyDeletionInput{KeyId: k.name})
 	if err != nil {
-		return fmt.Errorf("FAILED scheduling deletion of %s %s: %s", k.rtype, k.identifier, err)
+		return fmt.Errorf("Schedule deletion: %s", err)
 	}
 
 	return nil

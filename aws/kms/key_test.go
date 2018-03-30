@@ -48,7 +48,7 @@ var _ = Describe("Key", func() {
 
 			It("returns the error", func() {
 				err := key.Delete()
-				Expect(err).To(MatchError("FAILED disabling KMS Key the-id: banana"))
+				Expect(err).To(MatchError("Disable: banana"))
 			})
 		})
 
@@ -59,7 +59,7 @@ var _ = Describe("Key", func() {
 
 			It("returns the error", func() {
 				err := key.Delete()
-				Expect(err).To(MatchError("FAILED scheduling deletion of KMS Key the-id: banana"))
+				Expect(err).To(MatchError("Schedule deletion: banana"))
 			})
 		})
 	})

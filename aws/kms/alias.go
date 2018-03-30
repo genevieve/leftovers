@@ -25,7 +25,7 @@ func NewAlias(client aliasesClient, name *string) Alias {
 func (a Alias) Delete() error {
 	_, err := a.client.DeleteAlias(&awskms.DeleteAliasInput{AliasName: a.name})
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", a.rtype, a.identifier, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil
