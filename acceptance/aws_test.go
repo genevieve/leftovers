@@ -52,11 +52,9 @@ var _ = Describe("AWS", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("EC2 Key Pair: leftovers-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-dry-run."))
-			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run!"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair leftovers-dry-run"))
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: leftovers-dry-run]"))
+			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: leftovers-acceptance] Deleted!"))
 		})
 	})
 
@@ -70,9 +68,8 @@ var _ = Describe("AWS", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("Deleting leftovers-acceptance."))
-			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting key pair leftovers-acceptance"))
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: leftovers-acceptance] Deleted!"))
 		})
 	})
 })
