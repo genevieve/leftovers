@@ -50,10 +50,8 @@ var _ = Describe("Azure", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("resource group: leftovers-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
-			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting resource group"))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: leftovers-dry-run]"))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: leftovers-acceptance] Deleting..."))
 		})
 	})
 
@@ -67,8 +65,8 @@ var _ = Describe("Azure", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED deleting resource group"))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: leftovers-acceptance] Deleted!"))
 		})
 	})
 })
