@@ -39,7 +39,7 @@ func (n InternetGateways) Delete(vpcId string) error {
 		}},
 	})
 	if err != nil {
-		return fmt.Errorf("Describing EC2 Internet Gateways: %s", err)
+		return fmt.Errorf("Describe EC2 Internet Gateways: %s", err)
 	}
 
 	for _, i := range igws.InternetGateways {
@@ -50,18 +50,18 @@ func (n InternetGateways) Delete(vpcId string) error {
 			VpcId:             aws.String(vpcId),
 		})
 		if err == nil {
-			n.logger.Printf("SUCCESS detaching %s %s\n", n.rtype, igwId)
+			n.logger.Printf("[INFO] Detached %s %s\n", n.rtype, igwId)
 		} else {
-			n.logger.Printf("ERROR detaching %s %s: %s\n", n.rtype, igwId, err)
+			n.logger.Printf("[WARNING] Detach %s %s: %s\n", n.rtype, igwId, err)
 		}
 
 		_, err = n.client.DeleteInternetGateway(&awsec2.DeleteInternetGatewayInput{
 			InternetGatewayId: i.InternetGatewayId,
 		})
 		if err == nil {
-			n.logger.Printf("SUCCESS deleting %s %s\n", n.rtype, igwId)
+			n.logger.Printf("[INFO] Deleted %s %s\n", n.rtype, igwId)
 		} else {
-			n.logger.Printf("ERROR deleting %s %s: %s\n", n.rtype, igwId, err)
+			n.logger.Printf("[WARNING] Delete %s %s: %s\n", n.rtype, igwId, err)
 		}
 	}
 

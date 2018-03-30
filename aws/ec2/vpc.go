@@ -49,25 +49,22 @@ func NewVpc(client vpcsClient,
 func (v Vpc) Delete() error {
 	err := v.routes.Delete(*v.id)
 	if err != nil {
-		return fmt.Errorf("FAILED deleting routes for %s %s: %s", v.rtype, v.identifier, err)
+		return fmt.Errorf("Delete routes for %s %s: %s", v.rtype, v.identifier, err)
 	}
 
 	err = v.subnets.Delete(*v.id)
 	if err != nil {
-		return fmt.Errorf("FAILED deleting subnets for %s %s: %s", v.rtype, v.identifier, err)
+		return fmt.Errorf("Delete subnets for %s %s: %s", v.rtype, v.identifier, err)
 	}
 
 	err = v.gateways.Delete(*v.id)
 	if err != nil {
-		return fmt.Errorf("FAILED deleting internet gateways for %s %s: %s", v.rtype, v.identifier, err)
+		return fmt.Errorf("Delete internet gateways for %s %s: %s", v.rtype, v.identifier, err)
 	}
 
-	_, err = v.client.DeleteVpc(&awsec2.DeleteVpcInput{
-		VpcId: v.id,
-	})
-
+	_, err = v.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: v.id})
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", v.rtype, v.identifier, err)
+		return fmt.Errorf("Delete %s %s: %s", v.rtype, v.identifier, err)
 	}
 
 	return nil

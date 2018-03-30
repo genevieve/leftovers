@@ -37,7 +37,7 @@ func (u RouteTables) Delete(vpcId string) error {
 		}},
 	})
 	if err != nil {
-		return fmt.Errorf("Describing route tables: %s", err)
+		return fmt.Errorf("Describe EC2 Route Tables: %s", err)
 	}
 
 	for _, r := range routeTables.RouteTables {
@@ -51,26 +51,21 @@ func (u RouteTables) Delete(vpcId string) error {
 		}
 
 		for _, a := range r.Associations {
-			_, err = u.client.DisassociateRouteTable(&awsec2.DisassociateRouteTableInput{
-				AssociationId: a.RouteTableAssociationId,
-			})
+			_, err = u.client.DisassociateRouteTable(&awsec2.DisassociateRouteTableInput{AssociationId: a.RouteTableAssociationId})
 			if err == nil {
-				u.logger.Printf("SUCCESS disassociating route table %s\n", n)
+				u.logger.Printf("[INFO] Disassociated route table %s\n", n)
 			} else {
-				u.logger.Printf("ERROR disassociating route table %s: %s\n", n, err)
+				u.logger.Printf("[WARNING] Disassociate route table %s: %s\n", n, err)
 			}
 		}
 
-		_, err = u.client.DeleteRouteTable(&awsec2.DeleteRouteTableInput{
-			RouteTableId: r.RouteTableId,
-		})
+		_, err = u.client.DeleteRouteTable(&awsec2.DeleteRouteTableInput{RouteTableId: r.RouteTableId})
 		if err == nil {
-			u.logger.Printf("SUCCESS deleting route table %s\n", n)
+			u.logger.Printf("[INFO] Deleted route table %s\n", n)
 		} else {
-			u.logger.Printf("ERROR deleting route table %s: %s\n", n, err)
+			u.logger.Printf("[WARNING] Delete route table %s: %s\n", n, err)
 		}
 	}
 
 	return nil
-
 }

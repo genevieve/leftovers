@@ -39,12 +39,9 @@ func NewInstance(client instancesClient, id, keyName *string, tags []*awsec2.Tag
 }
 
 func (i Instance) Delete() error {
-	_, err := i.client.TerminateInstances(&awsec2.TerminateInstancesInput{
-		InstanceIds: []*string{i.id},
-	})
-
+	_, err := i.client.TerminateInstances(&awsec2.TerminateInstancesInput{InstanceIds: []*string{i.id}})
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", i.rtype, i.identifier, err)
+		return fmt.Errorf("Delete %s %s: %s", i.rtype, i.identifier, err)
 	}
 
 	return nil

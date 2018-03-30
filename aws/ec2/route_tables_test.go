@@ -48,7 +48,7 @@ var _ = Describe("RouteTables", func() {
 			Expect(client.DeleteRouteTableCall.Receives.Input.RouteTableId).To(Equal(aws.String("the-route-table-id")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"SUCCESS deleting route table the-route-table-id\n",
+				"[INFO] Deleted route table the-route-table-id\n",
 			}))
 		})
 
@@ -59,7 +59,7 @@ var _ = Describe("RouteTables", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				err := routeTables.Delete("banana")
-				Expect(err).To(MatchError("Describing route tables: some error"))
+				Expect(err).To(MatchError("Describe EC2 Route Tables: some error"))
 
 				Expect(client.DeleteRouteTableCall.CallCount).To(Equal(0))
 			})
@@ -91,8 +91,8 @@ var _ = Describe("RouteTables", func() {
 				Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"SUCCESS disassociating route table the-route-table-id\n",
-					"SUCCESS deleting route table the-route-table-id\n",
+					"[INFO] Disassociated route table the-route-table-id\n",
+					"[INFO] Deleted route table the-route-table-id\n",
 				}))
 			})
 
@@ -134,8 +134,8 @@ var _ = Describe("RouteTables", func() {
 
 					Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
 					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"ERROR disassociating route table the-route-table-id: some error\n",
-						"SUCCESS deleting route table the-route-table-id\n",
+						"[WARNING] Disassociate route table the-route-table-id: some error\n",
+						"[INFO] Deleted route table the-route-table-id\n",
 					}))
 				})
 			})
@@ -151,7 +151,7 @@ var _ = Describe("RouteTables", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"ERROR deleting route table the-route-table-id: some error\n",
+					"[WARNING] Delete route table the-route-table-id: some error\n",
 				}))
 			})
 		})

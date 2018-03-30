@@ -45,7 +45,7 @@ var _ = Describe("SecurityGroup", func() {
 
 			It("returns the error", func() {
 				err := securityGroup.Delete()
-				Expect(err).To(MatchError("FAILED deleting EC2 Security Group the-group-name: banana"))
+				Expect(err).To(MatchError("Delete EC2 Security Group the-group-name: banana"))
 			})
 		})
 	})

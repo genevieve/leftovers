@@ -111,7 +111,7 @@ var _ = Describe("Vpcs", func() {
 
 			It("returns the error", func() {
 				_, err := vpcs.List(filter)
-				Expect(err).To(MatchError("Describing EC2 VPCs: some error"))
+				Expect(err).To(MatchError("Describe EC2 VPCs: some error"))
 			})
 		})
 

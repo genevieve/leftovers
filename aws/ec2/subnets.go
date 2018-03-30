@@ -38,18 +38,17 @@ func (u Subnets) Delete(vpcId string) error {
 		}},
 	})
 	if err != nil {
-		return fmt.Errorf("Describing EC2 Subnets: %s", err)
+		return fmt.Errorf("Describe EC2 Subnets: %s", err)
 	}
 
 	for _, s := range subnets.Subnets {
 		n := *s.SubnetId
 
 		_, err = u.client.DeleteSubnet(&awsec2.DeleteSubnetInput{SubnetId: s.SubnetId})
-
 		if err == nil {
-			u.logger.Printf("SUCCESS deleting %s %s\n", u.rtype, n)
+			u.logger.Printf("[INFO] Deleted %s %s\n", u.rtype, n)
 		} else {
-			u.logger.Printf("ERROR deleting %s %s: %s\n", u.rtype, n, err)
+			u.logger.Printf("[WARNING] Delete %s %s: %s\n", u.rtype, n, err)
 		}
 	}
 
