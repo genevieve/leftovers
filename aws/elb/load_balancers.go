@@ -51,7 +51,7 @@ func (l LoadBalancers) List(filter string) ([]common.Deletable, error) {
 func (l LoadBalancers) get(filter string) ([]common.Deletable, error) {
 	loadBalancers, err := l.client.DescribeLoadBalancers(&awselb.DescribeLoadBalancersInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Describe Elastic Load Balancers: %s", err)
+		return nil, fmt.Errorf("Describe ELB Load Balancers: %s", err)
 	}
 
 	var resources []common.Deletable

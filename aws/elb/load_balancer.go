@@ -18,7 +18,7 @@ func NewLoadBalancer(client loadBalancersClient, name *string) LoadBalancer {
 		client:     client,
 		name:       name,
 		identifier: *name,
-		rtype:      "Elastic Load Balancer",
+		rtype:      "ELB Load Balancer",
 	}
 }
 

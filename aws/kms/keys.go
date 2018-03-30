@@ -59,19 +59,12 @@ func (k Keys) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, key := range keys.Keys {
-		metadata, err := k.client.DescribeKey(&awskms.DescribeKeyInput{KeyId: key.KeyId})
-		if err != nil {
-			k.logger.Printf("[KMS Key: %s] Describe key: %s", *key.KeyId, err)
-		}
-
+		metadata, _ := k.client.DescribeKey(&awskms.DescribeKeyInput{KeyId: key.KeyId})
 		if metadata == nil || *metadata.KeyMetadata.KeyState != awskms.KeyStateEnabled {
 			continue
 		}
 
-		tags, err := k.client.ListResourceTags(&awskms.ListResourceTagsInput{KeyId: key.KeyId})
-		if err != nil {
-			k.logger.Printf("[KMS Key: %s] List resource tags: %s", *key.KeyId, err)
-		}
+		tags, _ := k.client.ListResourceTags(&awskms.ListResourceTagsInput{KeyId: key.KeyId})
 
 		resource := NewKey(k.client, key.KeyId, metadata.KeyMetadata, tags.Tags)
 

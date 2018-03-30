@@ -20,7 +20,7 @@ func NewLoadBalancer(client loadBalancersClient, name, arn *string) LoadBalancer
 		name:       name,
 		arn:        arn,
 		identifier: *name,
-		rtype:      "Elastic Load Balancer V2",
+		rtype:      "ELBV2 Load Balancer",
 	}
 }
 

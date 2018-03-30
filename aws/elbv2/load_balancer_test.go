@@ -56,7 +56,7 @@ var _ = Describe("LoadBalancer", func() {
 
 	Describe("Type", func() {
 		It("returns \"load balancer\"", func() {
-			Expect(loadBalancer.Type()).To(Equal("Elastic Load Balancer V2"))
+			Expect(loadBalancer.Type()).To(Equal("ELBV2 Load Balancer"))
 		})
 	})
 })

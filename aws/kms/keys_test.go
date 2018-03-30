@@ -95,13 +95,9 @@ var _ = Describe("Keys", func() {
 				client.DescribeKeyCall.Returns.Error = errors.New("some error")
 			})
 
-			It("logs the error", func() {
+			It("ignores the error", func() {
 				_, err := keys.List(filter)
 				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Receives.Message).To(ContainSubstring("[KMS Key: %s] Describe key"))
-				Expect(logger.PrintfCall.Receives.Arguments[1]).To(MatchError("some error"))
 			})
 		})
 
@@ -110,13 +106,9 @@ var _ = Describe("Keys", func() {
 				client.ListResourceTagsCall.Returns.Error = errors.New("some error")
 			})
 
-			It("logs the error", func() {
+			It("ignores the error", func() {
 				_, err := keys.List(filter)
 				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Receives.Message).To(ContainSubstring("[KMS Key: %s] List resource tags"))
-				Expect(logger.PrintfCall.Receives.Arguments[1]).To(MatchError("some error"))
 			})
 		})
 
