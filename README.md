@@ -1,4 +1,4 @@
-# Leftovers
+# Leftovers :turkey:
 
 Go cli/library for cleaning up **orphaned IAAS resources**.
 
