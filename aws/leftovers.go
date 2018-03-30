@@ -116,7 +116,7 @@ func (l Leftovers) List(filter string) {
 	}
 
 	for _, r := range all {
-		l.logger.Println(fmt.Sprintf("%s: %s", r.Type(), r.Name()))
+		l.logger.Println(fmt.Sprintf("[%s: %s]", r.Type(), r.Name()))
 	}
 }
 
@@ -141,13 +141,14 @@ func (l Leftovers) Delete(filter string) error {
 			go func(r common.Deletable) {
 				defer wg.Done()
 
-				l.logger.Println(fmt.Sprintf("Deleting %s.", r.Name()))
+				//TODO: Create a prefixed logger
+				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", r.Type(), r.Name()))
 
 				err := r.Delete()
 				if err != nil {
-					l.logger.Println(err.Error())
+					l.logger.Println(fmt.Sprintf("[%s: %s] %s", r.Type(), r.Name(), err.Error()))
 				} else {
-					l.logger.Println(fmt.Sprintf("SUCCESS deleting %s!", r.Name()))
+					l.logger.Println(fmt.Sprintf("[%s: %s] Deleted!", r.Type(), r.Name()))
 				}
 			}(r)
 		}
