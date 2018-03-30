@@ -20,22 +20,18 @@ type Leftovers struct {
 }
 
 func (l Leftovers) List(filter string) {
-	var deletables []Deletable
-
-	l.logger.NoConfirm()
-
+	var all []Deletable
 	for _, r := range l.resources {
 		list, err := r.List(filter)
-
 		if err != nil {
 			l.logger.Println(err.Error())
 		}
 
-		deletables = append(deletables, list...)
+		all = append(all, list...)
 	}
 
-	for _, d := range deletables {
-		l.logger.Println(fmt.Sprintf("%s: %s", d.Type(), d.Name()))
+	for _, r := range all {
+		l.logger.Println(fmt.Sprintf("[%s: %s]", r.Type(), r.Name()))
 	}
 }
 
@@ -52,14 +48,13 @@ func (l Leftovers) Delete(filter string) error {
 	}
 
 	for _, d := range deletables {
-		l.logger.Println(fmt.Sprintf("Deleting %s.", d.Name()))
+		l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
 
 		err := d.Delete()
-
 		if err != nil {
 			l.logger.Println(err.Error())
 		} else {
-			l.logger.Printf("SUCCESS deleting %s!\n", d.Name())
+			l.logger.Printf("[%s: %s] Deleted!\n", d.Type(), d.Name())
 		}
 	}
 

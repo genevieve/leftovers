@@ -51,10 +51,8 @@ var _ = Describe("vSphere", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("folder: leftovers-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
-			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
+			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-dry-run]"))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
 		})
 	})
 
@@ -67,8 +65,8 @@ var _ = Describe("vSphere", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting leftovers-acceptance!"))
-			Expect(stdout.String()).NotTo(ContainSubstring("FAILED"))
+			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleted!"))
 		})
 	})
 })
