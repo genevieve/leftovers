@@ -35,7 +35,7 @@ var _ = Describe("Tags", func() {
 				Tags: []*awsec2.TagDescription{{
 					Key:        aws.String("the-key"),
 					Value:      aws.String("banana-tag"),
-					ResourceId: aws.String("the-resource-id"),
+					ResourceId: aws.String(""),
 				}},
 			}
 			filter = "banana"
@@ -67,6 +67,27 @@ var _ = Describe("Tags", func() {
 		Context("when the tag name does not contain the filter", func() {
 			It("does not return it in the list", func() {
 				items, err := tags.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
+				Expect(items).To(HaveLen(0))
+			})
+		})
+
+		Context("when the tag has a resource id", func() {
+			BeforeEach(func() {
+				client.DescribeTagsCall.Returns.Output = &awsec2.DescribeTagsOutput{
+					Tags: []*awsec2.TagDescription{{
+						Key:        aws.String("the-key"),
+						Value:      aws.String("banana-tag"),
+						ResourceId: aws.String("banana"),
+					}},
+				}
+			})
+
+			It("does not return it in the list", func() {
+				items, err := tags.List("banana")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeTagsCall.CallCount).To(Equal(1))

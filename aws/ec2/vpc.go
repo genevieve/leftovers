@@ -8,19 +8,21 @@ import (
 )
 
 type Vpc struct {
-	client     vpcsClient
-	routes     routeTables
-	subnets    subnets
-	gateways   internetGateways
-	id         *string
-	identifier string
-	rtype      string
+	client       vpcsClient
+	routes       routeTables
+	subnets      subnets
+	gateways     internetGateways
+	resourceTags resourceTags
+	id           *string
+	identifier   string
+	rtype        string
 }
 
 func NewVpc(client vpcsClient,
 	routes routeTables,
 	subnets subnets,
 	gateways internetGateways,
+	resourceTags resourceTags,
 	id *string,
 	tags []*awsec2.Tag) Vpc {
 
@@ -36,13 +38,14 @@ func NewVpc(client vpcsClient,
 	}
 
 	return Vpc{
-		client:     client,
-		routes:     routes,
-		subnets:    subnets,
-		gateways:   gateways,
-		id:         id,
-		identifier: identifier,
-		rtype:      "EC2 VPC",
+		client:       client,
+		routes:       routes,
+		subnets:      subnets,
+		gateways:     gateways,
+		resourceTags: resourceTags,
+		id:           id,
+		identifier:   identifier,
+		rtype:        "EC2 VPC",
 	}
 }
 
@@ -65,6 +68,11 @@ func (v Vpc) Delete() error {
 	_, err = v.client.DeleteVpc(&awsec2.DeleteVpcInput{VpcId: v.id})
 	if err != nil {
 		return fmt.Errorf("Delete: %s", err)
+	}
+
+	err = v.resourceTags.Delete("vpc-id", *v.id)
+	if err != nil {
+		return fmt.Errorf("Delete resource tags: %s", err)
 	}
 
 	return nil

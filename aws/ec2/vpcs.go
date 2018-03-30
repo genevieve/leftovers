@@ -14,24 +14,22 @@ type vpcsClient interface {
 }
 
 type Vpcs struct {
-	client   vpcsClient
-	logger   logger
-	routes   routeTables
-	subnets  subnets
-	gateways internetGateways
+	client       vpcsClient
+	logger       logger
+	routes       routeTables
+	subnets      subnets
+	gateways     internetGateways
+	resourceTags resourceTags
 }
 
-func NewVpcs(client vpcsClient,
-	logger logger,
-	routes routeTables,
-	subnets subnets,
-	gateways internetGateways) Vpcs {
+func NewVpcs(client vpcsClient, logger logger, routes routeTables, subnets subnets, gateways internetGateways, resourceTags resourceTags) Vpcs {
 	return Vpcs{
-		client:   client,
-		logger:   logger,
-		routes:   routes,
-		subnets:  subnets,
-		gateways: gateways,
+		client:       client,
+		logger:       logger,
+		routes:       routes,
+		subnets:      subnets,
+		gateways:     gateways,
+		resourceTags: resourceTags,
 	}
 }
 
@@ -66,7 +64,7 @@ func (v Vpcs) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, vpc := range output.Vpcs {
-		resource := NewVpc(v.client, v.routes, v.subnets, v.gateways, vpc.VpcId, vpc.Tags)
+		resource := NewVpc(v.client, v.routes, v.subnets, v.gateways, v.resourceTags, vpc.VpcId, vpc.Tags)
 
 		if *vpc.IsDefault {
 			continue

@@ -45,12 +45,14 @@ func (u Subnets) Delete(vpcId string) error {
 		n := *s.SubnetId
 
 		_, err = u.client.DeleteSubnet(&awsec2.DeleteSubnetInput{SubnetId: s.SubnetId})
-		if err == nil {
-			u.logger.Printf("[EC2 VPC: %s] Deleted subnet %s", vpcId, n)
-		} else {
+		if err != nil {
 			u.logger.Printf("[EC2 VPC: %s] Delete subnet %s: %s", vpcId, n, err)
+		} else {
+			u.logger.Printf("[EC2 VPC: %s] Deleted subnet %s", vpcId, n)
 		}
 	}
+
+	// TODO: Delete the subnets tags
 
 	return nil
 }

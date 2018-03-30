@@ -68,6 +68,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	internetGateways := ec2.NewInternetGateways(ec2Client, logger)
 	routeTables := ec2.NewRouteTables(ec2Client, logger)
 	subnets := ec2.NewSubnets(ec2Client, logger)
+	resourceTags := ec2.NewResourceTags(ec2Client)
 	bucketManager := s3.NewBucketManager(region)
 
 	return Leftovers{
@@ -89,7 +90,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			ec2.NewTags(ec2Client, logger),
 			ec2.NewVolumes(ec2Client, logger),
 			ec2.NewNetworkInterfaces(ec2Client, logger),
-			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways),
+			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways, resourceTags),
 
 			s3.NewBuckets(s3Client, logger, bucketManager),
 

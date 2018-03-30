@@ -25,8 +25,9 @@ var _ = Describe("Vpcs", func() {
 		routes := &fakes.RouteTables{}
 		subnets := &fakes.Subnets{}
 		gateways := &fakes.InternetGateways{}
+		resourceTags := &fakes.ResourceTags{}
 
-		vpcs = ec2.NewVpcs(client, logger, routes, subnets, gateways)
+		vpcs = ec2.NewVpcs(client, logger, routes, subnets, gateways, resourceTags)
 	})
 
 	Describe("List", func() {

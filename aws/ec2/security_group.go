@@ -73,7 +73,7 @@ func (s SecurityGroup) Delete() error {
 			return retry(5, time.Second, func() error {
 				_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
 				if err != nil {
-					s.logger.Printf("[%s: %s] Retrying delete: %s", s.Type(), s.Name(), err)
+					s.logger.Printf("[%s: %s] Retrying delete due to dependency violation", s.Type(), s.Name())
 					return fmt.Errorf("Delete: %s", err)
 				}
 				return nil
@@ -82,6 +82,9 @@ func (s SecurityGroup) Delete() error {
 			return fmt.Errorf("Delete: %s", err)
 		}
 	}
+
+	// TODO: Delete the security group's tags
+
 	return nil
 }
 

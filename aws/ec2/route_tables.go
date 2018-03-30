@@ -67,5 +67,7 @@ func (u RouteTables) Delete(vpcId string) error {
 		}
 	}
 
+	// TODO: Delete the route tables tags
+
 	return nil
 }

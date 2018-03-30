@@ -56,9 +56,13 @@ func (a Tags) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, t := range output.Tags {
+		if *t.ResourceId != "" {
+			continue
+		}
+
 		resource := NewTag(a.client, t.Key, t.Value, t.ResourceId)
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
 		}
 
