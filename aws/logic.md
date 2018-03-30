@@ -14,6 +14,8 @@ Revoke ingress and egress permissions **before** deleting security groups.
 Delete internet gateways **before** deleting vpcs.
 Delete route tables **before** deleting vpcs.
 Delete subnets **before** deleting vpcs.
+Delete tags associated to a resource **after** deleting the resource.
+Delete tags without a resource at any time.
 
 ### iam
 Remove roles from instance profiles **before** deleting the instance profile.
