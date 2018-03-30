@@ -48,7 +48,7 @@ var _ = Describe("ManagedZones", func() {
 
 			Expect(client.ListManagedZonesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete managed zone banana-managed-zone?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete DNS Managed Zone banana-managed-zone?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -60,7 +60,7 @@ var _ = Describe("ManagedZones", func() {
 
 			It("returns the error", func() {
 				_, err := managedZones.List(filter)
-				Expect(err).To(MatchError("Listing managed zones: some error"))
+				Expect(err).To(MatchError("Listing DNS Managed Zones: some error"))
 			})
 		})
 
