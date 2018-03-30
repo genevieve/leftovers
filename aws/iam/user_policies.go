@@ -34,7 +34,7 @@ func NewUserPolicies(client userPoliciesClient, logger logger) UserPolicies {
 func (o UserPolicies) Delete(userName string) error {
 	policies, err := o.client.ListAttachedUserPolicies(&awsiam.ListAttachedUserPoliciesInput{UserName: aws.String(userName)})
 	if err != nil {
-		return fmt.Errorf("Listing user policies: %s", err)
+		return fmt.Errorf("List IAM User Policies: %s", err)
 	}
 
 	for _, p := range policies.AttachedPolicies {
@@ -45,9 +45,9 @@ func (o UserPolicies) Delete(userName string) error {
 			PolicyArn: p.PolicyArn,
 		})
 		if err == nil {
-			o.logger.Printf("SUCCESS detaching %s %s\n", o.rtype, n)
+			o.logger.Printf("[INFO] Detached %s %s\n", o.rtype, n)
 		} else {
-			o.logger.Printf("ERROR detaching %s %s: %s\n", o.rtype, n, err)
+			o.logger.Printf("[WARNING] Detach %s %s: %s\n", o.rtype, n, err)
 		}
 
 		_, err = o.client.DeleteUserPolicy(&awsiam.DeleteUserPolicyInput{
@@ -55,9 +55,9 @@ func (o UserPolicies) Delete(userName string) error {
 			PolicyName: p.PolicyName,
 		})
 		if err == nil {
-			o.logger.Printf("SUCCESS deleting %s %s\n", o.rtype, n)
+			o.logger.Printf("[INFO] Deleted %s %s\n", o.rtype, n)
 		} else {
-			o.logger.Printf("ERROR deleting %s %s: %s\n", o.rtype, n, err)
+			o.logger.Printf("[WARNING] Delete %s %s: %s\n", o.rtype, n, err)
 		}
 	}
 

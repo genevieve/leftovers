@@ -55,7 +55,7 @@ func (u Users) List(filter string) ([]common.Deletable, error) {
 func (u Users) getUsers(filter string) ([]common.Deletable, error) {
 	users, err := u.client.ListUsers(&awsiam.ListUsersInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Listing users: %s", err)
+		return nil, fmt.Errorf("List IAM Users: %s", err)
 	}
 
 	var resources []common.Deletable

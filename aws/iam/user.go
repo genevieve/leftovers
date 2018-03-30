@@ -29,12 +29,12 @@ func NewUser(client usersClient, policies userPolicies, accessKeys accessKeys, n
 func (u User) Delete() error {
 	err := u.accessKeys.Delete(*u.name)
 	if err != nil {
-		return fmt.Errorf("FAILED deleting access keys for %s %s: %s", u.rtype, u.identifier, err)
+		return fmt.Errorf("Delete access keys for %s %s: %s", u.rtype, u.identifier, err)
 	}
 
 	err = u.policies.Delete(*u.name)
 	if err != nil {
-		return fmt.Errorf("FAILED deleting policies for %s %s: %s", u.rtype, u.identifier, err)
+		return fmt.Errorf("Delete policies for %s %s: %s", u.rtype, u.identifier, err)
 	}
 
 	_, err = u.client.DeleteUser(&awsiam.DeleteUserInput{
@@ -42,7 +42,7 @@ func (u User) Delete() error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", u.rtype, u.identifier, err)
+		return fmt.Errorf("Delete %s %s: %s", u.rtype, u.identifier, err)
 	}
 
 	return err
