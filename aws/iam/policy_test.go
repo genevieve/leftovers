@@ -74,7 +74,7 @@ var _ = Describe("Policy", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"[WARNING] Delete policy version v1 of IAM Policy banana: some error\n",
+						"[IAM Policy: banana] Delete policy version v1: some error\n",
 					}))
 				})
 			})
@@ -87,7 +87,7 @@ var _ = Describe("Policy", func() {
 
 			It("returns the error", func() {
 				err := policy.Delete()
-				Expect(err).To(MatchError("Delete IAM Policy banana: some error"))
+				Expect(err).To(MatchError("Delete: some error"))
 			})
 		})
 
@@ -98,7 +98,7 @@ var _ = Describe("Policy", func() {
 
 			It("returns the error", func() {
 				err := policy.Delete()
-				Expect(err).To(MatchError("List policy versions for IAM Policy banana: some error"))
+				Expect(err).To(MatchError("List IAM Policy Versions: some error"))
 			})
 		})
 	})

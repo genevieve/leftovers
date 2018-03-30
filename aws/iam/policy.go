@@ -29,7 +29,7 @@ func NewPolicy(client policiesClient, logger logger, name, arn *string) Policy {
 func (p Policy) Delete() error {
 	versions, err := p.client.ListPolicyVersions(&awsiam.ListPolicyVersionsInput{PolicyArn: p.arn})
 	if err != nil {
-		return fmt.Errorf("List policy versions for %s %s: %s", p.rtype, p.identifier, err)
+		return fmt.Errorf("List IAM Policy Versions: %s", err)
 	}
 
 	for _, v := range versions.Versions {
@@ -39,14 +39,14 @@ func (p Policy) Delete() error {
 				VersionId: v.VersionId,
 			})
 			if err != nil {
-				p.logger.Printf("[WARNING] Delete policy version %s of %s %s: %s\n", *v.VersionId, p.rtype, p.identifier, err)
+				p.logger.Printf("[%s: %s] Delete policy version %s: %s\n", p.rtype, p.identifier, *v.VersionId, err)
 			}
 		}
 	}
 
 	_, err = p.client.DeletePolicy(&awsiam.DeletePolicyInput{PolicyArn: p.arn})
 	if err != nil {
-		return fmt.Errorf("Delete %s %s: %s", p.rtype, p.identifier, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil

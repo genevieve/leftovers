@@ -52,8 +52,8 @@ var _ = Describe("UserPolicies", func() {
 			Expect(client.DeleteUserPolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-policy")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"[INFO] Detached IAM User Policy the-policy\n",
-				"[INFO] Deleted IAM User Policy the-policy\n",
+				"[IAM User: banana] Detached policy the-policy\n",
+				"[IAM User: banana] Deleted policy the-policy\n",
 			}))
 		})
 
@@ -82,8 +82,8 @@ var _ = Describe("UserPolicies", func() {
 
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[WARNING] Detach IAM User Policy the-policy: some error\n",
-					"[INFO] Deleted IAM User Policy the-policy\n",
+					"[IAM User: banana] Detach policy the-policy: some error\n",
+					"[IAM User: banana] Deleted policy the-policy\n",
 				}))
 			})
 		})
@@ -98,8 +98,8 @@ var _ = Describe("UserPolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[INFO] Detached IAM User Policy the-policy\n",
-					"[WARNING] Delete IAM User Policy the-policy: some error\n",
+					"[IAM User: banana] Detached policy the-policy\n",
+					"[IAM User: banana] Delete policy the-policy: some error\n",
 				}))
 			})
 		})

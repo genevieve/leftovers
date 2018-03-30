@@ -53,8 +53,8 @@ var _ = Describe("RolePolicies", func() {
 			Expect(client.DeleteRolePolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-policy")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"[INFO] Detached IAM Role Policy the-policy for IAM Role banana\n",
-				"[INFO] Deleted IAM Role Policy the-policy for IAM Role banana\n",
+				"[IAM Role: banana] Detached policy the-policy\n",
+				"[IAM Role: banana] Deleted policy the-policy\n",
 			}))
 		})
 
@@ -80,7 +80,7 @@ var _ = Describe("RolePolicies", func() {
 				Expect(client.DeleteRolePolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-not-attached-policy")))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[INFO] Deleted IAM Role Policy the-not-attached-policy for IAM Role banana\n",
+					"[IAM Role: banana] Deleted policy the-not-attached-policy\n",
 				}))
 			})
 		})
@@ -125,8 +125,8 @@ var _ = Describe("RolePolicies", func() {
 
 				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(1))
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[WARNING] Detach IAM Role Policy the-policy for IAM Role banana: some error\n",
-					"[INFO] Deleted IAM Role Policy the-policy for IAM Role banana\n",
+					"[IAM Role: banana] Detach policy the-policy: some error\n",
+					"[IAM Role: banana] Deleted policy the-policy\n",
 				}))
 			})
 		})
@@ -141,8 +141,8 @@ var _ = Describe("RolePolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[INFO] Detached IAM Role Policy the-policy for IAM Role banana\n",
-					"[WARNING] Delete IAM Role Policy the-policy for IAM Role banana: some error\n",
+					"[IAM Role: banana] Detached policy the-policy\n",
+					"[IAM Role: banana] Delete policy the-policy: some error\n",
 				}))
 			})
 		})

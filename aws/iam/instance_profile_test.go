@@ -45,7 +45,7 @@ var _ = Describe("InstanceProfile", func() {
 
 			It("returns the error", func() {
 				err := instanceProfile.Delete()
-				Expect(err).To(MatchError("Delete IAM Instance Profile the-name: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 
@@ -64,7 +64,7 @@ var _ = Describe("InstanceProfile", func() {
 				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.RoleName).To(Equal(aws.String("the-role")))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[INFO] Removed role the-role from IAM Instance Profile the-name (Role:the-role)\n",
+					"[IAM Instance Profile: the-name (Role:the-role)] Removed role the-role\n",
 				}))
 			})
 
@@ -78,7 +78,7 @@ var _ = Describe("InstanceProfile", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"[WARNING] Remove role the-role from IAM Instance Profile the-name (Role:the-role): some error\n",
+						"[IAM Instance Profile: the-name (Role:the-role)] Remove role the-role: some error\n",
 					}))
 				})
 			})
