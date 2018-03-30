@@ -2,7 +2,9 @@ package ec2
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
+	"time"
 
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -40,7 +42,6 @@ func NewSecurityGroup(client securityGroupsClient, logger logger, id, groupName 
 	}
 }
 
-//TODO: Retryable error - DependencyViolation
 func (s SecurityGroup) Delete() error {
 	if len(s.ingress) > 0 {
 		_, err := s.client.RevokeSecurityGroupIngress(&awsec2.RevokeSecurityGroupIngressInput{
@@ -68,9 +69,19 @@ func (s SecurityGroup) Delete() error {
 
 	_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
 	if err != nil {
-		return fmt.Errorf("Delete: %s", err)
+		if strings.Contains(err.Error(), "DependencyViolation") {
+			return retry(5, time.Second, func() error {
+				_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
+				if err != nil {
+					s.logger.Printf("[%s: %s] Retrying delete: %s", s.Type(), s.Name(), err)
+					return fmt.Errorf("Delete: %s", err)
+				}
+				return nil
+			})
+		} else {
+			return fmt.Errorf("Delete: %s", err)
+		}
 	}
-
 	return nil
 }
 
@@ -80,4 +91,19 @@ func (s SecurityGroup) Name() string {
 
 func (s SecurityGroup) Type() string {
 	return "EC2 Security Group"
+}
+
+func retry(attempts int, sleep time.Duration, f func() error) error {
+	err := f()
+	if err != nil {
+		if attempts--; attempts > 0 {
+			jitter := time.Duration(rand.Int63n(int64(sleep)))
+			sleep = sleep + jitter/2
+
+			time.Sleep(sleep)
+			return retry(attempts, 2*sleep, f)
+		}
+		return err
+	}
+	return nil
 }

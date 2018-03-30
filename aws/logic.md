@@ -8,6 +8,7 @@ Delete target groups.
 ### ec2
 Delete load balancers **before** deleting security groups.
 Delete instances **before** deleting security groups.
+Delete network interfaces **before** deleting security groups.
 Delete security groups **before** deleting subnets.
 Revoke ingress and egress permissions **before** deleting security groups.
 Delete internet gateways **before** deleting vpcs.

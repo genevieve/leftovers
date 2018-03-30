@@ -58,7 +58,7 @@ func (e NetworkInterfaces) get(filter string) ([]common.Deletable, error) {
 	for _, i := range networkInterfaces.NetworkInterfaces {
 		resource := NewNetworkInterface(e.client, i.NetworkInterfaceId, i.TagSet)
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
 		}
 
