@@ -47,19 +47,19 @@ func (n InternetGateways) Delete(vpcId string) error {
 			InternetGatewayId: i.InternetGatewayId,
 			VpcId:             aws.String(vpcId),
 		})
-		if err == nil {
-			n.logger.Printf("[EC2 VPC: %s] Detached internet gateway %s", vpcId, igwId)
-		} else {
+		if err != nil {
 			n.logger.Printf("[EC2 VPC: %s] Detach internet gateway %s: %s", vpcId, igwId, err)
+		} else {
+			n.logger.Printf("[EC2 VPC: %s] Detached internet gateway %s", vpcId, igwId)
 		}
 
 		_, err = n.client.DeleteInternetGateway(&awsec2.DeleteInternetGatewayInput{
 			InternetGatewayId: i.InternetGatewayId,
 		})
-		if err == nil {
-			n.logger.Printf("[EC2 VPC: %s] Deleted internet gateway %s", vpcId, igwId)
+		if err != nil {
+			return fmt.Errorf("Delete %s: %s", igwId, err)
 		} else {
-			n.logger.Printf("[EC2 VPC: %s] Delete internet gateway %s: %s", vpcId, igwId, err)
+			n.logger.Printf("[EC2 VPC: %s] Deleted internet gateway %s", vpcId, igwId)
 		}
 	}
 

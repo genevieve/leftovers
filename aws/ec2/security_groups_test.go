@@ -13,8 +13,9 @@ import (
 
 var _ = Describe("SecurityGroups", func() {
 	var (
-		client *fakes.SecurityGroupsClient
-		logger *fakes.Logger
+		client       *fakes.SecurityGroupsClient
+		logger       *fakes.Logger
+		resourceTags *fakes.ResourceTags
 
 		securityGroups ec2.SecurityGroups
 	)
@@ -23,8 +24,9 @@ var _ = Describe("SecurityGroups", func() {
 		client = &fakes.SecurityGroupsClient{}
 		logger = &fakes.Logger{}
 		logger.PromptWithDetailsCall.Returns.Proceed = true
+		resourceTags = &fakes.ResourceTags{}
 
-		securityGroups = ec2.NewSecurityGroups(client, logger)
+		securityGroups = ec2.NewSecurityGroups(client, logger, resourceTags)
 	})
 
 	Describe("List", func() {

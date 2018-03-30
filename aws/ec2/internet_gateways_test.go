@@ -95,13 +95,12 @@ var _ = Describe("InternetGateways", func() {
 				client.DeleteInternetGatewayCall.Returns.Error = errors.New("some error")
 			})
 
-			It("logs the error", func() {
+			It("returns the error", func() {
 				err := gateways.Delete("banana")
-				Expect(err).NotTo(HaveOccurred())
+				Expect(err).To(MatchError("Delete the-gateway-id: some error"))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
 					"[EC2 VPC: banana] Detached internet gateway the-gateway-id",
-					"[EC2 VPC: banana] Delete internet gateway the-gateway-id: some error",
 				}))
 			})
 		})

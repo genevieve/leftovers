@@ -16,14 +16,16 @@ type securityGroupsClient interface {
 }
 
 type SecurityGroups struct {
-	client securityGroupsClient
-	logger logger
+	client       securityGroupsClient
+	logger       logger
+	resourceTags resourceTags
 }
 
-func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroups {
+func NewSecurityGroups(client securityGroupsClient, logger logger, resourceTags resourceTags) SecurityGroups {
 	return SecurityGroups{
-		client: client,
-		logger: logger,
+		client:       client,
+		logger:       logger,
+		resourceTags: resourceTags,
 	}
 }
 
@@ -58,7 +60,7 @@ func (s SecurityGroups) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, sg := range output.SecurityGroups {
-		r := NewSecurityGroup(s.client, s.logger, sg.GroupId, sg.GroupName, sg.Tags, sg.IpPermissions, sg.IpPermissionsEgress)
+		r := NewSecurityGroup(s.client, s.logger, s.resourceTags, sg.GroupId, sg.GroupName, sg.Tags, sg.IpPermissions, sg.IpPermissionsEgress)
 
 		if *sg.GroupName == "default" {
 			continue

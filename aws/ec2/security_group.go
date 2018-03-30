@@ -10,16 +10,16 @@ import (
 )
 
 type SecurityGroup struct {
-	client     securityGroupsClient
-	logger     logger
-	id         *string
-	identifier string
-	rtype      string
-	ingress    []*awsec2.IpPermission
-	egress     []*awsec2.IpPermission
+	client       securityGroupsClient
+	logger       logger
+	resourceTags resourceTags
+	id           *string
+	identifier   string
+	ingress      []*awsec2.IpPermission
+	egress       []*awsec2.IpPermission
 }
 
-func NewSecurityGroup(client securityGroupsClient, logger logger, id, groupName *string, tags []*awsec2.Tag, ingress []*awsec2.IpPermission, egress []*awsec2.IpPermission) SecurityGroup {
+func NewSecurityGroup(client securityGroupsClient, logger logger, resourceTags resourceTags, id, groupName *string, tags []*awsec2.Tag, ingress []*awsec2.IpPermission, egress []*awsec2.IpPermission) SecurityGroup {
 	identifier := *groupName
 
 	var extra []string
@@ -32,13 +32,13 @@ func NewSecurityGroup(client securityGroupsClient, logger logger, id, groupName 
 	}
 
 	return SecurityGroup{
-		client:     client,
-		logger:     logger,
-		id:         id,
-		identifier: identifier,
-		rtype:      "EC2 Security Group",
-		ingress:    ingress,
-		egress:     egress,
+		client:       client,
+		logger:       logger,
+		resourceTags: resourceTags,
+		id:           id,
+		identifier:   identifier,
+		ingress:      ingress,
+		egress:       egress,
 	}
 }
 
@@ -49,9 +49,7 @@ func (s SecurityGroup) Delete() error {
 			IpPermissions: s.ingress,
 		})
 		if err != nil {
-			s.logger.Printf("[%s: %s] Revoke ingress: %s", s.Type(), s.Name(), err)
-		} else {
-			s.logger.Printf("[%s: %s] Revoked ingress", s.Type(), s.Name())
+			return fmt.Errorf("Revoke ingress: %s", err)
 		}
 	}
 
@@ -61,29 +59,32 @@ func (s SecurityGroup) Delete() error {
 			IpPermissions: s.egress,
 		})
 		if err != nil {
-			s.logger.Printf("[%s: %s] Revoke egress: %s", s.Type(), s.Name(), err)
-		} else {
-			s.logger.Printf("[%s: %s] Revoked egress", s.Type(), s.Name())
+			return fmt.Errorf("Revoke egress: %s", err)
 		}
 	}
+
+	var delete error
 
 	_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
-	if err != nil {
-		if strings.Contains(err.Error(), "DependencyViolation") {
-			return retry(5, time.Second, func() error {
-				_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
-				if err != nil {
-					s.logger.Printf("[%s: %s] Retrying delete due to dependency violation", s.Type(), s.Name())
-					return fmt.Errorf("Delete: %s", err)
-				}
-				return nil
-			})
-		} else {
-			return fmt.Errorf("Delete: %s", err)
-		}
+	if err != nil && strings.Contains(err.Error(), "DependencyViolation") {
+		delete = retry(5, time.Second, func() error {
+			_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
+			if err != nil {
+				s.logger.Printf("[%s: %s] Retrying delete due to dependency violation", s.Type(), s.Name())
+				return fmt.Errorf("Delete: %s", err)
+			}
+			return nil
+		})
 	}
 
-	// TODO: Delete the security group's tags
+	if err != nil || delete != nil {
+		return fmt.Errorf("Delete: %s", err)
+	}
+
+	err = s.resourceTags.Delete("security-group", *s.id)
+	if err != nil {
+		return fmt.Errorf("Delete resource tags: %s", err)
+	}
 
 	return nil
 }

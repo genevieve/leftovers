@@ -14,26 +14,29 @@ import (
 
 var _ = Describe("SecurityGroup", func() {
 	var (
+		client       *fakes.SecurityGroupsClient
+		logger       *fakes.Logger
+		resourceTags *fakes.ResourceTags
+		id           *string
+		groupName    *string
+		tags         []*awsec2.Tag
+		ingress      []*awsec2.IpPermission
+		egress       []*awsec2.IpPermission
+
 		securityGroup ec2.SecurityGroup
-		client        *fakes.SecurityGroupsClient
-		logger        *fakes.Logger
-		id            *string
-		groupName     *string
-		tags          []*awsec2.Tag
-		ingress       []*awsec2.IpPermission
-		egress        []*awsec2.IpPermission
 	)
 
 	BeforeEach(func() {
 		client = &fakes.SecurityGroupsClient{}
 		logger = &fakes.Logger{}
+		resourceTags = &fakes.ResourceTags{}
 		id = aws.String("the-id")
 		groupName = aws.String("the-group-name")
 		tags = []*awsec2.Tag{}
 		ingress = []*awsec2.IpPermission{}
 		egress = []*awsec2.IpPermission{}
 
-		securityGroup = ec2.NewSecurityGroup(client, logger, id, groupName, tags, ingress, egress)
+		securityGroup = ec2.NewSecurityGroup(client, logger, resourceTags, id, groupName, tags, ingress, egress)
 	})
 
 	Describe("Delete", func() {
@@ -45,7 +48,7 @@ var _ = Describe("SecurityGroup", func() {
 			Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(id))
 		})
 
-		Context("the client fails", func() {
+		Context("when the client fails", func() {
 			BeforeEach(func() {
 				client.DeleteSecurityGroupCall.Returns.Error = errors.New("banana")
 			})
@@ -58,10 +61,8 @@ var _ = Describe("SecurityGroup", func() {
 
 		Context("when the security group has ingress rules", func() {
 			BeforeEach(func() {
-				ingress = []*awsec2.IpPermission{{
-					IpProtocol: aws.String("tcp"),
-				}}
-				securityGroup = ec2.NewSecurityGroup(client, logger, id, groupName, tags, ingress, egress)
+				ingress = []*awsec2.IpPermission{{IpProtocol: aws.String("tcp")}}
+				securityGroup = ec2.NewSecurityGroup(client, logger, resourceTags, id, groupName, tags, ingress, egress)
 			})
 
 			It("revokes them", func() {
@@ -78,22 +79,17 @@ var _ = Describe("SecurityGroup", func() {
 					client.RevokeSecurityGroupIngressCall.Returns.Error = errors.New("some error")
 				})
 
-				It("logs the error", func() {
+				It("returns the error", func() {
 					err := securityGroup.Delete()
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(logger.PrintfCall.CallCount).To(Equal(1))
-					Expect(logger.PrintfCall.Receives.Message).To(Equal("[%s: %s] Revoke ingress: %s"))
+					Expect(err).To(MatchError("Revoke ingress: some error"))
 				})
 			})
 		})
 
 		Context("when the security group has egress rules", func() {
 			BeforeEach(func() {
-				egress = []*awsec2.IpPermission{{
-					IpProtocol: aws.String("tcp"),
-				}}
-				securityGroup = ec2.NewSecurityGroup(client, logger, id, groupName, tags, ingress, egress)
+				egress = []*awsec2.IpPermission{{IpProtocol: aws.String("tcp")}}
+				securityGroup = ec2.NewSecurityGroup(client, logger, resourceTags, id, groupName, tags, ingress, egress)
 			})
 
 			It("revokes them", func() {
@@ -112,10 +108,7 @@ var _ = Describe("SecurityGroup", func() {
 
 				It("returns the error", func() {
 					err := securityGroup.Delete()
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(logger.PrintfCall.CallCount).To(Equal(1))
-					Expect(logger.PrintfCall.Receives.Message).To(Equal("[%s: %s] Revoke egress: %s"))
+					Expect(err).To(MatchError("Revoke egress: some error"))
 				})
 			})
 		})
@@ -129,7 +122,7 @@ var _ = Describe("SecurityGroup", func() {
 		Context("when the security group has tags", func() {
 			BeforeEach(func() {
 				tags = []*awsec2.Tag{{Key: aws.String("the-key"), Value: aws.String("the-value")}}
-				securityGroup = ec2.NewSecurityGroup(client, logger, id, groupName, tags, ingress, egress)
+				securityGroup = ec2.NewSecurityGroup(client, logger, resourceTags, id, groupName, tags, ingress, egress)
 			})
 			It("uses the tag in the name", func() {
 				Expect(securityGroup.Name()).To(Equal("the-group-name (the-key:the-value)"))
