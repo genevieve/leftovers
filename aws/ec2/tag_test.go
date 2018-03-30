@@ -49,7 +49,7 @@ var _ = Describe("Tag", func() {
 
 			It("returns the error", func() {
 				err := tag.Delete()
-				Expect(err).To(MatchError("Delete EC2 Tag the-value: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 	})

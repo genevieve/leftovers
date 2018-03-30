@@ -48,7 +48,7 @@ var _ = Describe("Subnets", func() {
 			Expect(client.DeleteSubnetCall.Receives.Input.SubnetId).To(Equal(aws.String("the-subnet-id")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"[INFO] Deleted EC2 Subnet the-subnet-id\n",
+				"[EC2 VPC: the-vpc-id] Deleted subnet the-subnet-id",
 			}))
 		})
 
@@ -75,7 +75,7 @@ var _ = Describe("Subnets", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[WARNING] Delete EC2 Subnet the-subnet-id: some error\n",
+					"[EC2 VPC: banana] Delete subnet the-subnet-id: some error",
 				}))
 			})
 		})

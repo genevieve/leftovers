@@ -48,7 +48,7 @@ var _ = Describe("RouteTables", func() {
 			Expect(client.DeleteRouteTableCall.Receives.Input.RouteTableId).To(Equal(aws.String("the-route-table-id")))
 
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
-				"[INFO] Deleted route table the-route-table-id\n",
+				"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id",
 			}))
 		})
 
@@ -91,8 +91,8 @@ var _ = Describe("RouteTables", func() {
 				Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[INFO] Disassociated route table the-route-table-id\n",
-					"[INFO] Deleted route table the-route-table-id\n",
+					"[EC2 VPC: the-vpc-id] Disassociated route table the-route-table-id",
+					"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id",
 				}))
 			})
 
@@ -134,8 +134,8 @@ var _ = Describe("RouteTables", func() {
 
 					Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
 					Expect(logger.PrintfCall.Messages).To(Equal([]string{
-						"[WARNING] Disassociate route table the-route-table-id: some error\n",
-						"[INFO] Deleted route table the-route-table-id\n",
+						"[EC2 VPC: the-vpc-id] Disassociate route table the-route-table-id: some error",
+						"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id",
 					}))
 				})
 			})
@@ -143,15 +143,15 @@ var _ = Describe("RouteTables", func() {
 
 		Context("when the client fails to delete the route table", func() {
 			BeforeEach(func() {
-				client.DeleteRouteTableCall.Returns.Error = errors.New("some error")
+				client.DeleteRouteTableCall.Returns.Error = errors.New("banana")
 			})
 
 			It("logs the error", func() {
-				err := routeTables.Delete("banana")
+				err := routeTables.Delete("the-vpc-id")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[WARNING] Delete route table the-route-table-id: some error\n",
+					"[EC2 VPC: the-vpc-id] Delete route table the-route-table-id: banana",
 				}))
 			})
 		})

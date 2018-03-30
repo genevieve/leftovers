@@ -27,7 +27,7 @@ func NewAddress(client addressesClient, publicIp, allocationId *string) Address 
 func (a Address) Delete() error {
 	_, err := a.client.ReleaseAddress(&awsec2.ReleaseAddressInput{AllocationId: a.allocationId})
 	if err != nil {
-		return fmt.Errorf("Delete %s %s: %s", a.rtype, a.identifier, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil

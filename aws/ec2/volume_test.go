@@ -41,7 +41,7 @@ var _ = Describe("Volume", func() {
 
 			It("returns the error", func() {
 				err := volume.Delete()
-				Expect(err).To(MatchError("Delete EC2 Volume the-id: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 	})

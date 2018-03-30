@@ -140,7 +140,7 @@ var _ = Describe("SecurityGroups", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(logger.PrintfCall.CallCount).To(Equal(1))
-					Expect(logger.PrintfCall.Receives.Message).To(Equal("[WARNING] Revoke ingress for %s: %s\n"))
+					Expect(logger.PrintfCall.Receives.Message).To(Equal("[%s: %s] Revoke ingress: %s"))
 				})
 			})
 		})
@@ -178,7 +178,7 @@ var _ = Describe("SecurityGroups", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(logger.PrintfCall.CallCount).To(Equal(1))
-					Expect(logger.PrintfCall.Receives.Message).To(Equal("[WARNING] Revoke egress for %s: %s\n"))
+					Expect(logger.PrintfCall.Receives.Message).To(Equal("[%s: %s] Revoke egress: %s"))
 				})
 			})
 		})

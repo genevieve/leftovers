@@ -58,7 +58,7 @@ var _ = Describe("Vpc", func() {
 
 			It("returns the error", func() {
 				err := vpc.Delete()
-				Expect(err).To(MatchError("Delete routes for EC2 VPC the-id: banana"))
+				Expect(err).To(MatchError("Delete routes: banana"))
 			})
 		})
 
@@ -69,7 +69,7 @@ var _ = Describe("Vpc", func() {
 
 			It("returns the error", func() {
 				err := vpc.Delete()
-				Expect(err).To(MatchError("Delete subnets for EC2 VPC the-id: banana"))
+				Expect(err).To(MatchError("Delete subnets: banana"))
 			})
 		})
 
@@ -80,7 +80,7 @@ var _ = Describe("Vpc", func() {
 
 			It("returns the error", func() {
 				err := vpc.Delete()
-				Expect(err).To(MatchError("Delete internet gateways for EC2 VPC the-id: banana"))
+				Expect(err).To(MatchError("Delete internet gateways: banana"))
 			})
 		})
 
@@ -91,7 +91,7 @@ var _ = Describe("Vpc", func() {
 
 			It("returns the error", func() {
 				err := vpc.Delete()
-				Expect(err).To(MatchError("Delete EC2 VPC the-id: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 	})

@@ -53,17 +53,17 @@ func (u RouteTables) Delete(vpcId string) error {
 		for _, a := range r.Associations {
 			_, err = u.client.DisassociateRouteTable(&awsec2.DisassociateRouteTableInput{AssociationId: a.RouteTableAssociationId})
 			if err == nil {
-				u.logger.Printf("[INFO] Disassociated route table %s\n", n)
+				u.logger.Printf("[EC2 VPC: %s] Disassociated route table %s", vpcId, n)
 			} else {
-				u.logger.Printf("[WARNING] Disassociate route table %s: %s\n", n, err)
+				u.logger.Printf("[EC2 VPC: %s] Disassociate route table %s: %s", vpcId, n, err)
 			}
 		}
 
 		_, err = u.client.DeleteRouteTable(&awsec2.DeleteRouteTableInput{RouteTableId: r.RouteTableId})
 		if err == nil {
-			u.logger.Printf("[INFO] Deleted route table %s\n", n)
+			u.logger.Printf("[EC2 VPC: %s] Deleted route table %s", vpcId, n)
 		} else {
-			u.logger.Printf("[WARNING] Delete route table %s: %s\n", n, err)
+			u.logger.Printf("[EC2 VPC: %s] Delete route table %s: %s", vpcId, n, err)
 		}
 	}
 

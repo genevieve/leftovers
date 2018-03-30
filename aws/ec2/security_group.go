@@ -37,7 +37,7 @@ func NewSecurityGroup(client securityGroupsClient, id, groupName *string, tags [
 func (s SecurityGroup) Delete() error {
 	_, err := s.client.DeleteSecurityGroup(&awsec2.DeleteSecurityGroupInput{GroupId: s.id})
 	if err != nil {
-		return fmt.Errorf("Delete %s %s: %s", s.rtype, s.identifier, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil

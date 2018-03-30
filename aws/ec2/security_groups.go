@@ -28,11 +28,11 @@ func NewSecurityGroups(client securityGroupsClient, logger logger) SecurityGroup
 }
 
 func (e SecurityGroups) ListOnly(filter string) ([]common.Deletable, error) {
-	return e.get(filter)
+	return e.get(filter, false)
 }
 
 func (e SecurityGroups) List(filter string) ([]common.Deletable, error) {
-	resources, err := e.get(filter)
+	resources, err := e.get(filter, true)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (e SecurityGroups) List(filter string) ([]common.Deletable, error) {
 	return delete, nil
 }
 
-func (s SecurityGroups) get(filter string) ([]common.Deletable, error) {
+func (s SecurityGroups) get(filter string, cleanup bool) ([]common.Deletable, error) {
 	output, err := s.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describe EC2 Security Groups: %s", err)
@@ -58,41 +58,43 @@ func (s SecurityGroups) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, sg := range output.SecurityGroups {
-		resource := NewSecurityGroup(s.client, sg.GroupId, sg.GroupName, sg.Tags)
+		r := NewSecurityGroup(s.client, sg.GroupId, sg.GroupName, sg.Tags)
 
 		if *sg.GroupName == "default" {
 			continue
 		}
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !strings.Contains(r.Name(), filter) {
 			continue
 		}
 
-		if len(sg.IpPermissions) > 0 {
-			_, err := s.client.RevokeSecurityGroupIngress(&awsec2.RevokeSecurityGroupIngressInput{
-				GroupId:       sg.GroupId,
-				IpPermissions: sg.IpPermissions,
-			})
-			if err != nil {
-				s.logger.Printf("[WARNING] Revoke ingress for %s: %s\n", resource.Name(), err)
-			} else {
-				s.logger.Printf("[INFO] Revoked ingress for %s\n", resource.Name())
+		if cleanup {
+			if len(sg.IpPermissions) > 0 {
+				_, err := s.client.RevokeSecurityGroupIngress(&awsec2.RevokeSecurityGroupIngressInput{
+					GroupId:       sg.GroupId,
+					IpPermissions: sg.IpPermissions,
+				})
+				if err != nil {
+					s.logger.Printf("[%s: %s] Revoke ingress: %s", r.Type(), r.Name(), err)
+				} else {
+					s.logger.Printf("[%s: %s] Revoked ingress", r.Type(), r.Name())
+				}
+			}
+
+			if len(sg.IpPermissionsEgress) > 0 {
+				_, err := s.client.RevokeSecurityGroupEgress(&awsec2.RevokeSecurityGroupEgressInput{
+					GroupId:       sg.GroupId,
+					IpPermissions: sg.IpPermissionsEgress,
+				})
+				if err != nil {
+					s.logger.Printf("[%s: %s] Revoke egress: %s", r.Type(), r.Name(), err)
+				} else {
+					s.logger.Printf("[%s: %s] Revoked egress", r.Type(), r.Name())
+				}
 			}
 		}
 
-		if len(sg.IpPermissionsEgress) > 0 {
-			_, err := s.client.RevokeSecurityGroupEgress(&awsec2.RevokeSecurityGroupEgressInput{
-				GroupId:       sg.GroupId,
-				IpPermissions: sg.IpPermissionsEgress,
-			})
-			if err != nil {
-				s.logger.Printf("[WARNING] Revoke egress for %s: %s\n", resource.Name(), err)
-			} else {
-				s.logger.Printf("[INFO] Revoked egress for %s\n", resource.Name())
-			}
-		}
-
-		resources = append(resources, resource)
+		resources = append(resources, r)
 	}
 
 	return resources, nil

@@ -20,14 +20,12 @@ type internetGateways interface {
 type InternetGateways struct {
 	client internetGatewaysClient
 	logger logger
-	rtype  string
 }
 
 func NewInternetGateways(client internetGatewaysClient, logger logger) InternetGateways {
 	return InternetGateways{
 		client: client,
 		logger: logger,
-		rtype:  "EC2 Internet Gateway",
 	}
 }
 
@@ -50,18 +48,18 @@ func (n InternetGateways) Delete(vpcId string) error {
 			VpcId:             aws.String(vpcId),
 		})
 		if err == nil {
-			n.logger.Printf("[INFO] Detached %s %s\n", n.rtype, igwId)
+			n.logger.Printf("[EC2 VPC: %s] Detached internet gateway %s", vpcId, igwId)
 		} else {
-			n.logger.Printf("[WARNING] Detach %s %s: %s\n", n.rtype, igwId, err)
+			n.logger.Printf("[EC2 VPC: %s] Detach internet gateway %s: %s", vpcId, igwId, err)
 		}
 
 		_, err = n.client.DeleteInternetGateway(&awsec2.DeleteInternetGatewayInput{
 			InternetGatewayId: i.InternetGatewayId,
 		})
 		if err == nil {
-			n.logger.Printf("[INFO] Deleted %s %s\n", n.rtype, igwId)
+			n.logger.Printf("[EC2 VPC: %s] Deleted internet gateway %s", vpcId, igwId)
 		} else {
-			n.logger.Printf("[WARNING] Delete %s %s: %s\n", n.rtype, igwId, err)
+			n.logger.Printf("[EC2 VPC: %s] Delete internet gateway %s: %s", vpcId, igwId, err)
 		}
 	}
 

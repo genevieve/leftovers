@@ -43,7 +43,7 @@ var _ = Describe("Address", func() {
 
 			It("returns the error", func() {
 				err := address.Delete()
-				Expect(err).To(MatchError("Delete EC2 Address the-public-ip: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 	})

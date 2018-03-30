@@ -46,7 +46,7 @@ var _ = Describe("Instance", func() {
 
 			It("returns the error", func() {
 				err := instance.Delete()
-				Expect(err).To(MatchError("Delete EC2 Instance the-id (KeyPairName:the-key-name): banana"))
+				Expect(err).To(MatchError("Terminate: banana"))
 			})
 		})
 	})
