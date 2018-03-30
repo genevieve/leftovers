@@ -28,9 +28,8 @@ func (l LoadBalancer) Delete() error {
 	_, err := l.client.DeleteLoadBalancer(&awselbv2.DeleteLoadBalancerInput{
 		LoadBalancerArn: l.arn,
 	})
-
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", l.rtype, l.identifier, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil

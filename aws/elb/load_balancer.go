@@ -28,7 +28,7 @@ func (l LoadBalancer) Delete() error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("FAILED deleting %s %s: %s", l.rtype, l.identifier, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil

@@ -18,7 +18,6 @@ type LoadBalancers struct {
 	logger logger
 }
 
-//TODO: Remove unused logger
 func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	return LoadBalancers{
 		client: client,
@@ -52,7 +51,7 @@ func (l LoadBalancers) List(filter string) ([]common.Deletable, error) {
 func (l LoadBalancers) get(filter string) ([]common.Deletable, error) {
 	loadBalancers, err := l.client.DescribeLoadBalancers(&awselb.DescribeLoadBalancersInput{})
 	if err != nil {
-		return nil, fmt.Errorf("Describing Elastic Load Balancers: %s", err)
+		return nil, fmt.Errorf("Describe Elastic Load Balancers: %s", err)
 	}
 
 	var resources []common.Deletable

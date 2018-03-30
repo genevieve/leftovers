@@ -41,7 +41,7 @@ var _ = Describe("LoadBalancer", func() {
 
 			It("returns the error", func() {
 				err := loadBalancer.Delete()
-				Expect(err).To(MatchError("FAILED deleting Elastic Load Balancer the-name: banana"))
+				Expect(err).To(MatchError("Delete: banana"))
 			})
 		})
 	})

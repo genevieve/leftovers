@@ -39,14 +39,14 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	l.clear()
-	fmt.Fprintf(l.writer, "\t%s", fmt.Sprintf(message, a...))
+	fmt.Fprintf(l.writer, "%s\n", fmt.Sprintf(message, a...))
 }
 
 func (l *Logger) Println(message string) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	l.clear()
-	fmt.Fprintf(l.writer, "%s\n\n", message)
+	fmt.Fprintf(l.writer, "%s\n", message)
 }
 
 // TODO: Remove this function when PromptWithDetails is the only Prompt.
@@ -76,7 +76,7 @@ func (l *Logger) Prompt(message string) bool {
 }
 
 func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
-	return l.Prompt(fmt.Sprintf("Are you sure you want to delete %s: %s?", resourceType, resourceName))
+	return l.Prompt(fmt.Sprintf("[%s: %s] Delete?", resourceType, resourceName))
 }
 
 func (l *Logger) NoConfirm() {

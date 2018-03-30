@@ -61,7 +61,7 @@ var _ = Describe("TargetGroups", func() {
 
 			It("returns the error", func() {
 				_, err := targetGroups.List(filter)
-				Expect(err).To(MatchError("Describing ELBV2 Target Groups: error"))
+				Expect(err).To(MatchError("Describe ELBV2 Target Groups: error"))
 			})
 		})
 
