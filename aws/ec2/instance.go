@@ -44,6 +44,8 @@ func (i Instance) Delete() error {
 		return fmt.Errorf("Terminate: %s", err)
 	}
 
+	// TODO: Delete tags
+
 	return nil
 }
 

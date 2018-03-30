@@ -18,14 +18,16 @@ type routeTables interface {
 }
 
 type RouteTables struct {
-	client routesClient
-	logger logger
+	client       routesClient
+	logger       logger
+	resourceTags resourceTags
 }
 
-func NewRouteTables(client routesClient, logger logger) RouteTables {
+func NewRouteTables(client routesClient, logger logger, resourceTags resourceTags) RouteTables {
 	return RouteTables{
-		client: client,
-		logger: logger,
+		client:       client,
+		logger:       logger,
+		resourceTags: resourceTags,
 	}
 }
 
@@ -60,14 +62,19 @@ func (u RouteTables) Delete(vpcId string) error {
 		}
 
 		_, err = u.client.DeleteRouteTable(&awsec2.DeleteRouteTableInput{RouteTableId: r.RouteTableId})
-		if err == nil {
-			u.logger.Printf("[EC2 VPC: %s] Deleted route table %s", vpcId, n)
+		if err != nil {
+			return fmt.Errorf("Delete %s: %s", n, err)
 		} else {
-			u.logger.Printf("[EC2 VPC: %s] Delete route table %s: %s", vpcId, n, err)
+			u.logger.Printf("[EC2 VPC: %s] Deleted route table %s", vpcId, n)
+		}
+
+		err = u.resourceTags.Delete("route-table", n)
+		if err != nil {
+			u.logger.Printf("[EC2 VPC: %s] Delete route table %s tags: %s", vpcId, n, err)
+		} else {
+			u.logger.Printf("[EC2 VPC: %s] Deleted route table %s tags", vpcId, n)
 		}
 	}
-
-	// TODO: Delete the route tables tags
 
 	return nil
 }

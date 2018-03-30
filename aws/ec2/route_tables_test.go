@@ -13,8 +13,9 @@ import (
 
 var _ = Describe("RouteTables", func() {
 	var (
-		client *fakes.RouteTablesClient
-		logger *fakes.Logger
+		client       *fakes.RouteTablesClient
+		logger       *fakes.Logger
+		resourceTags *fakes.ResourceTags
 
 		routeTables ec2.RouteTables
 	)
@@ -22,8 +23,9 @@ var _ = Describe("RouteTables", func() {
 	BeforeEach(func() {
 		client = &fakes.RouteTablesClient{}
 		logger = &fakes.Logger{}
+		resourceTags = &fakes.ResourceTags{}
 
-		routeTables = ec2.NewRouteTables(client, logger)
+		routeTables = ec2.NewRouteTables(client, logger, resourceTags)
 	})
 
 	Describe("Delete", func() {
@@ -36,7 +38,7 @@ var _ = Describe("RouteTables", func() {
 			}
 		})
 
-		It("detaches and deletes the routeTables", func() {
+		It("detaches and deletes the route tables", func() {
 			err := routeTables.Delete("the-vpc-id")
 			Expect(err).NotTo(HaveOccurred())
 
@@ -47,8 +49,13 @@ var _ = Describe("RouteTables", func() {
 			Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
 			Expect(client.DeleteRouteTableCall.Receives.Input.RouteTableId).To(Equal(aws.String("the-route-table-id")))
 
+			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
+			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("route-table"))
+			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-route-table-id"))
+
 			Expect(logger.PrintfCall.Messages).To(Equal([]string{
 				"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id",
+				"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id tags",
 			}))
 		})
 
@@ -93,6 +100,7 @@ var _ = Describe("RouteTables", func() {
 				Expect(logger.PrintfCall.Messages).To(Equal([]string{
 					"[EC2 VPC: the-vpc-id] Disassociated route table the-route-table-id",
 					"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id",
+					"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id tags",
 				}))
 			})
 
@@ -136,6 +144,7 @@ var _ = Describe("RouteTables", func() {
 					Expect(logger.PrintfCall.Messages).To(Equal([]string{
 						"[EC2 VPC: the-vpc-id] Disassociate route table the-route-table-id: some error",
 						"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id",
+						"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id tags",
 					}))
 				})
 			})
@@ -146,13 +155,9 @@ var _ = Describe("RouteTables", func() {
 				client.DeleteRouteTableCall.Returns.Error = errors.New("banana")
 			})
 
-			It("logs the error", func() {
+			It("returns the error", func() {
 				err := routeTables.Delete("the-vpc-id")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
-					"[EC2 VPC: the-vpc-id] Delete route table the-route-table-id: banana",
-				}))
+				Expect(err).To(MatchError("Delete the-route-table-id: banana"))
 			})
 		})
 	})

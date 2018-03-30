@@ -66,8 +66,8 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	userPolicies := iam.NewUserPolicies(iamClient, logger)
 	accessKeys := iam.NewAccessKeys(iamClient, logger)
 	internetGateways := ec2.NewInternetGateways(ec2Client, logger)
-	routeTables := ec2.NewRouteTables(ec2Client, logger)
 	resourceTags := ec2.NewResourceTags(ec2Client)
+	routeTables := ec2.NewRouteTables(ec2Client, logger, resourceTags)
 	subnets := ec2.NewSubnets(ec2Client, logger, resourceTags)
 	bucketManager := s3.NewBucketManager(region)
 
