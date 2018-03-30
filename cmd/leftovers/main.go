@@ -82,4 +82,6 @@ func main() {
 	if err := l.Delete(c.Filter); err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
+
+	log.Println("Try leftovers --dry-run to list resources!")
 }
