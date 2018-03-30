@@ -70,7 +70,7 @@ func (v Vpc) Delete() error {
 		return fmt.Errorf("Delete: %s", err)
 	}
 
-	err = v.resourceTags.Delete("vpc-id", *v.id)
+	err = v.resourceTags.Delete("vpc", *v.id)
 	if err != nil {
 		return fmt.Errorf("Delete resource tags: %s", err)
 	}

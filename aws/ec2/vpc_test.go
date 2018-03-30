@@ -53,8 +53,8 @@ var _ = Describe("Vpc", func() {
 			Expect(client.DeleteVpcCall.Receives.Input.VpcId).To(Equal(id))
 
 			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
-			Expect(resourceTags.DeleteCall.Receives.FilterName).To(Equal("vpc-id"))
-			Expect(resourceTags.DeleteCall.Receives.FilterValue).To(Equal("the-id"))
+			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("vpc"))
+			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-id"))
 		})
 
 		Context("when deleting routes fails", func() {

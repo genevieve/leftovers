@@ -4,8 +4,8 @@ type ResourceTags struct {
 	DeleteCall struct {
 		CallCount int
 		Receives  struct {
-			FilterName  string
-			FilterValue string
+			ResourceType string
+			ResourceId   string
 		}
 		Returns struct {
 			Error error
@@ -13,10 +13,10 @@ type ResourceTags struct {
 	}
 }
 
-func (r *ResourceTags) Delete(filterName, filterValue string) error {
+func (r *ResourceTags) Delete(resourceType, resourceId string) error {
 	r.DeleteCall.CallCount++
-	r.DeleteCall.Receives.FilterName = filterName
-	r.DeleteCall.Receives.FilterValue = filterValue
+	r.DeleteCall.Receives.ResourceType = resourceType
+	r.DeleteCall.Receives.ResourceId = resourceId
 
 	return r.DeleteCall.Returns.Error
 }

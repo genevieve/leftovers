@@ -13,14 +13,12 @@ import (
 
 var _ = Describe("ResourceTags", func() {
 	var (
-		client *fakes.TagsClient
-
+		client       *fakes.TagsClient
 		resourceTags ec2.ResourceTags
 	)
 
 	BeforeEach(func() {
 		client = &fakes.TagsClient{}
-
 		resourceTags = ec2.NewResourceTags(client)
 	})
 
@@ -36,12 +34,14 @@ var _ = Describe("ResourceTags", func() {
 		})
 
 		It("deletes the resource tags", func() {
-			err := resourceTags.Delete("vpc-id", "banana")
+			err := resourceTags.Delete("vpc", "vpc-id")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
-			Expect(client.DescribeTagsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("vpc-id")))
-			Expect(client.DescribeTagsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("banana")))
+			Expect(client.DescribeTagsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("resource-type")))
+			Expect(client.DescribeTagsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("vpc")))
+			Expect(client.DescribeTagsCall.Receives.Input.Filters[1].Name).To(Equal(aws.String("resource-id")))
+			Expect(client.DescribeTagsCall.Receives.Input.Filters[1].Values[0]).To(Equal(aws.String("vpc-id")))
 
 			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
 			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(aws.String("the-key")))
@@ -55,8 +55,8 @@ var _ = Describe("ResourceTags", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				err := resourceTags.Delete("vpc-id", "banana")
-				Expect(err).To(MatchError("Describe: some error"))
+				err := resourceTags.Delete("vpc", "vpc-id")
+				Expect(err).To(MatchError("Describe tags: some error"))
 			})
 		})
 
@@ -66,7 +66,7 @@ var _ = Describe("ResourceTags", func() {
 			})
 
 			It("returns the error", func() {
-				err := resourceTags.Delete("vpc-id", "banana")
+				err := resourceTags.Delete("vpc", "vpc-id")
 				Expect(err).To(MatchError("Delete the-key:the-value: some error"))
 			})
 		})

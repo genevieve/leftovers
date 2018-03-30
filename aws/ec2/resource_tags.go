@@ -21,15 +21,18 @@ func NewResourceTags(client tagsClient) ResourceTags {
 	}
 }
 
-func (r ResourceTags) Delete(filterName, filterValue string) error {
+func (r ResourceTags) Delete(resourceType, resourceId string) error {
 	output, err := r.client.DescribeTags(&awsec2.DescribeTagsInput{
 		Filters: []*awsec2.Filter{{
-			Name:   aws.String(filterName),
-			Values: []*string{aws.String(filterValue)},
+			Name:   aws.String("resource-type"),
+			Values: []*string{aws.String(resourceType)},
+		}, {
+			Name:   aws.String("resource-id"),
+			Values: []*string{aws.String(resourceId)},
 		}},
 	})
 	if err != nil {
-		return fmt.Errorf("Describe: %s", err)
+		return fmt.Errorf("Describe tags: %s", err)
 	}
 
 	for _, t := range output.Tags {

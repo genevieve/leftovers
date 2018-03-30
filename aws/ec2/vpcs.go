@@ -70,7 +70,7 @@ func (v Vpcs) get(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
 		}
 
