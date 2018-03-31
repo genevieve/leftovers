@@ -35,10 +35,6 @@ func (a GlobalAddresses) List(filter string) ([]common.Deletable, error) {
 	for _, address := range addresses.Items {
 		resource := NewGlobalAddress(a.client, address.Name)
 
-		if len(address.Users) > 0 {
-			continue
-		}
-
 		if !strings.Contains(address.Name, filter) {
 			continue
 		}

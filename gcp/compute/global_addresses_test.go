@@ -71,25 +71,6 @@ var _ = Describe("GlobalAddresses", func() {
 			})
 		})
 
-		Context("when the address is in use", func() {
-			BeforeEach(func() {
-				client.ListGlobalAddressesCall.Returns.Output = &gcpcompute.AddressList{
-					Items: []*gcpcompute.Address{{
-						Name:  "banana-address",
-						Users: []string{"a-virtual-machine"},
-					}},
-				}
-			})
-
-			It("does not add it to the list", func() {
-				list, err := addresses.List(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
-				Expect(list).To(HaveLen(0))
-			})
-		})
-
 		Context("when the user says no to the prompt", func() {
 			BeforeEach(func() {
 				logger.PromptCall.Returns.Proceed = false
