@@ -80,7 +80,8 @@ func main() {
 		return
 	}
 
-	if err := l.Delete(c.Filter); err != nil {
+	err = l.Delete(c.Filter)
+	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
 

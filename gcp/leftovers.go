@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/gcp/common"
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/dns"
@@ -70,9 +71,9 @@ func (l Leftovers) Delete(filter string) error {
 				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
 
 				if err := d.Delete(); err != nil {
-					l.logger.Println(fmt.Sprintf("[%s: %s]: %s", d.Type(), d.Name(), err.Error()))
+					l.logger.Println(fmt.Sprintf("[%s: %s]: %s", d.Type(), d.Name(), color.YellowString(err.Error())))
 				} else {
-					l.logger.Println(fmt.Sprintf("[%s: %s] Deleted!", d.Type(), d.Name()))
+					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
 				}
 			}(d)
 		}
