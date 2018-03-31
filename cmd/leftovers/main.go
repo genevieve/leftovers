@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/aws"
 	"github.com/genevieve/leftovers/azure"
@@ -84,6 +85,6 @@ func main() {
 	}
 
 	if !c.DryRun {
-		log.Println("Try leftovers --dry-run to list resources!")
+		color.Blue("Try leftovers --dry-run to list resources!\n")
 	}
 }
