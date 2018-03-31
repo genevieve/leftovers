@@ -15,6 +15,7 @@ import (
 	awskms "github.com/aws/aws-sdk-go/service/kms"
 	awsrds "github.com/aws/aws-sdk-go/service/rds"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/aws/common"
 	"github.com/genevieve/leftovers/aws/ec2"
 	"github.com/genevieve/leftovers/aws/elb"
@@ -147,9 +148,9 @@ func (l Leftovers) Delete(filter string) error {
 
 				err := r.Delete()
 				if err != nil {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", r.Type(), r.Name(), err.Error()))
+					l.logger.Println(fmt.Sprintf("[%s: %s]: %s", r.Type(), r.Name(), color.YellowString(err.Error())))
 				} else {
-					l.logger.Println(fmt.Sprintf("[%s: %s] Deleted!", r.Type(), r.Name()))
+					l.logger.Println(fmt.Sprintf("[%s: %s] %s", r.Type(), r.Name(), color.GreenString("Deleted!")))
 				}
 			}(r)
 		}
