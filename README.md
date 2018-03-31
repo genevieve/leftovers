@@ -4,15 +4,15 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 
 It will **prompt you before deleting** any resource, ie:
 
-```
-$ leftovers --filter banana
+```css
+> leftovers --filter banana
 
 [Firewall: banana-http] Delete? (y/N)
 ```
 
 Or maybe you want to **see all of the resources** in your IaaS, ie:
-```
-$ leftovers --filter banana --dry-run
+```css
+> leftovers --filter banana --dry-run
 
 [Firewall: banana-http]
 [Network: banana]
