@@ -23,8 +23,9 @@ var _ = Describe("Address", func() {
 		client = &fakes.AddressesClient{}
 		name = "banana"
 		region = "us-banana"
+		users := 0
 
-		address = compute.NewAddress(client, name, region)
+		address = compute.NewAddress(client, name, region, users)
 	})
 
 	Describe("Delete", func() {
@@ -52,6 +53,16 @@ var _ = Describe("Address", func() {
 	Describe("Name", func() {
 		It("returns the name", func() {
 			Expect(address.Name()).To(Equal(name))
+		})
+
+		Context("when the address is in use", func() {
+			BeforeEach(func() {
+				users := 1
+				address = compute.NewAddress(client, name, region, users)
+			})
+			It("adds the number of users to the name", func() {
+				Expect(address.Name()).To(Equal("banana (Users:1)"))
+			})
 		})
 	})
 

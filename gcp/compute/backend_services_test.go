@@ -30,7 +30,7 @@ var _ = Describe("BackendServices", func() {
 
 		BeforeEach(func() {
 			filter = "banana"
-			logger.PromptCall.Returns.Proceed = true
+			logger.PromptWithDetailsCall.Returns.Proceed = true
 			client.ListBackendServicesCall.Returns.Output = &gcpcompute.BackendServiceList{
 				Items: []*gcpcompute.BackendService{{
 					Name: "banana-backend-service",
@@ -44,7 +44,9 @@ var _ = Describe("BackendServices", func() {
 
 			Expect(client.ListBackendServicesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Backend Service banana-backend-service?"))
+			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Backend Service"))
+			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-backend-service"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -65,14 +67,14 @@ var _ = Describe("BackendServices", func() {
 				list, err := backendServices.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(list).To(HaveLen(0))
 			})
 		})
 
 		Context("when the user says no to the prompt", func() {
 			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
+				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
 
 			It("does not add it to the list", func() {

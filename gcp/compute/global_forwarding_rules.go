@@ -39,7 +39,7 @@ func (g GlobalForwardingRules) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := g.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
+		proceed := g.logger.PromptWithDetails(resource.Type(), resource.Name())
 		if !proceed {
 			continue
 		}

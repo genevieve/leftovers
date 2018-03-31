@@ -27,6 +27,17 @@ type Logger struct {
 			Proceed bool
 		}
 	}
+
+	PromptWithDetailsCall struct {
+		CallCount int
+		Receives  struct {
+			Type string
+			Name string
+		}
+		Returns struct {
+			Proceed bool
+		}
+	}
 }
 
 func (l *Logger) Printf(message string, a ...interface{}) {
@@ -47,4 +58,12 @@ func (l *Logger) Prompt(message string) bool {
 	l.PromptCall.Receives.Message = message
 
 	return l.PromptCall.Returns.Proceed
+}
+
+func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
+	l.PromptWithDetailsCall.CallCount++
+	l.PromptWithDetailsCall.Receives.Type = resourceType
+	l.PromptWithDetailsCall.Receives.Name = resourceName
+
+	return l.PromptWithDetailsCall.Returns.Proceed
 }

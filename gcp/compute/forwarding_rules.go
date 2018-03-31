@@ -46,7 +46,7 @@ func (f ForwardingRules) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := f.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
+		proceed := f.logger.PromptWithDetails(resource.Type(), resource.Name())
 		if !proceed {
 			continue
 		}
