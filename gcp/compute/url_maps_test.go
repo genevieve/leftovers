@@ -44,7 +44,7 @@ var _ = Describe("UrlMaps", func() {
 
 			Expect(client.ListUrlMapsCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete url map banana-url-map?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Url Map banana-url-map?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("UrlMaps", func() {
 
 			It("returns the error", func() {
 				_, err := urlMaps.List(filter)
-				Expect(err).To(MatchError("Listing url maps: some error"))
+				Expect(err).To(MatchError("List Url Maps: some error"))
 			})
 		})
 

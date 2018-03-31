@@ -48,7 +48,7 @@ var _ = Describe("TargetPools", func() {
 			Expect(client.ListTargetPoolsCall.CallCount).To(Equal(1))
 			Expect(client.ListTargetPoolsCall.Receives.Region).To(Equal("region-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete target pool banana-pool?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Target Pool banana-pool?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -60,7 +60,7 @@ var _ = Describe("TargetPools", func() {
 
 			It("returns the error", func() {
 				_, err := targetPools.List(filter)
-				Expect(err).To(MatchError("Listing target pools for region region-1: some error"))
+				Expect(err).To(MatchError("List Target Pools for region region-1: some error"))
 			})
 		})
 

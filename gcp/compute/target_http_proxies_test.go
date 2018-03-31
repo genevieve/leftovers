@@ -44,7 +44,7 @@ var _ = Describe("TargetHttpProxies", func() {
 
 			Expect(client.ListTargetHttpProxiesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete target http proxy banana-target-http-proxy?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Target Http Proxy banana-target-http-proxy?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("TargetHttpProxies", func() {
 
 			It("returns the error", func() {
 				_, err := targetHttpProxies.List(filter)
-				Expect(err).To(MatchError("Listing target http proxies: some error"))
+				Expect(err).To(MatchError("List Target Http Proxies: some error"))
 			})
 		})
 
