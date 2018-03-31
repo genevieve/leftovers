@@ -44,7 +44,7 @@ var _ = Describe("GlobalForwardingRules", func() {
 
 			Expect(client.ListGlobalForwardingRulesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete global forwarding rule banana-rule?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Global Forwarding Rule banana-rule?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("GlobalForwardingRules", func() {
 
 			It("returns the error", func() {
 				_, err := globalForwardingRules.List(filter)
-				Expect(err).To(MatchError("Listing global forwarding rules: some error"))
+				Expect(err).To(MatchError("List Global Forwarding Rules: some error"))
 			})
 		})
 

@@ -44,7 +44,7 @@ var _ = Describe("HttpHealthChecks", func() {
 
 			Expect(client.ListHttpHealthChecksCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete http health check banana-check?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Http Health Check banana-check?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("HttpHealthChecks", func() {
 
 			It("returns the error", func() {
 				_, err := httpHealthChecks.List(filter)
-				Expect(err).To(MatchError("Listing http health checks: some error"))
+				Expect(err).To(MatchError("List Http Health Checks: some error"))
 			})
 		})
 

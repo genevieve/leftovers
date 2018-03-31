@@ -48,7 +48,7 @@ var _ = Describe("ForwardingRules", func() {
 			Expect(client.ListForwardingRulesCall.CallCount).To(Equal(1))
 			Expect(client.ListForwardingRulesCall.Receives.Region).To(Equal("region-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete forwarding rule banana-rule?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Forwarding Rule banana-rule?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -60,7 +60,7 @@ var _ = Describe("ForwardingRules", func() {
 
 			It("returns the error", func() {
 				_, err := forwardingRules.List(filter)
-				Expect(err).To(MatchError("Listing forwarding rules for region region-1: some error"))
+				Expect(err).To(MatchError("List Forwarding Rules for region region-1: some error"))
 			})
 		})
 

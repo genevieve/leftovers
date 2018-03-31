@@ -44,7 +44,7 @@ var _ = Describe("GlobalHealthChecks", func() {
 
 			Expect(client.ListGlobalHealthChecksCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete global health check banana-check?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Global Health Check banana-check?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("GlobalHealthChecks", func() {
 
 			It("returns the error", func() {
 				_, err := globalHealthChecks.List(filter)
-				Expect(err).To(MatchError("Listing global health checks: some error"))
+				Expect(err).To(MatchError("List Global Health Checks: some error"))
 			})
 		})
 

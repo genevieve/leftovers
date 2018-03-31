@@ -45,7 +45,7 @@ var _ = Describe("GlobalAddresses", func() {
 
 			Expect(client.ListGlobalAddressesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete global address banana-address?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Global Address banana-address?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -57,7 +57,7 @@ var _ = Describe("GlobalAddresses", func() {
 
 			It("returns the error", func() {
 				_, err := addresses.List(filter)
-				Expect(err).To(MatchError("Listing global addresses: some error"))
+				Expect(err).To(MatchError("List Global Addresses: some error"))
 			})
 		})
 

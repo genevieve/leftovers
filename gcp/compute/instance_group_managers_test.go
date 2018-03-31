@@ -48,7 +48,7 @@ var _ = Describe("InstanceGroupManagers", func() {
 			Expect(client.ListInstanceGroupManagersCall.CallCount).To(Equal(1))
 			Expect(client.ListInstanceGroupManagersCall.Receives.Zone).To(Equal("zone-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance group manager banana-group?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Instance Group Manager banana-group?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -60,7 +60,7 @@ var _ = Describe("InstanceGroupManagers", func() {
 
 			It("returns the error", func() {
 				_, err := instanceGroupManagers.List(filter)
-				Expect(err).To(MatchError("Listing instance group managers for zone zone-1: some error"))
+				Expect(err).To(MatchError("List Instance Group Managers for zone zone-1: some error"))
 			})
 		})
 

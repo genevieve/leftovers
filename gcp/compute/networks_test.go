@@ -44,7 +44,7 @@ var _ = Describe("Networks", func() {
 
 			Expect(client.ListNetworksCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete network banana-network?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Network banana-network?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("Networks", func() {
 
 			It("returns the error", func() {
 				_, err := networks.List(filter)
-				Expect(err).To(MatchError("Listing networks: some error"))
+				Expect(err).To(MatchError("List Networks: some error"))
 			})
 		})
 

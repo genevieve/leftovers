@@ -48,7 +48,7 @@ var _ = Describe("InstanceGroups", func() {
 			Expect(client.ListInstanceGroupsCall.CallCount).To(Equal(1))
 			Expect(client.ListInstanceGroupsCall.Receives.Zone).To(Equal("zone-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance group banana-group?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Instance Group banana-group?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -60,7 +60,7 @@ var _ = Describe("InstanceGroups", func() {
 
 			It("returns the error", func() {
 				_, err := instanceGroups.List(filter)
-				Expect(err).To(MatchError("Listing instance groups for zone zone-1: some error"))
+				Expect(err).To(MatchError("List Instance Groups for zone zone-1: some error"))
 			})
 		})
 

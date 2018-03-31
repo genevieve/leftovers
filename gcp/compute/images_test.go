@@ -44,7 +44,7 @@ var _ = Describe("Images", func() {
 
 			Expect(client.ListImagesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete image banana-image?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Image banana-image?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("Images", func() {
 
 			It("returns the error", func() {
 				_, err := images.List(filter)
-				Expect(err).To(MatchError("Listing images: some error"))
+				Expect(err).To(MatchError("List Images: some error"))
 			})
 		})
 

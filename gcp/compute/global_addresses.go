@@ -28,7 +28,7 @@ func NewGlobalAddresses(client globalAddressesClient, logger logger) GlobalAddre
 func (a GlobalAddresses) List(filter string) ([]common.Deletable, error) {
 	addresses, err := a.client.ListGlobalAddresses()
 	if err != nil {
-		return nil, fmt.Errorf("Listing global addresses: %s", err)
+		return nil, fmt.Errorf("List Global Addresses: %s", err)
 	}
 
 	var resources []common.Deletable
@@ -43,7 +43,7 @@ func (a GlobalAddresses) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete global address %s?", address.Name))
+		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
 		if !proceed {
 			continue
 		}

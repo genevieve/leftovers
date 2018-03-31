@@ -44,7 +44,7 @@ var _ = Describe("InstanceTemplates", func() {
 
 			Expect(client.ListInstanceTemplatesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete instance template banana-template?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Instance Template banana-template?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("InstanceTemplates", func() {
 
 			It("returns the error", func() {
 				_, err := instanceTemplates.List(filter)
-				Expect(err).To(MatchError("Listing instance templates: some error"))
+				Expect(err).To(MatchError("List Instance Templates: some error"))
 			})
 		})
 
