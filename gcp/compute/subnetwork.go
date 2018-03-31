@@ -1,6 +1,9 @@
 package compute
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Subnetwork struct {
 	client      subnetworksClient
@@ -9,9 +12,11 @@ type Subnetwork struct {
 	region      string
 }
 
-func NewSubnetwork(client subnetworksClient, name, region, network string) Subnetwork {
+func NewSubnetwork(client subnetworksClient, name, region, networkUrl string) Subnetwork {
 	clearerName := name
-	if network != "" {
+	if networkUrl != "" {
+		parts := strings.Split(networkUrl, "/")
+		network := parts[len(parts)-1]
 		clearerName = fmt.Sprintf("%s (Network:%s)", name, network)
 	}
 

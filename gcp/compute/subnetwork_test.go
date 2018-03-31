@@ -24,7 +24,7 @@ var _ = Describe("Subnetwork", func() {
 		client = &fakes.SubnetworksClient{}
 		name = "banana"
 		region = "region"
-		network = "network"
+		network = "some-url/network"
 
 		subnetwork = compute.NewSubnetwork(client, name, region, network)
 	})
