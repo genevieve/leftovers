@@ -46,7 +46,7 @@ func (a Addresses) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete address %s with %d user(s)?", address.Name, len(address.Users)))
+		proceed := a.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
 		if !proceed {
 			continue
 		}

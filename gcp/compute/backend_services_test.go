@@ -44,7 +44,7 @@ var _ = Describe("BackendServices", func() {
 
 			Expect(client.ListBackendServicesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete backend service banana-backend-service?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Backend Service banana-backend-service?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -56,7 +56,7 @@ var _ = Describe("BackendServices", func() {
 
 			It("returns the error", func() {
 				_, err := backendServices.List(filter)
-				Expect(err).To(MatchError("Listing backend services: some error"))
+				Expect(err).To(MatchError("List Backend Services: some error"))
 			})
 		})
 

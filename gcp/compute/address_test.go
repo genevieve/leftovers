@@ -44,7 +44,7 @@ var _ = Describe("Address", func() {
 
 			It("returns the error", func() {
 				err := address.Delete()
-				Expect(err).To(MatchError("ERROR deleting address banana: the-error"))
+				Expect(err).To(MatchError("Delete: the-error"))
 			})
 		})
 	})
@@ -56,8 +56,8 @@ var _ = Describe("Address", func() {
 	})
 
 	Describe("Type", func() {
-		It("returns \"address\"", func() {
-			Expect(address.Type()).To(Equal("address"))
+		It("returns the type", func() {
+			Expect(address.Type()).To(Equal("Address"))
 		})
 	})
 })

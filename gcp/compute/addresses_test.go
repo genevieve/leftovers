@@ -49,7 +49,7 @@ var _ = Describe("Addresses", func() {
 			Expect(client.ListAddressesCall.CallCount).To(Equal(1))
 			Expect(client.ListAddressesCall.Receives.Region).To(Equal("region-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete address banana-address with 0 user(s)?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Address banana-address?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -90,7 +90,7 @@ var _ = Describe("Addresses", func() {
 				list, err := addresses.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete address banana-address with 1 user(s)?"))
+				Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Address banana-address?"))
 				Expect(list).To(HaveLen(1))
 			})
 		})

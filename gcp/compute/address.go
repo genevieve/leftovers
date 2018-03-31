@@ -18,9 +18,8 @@ func NewAddress(client addressesClient, name, region string) Address {
 
 func (a Address) Delete() error {
 	err := a.client.DeleteAddress(a.region, a.name)
-
 	if err != nil {
-		return fmt.Errorf("ERROR deleting address %s: %s", a.name, err)
+		return fmt.Errorf("Delete: %s", err)
 	}
 
 	return nil
@@ -31,5 +30,5 @@ func (a Address) Name() string {
 }
 
 func (a Address) Type() string {
-	return "address"
+	return "Address"
 }

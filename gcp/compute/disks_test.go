@@ -48,7 +48,7 @@ var _ = Describe("Disks", func() {
 			Expect(client.ListDisksCall.CallCount).To(Equal(1))
 			Expect(client.ListDisksCall.Receives.Zone).To(Equal("zone-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete disk banana-disk?"))
+			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Disk banana-disk?"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -60,7 +60,7 @@ var _ = Describe("Disks", func() {
 
 			It("returns the error", func() {
 				_, err := disks.List(filter)
-				Expect(err).To(MatchError("Listing disks for zone zone-1: some error"))
+				Expect(err).To(MatchError("List Disks for zone zone-1: some error"))
 			})
 		})
 
