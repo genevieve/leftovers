@@ -13,7 +13,7 @@ import (
 )
 
 type opts struct {
-	IAAS      string `short:"i"  long:"iaas"        env:"BBL_IAAS"  description:"The IAAS for clean up."  `
+	IAAS      string `short:"i"  long:"iaas"        env:"BBL_IAAS"  description:"The IaaS for clean up."  `
 	NoConfirm bool   `short:"n"  long:"no-confirm"                  description:"Destroy resources without prompting. This is dangerous, make good choices!"`
 	Filter    string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
 	DryRun    bool   `short:"d"  long:"dry-run"                     description:"List all resources without deleting any."`

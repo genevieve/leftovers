@@ -1,13 +1,21 @@
 # Leftovers :turkey:
 
-Go cli/library for cleaning up **orphaned IAAS resources**.
+Go cli & library for cleaning up **orphaned IaaS resources**.
 
 It will **prompt you before deleting** any resource, ie:
 
 ```
-$ leftovers --filter reindeer
+$ leftovers --filter banana
 
-Are you sure you want to delete firewall bbl-env-reindeer? (y/N)
+[Firewall: banana-http] Delete? (y/N)
+```
+
+Or maybe you want to **see all of the resources** in your IaaS, ie:
+```
+$ leftovers --filter banana --dry-run
+
+[Firewall: banana-http]
+[Network: banana]
 ```
 
 
@@ -44,9 +52,10 @@ Usage:
   leftovers [OPTIONS]
 
 Application Options:
-  -i, --iaas=                     The IAAS for clean up. (default: aws) [$BBL_IAAS]
+  -i, --iaas=                     The IaaS for clean up. (default: aws) [$BBL_IAAS]
   -n, --no-confirm                Destroy resources without prompting. This is dangerous, make good choices!
   -f, --filter=                   Filtering resources by an environment name.
+  -d, --dry-run                   List all resources without deleting any.
       --aws-access-key-id=        AWS access key id. [$BBL_AWS_ACCESS_KEY_ID]
       --aws-secret-access-key=    AWS secret access key. [$BBL_AWS_SECRET_ACCESS_KEY]
       --aws-region=               AWS region. [$BBL_AWS_REGION]
@@ -66,7 +75,7 @@ Help Options:
 
 
 
-## What's being deleted by IAAS:
+## Resources deleted by IaaS
 
 ### AWS
 
@@ -76,6 +85,7 @@ Help Options:
   + iam role policies
   + iam user policies
   + iam server certificates
+  + ec2 eips
   + ec2 volumes
   + ec2 tags
   + ec2 key pairs
@@ -95,7 +105,6 @@ Help Options:
   + kms key aliases
   + kms keys
   - iam group policies
-  - ec2 eips
   ```
 
 ### Microsoft Azure
