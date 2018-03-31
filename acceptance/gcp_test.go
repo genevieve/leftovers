@@ -51,11 +51,8 @@ var _ = Describe("GCP", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("disk: leftovers-dry-run"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Are you sure you want to delete"))
-			Expect(stdout.String()).NotTo(ContainSubstring("Deleting leftovers-dry-run."))
-			Expect(stdout.String()).NotTo(ContainSubstring("SUCCESS deleting leftovers-dry-run!"))
-			Expect(stdout.String()).NotTo(ContainSubstring("ERROR deleting disk"))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-dry-run]"))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Disk: leftovers-dry-run] Deleting..."))
 		})
 	})
 
@@ -69,9 +66,8 @@ var _ = Describe("GCP", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("Deleting disk: leftovers-acceptance."))
-			Expect(stdout.String()).To(ContainSubstring("SUCCESS deleting disk: leftovers-acceptance!"))
-			Expect(stdout.String()).NotTo(ContainSubstring("ERROR deleting disk"))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleted!"))
 		})
 	})
 })
