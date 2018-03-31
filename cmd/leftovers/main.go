@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -86,6 +87,6 @@ func main() {
 	}
 
 	if !c.DryRun {
-		color.Blue("Try leftovers --dry-run to list resources!\n")
+		log.Println(fmt.Sprintf("Try %s to list remaining resources!", fmt.Sprintf(color.BlueString("leftovers --filter %s --dry-run"), c.Filter)))
 	}
 }
