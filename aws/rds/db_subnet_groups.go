@@ -58,7 +58,7 @@ func (d DBSubnetGroups) get(filter string) ([]common.Deletable, error) {
 	for _, db := range dbSubnetGroups.DBSubnetGroups {
 		resource := NewDBSubnetGroup(d.client, db.DBSubnetGroupName)
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
 		}
 

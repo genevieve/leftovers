@@ -89,7 +89,7 @@ var _ = Describe("Instances", func() {
 				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-instance-id"))
 
 				Expect(items).To(HaveLen(1))
 			})
@@ -108,7 +108,7 @@ var _ = Describe("Instances", func() {
 				}
 			})
 
-			It("uses just the instance id in the prompt", func() {
+			It("uses it in the prompt", func() {
 				items, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
