@@ -2,6 +2,14 @@
 
 Go cli & library for cleaning up **orphaned IaaS resources**.
 
+* <a href='#what'>What's it look like?</a>
+* <a href='#why'>Why you might be here.</a>
+* <a href='#how'>Installation</a>
+* <a href='#usage'>Usage</a>
+* [Resources you can delete by IaaS.](RESOURCES.md)
+
+## <a name='what'></a>Why you might be here.
+
 It will **prompt you before deleting** any resource, ie:
 
 ```css
@@ -20,7 +28,7 @@ Or maybe you want to **see all of the resources** in your IaaS, ie:
 
 
 
-## Why you might be here?
+## <a name='why'></a> Why you might be here.
 - You `terraform apply`'d way back when and lost your `terraform.tfstate`
 - You used the console or cli to create some infrastructure and want to clean up
 - Your acceptance tests in CI failed, the container disappeared, and
@@ -28,7 +36,7 @@ infrastructure resources were tragically orphaned
 
 
 
-## Installation
+## <a name='how'></a>Installation
 
 [Install go.](https://golang.org/doc/install) Then:
 
@@ -45,7 +53,7 @@ brew install leftovers
 
 
 
-## Usage
+## <a name='how'></a>Usage
 
 ```
 Usage:
@@ -73,82 +81,3 @@ Help Options:
   -h, --help                     Show this help message
 ```
 
-
-
-## Resources deleted by IaaS
-
-### AWS
-
-  ```diff
-  + iam access keys
-  + iam instance profiles
-  + iam policies
-  + iam roles
-  + iam role policies
-  + iam users
-  + iam user policies
-  + iam server certificates
-  + ec2 eips
-  + ec2 volumes
-  + ec2 tags
-  + ec2 key pairs
-  + ec2 instances
-  + ec2 security groups
-  + ec2 vpcs
-  + ec2 subnets
-  + ec2 route tables
-  + ec2 internet gateways
-  + ec2 network interfaces
-  + elb load balancers
-  + elbv2 load balancers
-  + elbv2 target groups
-  + kms aliases
-  + kms keys
-  + rds db instances
-  + rds db subnet groups
-  + s3 buckets
-  - iam group policies
-  ```
-
-### Microsoft Azure
-
-  ```diff
-  + resource groups
-  ```
-
-### GCP
-
-  ```diff
-  + compute addresses
-  + compute global addresses
-  + compute backend services
-  + compute disks
-  + compute firewalls
-  + compute forwarding rules
-  + compute global forwarding rules
-  + compute global health checks
-  + compute http health checks
-  + compute https health checks
-  + compute images
-  + compute subnetworks
-  + compute networks
-  + compute target pools
-  + compute target https proxies
-  + compute target http proxies
-  + compute url maps
-  + compute vm instance templates
-  + compute vm instances
-  + compute vm instance groups
-  + compute vm instance group managers
-  + dns managed zones
-  + dns record sets
-  - compute routes
-  - compute snapshots
-  ```
-
-### vSphere
-
-  ```diff
-  + virtual machines
-  + empty folders
-  ```
