@@ -8,14 +8,23 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 * <a href='#usage'>Usage</a>
 * [Resources you can delete by IaaS.](RESOURCES.md)
 
-## <a name='what'></a>Why you might be here.
+## <a name='what'></a>What's it look like?
 
-It will **prompt you before deleting** any resource, ie:
+It will **prompt you before deleting** any resource by default, ie:
 
 ```css
 > leftovers --filter banana
 
 [Firewall: banana-http] Delete? (y/N)
+```
+
+It can be configured to **not** prompt, ie:
+
+```css
+> leftovers --filter banana --no-confirm
+
+[Firewall: banana-http] Deleting...
+[Firewall: banana-http] Deleted!
 ```
 
 Or maybe you want to **see all of the resources** in your IaaS, ie:
@@ -38,13 +47,14 @@ infrastructure resources were tragically orphaned
 
 ## <a name='how'></a>Installation
 
+### Option 1
 [Install go.](https://golang.org/doc/install) Then:
 
 ```
-$  go get -u github.com/genevieve/leftovers/cmd/leftovers
+go get -u github.com/genevieve/leftovers/cmd/leftovers
 ```
 
-**OR**
+### Option 2
 
 ```
 brew tap genevieve/tap
