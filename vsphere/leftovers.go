@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/vmware/govmomi"
 )
 
@@ -21,10 +22,11 @@ type Leftovers struct {
 
 func (l Leftovers) List(filter string) {
 	var all []Deletable
+
 	for _, r := range l.resources {
 		list, err := r.List(filter)
 		if err != nil {
-			l.logger.Println(err.Error())
+			l.logger.Println(color.YellowString(err.Error()))
 		}
 
 		all = append(all, list...)
@@ -52,9 +54,9 @@ func (l Leftovers) Delete(filter string) error {
 
 		err := d.Delete()
 		if err != nil {
-			l.logger.Println(err.Error())
+			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
 		} else {
-			l.logger.Printf("[%s: %s] Deleted!\n", d.Type(), d.Name())
+			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
 		}
 	}
 
