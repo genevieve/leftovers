@@ -23,8 +23,9 @@ var _ = Describe("Address", func() {
 		client = &fakes.AddressesClient{}
 		publicIp = aws.String("the-public-ip")
 		allocationId = aws.String("the-allocation-id")
+		instanceId := aws.String("")
 
-		address = ec2.NewAddress(client, publicIp, allocationId)
+		address = ec2.NewAddress(client, publicIp, allocationId, instanceId)
 	})
 
 	Describe("Delete", func() {
@@ -51,6 +52,15 @@ var _ = Describe("Address", func() {
 	Describe("Name", func() {
 		It("returns the identifier", func() {
 			Expect(address.Name()).To(Equal("the-public-ip"))
+		})
+
+		Context("when it's in use by an instance", func() {
+			BeforeEach(func() {
+				address = ec2.NewAddress(client, publicIp, allocationId, aws.String("the-banana-id"))
+			})
+			It("returns a more helpful identifier", func() {
+				Expect(address.Name()).To(Equal("the-public-ip (Instance:the-banana-id)"))
+			})
 		})
 	})
 

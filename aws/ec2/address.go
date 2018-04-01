@@ -14,12 +14,17 @@ type Address struct {
 	rtype        string
 }
 
-func NewAddress(client addressesClient, publicIp, allocationId *string) Address {
+func NewAddress(client addressesClient, publicIp, allocationId, instanceId *string) Address {
+	identifier := *publicIp
+	if *instanceId != "" {
+		identifier = fmt.Sprintf("%s (Instance:%s)", *publicIp, *instanceId)
+	}
+
 	return Address{
 		client:       client,
 		publicIp:     publicIp,
 		allocationId: allocationId,
-		identifier:   *publicIp,
+		identifier:   identifier,
 		rtype:        "EC2 Address",
 	}
 }

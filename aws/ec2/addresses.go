@@ -55,13 +55,7 @@ func (d Addresses) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, a := range addresses.Addresses {
-		resource := NewAddress(d.client, a.PublicIp, a.AllocationId)
-
-		if d.inUse(a) {
-			continue
-		}
-
-		resources = append(resources, resource)
+		resources = append(resources, NewAddress(d.client, a.PublicIp, a.AllocationId, a.InstanceId))
 	}
 
 	return resources, nil
