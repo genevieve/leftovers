@@ -37,7 +37,7 @@ func (g Groups) List(filter string) ([]Deletable, error) {
 
 	var delete []Deletable
 	for _, r := range resources {
-		proceed := g.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", r.Type(), r.Name()))
+		proceed := g.logger.PromptWithDetails(r.Type(), r.Name())
 		if !proceed {
 			continue
 		}
@@ -58,7 +58,7 @@ func (g Groups) get(filter string) ([]Deletable, error) {
 	for _, group := range *groups.Value {
 		resource := NewGroup(g.client, group.Name)
 
-		if !strings.Contains(resource.identifier, filter) {
+		if !strings.Contains(resource.Name(), filter) {
 			continue
 		}
 
