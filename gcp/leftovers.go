@@ -30,9 +30,9 @@ func (l Leftovers) List(filter string) {
 	l.logger.NoConfirm()
 
 	var deletables []common.Deletable
+
 	for _, r := range l.resources {
 		list, err := r.List(filter)
-
 		if err != nil {
 			l.logger.Println(color.YellowString(err.Error()))
 		}
@@ -46,7 +46,7 @@ func (l Leftovers) List(filter string) {
 }
 
 func (l Leftovers) Delete(filter string) error {
-	var deletables []common.Deletable
+	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
 		list, err := r.List(filter)
