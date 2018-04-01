@@ -49,11 +49,10 @@ func (l *Logger) Println(message string) {
 	fmt.Fprintf(l.writer, "%s\n", message)
 }
 
-// TODO: Remove this function when PromptWithDetails is the only Prompt.
 // Please note that Prompt will block all other goroutines
 // attempting to print to this logger while
 // waiting for user input.
-func (l *Logger) Prompt(message string) bool {
+func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
 	if l.noConfirm {
 		return true
 	}
@@ -61,7 +60,7 @@ func (l *Logger) Prompt(message string) bool {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	l.clear()
-	fmt.Fprintf(l.writer, "%s (y/N): ", message)
+	fmt.Fprintf(l.writer, "[%s: %s] Delete? (y/N):", resourceType, resourceName)
 	l.newline = true
 
 	var proceed string
@@ -73,10 +72,6 @@ func (l *Logger) Prompt(message string) bool {
 	}
 
 	return true
-}
-
-func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
-	return l.Prompt(fmt.Sprintf("[%s: %s] Delete?", resourceType, resourceName))
 }
 
 func (l *Logger) NoConfirm() {
