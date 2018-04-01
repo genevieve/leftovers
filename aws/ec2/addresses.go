@@ -24,30 +24,7 @@ func NewAddresses(client addressesClient, logger logger) Addresses {
 	}
 }
 
-func (d Addresses) ListOnly(filter string) ([]common.Deletable, error) {
-	return d.get(filter)
-}
-
 func (d Addresses) List(filter string) ([]common.Deletable, error) {
-	resources, err := d.get(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	var delete []common.Deletable
-	for _, r := range resources {
-		proceed := d.logger.PromptWithDetails(r.Type(), r.Name())
-		if !proceed {
-			continue
-		}
-
-		delete = append(delete, r)
-	}
-
-	return delete, nil
-}
-
-func (d Addresses) get(filter string) ([]common.Deletable, error) {
 	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Addresses: %s", err)
@@ -55,7 +32,14 @@ func (d Addresses) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, a := range addresses.Addresses {
-		resources = append(resources, NewAddress(d.client, a.PublicIp, a.AllocationId, a.InstanceId))
+		r := NewAddress(d.client, a.PublicIp, a.AllocationId, a.InstanceId)
+
+		proceed := d.logger.PromptWithDetails(r.Type(), r.Name())
+		if !proceed {
+			continue
+		}
+
+		resources = append(resources, r)
 	}
 
 	return resources, nil

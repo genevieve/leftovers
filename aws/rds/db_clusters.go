@@ -25,30 +25,7 @@ func NewDBClusters(client dbClustersClient, logger logger) DBClusters {
 	}
 }
 
-func (d DBClusters) ListOnly(filter string) ([]common.Deletable, error) {
-	return d.get(filter)
-}
-
 func (d DBClusters) List(filter string) ([]common.Deletable, error) {
-	resources, err := d.get(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	var delete []common.Deletable
-	for _, r := range resources {
-		proceed := d.logger.PromptWithDetails(r.Type(), r.Name())
-		if !proceed {
-			continue
-		}
-
-		delete = append(delete, r)
-	}
-
-	return delete, nil
-}
-
-func (d DBClusters) get(filter string) ([]common.Deletable, error) {
 	dbClusters, err := d.client.DescribeDBClusters(&awsrds.DescribeDBClustersInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing RDS DB Clusters: %s", err)
@@ -56,17 +33,22 @@ func (d DBClusters) get(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, db := range dbClusters.DBClusters {
-		resource := NewDBCluster(d.client, db.DBClusterIdentifier)
+		r := NewDBCluster(d.client, db.DBClusterIdentifier)
 
 		if *db.Status == "deleting" {
 			continue
 		}
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !strings.Contains(r.Name(), filter) {
 			continue
 		}
 
-		resources = append(resources, resource)
+		proceed := d.logger.PromptWithDetails(r.Type(), r.Name())
+		if !proceed {
+			continue
+		}
+
+		resources = append(resources, r)
 	}
 
 	return resources, nil

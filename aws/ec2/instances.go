@@ -27,30 +27,7 @@ func NewInstances(client instancesClient, logger logger, resourceTags resourceTa
 	}
 }
 
-func (a Instances) ListOnly(filter string) ([]common.Deletable, error) {
-	return a.get(filter)
-}
-
 func (a Instances) List(filter string) ([]common.Deletable, error) {
-	resources, err := a.get(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	var delete []common.Deletable
-	for _, r := range resources {
-		proceed := a.logger.PromptWithDetails(r.Type(), r.Name())
-		if !proceed {
-			continue
-		}
-
-		delete = append(delete, r)
-	}
-
-	return delete, nil
-}
-
-func (a Instances) get(filter string) ([]common.Deletable, error) {
 	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Instances: %s", err)
@@ -59,17 +36,22 @@ func (a Instances) get(filter string) ([]common.Deletable, error) {
 	var resources []common.Deletable
 	for _, r := range instances.Reservations {
 		for _, i := range r.Instances {
-			resource := NewInstance(a.client, a.resourceTags, i.InstanceId, i.KeyName, i.Tags)
+			r := NewInstance(a.client, a.resourceTags, i.InstanceId, i.KeyName, i.Tags)
 
 			if a.alreadyShutdown(*i.State.Name) {
 				continue
 			}
 
-			if !strings.Contains(resource.Name(), filter) {
+			if !strings.Contains(r.Name(), filter) {
 				continue
 			}
 
-			resources = append(resources, resource)
+			proceed := a.logger.PromptWithDetails(r.Type(), r.Name())
+			if !proceed {
+				continue
+			}
+
+			resources = append(resources, r)
 		}
 	}
 

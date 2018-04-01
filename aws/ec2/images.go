@@ -27,15 +27,7 @@ func NewImages(client imagesClient, logger logger, resourceTags resourceTags) Im
 	}
 }
 
-func (i Images) ListOnly(filter string) ([]common.Deletable, error) {
-	return i.get(filter, true)
-}
-
 func (i Images) List(filter string) ([]common.Deletable, error) {
-	return i.get(filter, true)
-}
-
-func (i Images) get(filter string, prompt bool) ([]common.Deletable, error) {
 	images, err := i.client.DescribeImages(&awsec2.DescribeImagesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Images: %s", err)
@@ -49,11 +41,9 @@ func (i Images) get(filter string, prompt bool) ([]common.Deletable, error) {
 			continue
 		}
 
-		if prompt {
-			proceed := i.logger.PromptWithDetails(r.Type(), r.Name())
-			if !proceed {
-				continue
-			}
+		proceed := i.logger.PromptWithDetails(r.Type(), r.Name())
+		if !proceed {
+			continue
 		}
 
 		resources = append(resources, r)
