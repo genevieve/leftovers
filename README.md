@@ -80,9 +80,12 @@ Help Options:
 ### AWS
 
   ```diff
-  + iam instance profiles (& detaching roles)
+  + iam access keys
+  + iam instance profiles
+  + iam policies
   + iam roles
   + iam role policies
+  + iam users
   + iam user policies
   + iam server certificates
   + ec2 eips
@@ -99,11 +102,11 @@ Help Options:
   + elb load balancers
   + elbv2 load balancers
   + elbv2 target groups
-  + s3 buckets
+  + kms aliases
+  + kms keys
   + rds db instances
   + rds db subnet groups
-  + kms key aliases
-  + kms keys
+  + s3 buckets
   - iam group policies
   ```
 
@@ -133,7 +136,7 @@ Help Options:
   + compute target https proxies
   + compute target http proxies
   + compute url maps
-  - compute vm instance templates
+  + compute vm instance templates
   + compute vm instances
   + compute vm instance groups
   + compute vm instance group managers
