@@ -4,18 +4,9 @@
 
   ```diff
   - acm certificate
-  - ami
   - cloudformation stack
   - dms certificate
-  + iam access keys
-  + iam instance profiles
-  + iam policies
-  + iam roles
-  + iam role policies
-  + iam users
-  - iam user ssh key
-  + iam user policies
-  + iam server certificates
+  + ec2 images
   + ec2 eips
   + ec2 volumes
   + ec2 tags
@@ -38,6 +29,16 @@
   + elbv2 target groups
   + kms aliases
   + kms keys
+  + iam access keys
+  + iam instance profiles
+  - iam group policies
+  + iam policies
+  + iam roles
+  + iam role policies
+  + iam users
+  - iam user ssh key
+  + iam user policies
+  + iam server certificates
   + rds db cluster
   + rds db instances
   + rds db subnet groups
@@ -47,7 +48,6 @@
   - rds db parameter group
   + s3 buckets
   - s3 bucket policy
-  - iam group policies
   - route53 health check
   - route53 record
   - route53 zone
