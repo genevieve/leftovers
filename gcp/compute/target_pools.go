@@ -46,7 +46,7 @@ func (t TargetPools) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := t.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
+		proceed := t.logger.PromptWithDetails(resource.Type(), resource.Name())
 		if !proceed {
 			continue
 		}

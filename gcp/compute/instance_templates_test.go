@@ -29,7 +29,7 @@ var _ = Describe("InstanceTemplates", func() {
 		var filter string
 
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
+			logger.PromptWithDetailsCall.Returns.Proceed = true
 			client.ListInstanceTemplatesCall.Returns.Output = &gcpcompute.InstanceTemplateList{
 				Items: []*gcpcompute.InstanceTemplate{{
 					Name: "banana-template",
@@ -44,7 +44,9 @@ var _ = Describe("InstanceTemplates", func() {
 
 			Expect(client.ListInstanceTemplatesCall.CallCount).To(Equal(1))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Instance Template banana-template?"))
+			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Instance Template"))
+			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-template"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -65,14 +67,14 @@ var _ = Describe("InstanceTemplates", func() {
 				list, err := instanceTemplates.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(list).To(HaveLen(0))
 			})
 		})
 
 		Context("when the user says no to the prompt", func() {
 			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
+				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
 
 			It("does not add it to the list", func() {

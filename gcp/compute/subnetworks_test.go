@@ -31,7 +31,7 @@ var _ = Describe("Subnetworks", func() {
 		var filter string
 
 		BeforeEach(func() {
-			logger.PromptCall.Returns.Proceed = true
+			logger.PromptWithDetailsCall.Returns.Proceed = true
 			client.ListSubnetworksCall.Returns.Output = &gcpcompute.SubnetworkList{
 				Items: []*gcpcompute.Subnetwork{{
 					Name:   "banana-subnetwork",
@@ -48,7 +48,9 @@ var _ = Describe("Subnetworks", func() {
 			Expect(client.ListSubnetworksCall.CallCount).To(Equal(1))
 			Expect(client.ListSubnetworksCall.Receives.Region).To(Equal("region-1"))
 
-			Expect(logger.PromptCall.Receives.Message).To(Equal("Are you sure you want to delete Subnetwork banana-subnetwork?"))
+			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Subnetwork"))
+			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-subnetwork"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -69,7 +71,7 @@ var _ = Describe("Subnetworks", func() {
 				list, err := subnetworks.List("grape")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(list).To(HaveLen(0))
 			})
 		})
@@ -88,14 +90,14 @@ var _ = Describe("Subnetworks", func() {
 				list, err := subnetworks.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptCall.CallCount).To(Equal(0))
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(list).To(HaveLen(0))
 			})
 		})
 
 		Context("when the user says no to the prompt", func() {
 			BeforeEach(func() {
-				logger.PromptCall.Returns.Proceed = false
+				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
 
 			It("does not add it to the list", func() {

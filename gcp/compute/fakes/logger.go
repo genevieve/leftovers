@@ -11,23 +11,6 @@ type Logger struct {
 		Messages []string
 	}
 
-	PrintlnCall struct {
-		Receives struct {
-			Message string
-		}
-		Messages []string
-	}
-
-	PromptCall struct {
-		CallCount int
-		Receives  struct {
-			Message string
-		}
-		Returns struct {
-			Proceed bool
-		}
-	}
-
 	PromptWithDetailsCall struct {
 		CallCount int
 		Receives  struct {
@@ -45,19 +28,6 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	l.PrintfCall.Receives.Arguments = a
 
 	l.PrintfCall.Messages = append(l.PrintfCall.Messages, fmt.Sprintf(message, a...))
-}
-
-func (l *Logger) Println(message string) {
-	l.PrintlnCall.Receives.Message = message
-
-	l.PrintlnCall.Messages = append(l.PrintlnCall.Messages, message)
-}
-
-func (l *Logger) Prompt(message string) bool {
-	l.PromptCall.CallCount++
-	l.PromptCall.Receives.Message = message
-
-	return l.PromptCall.Returns.Proceed
 }
 
 func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {

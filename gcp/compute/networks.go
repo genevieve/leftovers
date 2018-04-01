@@ -39,7 +39,7 @@ func (n Networks) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := n.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
+		proceed := n.logger.PromptWithDetails(resource.Type(), resource.Name())
 		if !proceed {
 			continue
 		}

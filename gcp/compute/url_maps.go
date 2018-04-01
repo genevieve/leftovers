@@ -40,7 +40,7 @@ func (u UrlMaps) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		proceed := u.logger.Prompt(fmt.Sprintf("Are you sure you want to delete %s %s?", resource.Type(), resource.Name()))
+		proceed := u.logger.PromptWithDetails(resource.Type(), resource.Name())
 		if !proceed {
 			continue
 		}
