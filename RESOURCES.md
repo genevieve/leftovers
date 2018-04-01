@@ -16,8 +16,6 @@
   - iam user ssh key
   + iam user policies
   + iam server certificates
-  - ebs volume
-  - ebs snapshot
   + ec2 eips
   + ec2 volumes
   + ec2 tags
@@ -29,6 +27,7 @@
   + ec2 route tables
   + ec2 internet gateways
   + ec2 network interfaces
+  - ec2 snapshots
   + elb load balancers
   - elb attachments
   - elb listener
@@ -39,6 +38,7 @@
   + elbv2 target groups
   + kms aliases
   + kms keys
+  + rds db cluster
   + rds db instances
   + rds db subnet groups
   - rds db snapshot

@@ -97,6 +97,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 
 			rds.NewDBInstances(rdsClient, logger),
 			rds.NewDBSubnetGroups(rdsClient, logger),
+			rds.NewDBClusters(rdsClient, logger),
 
 			iam.NewServerCertificates(iamClient, logger),
 
