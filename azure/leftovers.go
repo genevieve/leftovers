@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
 	azurelib "github.com/Azure/go-autorest/autorest/azure"
+	"github.com/fatih/color"
 )
 
 type resource interface {
@@ -25,7 +26,7 @@ func (l Leftovers) List(filter string) {
 	for _, r := range l.resources {
 		list, err := r.ListOnly(filter)
 		if err != nil {
-			l.logger.Println(err.Error())
+			l.logger.Println(color.YellowString(err.Error()))
 		}
 
 		all = append(all, list...)
@@ -42,7 +43,7 @@ func (l Leftovers) Delete(filter string) error {
 	for _, r := range l.resources {
 		list, err := r.List(filter)
 		if err != nil {
-			return err
+			l.logger.Println(color.YellowString(err.Error()))
 		}
 
 		deletables = append(deletables, list...)
@@ -53,9 +54,9 @@ func (l Leftovers) Delete(filter string) error {
 
 		err := d.Delete()
 		if err != nil {
-			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), err.Error()))
+			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
 		} else {
-			l.logger.Printf(fmt.Sprintf("[%s: %s] Deleted!", d.Type(), d.Name()))
+			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
 		}
 	}
 
