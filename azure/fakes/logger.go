@@ -50,3 +50,5 @@ func (l *Logger) Println(message string) {
 
 	l.PrintfCall.Messages = append(l.PrintfCall.Messages, message)
 }
+
+func (l *Logger) NoConfirm() {}
