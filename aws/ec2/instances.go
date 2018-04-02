@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/genevieve/leftovers/aws/common"
 )
@@ -28,7 +29,12 @@ func NewInstances(client instancesClient, logger logger, resourceTags resourceTa
 }
 
 func (a Instances) List(filter string) ([]common.Deletable, error) {
-	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{})
+	instances, err := a.client.DescribeInstances(&awsec2.DescribeInstancesInput{
+		Filters: []*awsec2.Filter{{
+			Name:   aws.String("instance-state-name"),
+			Values: []*string{aws.String("pending"), aws.String("running"), aws.String("shutting-down"), aws.String("stopping"), aws.String("stopped")},
+		}},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Instances: %s", err)
 	}
@@ -37,10 +43,6 @@ func (a Instances) List(filter string) ([]common.Deletable, error) {
 	for _, r := range instances.Reservations {
 		for _, i := range r.Instances {
 			r := NewInstance(a.client, a.resourceTags, i.InstanceId, i.KeyName, i.Tags)
-
-			if a.alreadyShutdown(*i.State.Name) {
-				continue
-			}
 
 			if !strings.Contains(r.Name(), filter) {
 				continue
@@ -56,8 +58,4 @@ func (a Instances) List(filter string) ([]common.Deletable, error) {
 	}
 
 	return resources, nil
-}
-
-func (a Instances) alreadyShutdown(state string) bool {
-	return state == "shutting-down" || state == "terminated"
 }
