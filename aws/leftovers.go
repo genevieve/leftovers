@@ -74,16 +74,16 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	return Leftovers{
 		logger: logger,
 		resources: []resource{
-			iam.NewInstanceProfiles(iamClient, logger),
-			iam.NewRoles(iamClient, logger, rolePolicies),
-			iam.NewUsers(iamClient, logger, userPolicies, accessKeys),
-			iam.NewPolicies(iamClient, logger),
-
 			elb.NewLoadBalancers(elbClient, logger),
 			elbv2.NewLoadBalancers(elbv2Client, logger),
 			elbv2.NewTargetGroups(elbv2Client, logger),
 
-			ec2.NewAddresses(ec2Client, logger),
+			iam.NewInstanceProfiles(iamClient, logger),
+			iam.NewRoles(iamClient, logger, rolePolicies),
+			iam.NewUsers(iamClient, logger, userPolicies, accessKeys),
+			iam.NewPolicies(iamClient, logger),
+			iam.NewServerCertificates(iamClient, logger),
+
 			ec2.NewKeyPairs(ec2Client, logger),
 			ec2.NewInstances(ec2Client, logger, resourceTags),
 			ec2.NewSecurityGroups(ec2Client, logger, resourceTags),
@@ -92,14 +92,13 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			ec2.NewNetworkInterfaces(ec2Client, logger),
 			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways, resourceTags),
 			ec2.NewImages(ec2Client, logger, resourceTags),
+			ec2.NewAddresses(ec2Client, logger),
 
 			s3.NewBuckets(s3Client, logger, bucketManager),
 
 			rds.NewDBInstances(rdsClient, logger),
 			rds.NewDBSubnetGroups(rdsClient, logger),
 			rds.NewDBClusters(rdsClient, logger),
-
-			iam.NewServerCertificates(iamClient, logger),
 
 			kms.NewAliases(kmsClient, logger),
 			kms.NewKeys(kmsClient, logger),
@@ -127,7 +126,6 @@ func (l Leftovers) List(filter string) {
 
 func (l Leftovers) Delete(filter string) error {
 	deletables := [][]common.Deletable{}
-
 	for _, r := range l.resources {
 		list, err := r.List(filter)
 		if err != nil {
@@ -138,7 +136,6 @@ func (l Leftovers) Delete(filter string) error {
 	}
 
 	var wg sync.WaitGroup
-
 	for _, resources := range deletables {
 		for _, r := range resources {
 			wg.Add(1)
@@ -146,7 +143,6 @@ func (l Leftovers) Delete(filter string) error {
 			go func(r common.Deletable) {
 				defer wg.Done()
 
-				//TODO: Create a prefixed logger
 				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", r.Type(), r.Name()))
 
 				err := r.Delete()
