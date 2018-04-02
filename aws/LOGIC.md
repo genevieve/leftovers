@@ -18,6 +18,7 @@
 * Delete subnets **before** deleting vpcs.
 * Delete tags associated to a resource **after** deleting the resource.
 * Delete tags without a resource at any time.
+* Terminate instances **before** releasing addresses.
 
 
 ### iam
