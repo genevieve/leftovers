@@ -16,7 +16,7 @@ type Address struct {
 
 func NewAddress(client addressesClient, publicIp, allocationId, instanceId *string) Address {
 	identifier := *publicIp
-	if *instanceId != "" {
+	if instanceId != nil && *instanceId != "" {
 		identifier = fmt.Sprintf("%s (Instance:%s)", *publicIp, *instanceId)
 	}
 
