@@ -18,7 +18,7 @@
   + ec2 route tables
   + ec2 internet gateways
   + ec2 network interfaces
-  - ec2 snapshots
+  + ec2 snapshots
   + elb load balancers
   - elb attachments
   - elb listener
