@@ -49,8 +49,7 @@ var _ = Describe("Images", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeImagesCall.CallCount).To(Equal(1))
-			Expect(client.DescribeImagesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("owner-id")))
-			Expect(client.DescribeImagesCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("the-account-id")))
+			Expect(client.DescribeImagesCall.Receives.Input.Owners[0]).To(Equal(aws.String("the-account-id")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Image"))

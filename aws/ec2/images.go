@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	awssts "github.com/aws/aws-sdk-go/service/sts"
 	"github.com/genevieve/leftovers/aws/common"
@@ -42,10 +41,7 @@ func (i Images) List(filter string) ([]common.Deletable, error) {
 	}
 
 	images, err := i.client.DescribeImages(&awsec2.DescribeImagesInput{
-		Filters: []*awsec2.Filter{{
-			Name:   aws.String("owner-id"),
-			Values: []*string{caller.Account},
-		}},
+		Owners: []*string{caller.Account},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Images: %s", err)
