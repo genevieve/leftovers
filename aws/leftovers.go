@@ -15,6 +15,7 @@ import (
 	awskms "github.com/aws/aws-sdk-go/service/kms"
 	awsrds "github.com/aws/aws-sdk-go/service/rds"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+	awssts "github.com/aws/aws-sdk-go/service/sts"
 	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/aws/common"
 	"github.com/genevieve/leftovers/aws/ec2"
@@ -54,6 +55,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	}
 	sess := session.New(config)
 
+	stsClient := awssts.New(sess)
 	iamClient := awsiam.New(sess)
 	ec2Client := awsec2.New(sess)
 	elbClient := awselb.New(sess)
@@ -91,7 +93,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			ec2.NewVolumes(ec2Client, logger),
 			ec2.NewNetworkInterfaces(ec2Client, logger),
 			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways, resourceTags),
-			ec2.NewImages(ec2Client, logger, resourceTags),
+			ec2.NewImages(ec2Client, stsClient, logger, resourceTags),
 			ec2.NewAddresses(ec2Client, logger),
 
 			s3.NewBuckets(s3Client, logger, bucketManager),

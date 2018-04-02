@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	awssts "github.com/aws/aws-sdk-go/service/sts"
 	"github.com/genevieve/leftovers/aws/ec2"
 	"github.com/genevieve/leftovers/aws/ec2/fakes"
 	. "github.com/onsi/ginkgo"
@@ -14,6 +15,7 @@ import (
 var _ = Describe("Images", func() {
 	var (
 		client       *fakes.ImagesClient
+		stsClient    *fakes.StsClient
 		logger       *fakes.Logger
 		resourceTags *fakes.ResourceTags
 
@@ -22,51 +24,39 @@ var _ = Describe("Images", func() {
 
 	BeforeEach(func() {
 		client = &fakes.ImagesClient{}
+		stsClient = &fakes.StsClient{}
 		logger = &fakes.Logger{}
 		logger.PromptWithDetailsCall.Returns.Proceed = true
 		resourceTags = &fakes.ResourceTags{}
 
-		images = ec2.NewImages(client, logger, resourceTags)
+		images = ec2.NewImages(client, stsClient, logger, resourceTags)
 	})
 
 	Describe("List", func() {
-		var filter string
-
 		BeforeEach(func() {
 			client.DescribeImagesCall.Returns.Output = &awsec2.DescribeImagesOutput{
 				Images: []*awsec2.Image{{
-					// State: &awsec2.ImageState{Name: aws.String("available")},
-					// Tags: []*awsec2.Tag{{
-					// 	Key:   aws.String("Name"),
-					// 	Value: aws.String("banana-image"),
-					// }},
 					ImageId: aws.String("the-image-id"),
 				}},
+			}
+			stsClient.GetCallerIdentityCall.Returns.Output = &awssts.GetCallerIdentityOutput{
+				Account: aws.String("the-account-id"),
 			}
 		})
 
 		It("returns a list of ec2 images to delete", func() {
-			items, err := images.List(filter)
+			items, err := images.List("")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeImagesCall.CallCount).To(Equal(1))
+			Expect(client.DescribeImagesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("owner-id")))
+			Expect(client.DescribeImagesCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("the-account-id")))
+
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Image"))
 			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-image-id"))
 
 			Expect(items).To(HaveLen(1))
-		})
-
-		Context("when the image name does not contain the filter", func() {
-			It("does not add it to the list", func() {
-				items, err := images.List("kiwi")
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(client.DescribeImagesCall.CallCount).To(Equal(1))
-				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
-
-				Expect(items).To(HaveLen(0))
-			})
 		})
 
 		Context("when the client fails to list images", func() {
@@ -75,8 +65,19 @@ var _ = Describe("Images", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := images.List(filter)
+				_, err := images.List("")
 				Expect(err).To(MatchError("Describing EC2 Images: some error"))
+			})
+		})
+
+		Context("when the sts client fails to return the caller identity", func() {
+			BeforeEach(func() {
+				stsClient.GetCallerIdentityCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error", func() {
+				_, err := images.List("")
+				Expect(err).To(MatchError("Get caller identity: some error"))
 			})
 		})
 
@@ -86,7 +87,7 @@ var _ = Describe("Images", func() {
 			})
 
 			It("does not return it to the list", func() {
-				items, err := images.List(filter)
+				items, err := images.List("")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

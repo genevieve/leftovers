@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	awssts "github.com/aws/aws-sdk-go/service/sts"
 	"github.com/genevieve/leftovers/aws/common"
 )
 
@@ -13,22 +15,38 @@ type imagesClient interface {
 	DeregisterImage(*awsec2.DeregisterImageInput) (*awsec2.DeregisterImageOutput, error)
 }
 
+type stsClient interface {
+	GetCallerIdentity(*awssts.GetCallerIdentityInput) (*awssts.GetCallerIdentityOutput, error)
+}
+
 type Images struct {
 	client       imagesClient
+	stsClient    stsClient
 	logger       logger
 	resourceTags resourceTags
 }
 
-func NewImages(client imagesClient, logger logger, resourceTags resourceTags) Images {
+func NewImages(client imagesClient, stsClient stsClient, logger logger, resourceTags resourceTags) Images {
 	return Images{
 		client:       client,
+		stsClient:    stsClient,
 		logger:       logger,
 		resourceTags: resourceTags,
 	}
 }
 
 func (i Images) List(filter string) ([]common.Deletable, error) {
-	images, err := i.client.DescribeImages(&awsec2.DescribeImagesInput{})
+	caller, err := i.stsClient.GetCallerIdentity(&awssts.GetCallerIdentityInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Get caller identity: %s", err)
+	}
+
+	images, err := i.client.DescribeImages(&awsec2.DescribeImagesInput{
+		Filters: []*awsec2.Filter{{
+			Name:   aws.String("owner-id"),
+			Values: []*string{caller.Account},
+		}},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Images: %s", err)
 	}
