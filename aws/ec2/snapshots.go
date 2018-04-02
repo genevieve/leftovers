@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+	awssts "github.com/aws/aws-sdk-go/service/sts"
 	"github.com/genevieve/leftovers/aws/common"
 )
 
@@ -15,20 +16,30 @@ type snapshotsClient interface {
 }
 
 type Snapshots struct {
-	client snapshotsClient
-	logger logger
+	client    snapshotsClient
+	stsClient stsClient
+	logger    logger
 }
 
-func NewSnapshots(client snapshotsClient, logger logger) Snapshots {
+func NewSnapshots(client snapshotsClient, stsClient stsClient, logger logger) Snapshots {
 	return Snapshots{
-		client: client,
-		logger: logger,
+		client:    client,
+		stsClient: stsClient,
+		logger:    logger,
 	}
 }
 
 func (s Snapshots) List(filter string) ([]common.Deletable, error) {
+	caller, err := s.stsClient.GetCallerIdentity(&awssts.GetCallerIdentityInput{})
+	if err != nil {
+		return nil, fmt.Errorf("Get caller identity: %s", err)
+	}
+
 	output, err := s.client.DescribeSnapshots(&awsec2.DescribeSnapshotsInput{
 		Filters: []*awsec2.Filter{{
+			Name:   aws.String("owner-id"),
+			Values: []*string{caller.Account},
+		}, {
 			Name:   aws.String("status"),
 			Values: []*string{aws.String("completed")},
 		}},

@@ -95,6 +95,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways, resourceTags),
 			ec2.NewImages(ec2Client, stsClient, logger, resourceTags),
 			ec2.NewAddresses(ec2Client, logger),
+			ec2.NewSnapshots(ec2Client, stsClient, logger),
 
 			s3.NewBuckets(s3Client, logger, bucketManager),
 
