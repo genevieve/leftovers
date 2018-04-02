@@ -52,10 +52,9 @@ var _ = Describe("Snapshots", func() {
 			Expect(stsClient.GetCallerIdentityCall.CallCount).To(Equal(1))
 
 			Expect(client.DescribeSnapshotsCall.CallCount).To(Equal(1))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("owner-id")))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("the-account-id")))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[1].Name).To(Equal(aws.String("status")))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[1].Values[0]).To(Equal(aws.String("completed")))
+			Expect(client.DescribeSnapshotsCall.Receives.Input.OwnerIds[0]).To(Equal(aws.String("the-account-id")))
+			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("status")))
+			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("completed")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Snapshot"))

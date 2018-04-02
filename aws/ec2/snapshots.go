@@ -36,10 +36,8 @@ func (s Snapshots) List(filter string) ([]common.Deletable, error) {
 	}
 
 	output, err := s.client.DescribeSnapshots(&awsec2.DescribeSnapshotsInput{
+		OwnerIds: []*string{caller.Account},
 		Filters: []*awsec2.Filter{{
-			Name:   aws.String("owner-id"),
-			Values: []*string{caller.Account},
-		}, {
 			Name:   aws.String("status"),
 			Values: []*string{aws.String("completed")},
 		}},
