@@ -3,6 +3,7 @@ package ec2
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/genevieve/leftovers/aws/common"
 )
@@ -25,18 +26,19 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 }
 
 func (v Volumes) List(filter string) ([]common.Deletable, error) {
-	output, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{})
+	output, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{
+		Filters: []*awsec2.Filter{{
+			Name:   aws.String("status"),
+			Values: []*string{aws.String("available"), aws.String("in-use")},
+		}},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("Describe EC2 Volumes: %s", err)
 	}
 
 	var resources []common.Deletable
 	for _, volume := range output.Volumes {
-		if *volume.State != "available" {
-			continue
-		}
-
-		r := NewVolume(v.client, volume.VolumeId)
+		r := NewVolume(v.client, volume.VolumeId, volume.State)
 
 		proceed := v.logger.PromptWithDetails(r.Type(), r.Name())
 		if !proceed {
