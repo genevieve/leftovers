@@ -111,6 +111,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 			kms.NewKeys(kmsClient, logger),
 
 			route53.NewHostedZones(route53Client, logger),
+			route53.NewHealthChecks(route53Client, logger),
 		},
 	}, nil
 }
