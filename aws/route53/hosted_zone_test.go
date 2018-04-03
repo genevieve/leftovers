@@ -53,6 +53,52 @@ var _ = Describe("HostedZone", func() {
 			Expect(client.DeleteHostedZoneCall.Receives.Input.Id).To(Equal(id))
 		})
 
+		Context("when the resource record set is of type NS", func() {
+			BeforeEach(func() {
+				client.ListResourceRecordSetsCall.Returns.Output = &awsroute53.ListResourceRecordSetsOutput{
+					ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
+						Type: aws.String("NS"),
+					}},
+				}
+			})
+
+			It("does not try to delete it", func() {
+				err := hostedZone.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListResourceRecordSetsCall.CallCount).To(Equal(1))
+				Expect(client.ListResourceRecordSetsCall.Receives.Input.HostedZoneId).To(Equal(id))
+
+				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(0))
+
+				Expect(client.DeleteHostedZoneCall.CallCount).To(Equal(1))
+				Expect(client.DeleteHostedZoneCall.Receives.Input.Id).To(Equal(id))
+			})
+		})
+
+		Context("when the resource record set is of type SOA", func() {
+			BeforeEach(func() {
+				client.ListResourceRecordSetsCall.Returns.Output = &awsroute53.ListResourceRecordSetsOutput{
+					ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
+						Type: aws.String("SOA"),
+					}},
+				}
+			})
+
+			It("does not try to delete it", func() {
+				err := hostedZone.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListResourceRecordSetsCall.CallCount).To(Equal(1))
+				Expect(client.ListResourceRecordSetsCall.Receives.Input.HostedZoneId).To(Equal(id))
+
+				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(0))
+
+				Expect(client.DeleteHostedZoneCall.CallCount).To(Equal(1))
+				Expect(client.DeleteHostedZoneCall.Receives.Input.Id).To(Equal(id))
+			})
+		})
+
 		Context("when the client fails to list resource record sets", func() {
 			BeforeEach(func() {
 				client.ListResourceRecordSetsCall.Returns.Error = errors.New("banana")
