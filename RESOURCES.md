@@ -49,8 +49,8 @@
   + s3 buckets
   - s3 bucket policy
   - route53 health check
-  - route53 record
-  - route53 zone
+  + route53 record
+  + route53 zone
   - route53 zone association
   ```
 
