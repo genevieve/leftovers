@@ -14,6 +14,7 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 	awskms "github.com/aws/aws-sdk-go/service/kms"
 	awsrds "github.com/aws/aws-sdk-go/service/rds"
+	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	awssts "github.com/aws/aws-sdk-go/service/sts"
 	"github.com/fatih/color"
@@ -24,6 +25,7 @@ import (
 	"github.com/genevieve/leftovers/aws/iam"
 	"github.com/genevieve/leftovers/aws/kms"
 	"github.com/genevieve/leftovers/aws/rds"
+	"github.com/genevieve/leftovers/aws/route53"
 	"github.com/genevieve/leftovers/aws/s3"
 )
 
@@ -55,18 +57,20 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	}
 	sess := session.New(config)
 
-	stsClient := awssts.New(sess)
-	iamClient := awsiam.New(sess)
 	ec2Client := awsec2.New(sess)
 	elbClient := awselb.New(sess)
 	elbv2Client := awselbv2.New(sess)
-	s3Client := awss3.New(sess)
-	rdsClient := awsrds.New(sess)
 	kmsClient := awskms.New(sess)
+	iamClient := awsiam.New(sess)
+	rdsClient := awsrds.New(sess)
+	route53Client := awsroute53.New(sess)
+	s3Client := awss3.New(sess)
+	stsClient := awssts.New(sess)
 
 	rolePolicies := iam.NewRolePolicies(iamClient, logger)
 	userPolicies := iam.NewUserPolicies(iamClient, logger)
 	accessKeys := iam.NewAccessKeys(iamClient, logger)
+
 	internetGateways := ec2.NewInternetGateways(ec2Client, logger)
 	resourceTags := ec2.NewResourceTags(ec2Client)
 	routeTables := ec2.NewRouteTables(ec2Client, logger, resourceTags)
@@ -105,6 +109,8 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 
 			kms.NewAliases(kmsClient, logger),
 			kms.NewKeys(kmsClient, logger),
+
+			route53.NewHostedZones(route53Client, logger),
 		},
 	}, nil
 }
