@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/vsphere"
@@ -41,6 +42,7 @@ var _ = Describe("vSphere", func() {
 	Describe("Dry run", func() {
 		BeforeEach(func() {
 			acc.CreateFolder(filter, "leftovers-dry-run")
+			time.Sleep(30 * time.Second)
 		})
 
 		AfterEach(func() {
@@ -59,6 +61,7 @@ var _ = Describe("vSphere", func() {
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			acc.CreateFolder(filter, "leftovers-acceptance")
+			time.Sleep(30 * time.Second)
 		})
 
 		It("deletes resources with the filter", func() {
