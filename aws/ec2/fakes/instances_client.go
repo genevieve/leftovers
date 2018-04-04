@@ -24,18 +24,54 @@ type InstancesClient struct {
 			Error  error
 		}
 	}
+
+	DescribeAddressesCall struct {
+		CallCount int
+		Receives  struct {
+			Input *ec2.DescribeAddressesInput
+		}
+		Returns struct {
+			Output *ec2.DescribeAddressesOutput
+			Error  error
+		}
+	}
+
+	ReleaseAddressCall struct {
+		CallCount int
+		Receives  struct {
+			Input *ec2.ReleaseAddressInput
+		}
+		Returns struct {
+			Output *ec2.ReleaseAddressOutput
+			Error  error
+		}
+	}
 }
 
-func (e *InstancesClient) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
-	e.DescribeInstancesCall.CallCount++
-	e.DescribeInstancesCall.Receives.Input = input
+func (i *InstancesClient) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
+	i.DescribeInstancesCall.CallCount++
+	i.DescribeInstancesCall.Receives.Input = input
 
-	return e.DescribeInstancesCall.Returns.Output, e.DescribeInstancesCall.Returns.Error
+	return i.DescribeInstancesCall.Returns.Output, i.DescribeInstancesCall.Returns.Error
 }
 
-func (e *InstancesClient) TerminateInstances(input *ec2.TerminateInstancesInput) (*ec2.TerminateInstancesOutput, error) {
-	e.TerminateInstancesCall.CallCount++
-	e.TerminateInstancesCall.Receives.Input = input
+func (i *InstancesClient) TerminateInstances(input *ec2.TerminateInstancesInput) (*ec2.TerminateInstancesOutput, error) {
+	i.TerminateInstancesCall.CallCount++
+	i.TerminateInstancesCall.Receives.Input = input
 
-	return e.TerminateInstancesCall.Returns.Output, e.TerminateInstancesCall.Returns.Error
+	return i.TerminateInstancesCall.Returns.Output, i.TerminateInstancesCall.Returns.Error
+}
+
+func (i *InstancesClient) DescribeAddresses(input *ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error) {
+	i.DescribeAddressesCall.CallCount++
+	i.DescribeAddressesCall.Receives.Input = input
+
+	return i.DescribeAddressesCall.Returns.Output, i.DescribeAddressesCall.Returns.Error
+}
+
+func (i *InstancesClient) ReleaseAddress(input *ec2.ReleaseAddressInput) (*ec2.ReleaseAddressOutput, error) {
+	i.ReleaseAddressCall.CallCount++
+	i.ReleaseAddressCall.Receives.Input = input
+
+	return i.ReleaseAddressCall.Returns.Output, i.ReleaseAddressCall.Returns.Error
 }

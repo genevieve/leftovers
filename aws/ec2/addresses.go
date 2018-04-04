@@ -32,7 +32,11 @@ func (d Addresses) List(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, a := range addresses.Addresses {
-		r := NewAddress(d.client, a.PublicIp, a.AllocationId, a.InstanceId)
+		if a.InstanceId != nil && *a.InstanceId != "" {
+			continue
+		}
+
+		r := NewAddress(d.client, a.PublicIp, a.AllocationId)
 
 		proceed := d.logger.PromptWithDetails(r.Type(), r.Name())
 		if !proceed {
@@ -43,8 +47,4 @@ func (d Addresses) List(filter string) ([]common.Deletable, error) {
 	}
 
 	return resources, nil
-}
-
-func (d Addresses) inUse(a *awsec2.Address) bool {
-	return a.InstanceId != nil && *a.InstanceId != ""
 }
