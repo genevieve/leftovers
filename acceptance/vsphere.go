@@ -49,7 +49,7 @@ func (v *VSphereAcceptance) CreateFolder(root, name string) {
 
 	vCenterUrl.User = url.UserPassword(v.VCenterUser, v.VCenterPassword)
 
-	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 	defer cancel()
 
 	vimClient, err := govmomi.NewClient(vContext, vCenterUrl, true)
