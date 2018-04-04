@@ -29,7 +29,7 @@ func (v Volumes) List(filter string) ([]common.Deletable, error) {
 	output, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{
 		Filters: []*awsec2.Filter{{
 			Name:   aws.String("status"),
-			Values: []*string{aws.String("available"), aws.String("in-use")},
+			Values: []*string{aws.String("available")},
 		}},
 	})
 	if err != nil {

@@ -47,7 +47,6 @@ var _ = Describe("Volumes", func() {
 			Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
 			Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("status")))
 			Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("available")))
-			Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Values[1]).To(Equal(aws.String("in-use")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Volume"))
