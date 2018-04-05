@@ -38,35 +38,26 @@ var _ = Describe("vSphere", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	Describe("Dry run", func() {
-		BeforeEach(func() {
-			acc.CreateFolder(filter, "leftovers-dry-run")
-		})
-
-		AfterEach(func() {
-			err := deleter.Delete(filter)
-			Expect(err).NotTo(HaveOccurred())
-		})
-
-		It("lists resources without deleting", func() {
-			deleter.List(filter)
-
-			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-dry-run]"))
-			Expect(stdout.String()).NotTo(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
-		})
-	})
-
-	Describe("Delete", func() {
+	Describe("leftovers", func() {
 		BeforeEach(func() {
 			acc.CreateFolder(filter, "leftovers-acceptance")
 		})
 
-		It("deletes resources with the filter", func() {
-			err := deleter.Delete(filter)
-			Expect(err).NotTo(HaveOccurred())
+		It("can list and delete resources with the filter", func() {
+			By("listing resources first", func() {
+				deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
-			Expect(stdout.String()).To(MatchRegexp(".Folder. leftovers.acceptance. .*Deleted!.*"))
+				Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance]"))
+				Expect(stdout.String()).NotTo(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
+			})
+
+			By("successfully deleting resources", func() {
+				err := deleter.Delete(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
+				Expect(stdout.String()).To(MatchRegexp(".Folder. leftovers.acceptance. .*Deleted!.*"))
+			})
 		})
 	})
 })
