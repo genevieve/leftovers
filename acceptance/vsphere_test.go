@@ -69,7 +69,7 @@ var _ = Describe("vSphere", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
-			Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleted!"))
+			Expect(stdout.String()).To(MatchRegexp(".Folder. leftovers.acceptance. .*Deleted!.*"))
 		})
 	})
 })
