@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"context"
-	"log"
 	"net/url"
 	"os"
 	"time"
@@ -45,13 +44,12 @@ func NewVSphereAcceptance() VSphereAcceptance {
 }
 
 func (v *VSphereAcceptance) CreateFolder(root, name string) {
-	log.SetFlags(log.Ldate | log.Ltime)
 	vCenterUrl, err := url.Parse("https://" + v.VCenterIP + "/sdk")
 	Expect(err).NotTo(HaveOccurred())
 
 	vCenterUrl.User = url.UserPassword(v.VCenterUser, v.VCenterPassword)
 
-	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*10)
+	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
 
 	vimClient, err := govmomi.NewClient(vContext, vCenterUrl, true)
@@ -67,24 +65,6 @@ func (v *VSphereAcceptance) CreateFolder(root, name string) {
 	rootFolder, err := finder.Folder(ctx, root)
 	Expect(err).NotTo(HaveOccurred())
 
-	log.Println("creating folder")
 	_, err = rootFolder.CreateFolder(ctx, name)
 	Expect(err).NotTo(HaveOccurred())
-
-	log.Println("verifying folder creation")
-	created := false
-	for !created {
-		createdFolder, err := finder.Folder(ctx, name)
-		if err != nil {
-			log.Printf("got %+v, %s\n", createdFolder, err)
-		} else {
-			log.Printf("got %+v\n", createdFolder)
-		}
-		created = (err == nil) && (createdFolder != nil)
-		if !created {
-			log.Println("waiting for folder to be created")
-			time.Sleep(10 * time.Second)
-		}
-	}
-	log.Println("created folder!")
 }
