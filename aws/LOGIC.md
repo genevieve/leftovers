@@ -1,5 +1,5 @@
 ### elb
-* Delete load balancers.
+* Delete load balancers. This deletes the associated listeners and policies..
 
 
 ### elbv2

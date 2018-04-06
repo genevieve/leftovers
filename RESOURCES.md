@@ -21,10 +21,6 @@
   + ec2 snapshots
   + elb load balancers
   - elb attachments
-  - elb listener
-  - elb listener certificate
-  - elb target group
-  - elb target group attachment
   + elbv2 load balancers
   + elbv2 target groups
   + kms aliases
