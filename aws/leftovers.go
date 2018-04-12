@@ -31,6 +31,7 @@ import (
 
 type resource interface {
 	List(filter string) ([]common.Deletable, error)
+	Type() string
 }
 
 type Leftovers struct {
