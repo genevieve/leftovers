@@ -12,9 +12,11 @@ import (
 	"github.com/genevieve/leftovers/gcp/common"
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/dns"
+	"github.com/genevieve/leftovers/gcp/sql"
 	"golang.org/x/oauth2/google"
 	gcpcompute "google.golang.org/api/compute/v1"
 	gcpdns "google.golang.org/api/dns/v1"
+	gcpsql "google.golang.org/api/sqladmin/v1beta4"
 )
 
 type resource interface {
@@ -99,7 +101,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
 	}
 
-	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope, gcpdns.NdevClouddnsReadwriteScope)
+	config, err := google.JWTConfigFromJSON(key, gcpcompute.ComputeScope, gcpdns.NdevClouddnsReadwriteScope, gcpsql.SqlserviceAdminScope)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating jwt config: %s", err)
 	}
@@ -122,9 +124,15 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 
 	dnsService, err := gcpdns.New(config.Client(context.Background()))
 	if err != nil {
-		return Leftovers{}, fmt.Errorf("Creating gcp client: %s", err)
+		return Leftovers{}, fmt.Errorf("Creating dns client: %s", err)
 	}
 	dnsClient := dns.NewClient(p.ProjectId, dnsService, logger)
+
+	sqlService, err := gcpsql.New(config.Client(context.Background()))
+	if err != nil {
+		return Leftovers{}, fmt.Errorf("Creating sql client: %s", err)
+	}
+	sqlClient := sql.NewClient(p.ProjectId, sqlService, logger)
 
 	return Leftovers{
 		logger: logger,
@@ -152,6 +160,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewGlobalAddresses(client, logger),
 			compute.NewSslCertificates(client, logger),
 			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
+			sql.NewInstances(sqlClient, logger),
 		},
 	}, nil
 }

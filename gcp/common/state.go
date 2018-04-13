@@ -1,4 +1,4 @@
-package compute
+package common
 
 import (
 	"fmt"
@@ -6,17 +6,24 @@ import (
 	"time"
 )
 
-type state struct {
+type State struct {
 	logger  logger
-	refresh stateRefreshFunc
+	refresh StateRefreshFunc
 }
 
-type stateRefreshFunc func() (result interface{}, state string, err error)
+func NewState(logger logger, refresh StateRefreshFunc) State {
+	return State{
+		logger:  logger,
+		refresh: refresh,
+	}
+}
+
+type StateRefreshFunc func() (result interface{}, state string, err error)
 
 var refreshGracePeriod = 30 * time.Second
 
 // Copied from terraform-provider-google implementation for compute operation polling.
-func (s *state) Wait() (interface{}, error) {
+func (s *State) Wait() (interface{}, error) {
 	notfoundTick := 0
 	targetOccurence := 0
 	notFoundChecks := 20
