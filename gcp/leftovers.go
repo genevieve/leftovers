@@ -150,6 +150,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewNetworks(client, logger),
 			compute.NewAddresses(client, logger, regions),
 			compute.NewGlobalAddresses(client, logger),
+			compute.NewSslCertificates(client, logger),
 			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
 		},
 	}, nil

@@ -51,5 +51,5 @@ func (i Instance) Name() string {
 }
 
 func (i Instance) Type() string {
-	return "Instance"
+	return "Compute Instance"
 }

@@ -72,6 +72,7 @@
   + compute images
   + compute subnetworks
   + compute networks
+  + compute ssl certificates
   + compute target pools
   + compute target https proxies
   + compute target http proxies

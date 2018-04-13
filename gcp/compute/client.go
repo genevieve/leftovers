@@ -28,6 +28,7 @@ type client struct {
 	forwardingRules       *gcpcompute.ForwardingRulesService
 	globalForwardingRules *gcpcompute.GlobalForwardingRulesService
 	subnetworks           *gcpcompute.SubnetworksService
+	sslCertificates       *gcpcompute.SslCertificatesService
 	networks              *gcpcompute.NetworksService
 	targetHttpProxies     *gcpcompute.TargetHttpProxiesService
 	targetHttpsProxies    *gcpcompute.TargetHttpsProxiesService
@@ -57,6 +58,7 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		firewalls:             service.Firewalls,
 		forwardingRules:       service.ForwardingRules,
 		globalForwardingRules: service.GlobalForwardingRules,
+		sslCertificates:       service.SslCertificates,
 		subnetworks:           service.Subnetworks,
 		networks:              service.Networks,
 		targetHttpProxies:     service.TargetHttpProxies,
@@ -202,6 +204,14 @@ func (c client) ListSubnetworks(region string) (*gcpcompute.SubnetworkList, erro
 
 func (c client) DeleteSubnetwork(region, subnetwork string) error {
 	return c.wait(c.subnetworks.Delete(c.project, region, subnetwork))
+}
+
+func (c client) ListSslCertificates() (*gcpcompute.SslCertificateList, error) {
+	return c.sslCertificates.List(c.project).Do()
+}
+
+func (c client) DeleteSslCertificate(certificate string) error {
+	return c.wait(c.sslCertificates.Delete(c.project, certificate))
 }
 
 func (c client) ListTargetHttpProxies() (*gcpcompute.TargetHttpProxyList, error) {
