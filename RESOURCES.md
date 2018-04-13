@@ -85,8 +85,7 @@
   + dns record sets
   - compute routes
   - compute snapshots
-  - sql users
-  - sql databases
+  + sql db instances
   ```
 
 ### vSphere
