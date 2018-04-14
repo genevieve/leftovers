@@ -103,12 +103,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, fmt.Errorf("Unmarshalling account key for project id: %s", err)
 	}
 
-	config, err := google.JWTConfigFromJSON(key,
-		gcpcompute.ComputeScope,
-		gcpdns.NdevClouddnsReadwriteScope,
-		gcpsql.SqlserviceAdminScope,
-		gcpstorage.DevstorageReadWriteScope,
-	)
+	config, err := google.JWTConfigFromJSON(key, gcpcompute.CloudPlatformScope)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating jwt config: %s", err)
 	}
