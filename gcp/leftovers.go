@@ -12,11 +12,13 @@ import (
 	"github.com/genevieve/leftovers/gcp/common"
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/dns"
+	"github.com/genevieve/leftovers/gcp/iam"
 	"github.com/genevieve/leftovers/gcp/sql"
 	"github.com/genevieve/leftovers/gcp/storage"
 	"golang.org/x/oauth2/google"
 	gcpcompute "google.golang.org/api/compute/v1"
 	gcpdns "google.golang.org/api/dns/v1"
+	gcpiam "google.golang.org/api/iam/v1"
 	gcpsql "google.golang.org/api/sqladmin/v1beta4"
 	gcpstorage "google.golang.org/api/storage/v1"
 )
@@ -134,6 +136,12 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	}
 	storageClient := storage.NewClient(p.ProjectId, storageService, logger)
 
+	iamService, err := gcpiam.New(httpClient)
+	if err != nil {
+		return Leftovers{}, err
+	}
+	iamClient := iam.NewClient(p.ProjectId, iamService, logger)
+
 	regions, err := client.ListRegions()
 	if err != nil {
 		return Leftovers{}, err
@@ -169,6 +177,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewAddresses(client, logger, regions),
 			compute.NewGlobalAddresses(client, logger),
 			compute.NewSslCertificates(client, logger),
+			iam.NewServiceAccounts(iamClient, logger),
 			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
 			sql.NewInstances(sqlClient, logger),
 			storage.NewBuckets(storageClient, logger),

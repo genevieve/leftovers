@@ -74,7 +74,7 @@ var _ = Describe("Instances", func() {
 			})
 		})
 
-		Context("when the instance says no to the prompt", func() {
+		Context("when the user says no to the prompt", func() {
 			BeforeEach(func() {
 				logger.PromptWithDetailsCall.Returns.Proceed = false
 			})
