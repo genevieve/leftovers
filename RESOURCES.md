@@ -83,9 +83,10 @@
   + compute vm instance group managers
   + dns managed zones
   + dns record sets
+  + storage buckets
+  + sql db instances
   - compute routes
   - compute snapshots
-  + sql db instances
   ```
 
 ### vSphere
