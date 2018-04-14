@@ -251,7 +251,7 @@ func (c client) ListRegions() (map[string]string, error) {
 
 	list, err := c.regions.List(c.project).Do()
 	if err != nil {
-		return regions, err
+		return regions, fmt.Errorf("List Regions: %s", err)
 	}
 
 	for _, r := range list.Items {
@@ -265,7 +265,7 @@ func (c client) ListZones() (map[string]string, error) {
 
 	list, err := c.zones.List(c.project).Do()
 	if err != nil {
-		return zones, err
+		return zones, fmt.Errorf("List Zones: %s", err)
 	}
 
 	for _, z := range list.Items {
