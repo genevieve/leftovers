@@ -83,6 +83,7 @@
   + compute vm instance group managers
   + dns managed zones
   + dns record sets
+  + kubernetes clusters
   + storage buckets
   + sql db instances
   - compute routes

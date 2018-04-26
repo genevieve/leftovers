@@ -29,8 +29,7 @@ func (c client) ListInstances() (*gcpsql.InstancesListResponse, error) {
 }
 
 func (c client) DeleteInstance(instance string) error {
-	_, err := c.instances.Delete(c.project, instance).Do()
-	return err
+	return c.wait(c.instances.Delete(c.project, instance))
 }
 
 type request interface {

@@ -243,6 +243,7 @@
   name = "google.golang.org/api"
   packages = [
     "compute/v1",
+    "container/v1",
     "dns/v1",
     "gensupport",
     "googleapi",
@@ -279,6 +280,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7ae92cb2b19a24dae990582d774d8b14d39d55b6adf5c644244fbee950cd2100"
+  inputs-digest = "fd16a9773143ba48940adb7f05690c8c15d009d1942291cd1e9916329b0e2159"
   solver-name = "gps-cdcl"
   solver-version = 1

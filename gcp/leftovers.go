@@ -11,12 +11,14 @@ import (
 	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/gcp/common"
 	"github.com/genevieve/leftovers/gcp/compute"
+	"github.com/genevieve/leftovers/gcp/container"
 	"github.com/genevieve/leftovers/gcp/dns"
 	"github.com/genevieve/leftovers/gcp/iam"
 	"github.com/genevieve/leftovers/gcp/sql"
 	"github.com/genevieve/leftovers/gcp/storage"
 	"golang.org/x/oauth2/google"
 	gcpcompute "google.golang.org/api/compute/v1"
+	gcpcontainer "google.golang.org/api/container/v1"
 	gcpdns "google.golang.org/api/dns/v1"
 	gcpiam "google.golang.org/api/iam/v1"
 	gcpsql "google.golang.org/api/sqladmin/v1beta4"
@@ -142,6 +144,12 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	}
 	iamClient := iam.NewClient(p.ProjectId, iamService, logger)
 
+	containerService, err := gcpcontainer.New(httpClient)
+	if err != nil {
+		return Leftovers{}, err
+	}
+	containerClient := container.NewClient(p.ProjectId, containerService, logger)
+
 	regions, err := client.ListRegions()
 	if err != nil {
 		return Leftovers{}, err
@@ -181,6 +189,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
 			sql.NewInstances(sqlClient, logger),
 			storage.NewBuckets(storageClient, logger),
+			container.NewClusters(containerClient, zones, logger),
 		},
 	}, nil
 }
