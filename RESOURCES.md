@@ -99,7 +99,7 @@
 
 ### OpenStack
 
-  ```
+  ```diff
   - floating ips
   - ports
   ```
