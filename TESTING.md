@@ -1,5 +1,9 @@
 # Testing
 
+We use [ginkgo](https://onsi.github.io/ginkgo/) for our acceptance and unit tests.
+
+To install, you can follow [these instructions](https://github.com/onsi/ginkgo#set-me-up).
+
 ## Unit tests
 
 ```
