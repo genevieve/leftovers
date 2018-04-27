@@ -1,4 +1,4 @@
-# Resources you can delete by IaaS. 
+# Resources you can delete by IaaS.
 
 ## Amazon Web Services
 
@@ -90,7 +90,7 @@
   - compute snapshots
   ```
 
-### vSphere
+### VMware vSphere
 
   ```diff
   + virtual machines
