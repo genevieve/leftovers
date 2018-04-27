@@ -9,8 +9,10 @@ import (
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/gcp/compute"
+	"github.com/genevieve/leftovers/gcp/container"
 	"golang.org/x/oauth2/google"
 	gcpcompute "google.golang.org/api/compute/v1"
+	gcpcontainer "google.golang.org/api/container/v1"
 
 	. "github.com/onsi/gomega"
 )
@@ -62,6 +64,29 @@ func (g GCPAcceptance) InsertDisk(name string) {
 	operation, err := service.Disks.Insert(g.ProjectId, g.Zone, &gcpcompute.Disk{Name: name}).Do()
 
 	waiter := compute.NewOperationWaiter(operation, service, g.ProjectId, g.Logger)
+
+	err = waiter.Wait()
+	Expect(err).NotTo(HaveOccurred())
+}
+
+func (g GCPAcceptance) InsertCluster(name string) {
+	config, err := google.JWTConfigFromJSON([]byte(g.Key), gcpcompute.ComputeScope, gcpcontainer.CloudPlatformScope)
+	Expect(err).NotTo(HaveOccurred())
+
+	service, err := gcpcontainer.New(config.Client(context.Background()))
+	Expect(err).NotTo(HaveOccurred())
+
+	req := &gcpcontainer.CreateClusterRequest{
+		Cluster: &gcpcontainer.Cluster{
+			Name:             name,
+			InitialNodeCount: 1,
+		},
+	}
+
+	operation, err := service.Projects.Zones.Clusters.Create(g.ProjectId, g.Zone, req).Do()
+	Expect(err).NotTo(HaveOccurred())
+
+	waiter := container.NewOperationWaiter(operation, service, g.ProjectId, g.Logger)
 
 	err = waiter.Wait()
 	Expect(err).NotTo(HaveOccurred())
