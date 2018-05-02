@@ -57,34 +57,17 @@ var _ = Describe("GCP", func() {
 	})
 
 	Describe("Delete", func() {
-		Describe("Compute Engine", func() {
-			BeforeEach(func() {
-				filter = "leftovers-acceptance"
-				acc.InsertDisk(filter)
-			})
-
-			It("deletes resources with the filter", func() {
-				err := deleter.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleting..."))
-				Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleted!"))
-			})
+		BeforeEach(func() {
+			filter = "leftovers-acceptance"
+			acc.InsertDisk(filter)
 		})
 
-		Describe("Kubernetes Engine", func() {
-			BeforeEach(func() {
-				filter = "leftovers-acceptance"
-				acc.InsertCluster(filter)
-			})
+		It("deletes resources with the filter", func() {
+			err := deleter.Delete(filter)
+			Expect(err).NotTo(HaveOccurred())
 
-			It("deletes resources with the filter", func() {
-				err := deleter.Delete(filter)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(stdout.String()).To(ContainSubstring("[Kubernetes Cluster: leftovers-acceptance] Deleting..."))
-				Expect(stdout.String()).To(ContainSubstring("[Kubernetes Cluster: leftovers-acceptance] Deleted!"))
-			})
+			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleted!"))
 		})
 	})
 })
