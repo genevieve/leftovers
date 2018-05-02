@@ -6,6 +6,7 @@ type Cluster struct {
 	name   string
 	zone   string
 	client clustersClient
+	kind   string
 }
 
 func NewCluster(client clustersClient, zone string, name string) Cluster {
@@ -13,6 +14,7 @@ func NewCluster(client clustersClient, zone string, name string) Cluster {
 		name:   name,
 		zone:   zone,
 		client: client,
+		kind:   "cluster",
 	}
 }
 
@@ -30,4 +32,8 @@ func (c Cluster) Name() string {
 
 func (c Cluster) Type() string {
 	return "Kubernetes Cluster"
+}
+
+func (c Cluster) Kind() string {
+	return c.kind
 }

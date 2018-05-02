@@ -12,6 +12,7 @@ type Instance struct {
 	name        string
 	clearerName string
 	zone        string
+	kind        string
 }
 
 func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tags) Instance {
@@ -33,6 +34,7 @@ func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tag
 		name:        name,
 		clearerName: clearerName,
 		zone:        zone,
+		kind:        "compute-instance",
 	}
 }
 
@@ -52,4 +54,8 @@ func (i Instance) Name() string {
 
 func (i Instance) Type() string {
 	return "Compute Instance"
+}
+
+func (i Instance) Kind() string {
+	return i.kind
 }
