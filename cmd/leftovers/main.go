@@ -19,6 +19,7 @@ type opts struct {
 	NoConfirm bool   `short:"n"  long:"no-confirm"                  description:"Destroy resources without prompting. This is dangerous, make good choices!"`
 	Filter    string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
 	DryRun    bool   `short:"d"  long:"dry-run"                     description:"List all resources without deleting any."`
+	Version   bool   `short:"v"  long:"version"                     description:"Print version."`
 
 	AWSAccessKeyID         string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
 	AWSSecretAccessKey     string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
@@ -39,6 +40,8 @@ type leftovers interface {
 	List(string)
 }
 
+var Version = "dev"
+
 func main() {
 	log.SetFlags(0)
 
@@ -50,6 +53,11 @@ func main() {
 	}
 
 	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
+
+	if c.Version {
+		log.Printf("%s\n", Version)
+		os.Exit(0)
+	}
 
 	var l leftovers
 
