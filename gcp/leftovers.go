@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"sync"
 
 	"github.com/fatih/color"
@@ -95,7 +96,9 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, errors.New("Missing service account key path.")
 	}
 
-	key, err := ioutil.ReadFile(keyPath)
+	absKeyPath, _ := filepath.Abs(keyPath)
+
+	key, err := ioutil.ReadFile(absKeyPath)
 	if err != nil {
 		key = []byte(keyPath)
 	}
