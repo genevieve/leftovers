@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/aws"
 
@@ -36,6 +37,8 @@ var _ = Describe("AWS", func() {
 		var err error
 		deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
 		Expect(err).NotTo(HaveOccurred())
+
+		color.NoColor = true
 	})
 
 	Describe("Dry run", func() {

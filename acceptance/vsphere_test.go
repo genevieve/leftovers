@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/vsphere"
 	. "github.com/onsi/ginkgo"
@@ -36,6 +37,8 @@ var _ = Describe("vSphere", func() {
 		var err error
 		deleter, err = vsphere.NewLeftovers(logger, acc.VCenterIP, acc.VCenterUser, acc.VCenterPassword, acc.Datacenter)
 		Expect(err).NotTo(HaveOccurred())
+
+		color.NoColor = true
 	})
 
 	Describe("leftovers", func() {

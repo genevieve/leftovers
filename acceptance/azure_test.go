@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/azure"
 
@@ -35,6 +36,8 @@ var _ = Describe("Azure", func() {
 		var err error
 		deleter, err = azure.NewLeftovers(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)
 		Expect(err).NotTo(HaveOccurred())
+
+		color.NoColor = true
 	})
 
 	Describe("Dry run", func() {
