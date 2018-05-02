@@ -23,16 +23,16 @@ type VSphereAcceptance struct {
 
 func NewVSphereAcceptance() VSphereAcceptance {
 	vcenterIP := os.Getenv("BBL_VSPHERE_VCENTER_IP")
-	Expect(vcenterIP).NotTo(Equal(""))
+	Expect(vcenterIP).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_IP.")
 
 	vcenterUser := os.Getenv("BBL_VSPHERE_VCENTER_USER")
-	Expect(vcenterUser).NotTo(Equal(""))
+	Expect(vcenterUser).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_USER.")
 
 	vcenterPassword := os.Getenv("BBL_VSPHERE_VCENTER_PASSWORD")
-	Expect(vcenterPassword).NotTo(Equal(""))
+	Expect(vcenterPassword).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_PASSWORD.")
 
 	datacenter := os.Getenv("BBL_VSPHERE_VCENTER_DC")
-	Expect(datacenter).NotTo(Equal(""))
+	Expect(datacenter).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_DC.")
 
 	return VSphereAcceptance{
 		VCenterIP:       vcenterIP,

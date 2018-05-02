@@ -21,16 +21,16 @@ type AzureAcceptance struct {
 
 func NewAzureAcceptance() AzureAcceptance {
 	subscriptionId := os.Getenv("BBL_AZURE_SUBSCRIPTION_ID")
-	Expect(subscriptionId).NotTo(Equal(""))
+	Expect(subscriptionId).NotTo(Equal(""), "Missing $BBL_AZURE_SUBSCRIPTION_ID.")
 
 	tenantId := os.Getenv("BBL_AZURE_TENANT_ID")
-	Expect(tenantId).NotTo(Equal(""))
+	Expect(tenantId).NotTo(Equal(""), "Missing $BBL_AZURE_TENANT_ID.")
 
 	clientId := os.Getenv("BBL_AZURE_CLIENT_ID")
-	Expect(clientId).NotTo(Equal(""))
+	Expect(clientId).NotTo(Equal(""), "Missing $BBL_AZURE_CLIENT_ID.")
 
 	clientSecret := os.Getenv("BBL_AZURE_CLIENT_SECRET")
-	Expect(clientSecret).NotTo(Equal(""))
+	Expect(clientSecret).NotTo(Equal(""), "Missing $BBL_AZURE_CLIENT_SECRET.")
 
 	return AzureAcceptance{
 		SubscriptionId: subscriptionId,

@@ -25,7 +25,7 @@ type GCPAcceptance struct {
 
 func NewGCPAcceptance() GCPAcceptance {
 	path := os.Getenv("BBL_GCP_SERVICE_ACCOUNT_KEY")
-	Expect(path).NotTo(Equal(""))
+	Expect(path).NotTo(Equal(""), "Missing $BBL_GCP_SERVICE_ACCOUNT_KEY.")
 
 	key, err := ioutil.ReadFile(path)
 	if err != nil {

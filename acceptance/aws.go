@@ -21,13 +21,13 @@ type AWSAcceptance struct {
 
 func NewAWSAcceptance() AWSAcceptance {
 	accessKeyId := os.Getenv("BBL_AWS_ACCESS_KEY_ID")
-	Expect(accessKeyId).NotTo(Equal(""))
+	Expect(accessKeyId).NotTo(Equal(""), "Missing $BBL_AWS_ACCESS_KEY_ID.")
 
 	secretAccessKey := os.Getenv("BBL_AWS_SECRET_ACCESS_KEY")
-	Expect(secretAccessKey).NotTo(Equal(""))
+	Expect(secretAccessKey).NotTo(Equal(""), "Missing $BBL_AWS_SECRET_ACCESS_KEY.")
 
 	region := os.Getenv("BBL_AWS_REGION")
-	Expect(region).NotTo(Equal(""))
+	Expect(region).NotTo(Equal(""), "Missing $BBL_AWS_REGION.")
 
 	return AWSAcceptance{
 		AccessKeyId:     accessKeyId,
