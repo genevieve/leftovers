@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"os"
-	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	"github.com/Azure/go-autorest/autorest"
@@ -20,32 +19,29 @@ type AzureAcceptance struct {
 	Logger         *app.Logger
 }
 
-func NewAzureAcceptance() *AzureAcceptance {
-	return &AzureAcceptance{}
+func NewAzureAcceptance() AzureAcceptance {
+	subscriptionId := os.Getenv("BBL_AZURE_SUBSCRIPTION_ID")
+	Expect(subscriptionId).NotTo(Equal(""))
+
+	tenantId := os.Getenv("BBL_AZURE_TENANT_ID")
+	Expect(tenantId).NotTo(Equal(""))
+
+	clientId := os.Getenv("BBL_AZURE_CLIENT_ID")
+	Expect(clientId).NotTo(Equal(""))
+
+	clientSecret := os.Getenv("BBL_AZURE_CLIENT_SECRET")
+	Expect(clientSecret).NotTo(Equal(""))
+
+	return AzureAcceptance{
+		SubscriptionId: subscriptionId,
+		TenantId:       tenantId,
+		ClientId:       clientId,
+		ClientSecret:   clientSecret,
+		Logger:         app.NewLogger(os.Stdin, os.Stdout, true),
+	}
 }
 
-func (a *AzureAcceptance) ReadyToTest() bool {
-	iaas := os.Getenv("LEFTOVERS_ACCEPTANCE")
-	if iaas == "" {
-		return false
-	}
-
-	if strings.ToLower(iaas) != "azure" {
-		return false
-	}
-
-	a.SubscriptionId = os.Getenv("BBL_AZURE_SUBSCRIPTION_ID")
-	a.TenantId = os.Getenv("BBL_AZURE_TENANT_ID")
-	a.ClientId = os.Getenv("BBL_AZURE_CLIENT_ID")
-	a.ClientSecret = os.Getenv("BBL_AZURE_CLIENT_SECRET")
-
-	logger := app.NewLogger(os.Stdin, os.Stdout, true)
-	a.Logger = logger
-
-	return true
-}
-
-func (a *AzureAcceptance) CreateResourceGroup(name string) {
+func (a AzureAcceptance) CreateResourceGroup(name string) {
 	oauthConfig, err := adal.NewOAuthConfig(azure.PublicCloud.ActiveDirectoryEndpoint, a.TenantId)
 	Expect(err).NotTo(HaveOccurred())
 

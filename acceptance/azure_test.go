@@ -3,6 +3,7 @@ package acceptance
 import (
 	"bytes"
 	"os"
+	"strings"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/azure"
@@ -13,19 +14,19 @@ import (
 
 var _ = Describe("Azure", func() {
 	var (
-		acc *AzureAcceptance
-
+		acc     AzureAcceptance
 		stdout  *bytes.Buffer
 		filter  string
 		deleter azure.Leftovers
 	)
 
 	BeforeEach(func() {
-		acc = NewAzureAcceptance()
-
-		if !acc.ReadyToTest() {
-			Skip("Skipping acceptance tests.")
+		iaas := os.Getenv(LEFTOVERS_ACCEPTANCE)
+		if strings.ToLower(iaas) != "azure" {
+			Skip("Skipping Azure acceptance tests.")
 		}
+
+		acc = NewAzureAcceptance()
 
 		noConfirm := true
 		stdout = bytes.NewBuffer([]byte{})
