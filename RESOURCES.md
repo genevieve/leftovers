@@ -17,6 +17,7 @@
   + ec2 subnets
   + ec2 route tables
   + ec2 internet gateways
+  - ec2 nat gateways
   + ec2 network interfaces
   + ec2 snapshots
   + elb load balancers
