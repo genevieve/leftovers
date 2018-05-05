@@ -36,7 +36,7 @@ func (s *State) Wait() (interface{}, error) {
 	notFoundChecks := 20
 	continuousTargetOccurence := 1
 	minTimeout := 2 * time.Second
-	delay := 10 * time.Second
+	delay := 2 * time.Second
 
 	type Result struct {
 		Result interface{}
