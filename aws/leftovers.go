@@ -158,7 +158,7 @@ func (l Leftovers) Delete(filter string) error {
 
 				err := r.Delete()
 				if err != nil {
-					l.logger.Println(fmt.Sprintf("[%s: %s]: %s", r.Type(), r.Name(), color.YellowString(err.Error())))
+					l.logger.Println(fmt.Sprintf("[%s: %s] %s", r.Type(), r.Name(), color.YellowString(err.Error())))
 				} else {
 					l.logger.Println(fmt.Sprintf("[%s: %s] %s", r.Type(), r.Name(), color.GreenString("Deleted!")))
 				}
