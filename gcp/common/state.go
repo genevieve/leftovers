@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -133,7 +132,7 @@ func (s *State) Wait() (interface{}, error) {
 				wait = 10 * time.Second
 			}
 
-			log.Printf("Waiting %s before next try.", wait)
+			s.logger.Printf("Waiting %s before next try.", wait)
 		}
 	}()
 
@@ -183,7 +182,7 @@ func (s *State) Wait() (interface{}, error) {
 					// TimeoutError and wait for the channel to close
 					lastResult = r
 				case <-timeout:
-					log.Printf("Waiting for state DONE exceeded refresh grace period.")
+					s.logger.Printf("Waiting for state DONE exceeded refresh grace period.")
 					break forSelect
 				}
 			}
