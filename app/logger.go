@@ -60,7 +60,7 @@ func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	l.clear()
-	fmt.Fprintf(l.writer, "[%s: %s] Delete? (y/N):", resourceType, resourceName)
+	fmt.Fprintf(l.writer, "[%s: %s] Delete? (y/N): ", resourceType, resourceName)
 	l.newline = true
 
 	var proceed string
