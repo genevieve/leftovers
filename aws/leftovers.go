@@ -118,6 +118,14 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	}, nil
 }
 
+func (l Leftovers) Types() {
+	l.logger.NoConfirm()
+
+	for _, r := range l.resources {
+		l.logger.Println(r.Type())
+	}
+}
+
 func (l Leftovers) List(filter string) {
 	l.logger.NoConfirm()
 
