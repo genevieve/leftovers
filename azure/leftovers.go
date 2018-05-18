@@ -38,6 +38,10 @@ func (l Leftovers) List(filter string) {
 	}
 }
 
+func (l Leftovers) Types() {
+	l.logger.Println("leftover types not implemented yet.")
+}
+
 func (l Leftovers) Delete(filter string) error {
 	var deletables []Deletable
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -38,6 +39,7 @@ type opts struct {
 type leftovers interface {
 	Delete(string) error
 	List(string)
+	Types()
 }
 
 var Version = "dev"
@@ -45,19 +47,21 @@ var Version = "dev"
 func main() {
 	log.SetFlags(0)
 
+	command := os.Args[1]
+
 	var c opts
 	parser := flags.NewParser(&c, flags.HelpFlag|flags.PrintErrors)
 	_, err := parser.ParseArgs(os.Args)
 	if err != nil {
-		os.Exit(0)
+		return
 	}
-
-	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
 	if c.Version {
 		log.Printf("%s\n", Version)
-		os.Exit(0)
+		return
 	}
+
+	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
 
 	var l leftovers
 
@@ -77,11 +81,16 @@ func main() {
 		}
 		l, err = vsphere.NewLeftovers(logger, c.VSphereVCenterIP, c.VSphereVCenterUser, c.VSphereVCenterPassword, c.VSphereVCenterDC)
 	default:
-		log.Fatalf("Missing or unsupported BBL_IAAS.")
+		err = errors.New("Missing or unsupported BBL_IAAS.")
 	}
 
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
+	}
+
+	if command == "types" {
+		l.Types()
+		return
 	}
 
 	if c.DryRun {
