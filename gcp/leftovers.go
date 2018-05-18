@@ -28,6 +28,7 @@ import (
 
 type resource interface {
 	List(filter string) ([]common.Deletable, error)
+	Type() string
 }
 
 type Leftovers struct {
@@ -51,6 +52,15 @@ func (l Leftovers) List(filter string) {
 
 	for _, d := range deletables {
 		l.logger.Println(fmt.Sprintf("[%s: %s]", d.Type(), d.Name()))
+	}
+}
+
+// Types will print all of the resource types that can be deleted.
+func (l Leftovers) Types() {
+	l.logger.NoConfirm()
+
+	for _, r := range l.resources {
+		l.logger.Println(r.Type())
 	}
 }
 
