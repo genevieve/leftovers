@@ -59,6 +59,14 @@ var _ = Describe("Azure", func() {
 		})
 	})
 
+	Describe("Types", func() {
+		It("lists the resource types that can be deleted", func() {
+			deleter.Types()
+
+			Expect(stdout.String()).To(ContainSubstring("resource-group"))
+		})
+	})
+
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acceptance"
