@@ -13,6 +13,7 @@ import (
 
 type resource interface {
 	List(filter string) ([]Deletable, error)
+	Type() string
 }
 
 type Leftovers struct {
@@ -38,7 +39,9 @@ func (l Leftovers) List(filter string) {
 }
 
 func (l Leftovers) Types() {
-	l.logger.Println("leftover types not implemented yet.")
+	for _, r := range l.resources {
+		l.logger.Println(r.Type())
+	}
 }
 
 func (l Leftovers) Delete(filter string) error {
