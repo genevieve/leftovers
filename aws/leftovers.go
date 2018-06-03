@@ -178,3 +178,7 @@ func (l Leftovers) Delete(filter string) error {
 	}
 	return nil
 }
+
+func (l Leftovers) DeleteType(filter, rType string) error {
+	return l.Delete(filter)
+}

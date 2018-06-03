@@ -70,6 +70,10 @@ func (l Leftovers) Delete(filter string) error {
 	return nil
 }
 
+func (l Leftovers) DeleteType(filter, rType string) error {
+	return l.Delete(filter)
+}
+
 func NewLeftovers(logger logger, vCenterIP, vCenterUser, vCenterPassword, vCenterDC string) (Leftovers, error) {
 	if vCenterIP == "" {
 		return Leftovers{}, errors.New("Missing vCenter IP.")

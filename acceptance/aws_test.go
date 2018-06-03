@@ -83,4 +83,19 @@ var _ = Describe("AWS", func() {
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: leftovers-acceptance] Deleted!"))
 		})
 	})
+
+	Describe("DeleteType", func() {
+		BeforeEach(func() {
+			filter = "lftvrs-acceptance-delete-type"
+			acc.CreateKeyPair(filter)
+		})
+
+		It("deletes the key pair resources with the filter", func() {
+			err := deleter.DeleteType(filter, "key-pair")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: lftvrs-acceptance-delete-type] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: lftvrs-acceptance-delete-type] Deleted!"))
+		})
+	})
 })

@@ -60,6 +60,10 @@ func (l Leftovers) Delete(filter string) error {
 	return nil
 }
 
+func (l Leftovers) DeleteType(filter, rType string) error {
+	return l.Delete(filter)
+}
+
 func NewLeftovers(logger logger, clientId, clientSecret, subscriptionId, tenantId string) (Leftovers, error) {
 	if clientId == "" {
 		return Leftovers{}, errors.New("Missing client id.")

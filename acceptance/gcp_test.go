@@ -81,4 +81,19 @@ var _ = Describe("GCP", func() {
 			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleted!"))
 		})
 	})
+
+	Describe("DeleteType", func() {
+		BeforeEach(func() {
+			filter = "lftvrs-acceptance-delete-type"
+			acc.InsertDisk(filter)
+		})
+
+		It("deletes resources with the filter", func() {
+			err := deleter.DeleteType(filter, "disk")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout.String()).To(ContainSubstring("[Disk: lftvrs-acceptance-delete-type] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: lftvrs-acceptance-delete-type] Deleted!"))
+		})
+	})
 })
