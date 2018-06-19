@@ -6,7 +6,7 @@ type ServiceAccountsClient struct {
 	ListServiceAccountsCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpiam.ListServiceAccountsResponse
+			Output []*gcpiam.ServiceAccount
 			Error  error
 		}
 	}
@@ -23,7 +23,7 @@ type ServiceAccountsClient struct {
 	}
 }
 
-func (u *ServiceAccountsClient) ListServiceAccounts() (*gcpiam.ListServiceAccountsResponse, error) {
+func (u *ServiceAccountsClient) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
 	u.ListServiceAccountsCall.CallCount++
 
 	return u.ListServiceAccountsCall.Returns.Output, u.ListServiceAccountsCall.Returns.Error
