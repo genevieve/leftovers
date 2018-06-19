@@ -141,7 +141,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	if err != nil {
 		return Leftovers{}, err
 	}
-	dnsClient := dns.NewClient(p.ProjectId, dnsService, logger)
+	dnsClient := dns.NewClient(p.ProjectId, dnsService)
 
 	sqlService, err := gcpsql.New(httpClient)
 	if err != nil {
@@ -153,13 +153,13 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	if err != nil {
 		return Leftovers{}, err
 	}
-	storageClient := storage.NewClient(p.ProjectId, storageService, logger)
+	storageClient := storage.NewClient(p.ProjectId, storageService)
 
 	iamService, err := gcpiam.New(httpClient)
 	if err != nil {
 		return Leftovers{}, err
 	}
-	iamClient := iam.NewClient(p.ProjectId, iamService, logger)
+	iamClient := iam.NewClient(p.ProjectId, iamService)
 
 	containerService, err := gcpcontainer.New(httpClient)
 	if err != nil {

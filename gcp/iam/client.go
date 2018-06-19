@@ -8,16 +8,14 @@ import (
 
 type client struct {
 	project string
-	logger  logger
 
 	service         *gcpiam.Service
 	serviceAccounts *gcpiam.ProjectsServiceAccountsService
 }
 
-func NewClient(project string, service *gcpiam.Service, logger logger) client {
+func NewClient(project string, service *gcpiam.Service) client {
 	return client{
 		project:         project,
-		logger:          logger,
 		service:         service,
 		serviceAccounts: service.Projects.ServiceAccounts,
 	}

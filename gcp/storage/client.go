@@ -6,17 +6,15 @@ import (
 
 type client struct {
 	project string
-	logger  logger
 
 	service *gcpstorage.Service
 	buckets *gcpstorage.BucketsService
 	objects *gcpstorage.ObjectsService
 }
 
-func NewClient(project string, service *gcpstorage.Service, logger logger) client {
+func NewClient(project string, service *gcpstorage.Service) client {
 	return client{
 		project: project,
-		logger:  logger,
 		service: service,
 		buckets: service.Buckets,
 		objects: service.Objects,
