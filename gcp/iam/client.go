@@ -21,8 +21,25 @@ func NewClient(project string, service *gcpiam.Service) client {
 	}
 }
 
-func (c client) ListServiceAccounts() (*gcpiam.ListServiceAccountsResponse, error) {
-	return c.serviceAccounts.List(fmt.Sprintf("projects/%s", c.project)).Do()
+func (c client) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
+	serviceAccounts := []*gcpiam.ServiceAccount{}
+
+	for {
+		resp, err := c.serviceAccounts.List(fmt.Sprintf("projects/%s", c.project)).PageSize(int64(200)).Do()
+		if err != nil {
+			return serviceAccounts, err
+		}
+
+		serviceAccounts = append(serviceAccounts, resp.Accounts...)
+
+		if resp.NextPageToken == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return serviceAccounts, nil
 }
 
 func (c client) DeleteServiceAccount(account string) (*gcpiam.Empty, error) {
