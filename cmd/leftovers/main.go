@@ -50,13 +50,16 @@ var Version = "dev"
 func main() {
 	log.SetFlags(0)
 
-	command := os.Args[1]
-
 	var c opts
 	parser := flags.NewParser(&c, flags.HelpFlag|flags.PrintErrors)
-	_, err := parser.ParseArgs(os.Args)
+	remaining, err := parser.ParseArgs(os.Args)
 	if err != nil {
 		return
+	}
+
+	command := "destroy"
+	if len(remaining) > 1 {
+		command = remaining[1]
 	}
 
 	if c.Version {
