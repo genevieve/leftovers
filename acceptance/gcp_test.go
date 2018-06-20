@@ -64,6 +64,7 @@ var _ = Describe("GCP", func() {
 			deleter.Types()
 
 			Expect(stdout.String()).To(ContainSubstring("address"))
+			Expect(stdout.String()).To(ContainSubstring("service-account"))
 		})
 	})
 
