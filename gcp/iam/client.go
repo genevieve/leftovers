@@ -7,6 +7,8 @@ import (
 	gcpiam "google.golang.org/api/iam/v1"
 )
 
+const PAGE_SIZE = int64(200)
+
 type client struct {
 	project string
 
@@ -22,11 +24,14 @@ func NewClient(project string, service *gcpiam.Service) client {
 	}
 }
 
+// ListServiceAccounts will loop over every page of results
+// and return the full list of service accounts. To prevent
+// backend errors from repeated calls, there is a 2s delay.
 func (c client) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
 	serviceAccounts := []*gcpiam.ServiceAccount{}
 
 	for {
-		resp, err := c.serviceAccounts.List(fmt.Sprintf("projects/%s", c.project)).PageSize(int64(200)).Do()
+		resp, err := c.serviceAccounts.List(fmt.Sprintf("projects/%s", c.project)).PageSize(PAGE_SIZE).Do()
 		if err != nil {
 			return serviceAccounts, err
 		}
