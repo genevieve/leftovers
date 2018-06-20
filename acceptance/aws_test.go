@@ -91,7 +91,7 @@ var _ = Describe("AWS", func() {
 		})
 
 		It("deletes the key pair resources with the filter", func() {
-			err := deleter.DeleteType(filter, "key-pair")
+			err := deleter.DeleteType(filter, "ec2-key-pair")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: lftvrs-acceptance-delete-type] Deleting..."))
