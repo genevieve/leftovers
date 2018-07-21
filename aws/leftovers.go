@@ -118,6 +118,8 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, region string) (L
 	}, nil
 }
 
+// Types will print all the resource types that can
+// be deleted on this IaaS.
 func (l Leftovers) Types() {
 	l.logger.NoConfirm()
 
@@ -126,6 +128,8 @@ func (l Leftovers) Types() {
 	}
 }
 
+// List will print all the resources that contain
+// the provided filter in the resource's identifier.
 func (l Leftovers) List(filter string) {
 	l.logger.NoConfirm()
 
@@ -144,6 +148,8 @@ func (l Leftovers) List(filter string) {
 	}
 }
 
+// Delete will collect all resources and delete those
+// that contain the provided filter in the resource's identifier.
 func (l Leftovers) Delete(filter string) error {
 	deletables := [][]common.Deletable{}
 
@@ -161,6 +167,9 @@ func (l Leftovers) Delete(filter string) error {
 	return nil
 }
 
+// DeleteType will collect all resources of the provided
+// type, and delete those that contain the provided filter
+// in the resource's identifier.
 func (l Leftovers) DeleteType(filter, rType string) error {
 	deletables := [][]common.Deletable{}
 
