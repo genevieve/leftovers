@@ -15,6 +15,8 @@ type Logger struct {
 	noConfirm bool
 }
 
+// NewLogger returns a new Logger with the provided writer,
+// reader, and value of noConfirm.
 func NewLogger(writer io.Writer, reader io.Reader, noConfirm bool) *Logger {
 	return &Logger{
 		newline:   true,
@@ -35,6 +37,7 @@ func (l *Logger) clear() {
 	l.newline = true
 }
 
+// Printf handles arguments in the manner of fmt.Fprintf.
 func (l *Logger) Printf(message string, a ...interface{}) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
@@ -42,16 +45,17 @@ func (l *Logger) Printf(message string, a ...interface{}) {
 	fmt.Fprintf(l.writer, "%s", fmt.Sprintf(message, a...))
 }
 
+// Println handles the argument in the manner of fmt.Fprintln.
 func (l *Logger) Println(message string) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	l.clear()
-	fmt.Fprintf(l.writer, "%s\n", message)
+	fmt.Fprintln(l.writer, message)
 }
 
-// Please note that Prompt will block all other goroutines
-// attempting to print to this logger while
-// waiting for user input.
+// PromptWithDetails will block all other goroutines attempting
+// to print the prompt to the logger for a given resource type
+// and resource name, while waiting for user input.
 func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
 	if l.noConfirm {
 		return true
