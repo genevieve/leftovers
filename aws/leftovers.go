@@ -172,7 +172,7 @@ func (l Leftovers) Delete(filter string) error {
 	return nil
 }
 
-// DeleteTypes will collect all resources of the provied type that contain
+// DeleteType will collect all resources of the provied type that contain
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
@@ -207,7 +207,8 @@ func (l Leftovers) asyncDelete(deletables [][]common.Deletable) {
 
 				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
 
-				if err := d.Delete(); err != nil {
+				err := d.Delete()
+				if err != nil {
 					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
 				} else {
 					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
