@@ -98,6 +98,31 @@
   + empty folders
   ```
 
+### VMware NSX-T
+
+  ```diff
+  - dhcp relay profile
+  - dhcp relay service
+  - firewall section
+  - ip set
+  - logical port
+  - logical router downlink port
+  - logical router link port on tier0
+  - logical router link port on tier1
+  - logical switch
+  - logical tier1 router
+  - nat rule
+  - ns group
+  - static route
+  - vm tags
+  - algorithm type ns service
+  - ether type ns service
+  - icmp type ns service
+  - igmp type ns service
+  - ip protocol ns service
+  - l4 port set ns service
+  ```
+
 ### OpenStack
 
   ```diff
