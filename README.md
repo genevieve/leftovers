@@ -12,10 +12,10 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 
 
 ## <a name='why'></a> Why might you use this?
-- You `terraform apply`'d way back when and lost your `terraform.tfstate`
-- You used the console or cli to create some infrastructure and want to clean up
+- You `terraform apply`'d way back when and lost your `terraform.tfstate`. Happens to the best of us.
+- You used the console or cli for some IaaS to create some infrastructure and want to clean up!
 - Your acceptance tests in CI failed, the container disappeared, and
-infrastructure resources were tragically orphaned
+infrastructure resources were tragically orphaned. :-(
 - `terraform destroy` isn't working because the refresh step is failing due to a missing resource.
 
 
