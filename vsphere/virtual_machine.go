@@ -8,6 +8,7 @@ import (
 	"github.com/vmware/govmomi/object"
 )
 
+// VirtualMachine represents a vm or template in vSphere.
 type VirtualMachine struct {
 	vm *object.VirtualMachine
 }
@@ -18,6 +19,8 @@ func NewVirtualMachine(vm *object.VirtualMachine) VirtualMachine {
 	}
 }
 
+// Delete will shut off a VM, if it is powered on or suspended,
+// and will delete a VM or template from inventory.
 func (v VirtualMachine) Delete() error {
 	tctx, tcancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer tcancel()
