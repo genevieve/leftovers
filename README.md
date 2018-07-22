@@ -9,7 +9,6 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 * <a href='#how'>Installation</a>
 * <a href='#usage'>Usage</a>
 * [Resources you can delete by IaaS.](RESOURCES.md)
-* [GoDoc](https://godoc.org/github.com/genevieve/leftovers)
 
 
 
