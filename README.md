@@ -1,5 +1,7 @@
 # Leftovers :turkey:
 
+[![GoDoc](https://godoc.org/github.com/genevieve/leftovers?status.svg)](https://godoc.org/github.com/genevieve/leftovers)
+
 Go cli & library for cleaning up **orphaned IaaS resources**.
 
 * <a href='#why'>Why might you use this?</a>
