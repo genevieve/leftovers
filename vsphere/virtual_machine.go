@@ -10,12 +10,15 @@ import (
 
 // VirtualMachine represents a vm or template in vSphere.
 type VirtualMachine struct {
-	vm *object.VirtualMachine
+	name string
+	vm   *object.VirtualMachine
 }
 
 func NewVirtualMachine(vm *object.VirtualMachine) VirtualMachine {
+	name, _ := vm.Common.ObjectName(context.Background())
 	return VirtualMachine{
-		vm: vm,
+		name: name,
+		vm:   vm,
 	}
 }
 
@@ -56,8 +59,7 @@ func (v VirtualMachine) Delete() error {
 }
 
 func (v VirtualMachine) Name() string {
-	name, _ := v.vm.Common.ObjectName(context.Background())
-	return name
+	return v.name
 }
 
 func (v VirtualMachine) Type() string {
