@@ -17,11 +17,12 @@ import (
 )
 
 type VSphereAcceptance struct {
+	Datacenter      string
+	Datastore       string
+	ResourcePool    string
 	VCenterIP       string
 	VCenterUser     string
 	VCenterPassword string
-	Datacenter      string
-	Datastore       string
 	VCenterClient   *govmomi.Client
 	Logger          *app.Logger
 }
@@ -42,6 +43,9 @@ func NewVSphereAcceptance() VSphereAcceptance {
 	datastore := os.Getenv("BBL_VSPHERE_VCENTER_DS")
 	Expect(datastore).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_DS.")
 
+	resourcePool := os.Getenv("BBL_VSPHERE_VCENTER_RP")
+	Expect(datastore).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_RP.")
+
 	vCenterUrl, err := url.Parse("https://" + vcenterIP + "/sdk")
 	Expect(err).NotTo(HaveOccurred())
 
@@ -58,6 +62,7 @@ func NewVSphereAcceptance() VSphereAcceptance {
 		VCenterPassword: vcenterPassword,
 		Datacenter:      datacenter,
 		Datastore:       datastore,
+		ResourcePool:    resourcePool,
 		VCenterClient:   vimClient,
 		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
 	}
@@ -100,7 +105,7 @@ func (v *VSphereAcceptance) CreateVM(folder *object.Folder, name string) {
 	finder.SetDatacenter(datacenter)
 
 	ctx := context.Background()
-	rootPool, err := finder.ResourcePoolOrDefault(ctx, "")
+	rootPool, err := finder.ResourcePoolOrDefault(ctx, v.ResourcePool)
 	Expect(err).NotTo(HaveOccurred())
 
 	task, err := folder.CreateVM(ctx, *spec, rootPool, nil)
