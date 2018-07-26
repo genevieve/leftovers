@@ -1,6 +1,7 @@
 package acceptance
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -10,14 +11,13 @@ import (
 	"github.com/genevieve/leftovers/vsphere"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
 )
 
 var _ = Describe("vSphere", func() {
 	var (
 		acc VSphereAcceptance
 
-		stdout  *gbytes.Buffer
+		stdout  *bytes.Buffer
 		filter  string
 		deleter vsphere.Leftovers
 	)
@@ -35,7 +35,7 @@ var _ = Describe("vSphere", func() {
 		acc = NewVSphereAcceptance()
 
 		noConfirm := true
-		stdout = gbytes.NewBuffer()
+		stdout = bytes.NewBuffer([]byte{})
 		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
 
 		var err error
@@ -49,8 +49,10 @@ var _ = Describe("vSphere", func() {
 		BeforeEach(func() {
 			rootFolder := acc.FindFolder(filter)
 			acc.CreateVM(rootFolder, "leftover-vm")
+
 			nestedFolder := acc.CreateFolder(filter, "leftovers-acceptance")
 			acc.CreateVM(nestedFolder, "leftover-nested-vm")
+
 			twiceNestedFolder := acc.CreateFolder(fmt.Sprintf("%s/leftovers-acceptance", filter), "leftovers-nested-acceptance")
 			acc.CreateVM(twiceNestedFolder, "leftover-twice-nested-vm")
 		})
@@ -59,28 +61,30 @@ var _ = Describe("vSphere", func() {
 			By("listing resources first", func() {
 				deleter.List(filter)
 
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-vm\]`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-nested-vm\]`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-twice-nested-vm\]`))
-				Expect(stdout).NotTo(gbytes.Say(`\[Virtual Machine: leftover-vm\] Deleting\.\.\.`))
-				Expect(stdout).NotTo(gbytes.Say(`\[Virtual Machine: leftover-nested-vm\] Deleting\.\.\.`))
-				Expect(stdout).NotTo(gbytes.Say(`\[Virtual Machine: leftover-twice-nested-vm\] Deleting\.\.\.`))
+				fmt.Printf("===========================%s\n", stdout)
+
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm]"))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-nested-vm]"))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm]"))
+				Expect(stdout.String()).NotTo(ContainSubstring("[Virtual Machine: leftover-vm] Deleting..."))
+				Expect(stdout.String()).NotTo(ContainSubstring("[Virtual Machine: leftover-nested-vm] Deleting..."))
+				Expect(stdout.String()).NotTo(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm] Deleting..."))
 			})
 
 			By("successfully deleting VMs", func() {
 				err := deleter.Delete(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-vm\] Deleting\.\.\.`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-vm\] Deleted!`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-nested-vm\] Deleting\.\.\.`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-nested-vm\] Deleted!`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-twice-nested-vm\] Deleting\.\.\.`))
-				Expect(stdout).To(gbytes.Say(`\[Virtual Machine: leftover-twice-nested-vm\] Deleted!`))
-				Expect(stdout).To(gbytes.Say(`\[Folder: leftovers-nested-acceptance\] Deleting\.\.\.`))
-				Expect(stdout).To(gbytes.Say(`\[Folder: leftovers-nested-acceptance\] Deleted!`))
-				Expect(stdout).To(gbytes.Say(`\[Folder: leftovers-acceptance\] Deleting\.\.\.`))
-				Expect(stdout).To(gbytes.Say(`\[Folder: leftovers-acceptance\] Deleted!`))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm] Deleting..."))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm] Deleted!"))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-nested-vm] Deleting..."))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-nested-vm] Deleted!"))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm] Deleting..."))
+				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm] Deleted!"))
+				Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-nested-acceptance] Deleting..."))
+				Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-nested-acceptance] Deleted!"))
+				Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleting..."))
+				Expect(stdout.String()).To(ContainSubstring("[Folder: leftovers-acceptance] Deleted!"))
 			})
 		})
 	})
