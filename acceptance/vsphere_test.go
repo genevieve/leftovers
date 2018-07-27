@@ -61,8 +61,6 @@ var _ = Describe("vSphere", func() {
 			By("listing resources first", func() {
 				deleter.List(filter)
 
-				fmt.Printf("===========================%s\n", stdout)
-
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm]"))
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-nested-vm]"))
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm]"))
