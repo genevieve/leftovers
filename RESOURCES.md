@@ -110,7 +110,7 @@
   - logical router link port on tier0
   - logical router link port on tier1
   - logical switch
-  - logical tier1 router
+  + logical tier1 router
   - nat rule
   - ns group
   - static route

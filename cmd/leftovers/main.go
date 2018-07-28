@@ -11,6 +11,7 @@ import (
 	"github.com/genevieve/leftovers/aws"
 	"github.com/genevieve/leftovers/azure"
 	"github.com/genevieve/leftovers/gcp"
+	"github.com/genevieve/leftovers/nsxt"
 	"github.com/genevieve/leftovers/vsphere"
 	flags "github.com/jessevdk/go-flags"
 )
@@ -36,6 +37,9 @@ type opts struct {
 	VSphereVCenterPassword string `long:"vsphere-vcenter-password" env:"BBL_VSPHERE_VCENTER_PASSWORD" description:"vSphere vCenter password."`
 	VSphereVCenterUser     string `long:"vsphere-vcenter-user"     env:"BBL_VSPHERE_VCENTER_USER"     description:"vSphere vCenter username."`
 	VSphereVCenterDC       string `long:"vsphere-vcenter-dc"       env:"BBL_VSPHERE_VCENTER_DC"       description:"vSphere vCenter datacenter."`
+	NSXTManagerHost        string `long:"nsxt-manager-host"        env:"BBL_NSXT_MANAGER_HOST"        description:"NSX-T manager IP address or domain name."`
+	NSXTUser               string `long:"nsxt-username"            env:"BBL_NSXT_USERNAME"            description:"NSX-T manager username."`
+	NSXTPassword           string `long:"nsxt-password"            env:"BBL_NSXT_PASSWORD"            description:"NSX-T manager password."`
 }
 
 type leftovers interface {
@@ -86,6 +90,8 @@ func main() {
 			log.Fatalf("--no-confirm is not supported for vSphere.")
 		}
 		l, err = vsphere.NewLeftovers(logger, c.VSphereVCenterIP, c.VSphereVCenterUser, c.VSphereVCenterPassword, c.VSphereVCenterDC)
+	case "nsxt":
+		l, err = nsxt.NewLeftovers(logger, c.NSXTManagerHost, c.NSXTUser, c.NSXTPassword)
 	default:
 		err = errors.New("Missing or unsupported BBL_IAAS.")
 	}
