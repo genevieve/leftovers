@@ -8,6 +8,7 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 * <a href='#what'>What's it look like?</a>
 * <a href='#how'>Installation</a>
 * <a href='#usage'>Usage</a>
+* <a href='#maintainers'>Maintainers</a>
 * [Resources you can delete by IaaS.](RESOURCES.md)
 
 
@@ -107,3 +108,7 @@ Help Options:
   -h, --help                     Show this help message
 ```
 
+## <a name='maintainers'></a>Maintainers
+
+- [Genevieve L'Esperance](twitter.com/genevieve_vl)
+- [Rowan Jacobs](github.com/rowanjacobs)
