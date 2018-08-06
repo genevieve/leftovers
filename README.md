@@ -110,5 +110,5 @@ Help Options:
 
 ## <a name='maintainers'></a>Maintainers
 
-- [Genevieve L'Esperance](twitter.com/genevieve_vl)
-- [Rowan Jacobs](github.com/rowanjacobs)
+- [Genevieve L'Esperance](https://twitter.com/genevieve_vl)
+- [Rowan Jacobs](https://github.com/rowanjacobs)
