@@ -6,7 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"sync"
+
+	"golang.org/x/sync/errgroup"
 
 	homedir "github.com/mitchellh/go-homedir"
 
@@ -198,9 +199,7 @@ func (l Leftovers) Delete(filter string) error {
 		deletables = append(deletables, list)
 	}
 
-	l.asyncDelete(deletables)
-
-	return nil
+	return l.asyncDelete(deletables)
 }
 
 // DeleteType will collect all resources of the provied type that contain
@@ -221,32 +220,32 @@ func (l Leftovers) DeleteType(filter, rType string) error {
 		}
 	}
 
-	l.asyncDelete(deletables)
-
-	return nil
+	return l.asyncDelete(deletables)
 }
 
-func (l Leftovers) asyncDelete(deletables [][]common.Deletable) {
-	var wg sync.WaitGroup
+func (l Leftovers) asyncDelete(deletables [][]common.Deletable) error {
+	var eg errgroup.Group
 
 	for _, list := range deletables {
 		for _, d := range list {
-			wg.Add(1)
-
-			go func(d common.Deletable) {
-				defer wg.Done()
-
+			eg.Go(func() error {
 				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
 
 				err := d.Delete()
 				if err != nil {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
-				} else {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
+					// l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
+					return fmt.Errorf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error()))
 				}
-			}(d)
+
+				l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
+				return nil
+			})
 		}
 
-		wg.Wait()
+		if err := eg.Wait(); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
