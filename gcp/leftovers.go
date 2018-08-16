@@ -6,13 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"sync"
 
-	multierror "github.com/hashicorp/go-multierror"
 	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/fatih/color"
-	"github.com/genevieve/leftovers/gcp/common"
+	"github.com/genevieve/leftovers/app"
+	"github.com/genevieve/leftovers/common"
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/container"
 	"github.com/genevieve/leftovers/gcp/dns"
@@ -33,9 +32,14 @@ type resource interface {
 	Type() string
 }
 
+// type asyncDeleter interface {
+// 	Run([][]common.Deletable) error
+// }
+
 type Leftovers struct {
-	logger    logger
-	resources []resource
+	logger       logger
+	asyncDeleter app.AsyncDeleter
+	resources    []resource
 }
 
 // NewLeftovers returns a new Leftovers for GCP that can be used to list resources,
@@ -119,8 +123,11 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, err
 	}
 
+	asyncDeleter := app.NewAsyncDeleter(logger)
+
 	return Leftovers{
-		logger: logger,
+		logger:       logger,
+		asyncDeleter: asyncDeleter,
 		resources: []resource{
 			compute.NewForwardingRules(client, logger, regions),
 			compute.NewGlobalForwardingRules(client, logger),
@@ -199,7 +206,7 @@ func (l Leftovers) Delete(filter string) error {
 		deletables = append(deletables, list)
 	}
 
-	return l.asyncDelete(deletables)
+	return l.asyncDeleter.Run(deletables)
 }
 
 // DeleteType will collect all resources of the provied type that contain
@@ -220,38 +227,5 @@ func (l Leftovers) DeleteType(filter, rType string) error {
 		}
 	}
 
-	return l.asyncDelete(deletables)
-}
-
-func (l Leftovers) asyncDelete(deletables [][]common.Deletable) error {
-	var (
-		wg     sync.WaitGroup
-		result *multierror.Error
-	)
-
-	for _, list := range deletables {
-
-		for _, d := range list {
-			wg.Add(1)
-
-			go func(d common.Deletable) {
-				defer wg.Done()
-
-				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
-
-				err := d.Delete()
-				if err != nil {
-					err = fmt.Errorf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error()))
-					l.logger.Println(err.Error())
-					result = multierror.Append(result, err)
-				} else {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
-				}
-			}(d)
-		}
-
-		wg.Wait()
-	}
-
-	return result.ErrorOrNil()
+	return l.asyncDeleter.Run(deletables)
 }
