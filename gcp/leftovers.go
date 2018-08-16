@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"sync"
 
+	multierror "github.com/hashicorp/go-multierror"
 	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/fatih/color"
@@ -198,9 +199,7 @@ func (l Leftovers) Delete(filter string) error {
 		deletables = append(deletables, list)
 	}
 
-	l.asyncDelete(deletables)
-
-	return nil
+	return l.asyncDelete(deletables)
 }
 
 // DeleteType will collect all resources of the provied type that contain
@@ -221,15 +220,17 @@ func (l Leftovers) DeleteType(filter, rType string) error {
 		}
 	}
 
-	l.asyncDelete(deletables)
-
-	return nil
+	return l.asyncDelete(deletables)
 }
 
-func (l Leftovers) asyncDelete(deletables [][]common.Deletable) {
-	var wg sync.WaitGroup
+func (l Leftovers) asyncDelete(deletables [][]common.Deletable) error {
+	var (
+		wg     sync.WaitGroup
+		result *multierror.Error
+	)
 
 	for _, list := range deletables {
+
 		for _, d := range list {
 			wg.Add(1)
 
@@ -240,7 +241,9 @@ func (l Leftovers) asyncDelete(deletables [][]common.Deletable) {
 
 				err := d.Delete()
 				if err != nil {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
+					err = fmt.Errorf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error()))
+					l.logger.Println(err.Error())
+					result = multierror.Append(result, err)
 				} else {
 					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
 				}
@@ -249,4 +252,6 @@ func (l Leftovers) asyncDelete(deletables [][]common.Deletable) {
 
 		wg.Wait()
 	}
+
+	return result.ErrorOrNil()
 }
