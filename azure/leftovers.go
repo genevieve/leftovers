@@ -56,9 +56,8 @@ func (l Leftovers) Delete(filter string) error {
 	for _, d := range deletables {
 		l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
 
-		err := d.Delete()
-		if err != nil {
-			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
+		if err := d.Delete(); err != nil {
+			return fmt.Errorf(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
 		} else {
 			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
 		}
