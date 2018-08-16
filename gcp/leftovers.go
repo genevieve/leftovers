@@ -233,7 +233,6 @@ func (l Leftovers) asyncDelete(deletables [][]common.Deletable) error {
 
 				err := d.Delete()
 				if err != nil {
-					// l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
 					return fmt.Errorf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error()))
 				}
 
