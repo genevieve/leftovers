@@ -17,7 +17,6 @@ type ServiceAccountsClient struct {
 			ServiceAccount string
 		}
 		Returns struct {
-			Empty *gcpiam.Empty
 			Error error
 		}
 	}
@@ -29,9 +28,9 @@ func (u *ServiceAccountsClient) ListServiceAccounts() ([]*gcpiam.ServiceAccount,
 	return u.ListServiceAccountsCall.Returns.Output, u.ListServiceAccountsCall.Returns.Error
 }
 
-func (u *ServiceAccountsClient) DeleteServiceAccount(account string) (*gcpiam.Empty, error) {
+func (u *ServiceAccountsClient) DeleteServiceAccount(account string) error {
 	u.DeleteServiceAccountCall.CallCount++
 	u.DeleteServiceAccountCall.Receives.ServiceAccount = account
 
-	return u.DeleteServiceAccountCall.Returns.Empty, u.DeleteServiceAccountCall.Returns.Error
+	return u.DeleteServiceAccountCall.Returns.Error
 }

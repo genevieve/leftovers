@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/api/googleapi"
 	gcpiam "google.golang.org/api/iam/v1"
 )
 
@@ -48,6 +49,15 @@ func (c client) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
 	return serviceAccounts, nil
 }
 
-func (c client) DeleteServiceAccount(account string) (*gcpiam.Empty, error) {
-	return c.serviceAccounts.Delete(account).Do()
+func (c client) DeleteServiceAccount(account string) error {
+	_, err := c.serviceAccounts.Delete(account).Do()
+	if err != nil {
+		gerr, ok := err.(*googleapi.Error)
+		if ok && gerr != nil && gerr.Code == 404 {
+			return nil
+		}
+
+		return err
+	}
+	return nil
 }
