@@ -9,6 +9,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	azurelib "github.com/Azure/go-autorest/autorest/azure"
 	"github.com/fatih/color"
+	multierror "github.com/hashicorp/go-multierror"
 )
 
 type resource interface {
@@ -46,7 +47,10 @@ func (l Leftovers) Types() {
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
 func (l Leftovers) Delete(filter string) error {
-	var deletables []Deletable
+	var (
+		deletables []Deletable
+		result     *multierror.Error
+	)
 
 	deletables, err := l.resource.List(filter)
 	if err != nil {
@@ -56,14 +60,18 @@ func (l Leftovers) Delete(filter string) error {
 	for _, d := range deletables {
 		l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
 
-		if err := d.Delete(); err != nil {
-			return fmt.Errorf(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
+		err := d.Delete()
+		if err != nil {
+			err = fmt.Errorf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error()))
+			result = multierror.Append(result, err)
+
+			l.logger.Println(err.Error())
 		} else {
 			l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
 		}
 	}
 
-	return nil
+	return result.ErrorOrNil()
 }
 
 // DeleteType will collect all resources of the provied type that contain
