@@ -32,10 +32,6 @@ type resource interface {
 	Type() string
 }
 
-// type asyncDeleter interface {
-// 	Run([][]common.Deletable) error
-// }
-
 type Leftovers struct {
 	logger       logger
 	asyncDeleter app.AsyncDeleter
