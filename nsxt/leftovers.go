@@ -3,13 +3,20 @@ package nsxt
 import (
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/fatih/color"
-	"github.com/genevieve/leftovers/nsxt/common"
+	"github.com/genevieve/leftovers/app"
+	"github.com/genevieve/leftovers/common"
 	"github.com/genevieve/leftovers/nsxt/logicalrouting"
 	nsxt "github.com/vmware/go-vmware-nsxt"
 )
+
+type logger interface {
+	Printf(message string, a ...interface{})
+	Println(message string)
+	PromptWithDetails(resourceType, resourceName string) bool
+	NoConfirm()
+}
 
 type resource interface {
 	List(filter string) ([]common.Deletable, error)
@@ -17,8 +24,9 @@ type resource interface {
 }
 
 type Leftovers struct {
-	logger    logger
-	resources []resource
+	logger       logger
+	asyncDeleter app.AsyncDeleter
+	resources    []resource
 }
 
 // List will print all the resources that contain
@@ -65,9 +73,7 @@ func (l Leftovers) Delete(filter string) error {
 		deletables = append(deletables, list)
 	}
 
-	l.asyncDelete(deletables)
-
-	return nil
+	return l.asyncDeleter.Run(deletables)
 }
 
 // DeleteType will collect all resources of the provied type that contain
@@ -88,34 +94,7 @@ func (l Leftovers) DeleteType(filter, rType string) error {
 		}
 	}
 
-	l.asyncDelete(deletables)
-
-	return nil
-}
-
-func (l Leftovers) asyncDelete(deletables [][]common.Deletable) {
-	var wg sync.WaitGroup
-
-	for _, list := range deletables {
-		for _, d := range list {
-			wg.Add(1)
-
-			go func(d common.Deletable) {
-				defer wg.Done()
-
-				l.logger.Println(fmt.Sprintf("[%s: %s] Deleting...", d.Type(), d.Name()))
-
-				err := d.Delete()
-				if err != nil {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.YellowString(err.Error())))
-				} else {
-					l.logger.Println(fmt.Sprintf("[%s: %s] %s", d.Type(), d.Name(), color.GreenString("Deleted!")))
-				}
-			}(d)
-		}
-
-		wg.Wait()
-	}
+	return l.asyncDeleter.Run(deletables)
 }
 
 func NewLeftovers(logger logger, managerHost, user, password string) (Leftovers, error) {
@@ -148,7 +127,8 @@ func NewLeftovers(logger logger, managerHost, user, password string) (Leftovers,
 	}
 
 	return Leftovers{
-		logger: logger,
+		logger:       logger,
+		asyncDeleter: app.NewAsyncDeleter(logger),
 		resources: []resource{
 			logicalrouting.NewTier1Routers(nsxtClient.LogicalRoutingAndServicesApi, nsxtClient.Context, logger),
 			// TBD

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/genevieve/leftovers/nsxt/common"
+	"github.com/genevieve/leftovers/common"
 )
 
 type Tier1Routers struct {
