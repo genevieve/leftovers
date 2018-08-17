@@ -9,11 +9,12 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	azurelib "github.com/Azure/go-autorest/autorest/azure"
 	"github.com/fatih/color"
+	"github.com/genevieve/leftovers/common"
 	multierror "github.com/hashicorp/go-multierror"
 )
 
 type resource interface {
-	List(filter string) ([]Deletable, error)
+	List(filter string) ([]common.Deletable, error)
 	Type() string
 }
 
@@ -48,7 +49,7 @@ func (l Leftovers) Types() {
 // that are selected.
 func (l Leftovers) Delete(filter string) error {
 	var (
-		deletables []Deletable
+		deletables []common.Deletable
 		result     *multierror.Error
 	)
 
