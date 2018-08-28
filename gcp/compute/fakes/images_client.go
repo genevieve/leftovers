@@ -6,7 +6,7 @@ type ImagesClient struct {
 	ListImagesCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.ImageList
+			Output []*gcpcompute.Image
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type ImagesClient struct {
 	}
 }
 
-func (n *ImagesClient) ListImages() (*gcpcompute.ImageList, error) {
+func (n *ImagesClient) ListImages() ([]*gcpcompute.Image, error) {
 	n.ListImagesCall.CallCount++
 
 	return n.ListImagesCall.Returns.Output, n.ListImagesCall.Returns.Error
