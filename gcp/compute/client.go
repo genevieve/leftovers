@@ -95,16 +95,33 @@ func (c client) DeleteBackendService(backendService string) error {
 	return c.wait(c.backendServices.Delete(c.project, backendService))
 }
 
-func (c client) ListDisks(zone string) (*gcpcompute.DiskList, error) {
-	return c.disks.List(c.project, zone).Do()
+// ListDisks returns the full list of disks.
+func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
+	disks := []*gcpcompute.Disk{}
+
+	for {
+		resp, err := c.disks.List(c.project, zone).Do()
+		if err != nil {
+			return disks, err
+		}
+
+		disks = append(disks, resp.Items...)
+
+		if resp.NextPageToken == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return disks, nil
 }
 
 func (c client) DeleteDisk(zone, disk string) error {
 	return c.wait(c.disks.Delete(c.project, zone, disk))
 }
 
-// ListImages will loop over every page of results and return
-// the full list of images.
+// ListImages returns the full list of images.
 func (c client) ListImages() ([]*gcpcompute.Image, error) {
 	images := []*gcpcompute.Image{}
 

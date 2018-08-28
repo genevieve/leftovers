@@ -9,7 +9,7 @@ type DisksClient struct {
 			Zone string
 		}
 		Returns struct {
-			Output *gcpcompute.DiskList
+			Output []*gcpcompute.Disk
 			Error  error
 		}
 	}
@@ -26,7 +26,7 @@ type DisksClient struct {
 	}
 }
 
-func (n *DisksClient) ListDisks(zone string) (*gcpcompute.DiskList, error) {
+func (n *DisksClient) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
 	n.ListDisksCall.CallCount++
 	n.ListDisksCall.Receives.Zone = zone
 
