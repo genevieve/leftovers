@@ -9,7 +9,7 @@ type AddressesClient struct {
 			Region string
 		}
 		Returns struct {
-			Output *gcpcompute.AddressList
+			Output []*gcpcompute.Address
 			Error  error
 		}
 	}
@@ -26,7 +26,7 @@ type AddressesClient struct {
 	}
 }
 
-func (a *AddressesClient) ListAddresses(region string) (*gcpcompute.AddressList, error) {
+func (a *AddressesClient) ListAddresses(region string) ([]*gcpcompute.Address, error) {
 	a.ListAddressesCall.CallCount++
 	a.ListAddressesCall.Receives.Region = region
 

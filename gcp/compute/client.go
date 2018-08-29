@@ -71,8 +71,27 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 	}
 }
 
-func (c client) ListAddresses(region string) (*gcpcompute.AddressList, error) {
-	return c.addresses.List(c.project, region).Do()
+func (c client) ListAddresses(region string) ([]*gcpcompute.Address, error) {
+	var token string
+	list := []*gcpcompute.Address{}
+
+	for {
+		resp, err := c.addresses.List(c.project, region).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteAddress(region, address string) error {
