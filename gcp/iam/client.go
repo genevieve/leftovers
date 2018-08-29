@@ -27,10 +27,10 @@ func NewClient(project string, service *gcpiam.Service) client {
 // and return the full list of service accounts. To prevent
 // backend errors from repeated calls, there is a 2s delay.
 func (c client) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
+	var token string
 	serviceAccounts := []*gcpiam.ServiceAccount{}
-	token := ""
 
-	for paginate := true; paginate; {
+	for {
 		resp, err := c.serviceAccounts.List(fmt.Sprintf("projects/%s", c.project)).PageToken(token).Do()
 		if err != nil {
 			return []*gcpiam.ServiceAccount{}, err
@@ -38,8 +38,10 @@ func (c client) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
 
 		serviceAccounts = append(serviceAccounts, resp.Accounts...)
 
-		token := resp.NextPageToken
-		paginate = token != ""
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
 
 		time.Sleep(2 * time.Second)
 	}
