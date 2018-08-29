@@ -9,7 +9,7 @@ type InstancesClient struct {
 			Zone string
 		}
 		Returns struct {
-			Output *gcpcompute.InstanceList
+			Output []*gcpcompute.Instance
 			Error  error
 		}
 	}
@@ -26,7 +26,7 @@ type InstancesClient struct {
 	}
 }
 
-func (n *InstancesClient) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
+func (n *InstancesClient) ListInstances(zone string) ([]*gcpcompute.Instance, error) {
 	n.ListInstancesCall.CallCount++
 	n.ListInstancesCall.Receives.Zone = zone
 

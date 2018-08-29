@@ -149,8 +149,26 @@ func (c client) DeleteImage(image string) error {
 	return c.wait(c.images.Delete(c.project, image))
 }
 
-func (c client) ListInstances(zone string) (*gcpcompute.InstanceList, error) {
-	return c.instances.List(c.project, zone).Do()
+func (c client) ListInstances(zone string) ([]*gcpcompute.Instance, error) {
+	resp, err := c.instances.List(c.project, zone).Do()
+	if err != nil {
+		return []*gcpcompute.Instance{}, err
+	}
+
+	instances := resp.Items
+
+	for resp.NextPageToken != "" {
+		resp, err = c.instances.List(c.project, zone).PageToken(resp.NextPageToken).Do()
+		if err != nil {
+			return []*gcpcompute.Instance{}, err
+		}
+
+		instances = append(instances, resp.Items...)
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return instances, nil
 }
 
 func (c client) DeleteInstance(zone, instance string) error {
