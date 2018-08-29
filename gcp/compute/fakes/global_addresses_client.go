@@ -6,7 +6,7 @@ type GlobalAddressesClient struct {
 	ListGlobalAddressesCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.AddressList
+			Output []*gcpcompute.Address
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type GlobalAddressesClient struct {
 	}
 }
 
-func (a *GlobalAddressesClient) ListGlobalAddresses() (*gcpcompute.AddressList, error) {
+func (a *GlobalAddressesClient) ListGlobalAddresses() ([]*gcpcompute.Address, error) {
 	a.ListGlobalAddressesCall.CallCount++
 
 	return a.ListGlobalAddressesCall.Returns.Output, a.ListGlobalAddressesCall.Returns.Error

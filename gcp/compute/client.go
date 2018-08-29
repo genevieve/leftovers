@@ -79,8 +79,27 @@ func (c client) DeleteAddress(region, address string) error {
 	return c.wait(c.addresses.Delete(c.project, region, address))
 }
 
-func (c client) ListGlobalAddresses() (*gcpcompute.AddressList, error) {
-	return c.globalAddresses.List(c.project).Do()
+func (c client) ListGlobalAddresses() ([]*gcpcompute.Address, error) {
+	var token string
+	list := []*gcpcompute.Address{}
+
+	for {
+		resp, err := c.globalAddresses.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteGlobalAddress(address string) error {
