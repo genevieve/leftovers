@@ -6,7 +6,7 @@ type BackendServicesClient struct {
 	ListBackendServicesCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.BackendServiceList
+			Output []*gcpcompute.BackendService
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type BackendServicesClient struct {
 	}
 }
 
-func (n *BackendServicesClient) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
+func (n *BackendServicesClient) ListBackendServices() ([]*gcpcompute.BackendService, error) {
 	n.ListBackendServicesCall.CallCount++
 
 	return n.ListBackendServicesCall.Returns.Output, n.ListBackendServicesCall.Returns.Error

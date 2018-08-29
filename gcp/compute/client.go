@@ -87,8 +87,27 @@ func (c client) DeleteGlobalAddress(address string) error {
 	return c.wait(c.globalAddresses.Delete(c.project, address))
 }
 
-func (c client) ListBackendServices() (*gcpcompute.BackendServiceList, error) {
-	return c.backendServices.List(c.project).Do()
+func (c client) ListBackendServices() ([]*gcpcompute.BackendService, error) {
+	var token string
+	list := []*gcpcompute.BackendService{}
+
+	for {
+		resp, err := c.backendServices.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteBackendService(backendService string) error {
