@@ -8,8 +8,6 @@ import (
 	gcpiam "google.golang.org/api/iam/v1"
 )
 
-const PAGE_SIZE = int64(200)
-
 type client struct {
 	project string
 
@@ -29,19 +27,22 @@ func NewClient(project string, service *gcpiam.Service) client {
 // and return the full list of service accounts. To prevent
 // backend errors from repeated calls, there is a 2s delay.
 func (c client) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
-	serviceAccounts := []*gcpiam.ServiceAccount{}
+	path := fmt.Sprintf("projects/%s", c.project)
 
-	for {
-		resp, err := c.serviceAccounts.List(fmt.Sprintf("projects/%s", c.project)).PageSize(PAGE_SIZE).Do()
+	resp, err := c.serviceAccounts.List(path).Do()
+	if err != nil {
+		return []*gcpiam.ServiceAccount{}, err
+	}
+
+	serviceAccounts := resp.Accounts
+
+	for resp.NextPageToken != "" {
+		resp, err = c.serviceAccounts.List(path).PageToken(resp.NextPageToken).Do()
 		if err != nil {
-			return serviceAccounts, err
+			return []*gcpiam.ServiceAccount{}, err
 		}
 
 		serviceAccounts = append(serviceAccounts, resp.Accounts...)
-
-		if resp.NextPageToken == "" {
-			break
-		}
 
 		time.Sleep(2 * time.Second)
 	}
