@@ -97,19 +97,20 @@ func (c client) DeleteBackendService(backendService string) error {
 
 // ListDisks returns the full list of disks.
 func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
-	disks := []*gcpcompute.Disk{}
+	resp, err := c.disks.List(c.project, zone).Do()
+	if err != nil {
+		return []*gcpcompute.Disk{}, err
+	}
 
-	for {
-		resp, err := c.disks.List(c.project, zone).Do()
+	disks := resp.Items
+
+	for resp.NextPageToken != "" {
+		resp, err = c.disks.List(c.project, zone).PageToken(resp.NextPageToken).Do()
 		if err != nil {
-			return disks, err
+			return []*gcpcompute.Disk{}, err
 		}
 
 		disks = append(disks, resp.Items...)
-
-		if resp.NextPageToken == "" {
-			break
-		}
 
 		time.Sleep(2 * time.Second)
 	}
