@@ -124,19 +124,20 @@ func (c client) DeleteDisk(zone, disk string) error {
 
 // ListImages returns the full list of images.
 func (c client) ListImages() ([]*gcpcompute.Image, error) {
-	images := []*gcpcompute.Image{}
+	resp, err := c.images.List(c.project).Do()
+	if err != nil {
+		return []*gcpcompute.Image{}, err
+	}
 
-	for {
-		resp, err := c.images.List(c.project).Do()
+	images := resp.Items
+
+	for resp.NextPageToken != "" {
+		resp, err = c.images.List(c.project).PageToken(resp.NextPageToken).Do()
 		if err != nil {
-			return images, err
+			return []*gcpcompute.Image{}, err
 		}
 
 		images = append(images, resp.Items...)
-
-		if resp.NextPageToken == "" {
-			break
-		}
 
 		time.Sleep(2 * time.Second)
 	}
