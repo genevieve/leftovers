@@ -97,20 +97,21 @@ func (c client) DeleteBackendService(backendService string) error {
 
 // ListDisks returns the full list of disks.
 func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
-	resp, err := c.disks.List(c.project, zone).Do()
-	if err != nil {
-		return []*gcpcompute.Disk{}, err
-	}
+	var token string
+	disks := []*gcpcompute.Disk{}
 
-	disks := resp.Items
-
-	for resp.NextPageToken != "" {
-		resp, err = c.disks.List(c.project, zone).PageToken(resp.NextPageToken).Do()
+	for {
+		resp, err := c.disks.List(c.project, zone).PageToken(token).Do()
 		if err != nil {
 			return []*gcpcompute.Disk{}, err
 		}
 
 		disks = append(disks, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
 
 		time.Sleep(2 * time.Second)
 	}
@@ -124,20 +125,21 @@ func (c client) DeleteDisk(zone, disk string) error {
 
 // ListImages returns the full list of images.
 func (c client) ListImages() ([]*gcpcompute.Image, error) {
-	resp, err := c.images.List(c.project).Do()
-	if err != nil {
-		return []*gcpcompute.Image{}, err
-	}
+	var token string
+	images := []*gcpcompute.Image{}
 
-	images := resp.Items
-
-	for resp.NextPageToken != "" {
-		resp, err = c.images.List(c.project).PageToken(resp.NextPageToken).Do()
+	for {
+		resp, err := c.images.List(c.project).PageToken(token).Do()
 		if err != nil {
 			return []*gcpcompute.Image{}, err
 		}
 
 		images = append(images, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
 
 		time.Sleep(2 * time.Second)
 	}
@@ -150,20 +152,21 @@ func (c client) DeleteImage(image string) error {
 }
 
 func (c client) ListInstances(zone string) ([]*gcpcompute.Instance, error) {
-	resp, err := c.instances.List(c.project, zone).Do()
-	if err != nil {
-		return []*gcpcompute.Instance{}, err
-	}
+	var token string
+	instances := []*gcpcompute.Instance{}
 
-	instances := resp.Items
-
-	for resp.NextPageToken != "" {
-		resp, err = c.instances.List(c.project, zone).PageToken(resp.NextPageToken).Do()
+	for {
+		resp, err := c.instances.List(c.project, zone).PageToken(token).Do()
 		if err != nil {
 			return []*gcpcompute.Instance{}, err
 		}
 
 		instances = append(instances, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
 
 		time.Sleep(2 * time.Second)
 	}
