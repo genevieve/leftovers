@@ -117,15 +117,15 @@ func (c client) DeleteBackendService(backendService string) error {
 // ListDisks returns the full list of disks.
 func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
 	var token string
-	disks := []*gcpcompute.Disk{}
+	list := []*gcpcompute.Disk{}
 
 	for {
 		resp, err := c.disks.List(c.project, zone).PageToken(token).Do()
 		if err != nil {
-			return []*gcpcompute.Disk{}, err
+			return nil, err
 		}
 
-		disks = append(disks, resp.Items...)
+		list = append(list, resp.Items...)
 
 		token = resp.NextPageToken
 		if token == "" {
@@ -135,7 +135,7 @@ func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
 		time.Sleep(2 * time.Second)
 	}
 
-	return disks, nil
+	return list, nil
 }
 
 func (c client) DeleteDisk(zone, disk string) error {
@@ -145,15 +145,15 @@ func (c client) DeleteDisk(zone, disk string) error {
 // ListImages returns the full list of images.
 func (c client) ListImages() ([]*gcpcompute.Image, error) {
 	var token string
-	images := []*gcpcompute.Image{}
+	list := []*gcpcompute.Image{}
 
 	for {
 		resp, err := c.images.List(c.project).PageToken(token).Do()
 		if err != nil {
-			return []*gcpcompute.Image{}, err
+			return nil, err
 		}
 
-		images = append(images, resp.Items...)
+		list = append(list, resp.Items...)
 
 		token = resp.NextPageToken
 		if token == "" {
@@ -163,7 +163,7 @@ func (c client) ListImages() ([]*gcpcompute.Image, error) {
 		time.Sleep(2 * time.Second)
 	}
 
-	return images, nil
+	return list, nil
 }
 
 func (c client) DeleteImage(image string) error {
@@ -172,15 +172,15 @@ func (c client) DeleteImage(image string) error {
 
 func (c client) ListInstances(zone string) ([]*gcpcompute.Instance, error) {
 	var token string
-	instances := []*gcpcompute.Instance{}
+	list := []*gcpcompute.Instance{}
 
 	for {
 		resp, err := c.instances.List(c.project, zone).PageToken(token).Do()
 		if err != nil {
-			return []*gcpcompute.Instance{}, err
+			return nil, err
 		}
 
-		instances = append(instances, resp.Items...)
+		list = append(list, resp.Items...)
 
 		token = resp.NextPageToken
 		if token == "" {
@@ -190,7 +190,7 @@ func (c client) ListInstances(zone string) ([]*gcpcompute.Instance, error) {
 		time.Sleep(2 * time.Second)
 	}
 
-	return instances, nil
+	return list, nil
 }
 
 func (c client) DeleteInstance(zone, instance string) error {
