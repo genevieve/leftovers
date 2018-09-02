@@ -28,7 +28,7 @@ func (h HostedZone) Delete() error {
 		return fmt.Errorf("Get Record Sets: %s", err)
 	}
 
-	err = h.recordSets.Delete(h.id, r)
+	err = h.recordSets.Delete(h.id, h.identifier, r)
 	if err != nil {
 		return fmt.Errorf("Delete Record Sets: %s", err)
 	}

@@ -2,6 +2,7 @@ package route53
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
@@ -46,10 +47,10 @@ func (r RecordSets) Get(hostedZoneId *string) ([]*awsroute53.ResourceRecordSet, 
 	return records, nil
 }
 
-func (r RecordSets) Delete(hostedZoneId *string, records []*awsroute53.ResourceRecordSet) error {
+func (r RecordSets) Delete(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet) error {
 	var changes []*awsroute53.Change
 	for _, record := range records {
-		if *record.Type == "NS" || *record.Type == "SOA" {
+		if strings.TrimSuffix(*record.Name, ".") == strings.TrimSuffix(hostedZoneName, ".") && (*record.Type == "NS" || *record.Type == "SOA") {
 			continue
 		}
 		changes = append(changes, &awsroute53.Change{

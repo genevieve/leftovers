@@ -14,8 +14,9 @@ import (
 
 var _ = Describe("RecordSets", func() {
 	var (
-		client       *fakes.RecordSetsClient
-		hostedZoneId *string
+		client         *fakes.RecordSetsClient
+		hostedZoneId   *string
+		hostedZoneName string
 
 		recordSets route53.RecordSets
 	)
@@ -23,6 +24,7 @@ var _ = Describe("RecordSets", func() {
 	BeforeEach(func() {
 		client = &fakes.RecordSetsClient{}
 		hostedZoneId = aws.String("zone-id")
+		hostedZoneName = "zone-name"
 
 		recordSets = route53.NewRecordSets(client)
 	})
@@ -32,6 +34,7 @@ var _ = Describe("RecordSets", func() {
 			client.ListResourceRecordSetsCall.Returns = []fakes.ListResourceRecordSetsCallReturn{{
 				Output: &awsroute53.ListResourceRecordSetsOutput{
 					ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
+						Name: aws.String("the-name"),
 						Type: aws.String("something-else"),
 					}},
 					IsTruncated: aws.Bool(false),
@@ -99,14 +102,16 @@ var _ = Describe("RecordSets", func() {
 
 	Describe("Delete", func() {
 		var records []*awsroute53.ResourceRecordSet
+
 		BeforeEach(func() {
 			records = []*awsroute53.ResourceRecordSet{{
+				Name: aws.String(hostedZoneName),
 				Type: aws.String("something-else"),
 			}}
 		})
 
 		It("deletes the record sets", func() {
-			err := recordSets.Delete(hostedZoneId, records)
+			err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
@@ -118,12 +123,13 @@ var _ = Describe("RecordSets", func() {
 		Context("when the resource record set is of type NS", func() {
 			BeforeEach(func() {
 				records = []*awsroute53.ResourceRecordSet{{
+					Name: aws.String(hostedZoneName),
 					Type: aws.String("NS"),
 				}}
 			})
 
 			It("does not try to delete it", func() {
-				err := recordSets.Delete(hostedZoneId, records)
+				err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(0))
@@ -133,12 +139,13 @@ var _ = Describe("RecordSets", func() {
 		Context("when the resource record set is of type SOA", func() {
 			BeforeEach(func() {
 				records = []*awsroute53.ResourceRecordSet{{
+					Name: aws.String(hostedZoneName),
 					Type: aws.String("SOA"),
 				}}
 			})
 
 			It("does not try to delete it", func() {
-				err := recordSets.Delete(hostedZoneId, records)
+				err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(0))
@@ -151,7 +158,7 @@ var _ = Describe("RecordSets", func() {
 			})
 
 			It("returns the error", func() {
-				err := recordSets.Delete(hostedZoneId, records)
+				err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
 				Expect(err).To(MatchError("Delete Resource Record Sets: banana"))
 			})
 		})

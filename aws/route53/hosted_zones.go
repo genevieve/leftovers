@@ -21,7 +21,7 @@ type HostedZones struct {
 
 type recordSets interface {
 	Get(hostedZoneId *string) ([]*awsroute53.ResourceRecordSet, error)
-	Delete(hostedZoneId *string, recordSets []*awsroute53.ResourceRecordSet) error
+	Delete(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet) error
 }
 
 func NewHostedZones(client hostedZonesClient, logger logger, recordSets recordSets) HostedZones {
