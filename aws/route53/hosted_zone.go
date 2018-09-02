@@ -22,13 +22,28 @@ func NewHostedZone(client hostedZonesClient, id, name *string) HostedZone {
 }
 
 func (h HostedZone) Delete() error {
-	records, err := h.client.ListResourceRecordSets(&awsroute53.ListResourceRecordSetsInput{HostedZoneId: h.id})
-	if err != nil {
-		return fmt.Errorf("List Resource Record Sets: %s", err)
+	var (
+		resourceRecordSets []*awsroute53.ResourceRecordSet
+		nextRecord         *string
+	)
+
+	for isTruncated := true; isTruncated; {
+		output, err := h.client.ListResourceRecordSets(&awsroute53.ListResourceRecordSetsInput{
+			HostedZoneId:    h.id,
+			StartRecordName: nextRecord,
+		})
+		if err != nil {
+			return fmt.Errorf("List Resource Record Sets: %s", err)
+		}
+
+		resourceRecordSets = append(resourceRecordSets, output.ResourceRecordSets...)
+
+		isTruncated = *output.IsTruncated
+		nextRecord = output.NextRecordName
 	}
 
 	var changes []*awsroute53.Change
-	for _, record := range records.ResourceRecordSets {
+	for _, record := range resourceRecordSets {
 		if *record.Type == "NS" || *record.Type == "SOA" {
 			continue
 		}
@@ -48,7 +63,7 @@ func (h HostedZone) Delete() error {
 		}
 	}
 
-	_, err = h.client.DeleteHostedZone(&awsroute53.DeleteHostedZoneInput{Id: h.id})
+	_, err := h.client.DeleteHostedZone(&awsroute53.DeleteHostedZoneInput{Id: h.id})
 	if err != nil {
 		return fmt.Errorf("Delete: %s", err)
 	}

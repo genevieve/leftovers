@@ -29,13 +29,8 @@ type HostedZonesClient struct {
 
 	ListResourceRecordSetsCall struct {
 		CallCount int
-		Receives  struct {
-			Input *awsroute53.ListResourceRecordSetsInput
-		}
-		Returns struct {
-			Output *awsroute53.ListResourceRecordSetsOutput
-			Error  error
-		}
+		Receives  []ListResourceRecordSetsCallReceive
+		Returns   []ListResourceRecordSetsCallReturn
 	}
 
 	ChangeResourceRecordSetsCall struct {
@@ -48,6 +43,15 @@ type HostedZonesClient struct {
 			Error  error
 		}
 	}
+}
+
+type ListResourceRecordSetsCallReceive struct {
+	Input *awsroute53.ListResourceRecordSetsInput
+}
+
+type ListResourceRecordSetsCallReturn struct {
+	Output *awsroute53.ListResourceRecordSetsOutput
+	Error  error
 }
 
 func (h *HostedZonesClient) ListHostedZones(input *awsroute53.ListHostedZonesInput) (*awsroute53.ListHostedZonesOutput, error) {
@@ -66,9 +70,13 @@ func (h *HostedZonesClient) DeleteHostedZone(input *awsroute53.DeleteHostedZoneI
 
 func (h *HostedZonesClient) ListResourceRecordSets(input *awsroute53.ListResourceRecordSetsInput) (*awsroute53.ListResourceRecordSetsOutput, error) {
 	h.ListResourceRecordSetsCall.CallCount++
-	h.ListResourceRecordSetsCall.Receives.Input = input
+	h.ListResourceRecordSetsCall.Receives = append(h.ListResourceRecordSetsCall.Receives, ListResourceRecordSetsCallReceive{Input: input})
 
-	return h.ListResourceRecordSetsCall.Returns.Output, h.ListResourceRecordSetsCall.Returns.Error
+	if len(h.ListResourceRecordSetsCall.Returns) < h.ListResourceRecordSetsCall.CallCount {
+		return nil, nil
+	}
+
+	return h.ListResourceRecordSetsCall.Returns[h.ListResourceRecordSetsCall.CallCount-1].Output, h.ListResourceRecordSetsCall.Returns[h.ListResourceRecordSetsCall.CallCount-1].Error
 }
 
 func (h *HostedZonesClient) ChangeResourceRecordSets(input *awsroute53.ChangeResourceRecordSetsInput) (*awsroute53.ChangeResourceRecordSetsOutput, error) {
