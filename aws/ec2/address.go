@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -39,6 +40,11 @@ func NewAddress(client addressesClient, publicIp, allocationId *string, tags []*
 func (a Address) Delete() error {
 	_, err := a.client.ReleaseAddress(&awsec2.ReleaseAddressInput{AllocationId: a.allocationId})
 	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok {
+			if awsErr.Code() == "InvalidAllocationID.NotFound" {
+				return nil
+			}
+		}
 		return fmt.Errorf("Delete: %s", err)
 	}
 
