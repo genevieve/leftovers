@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/genevieve/leftovers/aws/ec2"
 	"github.com/genevieve/leftovers/aws/ec2/fakes"
 
@@ -23,8 +24,9 @@ var _ = Describe("Address", func() {
 		client = &fakes.AddressesClient{}
 		publicIp = aws.String("the-public-ip")
 		allocationId = aws.String("the-allocation-id")
+		tags := []*awsec2.Tag{{Key: aws.String("hi"), Value: aws.String("bye")}}
 
-		address = ec2.NewAddress(client, publicIp, allocationId)
+		address = ec2.NewAddress(client, publicIp, allocationId, tags)
 	})
 
 	Describe("Delete", func() {
@@ -50,7 +52,7 @@ var _ = Describe("Address", func() {
 
 	Describe("Name", func() {
 		It("returns the identifier", func() {
-			Expect(address.Name()).To(Equal("the-public-ip"))
+			Expect(address.Name()).To(Equal("the-public-ip (hi:bye)"))
 		})
 	})
 
