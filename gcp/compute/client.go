@@ -544,7 +544,7 @@ func (c client) ListSslCertificates() ([]*gcpcompute.SslCertificate, error) {
 		list = append(list, resp.Items...)
 
 		token = resp.NextPageToken
-		if token != "" {
+		if token == "" {
 			break
 		}
 
