@@ -6,7 +6,7 @@ type InstanceTemplatesClient struct {
 	ListInstanceTemplatesCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.InstanceTemplateList
+			Output []*gcpcompute.InstanceTemplate
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type InstanceTemplatesClient struct {
 	}
 }
 
-func (n *InstanceTemplatesClient) ListInstanceTemplates() (*gcpcompute.InstanceTemplateList, error) {
+func (n *InstanceTemplatesClient) ListInstanceTemplates() ([]*gcpcompute.InstanceTemplate, error) {
 	n.ListInstanceTemplatesCall.CallCount++
 
 	return n.ListInstanceTemplatesCall.Returns.Output, n.ListInstanceTemplatesCall.Returns.Error

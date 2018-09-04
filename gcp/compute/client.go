@@ -235,8 +235,27 @@ func (c client) DeleteInstance(zone, instance string) error {
 	return c.wait(c.instances.Delete(c.project, zone, instance))
 }
 
-func (c client) ListInstanceTemplates() (*gcpcompute.InstanceTemplateList, error) {
-	return c.instanceTemplates.List(c.project).Do()
+func (c client) ListInstanceTemplates() ([]*gcpcompute.InstanceTemplate, error) {
+	var token string
+	list := []*gcpcompute.InstanceTemplate{}
+
+	for {
+		resp, err := c.instanceTemplates.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteInstanceTemplate(instanceTemplate string) error {
