@@ -424,16 +424,54 @@ func (c client) DeleteFirewall(firewall string) error {
 	return c.wait(c.firewalls.Delete(c.project, firewall))
 }
 
-func (c client) ListGlobalForwardingRules() (*gcpcompute.ForwardingRuleList, error) {
-	return c.globalForwardingRules.List(c.project).Do()
+func (c client) ListGlobalForwardingRules() ([]*gcpcompute.ForwardingRule, error) {
+	var token string
+	list := []*gcpcompute.ForwardingRule{}
+
+	for {
+		resp, err := c.globalForwardingRules.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteGlobalForwardingRule(globalForwardingRule string) error {
 	return c.wait(c.globalForwardingRules.Delete(c.project, globalForwardingRule))
 }
 
-func (c client) ListForwardingRules(region string) (*gcpcompute.ForwardingRuleList, error) {
-	return c.forwardingRules.List(c.project, region).Do()
+func (c client) ListForwardingRules(region string) ([]*gcpcompute.ForwardingRule, error) {
+	var token string
+	list := []*gcpcompute.ForwardingRule{}
+
+	for {
+		resp, err := c.forwardingRules.List(c.project, region).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteForwardingRule(region, forwardingRule string) error {

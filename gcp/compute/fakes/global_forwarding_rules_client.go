@@ -6,7 +6,7 @@ type GlobalForwardingRulesClient struct {
 	ListGlobalForwardingRulesCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.ForwardingRuleList
+			Output []*gcpcompute.ForwardingRule
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type GlobalForwardingRulesClient struct {
 	}
 }
 
-func (n *GlobalForwardingRulesClient) ListGlobalForwardingRules() (*gcpcompute.ForwardingRuleList, error) {
+func (n *GlobalForwardingRulesClient) ListGlobalForwardingRules() ([]*gcpcompute.ForwardingRule, error) {
 	n.ListGlobalForwardingRulesCall.CallCount++
 
 	return n.ListGlobalForwardingRulesCall.Returns.Output, n.ListGlobalForwardingRulesCall.Returns.Error
