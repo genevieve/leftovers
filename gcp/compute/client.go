@@ -316,8 +316,27 @@ func (c client) DeleteInstanceGroupManager(zone, instanceGroupManager string) er
 	return c.wait(c.instanceGroupManagers.Delete(c.project, zone, instanceGroupManager))
 }
 
-func (c client) ListGlobalHealthChecks() (*gcpcompute.HealthCheckList, error) {
-	return c.globalHealthChecks.List(c.project).Do()
+func (c client) ListGlobalHealthChecks() ([]*gcpcompute.HealthCheck, error) {
+	var token string
+	list := []*gcpcompute.HealthCheck{}
+
+	for {
+		resp, err := c.globalHealthChecks.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteGlobalHealthCheck(globalHealthCheck string) error {

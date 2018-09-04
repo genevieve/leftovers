@@ -6,7 +6,7 @@ type GlobalHealthChecksClient struct {
 	ListGlobalHealthChecksCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.HealthCheckList
+			Output []*gcpcompute.HealthCheck
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type GlobalHealthChecksClient struct {
 	}
 }
 
-func (n *GlobalHealthChecksClient) ListGlobalHealthChecks() (*gcpcompute.HealthCheckList, error) {
+func (n *GlobalHealthChecksClient) ListGlobalHealthChecks() ([]*gcpcompute.HealthCheck, error) {
 	n.ListGlobalHealthChecksCall.CallCount++
 
 	return n.ListGlobalHealthChecksCall.Returns.Output, n.ListGlobalHealthChecksCall.Returns.Error
