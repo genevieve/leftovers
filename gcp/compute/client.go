@@ -88,7 +88,7 @@ func (c client) ListAddresses(region string) ([]*gcpcompute.Address, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -115,7 +115,7 @@ func (c client) ListGlobalAddresses() ([]*gcpcompute.Address, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -142,7 +142,7 @@ func (c client) ListBackendServices() ([]*gcpcompute.BackendService, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -169,7 +169,7 @@ func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
 			break
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -197,7 +197,7 @@ func (c client) ListImages() ([]*gcpcompute.Image, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -224,7 +224,7 @@ func (c client) ListInstances(zone string) ([]*gcpcompute.Instance, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -251,7 +251,7 @@ func (c client) ListInstanceTemplates() ([]*gcpcompute.InstanceTemplate, error) 
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -278,7 +278,7 @@ func (c client) ListInstanceGroups(zone string) ([]*gcpcompute.InstanceGroup, er
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -305,7 +305,7 @@ func (c client) ListInstanceGroupManagers(zone string) ([]*gcpcompute.InstanceGr
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -332,7 +332,7 @@ func (c client) ListGlobalHealthChecks() ([]*gcpcompute.HealthCheck, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -359,7 +359,7 @@ func (c client) ListHttpHealthChecks() ([]*gcpcompute.HttpHealthCheck, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -386,7 +386,7 @@ func (c client) ListHttpsHealthChecks() ([]*gcpcompute.HttpsHealthCheck, error) 
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -413,7 +413,7 @@ func (c client) ListFirewalls() ([]*gcpcompute.Firewall, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -440,7 +440,7 @@ func (c client) ListGlobalForwardingRules() ([]*gcpcompute.ForwardingRule, error
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -467,7 +467,7 @@ func (c client) ListForwardingRules(region string) ([]*gcpcompute.ForwardingRule
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -494,7 +494,7 @@ func (c client) ListNetworks() ([]*gcpcompute.Network, error) {
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -521,7 +521,7 @@ func (c client) ListSubnetworks(region string) ([]*gcpcompute.Subnetwork, error)
 			break
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
@@ -532,9 +532,10 @@ func (c client) DeleteSubnetwork(region, subnetwork string) error {
 }
 
 func (c client) ListSslCertificates() ([]*gcpcompute.SslCertificate, error) {
+	var token string
 	list := []*gcpcompute.SslCertificate{}
 
-	for token := ""; token != ""; {
+	for {
 		resp, err := c.sslCertificates.List(c.project).PageToken(token).Do()
 		if err != nil {
 			return nil, err
@@ -544,8 +545,10 @@ func (c client) ListSslCertificates() ([]*gcpcompute.SslCertificate, error) {
 
 		token = resp.NextPageToken
 		if token != "" {
-			time.Sleep(time.Second)
+			break
 		}
+
+		time.Sleep(time.Second)
 	}
 
 	return list, nil
