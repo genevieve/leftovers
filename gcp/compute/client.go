@@ -481,8 +481,24 @@ func (c client) DeleteSubnetwork(region, subnetwork string) error {
 	return c.wait(c.subnetworks.Delete(c.project, region, subnetwork))
 }
 
-func (c client) ListSslCertificates() (*gcpcompute.SslCertificateList, error) {
-	return c.sslCertificates.List(c.project).Do()
+func (c client) ListSslCertificates() ([]*gcpcompute.SslCertificate, error) {
+	list := []*gcpcompute.SslCertificate{}
+
+	for token := ""; token != ""; {
+		resp, err := c.sslCertificates.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token != "" {
+			time.Sleep(time.Second)
+		}
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteSslCertificate(certificate string) error {

@@ -6,7 +6,7 @@ type SslCertificatesClient struct {
 	ListSslCertificatesCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.SslCertificateList
+			Output []*gcpcompute.SslCertificate
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type SslCertificatesClient struct {
 	}
 }
 
-func (n *SslCertificatesClient) ListSslCertificates() (*gcpcompute.SslCertificateList, error) {
+func (n *SslCertificatesClient) ListSslCertificates() ([]*gcpcompute.SslCertificate, error) {
 	n.ListSslCertificatesCall.CallCount++
 
 	return n.ListSslCertificatesCall.Returns.Output, n.ListSslCertificatesCall.Returns.Error
