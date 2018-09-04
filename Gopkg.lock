@@ -59,9 +59,11 @@
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
+    "private/protocol/restjson",
     "private/protocol/restxml",
     "private/protocol/xml/xmlutil",
     "service/ec2",
+    "service/eks",
     "service/elb",
     "service/elbv2",
     "service/iam",
@@ -328,6 +330,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1411de6ef9c63a2a8347cb9a111f168eb92bf98431ed1e48e5e0398ab8693a25"
+  inputs-digest = "9355918bf3de28d6eb48f342d1e8fffd52f0af971b5c7361fda638629d39055c"
   solver-name = "gps-cdcl"
   solver-version = 1
