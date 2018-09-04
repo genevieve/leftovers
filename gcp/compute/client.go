@@ -478,16 +478,54 @@ func (c client) DeleteForwardingRule(region, forwardingRule string) error {
 	return c.wait(c.forwardingRules.Delete(c.project, region, forwardingRule))
 }
 
-func (c client) ListNetworks() (*gcpcompute.NetworkList, error) {
-	return c.networks.List(c.project).Do()
+func (c client) ListNetworks() ([]*gcpcompute.Network, error) {
+	var token string
+	list := []*gcpcompute.Network{}
+
+	for {
+		resp, err := c.networks.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteNetwork(network string) error {
 	return c.wait(c.networks.Delete(c.project, network))
 }
 
-func (c client) ListSubnetworks(region string) (*gcpcompute.SubnetworkList, error) {
-	return c.subnetworks.List(c.project, region).Do()
+func (c client) ListSubnetworks(region string) ([]*gcpcompute.Subnetwork, error) {
+	var token string
+	list := []*gcpcompute.Subnetwork{}
+
+	for {
+		resp, err := c.subnetworks.List(c.project, region).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteSubnetwork(region, subnetwork string) error {

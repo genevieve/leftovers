@@ -6,7 +6,7 @@ type NetworksClient struct {
 	ListNetworksCall struct {
 		CallCount int
 		Returns   struct {
-			Output *compute.NetworkList
+			Output []*compute.Network
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type NetworksClient struct {
 	}
 }
 
-func (n *NetworksClient) ListNetworks() (*compute.NetworkList, error) {
+func (n *NetworksClient) ListNetworks() ([]*compute.Network, error) {
 	n.ListNetworksCall.CallCount++
 
 	return n.ListNetworksCall.Returns.Output, n.ListNetworksCall.Returns.Error

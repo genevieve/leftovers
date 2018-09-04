@@ -9,7 +9,7 @@ type SubnetworksClient struct {
 			Region string
 		}
 		Returns struct {
-			Output *compute.SubnetworkList
+			Output []*compute.Subnetwork
 			Error  error
 		}
 	}
@@ -26,7 +26,7 @@ type SubnetworksClient struct {
 	}
 }
 
-func (n *SubnetworksClient) ListSubnetworks(region string) (*compute.SubnetworkList, error) {
+func (n *SubnetworksClient) ListSubnetworks(region string) ([]*compute.Subnetwork, error) {
 	n.ListSubnetworksCall.CallCount++
 	n.ListSubnetworksCall.Receives.Region = region
 
