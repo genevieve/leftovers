@@ -289,8 +289,27 @@ func (c client) DeleteInstanceGroup(zone, instanceGroup string) error {
 	return c.wait(c.instanceGroups.Delete(c.project, zone, instanceGroup))
 }
 
-func (c client) ListInstanceGroupManagers(zone string) (*gcpcompute.InstanceGroupManagerList, error) {
-	return c.instanceGroupManagers.List(c.project, zone).Do()
+func (c client) ListInstanceGroupManagers(zone string) ([]*gcpcompute.InstanceGroupManager, error) {
+	var token string
+	list := []*gcpcompute.InstanceGroupManager{}
+
+	for {
+		resp, err := c.instanceGroupManagers.List(c.project, zone).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteInstanceGroupManager(zone, instanceGroupManager string) error {

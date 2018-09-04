@@ -9,7 +9,7 @@ type InstanceGroupManagersClient struct {
 			Zone string
 		}
 		Returns struct {
-			Output *gcpcompute.InstanceGroupManagerList
+			Output []*gcpcompute.InstanceGroupManager
 			Error  error
 		}
 	}
@@ -26,7 +26,7 @@ type InstanceGroupManagersClient struct {
 	}
 }
 
-func (n *InstanceGroupManagersClient) ListInstanceGroupManagers(zone string) (*gcpcompute.InstanceGroupManagerList, error) {
+func (n *InstanceGroupManagersClient) ListInstanceGroupManagers(zone string) ([]*gcpcompute.InstanceGroupManager, error) {
 	n.ListInstanceGroupManagersCall.CallCount++
 	n.ListInstanceGroupManagersCall.Receives.Zone = zone
 
