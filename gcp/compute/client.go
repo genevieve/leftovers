@@ -343,8 +343,27 @@ func (c client) DeleteGlobalHealthCheck(globalHealthCheck string) error {
 	return c.wait(c.globalHealthChecks.Delete(c.project, globalHealthCheck))
 }
 
-func (c client) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) {
-	return c.httpHealthChecks.List(c.project).Do()
+func (c client) ListHttpHealthChecks() ([]*gcpcompute.HttpHealthCheck, error) {
+	var token string
+	list := []*gcpcompute.HttpHealthCheck{}
+
+	for {
+		resp, err := c.httpHealthChecks.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteHttpHealthCheck(httpHealthCheck string) error {

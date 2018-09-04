@@ -6,7 +6,7 @@ type HttpHealthChecksClient struct {
 	ListHttpHealthChecksCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.HttpHealthCheckList
+			Output []*gcpcompute.HttpHealthCheck
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type HttpHealthChecksClient struct {
 	}
 }
 
-func (n *HttpHealthChecksClient) ListHttpHealthChecks() (*gcpcompute.HttpHealthCheckList, error) {
+func (n *HttpHealthChecksClient) ListHttpHealthChecks() ([]*gcpcompute.HttpHealthCheck, error) {
 	n.ListHttpHealthChecksCall.CallCount++
 
 	return n.ListHttpHealthChecksCall.Returns.Output, n.ListHttpHealthChecksCall.Returns.Error
