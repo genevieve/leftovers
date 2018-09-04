@@ -6,7 +6,7 @@ type FirewallsClient struct {
 	ListFirewallsCall struct {
 		CallCount int
 		Returns   struct {
-			Output *gcpcompute.FirewallList
+			Output []*gcpcompute.Firewall
 			Error  error
 		}
 	}
@@ -22,7 +22,7 @@ type FirewallsClient struct {
 	}
 }
 
-func (c *FirewallsClient) ListFirewalls() (*gcpcompute.FirewallList, error) {
+func (c *FirewallsClient) ListFirewalls() ([]*gcpcompute.Firewall, error) {
 	c.ListFirewallsCall.CallCount++
 
 	return c.ListFirewallsCall.Returns.Output, c.ListFirewallsCall.Returns.Error

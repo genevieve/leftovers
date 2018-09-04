@@ -397,8 +397,27 @@ func (c client) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
 	return c.wait(c.httpsHealthChecks.Delete(c.project, httpsHealthCheck))
 }
 
-func (c client) ListFirewalls() (*gcpcompute.FirewallList, error) {
-	return c.firewalls.List(c.project).Do()
+func (c client) ListFirewalls() ([]*gcpcompute.Firewall, error) {
+	var token string
+	list := []*gcpcompute.Firewall{}
+
+	for {
+		resp, err := c.firewalls.List(c.project).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Items...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteFirewall(firewall string) error {
