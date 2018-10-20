@@ -292,6 +292,7 @@
   branch = "master"
   name = "google.golang.org/api"
   packages = [
+    "cloudresourcemanager/v1",
     "compute/v1",
     "container/v1",
     "dns/v1",
@@ -330,6 +331,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9355918bf3de28d6eb48f342d1e8fffd52f0af971b5c7361fda638629d39055c"
+  inputs-digest = "d9959a610079baaf54c118e7777c003b88662816ac96ab01fc572b1c1194260f"
   solver-name = "gps-cdcl"
   solver-version = 1

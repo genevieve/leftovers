@@ -1,8 +1,19 @@
 package fakes
 
-import gcpiam "google.golang.org/api/iam/v1"
+import (
+	gcpcrm "google.golang.org/api/cloudresourcemanager/v1"
+	gcpiam "google.golang.org/api/iam/v1"
+)
 
 type ServiceAccountsClient struct {
+	GetProjectIamPolicyCall struct {
+		CallCount int
+		Returns   struct {
+			Output *gcpcrm.Policy
+			Error  error
+		}
+	}
+
 	ListServiceAccountsCall struct {
 		CallCount int
 		Returns   struct {
@@ -20,6 +31,12 @@ type ServiceAccountsClient struct {
 			Error error
 		}
 	}
+}
+
+func (u *ServiceAccountsClient) GetProjectIamPolicy() (*gcpcrm.Policy, error) {
+	u.GetProjectIamPolicyCall.CallCount++
+
+	return u.GetProjectIamPolicyCall.Returns.Output, u.GetProjectIamPolicyCall.Returns.Error
 }
 
 func (u *ServiceAccountsClient) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
