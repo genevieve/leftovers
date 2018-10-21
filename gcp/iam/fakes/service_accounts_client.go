@@ -14,6 +14,17 @@ type ServiceAccountsClient struct {
 		}
 	}
 
+	SetProjectIamPolicyCall struct {
+		CallCount int
+		Receives  struct {
+			Input *gcpcrm.Policy
+		}
+		Returns struct {
+			Output *gcpcrm.Policy
+			Error  error
+		}
+	}
+
 	ListServiceAccountsCall struct {
 		CallCount int
 		Returns   struct {
@@ -33,21 +44,28 @@ type ServiceAccountsClient struct {
 	}
 }
 
-func (u *ServiceAccountsClient) GetProjectIamPolicy() (*gcpcrm.Policy, error) {
-	u.GetProjectIamPolicyCall.CallCount++
+func (s *ServiceAccountsClient) SetProjectIamPolicy(input *gcpcrm.Policy) (*gcpcrm.Policy, error) {
+	s.SetProjectIamPolicyCall.CallCount++
+	s.SetProjectIamPolicyCall.Receives.Input = input
 
-	return u.GetProjectIamPolicyCall.Returns.Output, u.GetProjectIamPolicyCall.Returns.Error
+	return s.SetProjectIamPolicyCall.Returns.Output, s.SetProjectIamPolicyCall.Returns.Error
 }
 
-func (u *ServiceAccountsClient) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
-	u.ListServiceAccountsCall.CallCount++
+func (s *ServiceAccountsClient) GetProjectIamPolicy() (*gcpcrm.Policy, error) {
+	s.GetProjectIamPolicyCall.CallCount++
 
-	return u.ListServiceAccountsCall.Returns.Output, u.ListServiceAccountsCall.Returns.Error
+	return s.GetProjectIamPolicyCall.Returns.Output, s.GetProjectIamPolicyCall.Returns.Error
 }
 
-func (u *ServiceAccountsClient) DeleteServiceAccount(account string) error {
-	u.DeleteServiceAccountCall.CallCount++
-	u.DeleteServiceAccountCall.Receives.ServiceAccount = account
+func (s *ServiceAccountsClient) ListServiceAccounts() ([]*gcpiam.ServiceAccount, error) {
+	s.ListServiceAccountsCall.CallCount++
 
-	return u.DeleteServiceAccountCall.Returns.Error
+	return s.ListServiceAccountsCall.Returns.Output, s.ListServiceAccountsCall.Returns.Error
+}
+
+func (s *ServiceAccountsClient) DeleteServiceAccount(account string) error {
+	s.DeleteServiceAccountCall.CallCount++
+	s.DeleteServiceAccountCall.Receives.ServiceAccount = account
+
+	return s.DeleteServiceAccountCall.Returns.Error
 }

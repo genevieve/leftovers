@@ -28,6 +28,10 @@ func (c client) GetProjectIamPolicy() (*gcpcrm.Policy, error) {
 	return c.projects.GetIamPolicy(c.project, &gcpcrm.GetIamPolicyRequest{}).Do()
 }
 
+func (c client) SetProjectIamPolicy(p *gcpcrm.Policy) (*gcpcrm.Policy, error) {
+	return c.projects.SetIamPolicy(c.project, &gcpcrm.SetIamPolicyRequest{Policy: p}).Do()
+}
+
 // ListServiceAccounts will loop over every page of results
 // and return the full list of service accounts. To prevent
 // backend errors from repeated calls, there is a 2s delay.

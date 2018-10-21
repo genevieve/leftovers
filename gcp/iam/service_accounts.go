@@ -14,6 +14,7 @@ type serviceAccountsClient interface {
 	DeleteServiceAccount(account string) error
 
 	GetProjectIamPolicy() (*gcpcrm.Policy, error)
+	SetProjectIamPolicy(*gcpcrm.Policy) (*gcpcrm.Policy, error)
 }
 
 type ServiceAccounts struct {

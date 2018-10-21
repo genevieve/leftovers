@@ -45,17 +45,25 @@ var _ = Describe("ServiceAccount", func() {
 			Expect(client.DeleteServiceAccountCall.Receives.ServiceAccount).To(Equal(name))
 		})
 
-		Context("when there are bindings", func() {
+		Context("when there are bindings for the service account", func() {
+			var updatedPolicy *gcpcrm.Policy
+
 			BeforeEach(func() {
 				client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
 					Bindings: []*gcpcrm.Binding{{
-						Members: []string{"serviceAccount:banana@example.com"},
+						Members: []string{"serviceAccount:other", "serviceAccount:banana@example.com"},
+						Role:    "roles/some-role",
+					}},
+				}
+				updatedPolicy = &gcpcrm.Policy{
+					Bindings: []*gcpcrm.Binding{{
+						Members: []string{"serviceAccount:other"},
 						Role:    "roles/some-role",
 					}},
 				}
 			})
 
-			It("logs what gcloud cli command to run to remove it", func() {
+			It("modifies the project policy to remove them and set the new policy", func() {
 				err := serviceAccount.Delete()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -63,6 +71,61 @@ var _ = Describe("ServiceAccount", func() {
 				Expect(logger.PrintfCall.Receives.Arguments[0]).To(Equal("banana@example.com"))
 				Expect(logger.PrintfCall.Receives.Arguments[1]).To(Equal("serviceAccount:banana@example.com"))
 				Expect(logger.PrintfCall.Receives.Arguments[2]).To(Equal("roles/some-role"))
+
+				Expect(client.SetProjectIamPolicyCall.CallCount).To(Equal(1))
+				Expect(client.SetProjectIamPolicyCall.Receives.Input).To(Equal(updatedPolicy))
+			})
+
+			Context("when there are no more members in a binding", func() {
+				BeforeEach(func() {
+					client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
+						Bindings: []*gcpcrm.Binding{{
+							Members: []string{"serviceAccount:banana@example.com"},
+							Role:    "roles/some-role",
+						}},
+					}
+				})
+
+				It("removes the binding altogether", func() {
+					err := serviceAccount.Delete()
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(client.SetProjectIamPolicyCall.CallCount).To(Equal(1))
+					Expect(client.SetProjectIamPolicyCall.Receives.Input.Bindings).To(BeEmpty())
+				})
+			})
+
+			Context("when the service account has more than one binding", func() {
+				BeforeEach(func() {
+					client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
+						Bindings: []*gcpcrm.Binding{
+							{
+								Members: []string{"serviceAccount:banana@example.com"},
+								Role:    "roles/some-role",
+							},
+							{
+								Members: []string{"user:apple", "serviceAccount:banana@example.com"},
+								Role:    "roles/some-other-role",
+							},
+						},
+					}
+					updatedPolicy = &gcpcrm.Policy{
+						Bindings: []*gcpcrm.Binding{
+							{
+								Members: []string{"user:apple"},
+								Role:    "roles/some-other-role",
+							},
+						},
+					}
+				})
+
+				It("removes the member from every binding", func() {
+					err := serviceAccount.Delete()
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(client.SetProjectIamPolicyCall.CallCount).To(Equal(1))
+					Expect(client.SetProjectIamPolicyCall.Receives.Input).To(Equal(updatedPolicy))
+				})
 			})
 		})
 
@@ -74,6 +137,17 @@ var _ = Describe("ServiceAccount", func() {
 			It("returns the error", func() {
 				err := serviceAccount.Delete()
 				Expect(err).To(MatchError("Remove IAM Policy Bindings: Get Project IAM Policy: the-error"))
+			})
+		})
+
+		Context("when the client fails to set the project iam policy", func() {
+			BeforeEach(func() {
+				client.SetProjectIamPolicyCall.Returns.Error = errors.New("the-error")
+			})
+
+			It("returns the error", func() {
+				err := serviceAccount.Delete()
+				Expect(err).To(MatchError("Remove IAM Policy Bindings: Set Project IAM Policy: the-error"))
 			})
 		})
 
