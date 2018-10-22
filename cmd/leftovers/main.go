@@ -85,11 +85,12 @@ func main() {
 
 	switch o.IAAS {
 	case AWS:
-		o = otherEnvVars(o, AWS)
+		o = useOtherEnvVars(o, AWS)
 		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSRegion)
 	case Azure:
 		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
 	case GCP:
+		o = useOtherEnvVars(o, GCP)
 		l, err = gcp.NewLeftovers(logger, o.GCPServiceAccountKey)
 	case VSphere:
 		if o.Filter == "" {
@@ -133,7 +134,7 @@ func main() {
 	}
 }
 
-func otherEnvVars(o opts, iaas string) opts {
+func useOtherEnvVars(o opts, iaas string) opts {
 	switch iaas {
 	case AWS:
 		if o.AWSAccessKeyID == "" {
@@ -144,6 +145,10 @@ func otherEnvVars(o opts, iaas string) opts {
 		}
 		if o.AWSRegion == "" {
 			o.AWSRegion = os.Getenv("AWS_DEFAULT_REGION")
+		}
+	case GCP:
+		if o.GCPServiceAccountKey == "" {
+			o.GCPServiceAccountKey = os.Getenv("GOOGLE_CREDENTIALS")
 		}
 	}
 
