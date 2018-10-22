@@ -25,21 +25,21 @@ type opts struct {
 	Filter    string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
 	Type      string `short:"t"  long:"type"                        description:"Type of resource to delete."`
 
-	AWSAccessKeyID         string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
-	AWSSecretAccessKey     string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
-	AWSRegion              string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
-	AzureClientID          string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
-	AzureClientSecret      string `long:"azure-client-secret"      env:"BBL_AZURE_CLIENT_SECRET"      description:"Azure client secret."`
-	AzureTenantID          string `long:"azure-tenant-id"          env:"BBL_AZURE_TENANT_ID"          description:"Azure tenant id."`
-	AzureSubscriptionID    string `long:"azure-subscription-id"    env:"BBL_AZURE_SUBSCRIPTION_ID"    description:"Azure subscription id."`
-	GCPServiceAccountKey   string `long:"gcp-service-account-key"  env:"BBL_GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
-	VSphereVCenterIP       string `long:"vsphere-vcenter-ip"       env:"BBL_VSPHERE_VCENTER_IP"       description:"vSphere vCenter IP address."`
-	VSphereVCenterPassword string `long:"vsphere-vcenter-password" env:"BBL_VSPHERE_VCENTER_PASSWORD" description:"vSphere vCenter password."`
-	VSphereVCenterUser     string `long:"vsphere-vcenter-user"     env:"BBL_VSPHERE_VCENTER_USER"     description:"vSphere vCenter username."`
-	VSphereVCenterDC       string `long:"vsphere-vcenter-dc"       env:"BBL_VSPHERE_VCENTER_DC"       description:"vSphere vCenter datacenter."`
-	NSXTManagerHost        string `long:"nsxt-manager-host"        env:"BBL_NSXT_MANAGER_HOST"        description:"NSX-T manager IP address or domain name."`
-	NSXTUser               string `long:"nsxt-username"            env:"BBL_NSXT_USERNAME"            description:"NSX-T manager username."`
-	NSXTPassword           string `long:"nsxt-password"            env:"BBL_NSXT_PASSWORD"            description:"NSX-T manager password."`
+	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
+	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
+	AWSRegion            string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
+	AzureClientID        string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
+	AzureClientSecret    string `long:"azure-client-secret"      env:"BBL_AZURE_CLIENT_SECRET"      description:"Azure client secret."`
+	AzureTenantID        string `long:"azure-tenant-id"          env:"BBL_AZURE_TENANT_ID"          description:"Azure tenant id."`
+	AzureSubscriptionID  string `long:"azure-subscription-id"    env:"BBL_AZURE_SUBSCRIPTION_ID"    description:"Azure subscription id."`
+	GCPServiceAccountKey string `long:"gcp-service-account-key"  env:"BBL_GCP_SERVICE_ACCOUNT_KEY"  description:"GCP service account key path."`
+	VSphereIP            string `long:"vsphere-vcenter-ip"       env:"BBL_VSPHERE_VCENTER_IP"       description:"vSphere vCenter IP address."`
+	VSpherePassword      string `long:"vsphere-vcenter-password" env:"BBL_VSPHERE_VCENTER_PASSWORD" description:"vSphere vCenter password."`
+	VSphereUser          string `long:"vsphere-vcenter-user"     env:"BBL_VSPHERE_VCENTER_USER"     description:"vSphere vCenter username."`
+	VSphereDC            string `long:"vsphere-vcenter-dc"       env:"BBL_VSPHERE_VCENTER_DC"       description:"vSphere vCenter datacenter."`
+	NSXTManagerHost      string `long:"nsxt-manager-host"        env:"BBL_NSXT_MANAGER_HOST"        description:"NSX-T manager IP address or domain name."`
+	NSXTUser             string `long:"nsxt-username"            env:"BBL_NSXT_USERNAME"            description:"NSX-T manager username."`
+	NSXTPassword         string `long:"nsxt-password"            env:"BBL_NSXT_PASSWORD"            description:"NSX-T manager password."`
 }
 
 type leftovers interface {
@@ -93,6 +93,9 @@ func main() {
 	case GCP:
 		o = useOtherEnvVars(o, GCP)
 		l, err = gcp.NewLeftovers(logger, o.GCPServiceAccountKey)
+	case NSXT:
+		o = useOtherEnvVars(o, NSXT)
+		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)
 	case VSphere:
 		if o.Filter == "" {
 			log.Fatalf("--filter is required for vSphere.")
@@ -100,9 +103,7 @@ func main() {
 		if o.NoConfirm {
 			log.Fatalf("--no-confirm is not supported for vSphere.")
 		}
-		l, err = vsphere.NewLeftovers(logger, o.VSphereVCenterIP, o.VSphereVCenterUser, o.VSphereVCenterPassword, o.VSphereVCenterDC)
-	case NSXT:
-		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)
+		l, err = vsphere.NewLeftovers(logger, o.VSphereIP, o.VSphereUser, o.VSpherePassword, o.VSphereDC)
 	default:
 		err = errors.New("Missing or unsupported BBL_IAAS.")
 	}
@@ -163,6 +164,29 @@ func useOtherEnvVars(o opts, iaas string) opts {
 	case GCP:
 		if o.GCPServiceAccountKey == "" {
 			o.GCPServiceAccountKey = os.Getenv("GOOGLE_CREDENTIALS")
+		}
+	case NSXT:
+		if o.NSXTManagerHost == "" {
+			o.NSXTManagerHost = os.Getenv("NSXT_MANAGER_HOST")
+		}
+		if o.NSXTUser == "" {
+			o.NSXTUser = os.Getenv("NSXT_USERNAME")
+		}
+		if o.NSXTPassword == "" {
+			o.NSXTPassword = os.Getenv("NSXT_PASSWORD")
+		}
+	case VSphere:
+		if o.VSphereUser == "" {
+			o.VSphereUser = os.Getenv("VSPHERE_USER")
+		}
+		if o.VSpherePassword == "" {
+			o.VSpherePassword = os.Getenv("VSPHERE_PASSWORD")
+		}
+		if o.VSphereDC == "" {
+			o.VSphereDC = os.Getenv("VSPHERE_DATACENTER")
+		}
+		if o.VSphereIP == "" {
+			o.VSphereIP = os.Getenv("VSPHERE_IP")
 		}
 	}
 
