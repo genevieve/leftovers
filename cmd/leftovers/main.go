@@ -51,11 +51,19 @@ type leftovers interface {
 
 var Version = "dev"
 
+const (
+	AWS     = "aws"
+	GCP     = "gcp"
+	Azure   = "azure"
+	VSphere = "vsphere"
+	NSXT    = "nsxt"
+)
+
 func main() {
 	log.SetFlags(0)
 
-	var c opts
-	parser := flags.NewParser(&c, flags.HelpFlag|flags.PrintErrors)
+	var o opts
+	parser := flags.NewParser(&o, flags.HelpFlag|flags.PrintErrors)
 	remaining, err := parser.ParseArgs(os.Args)
 	if err != nil {
 		return
@@ -66,32 +74,33 @@ func main() {
 		command = remaining[1]
 	}
 
-	if c.Version {
+	if o.Version {
 		log.Printf("%s\n", Version)
 		return
 	}
 
-	logger := app.NewLogger(os.Stdout, os.Stdin, c.NoConfirm)
+	logger := app.NewLogger(os.Stdout, os.Stdin, o.NoConfirm)
 
 	var l leftovers
 
-	switch c.IAAS {
-	case "aws":
-		l, err = aws.NewLeftovers(logger, c.AWSAccessKeyID, c.AWSSecretAccessKey, c.AWSRegion)
-	case "azure":
-		l, err = azure.NewLeftovers(logger, c.AzureClientID, c.AzureClientSecret, c.AzureSubscriptionID, c.AzureTenantID)
-	case "gcp":
-		l, err = gcp.NewLeftovers(logger, c.GCPServiceAccountKey)
-	case "vsphere":
-		if c.Filter == "" {
+	switch o.IAAS {
+	case AWS:
+		o = otherEnvVars(o, AWS)
+		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSRegion)
+	case Azure:
+		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
+	case GCP:
+		l, err = gcp.NewLeftovers(logger, o.GCPServiceAccountKey)
+	case VSphere:
+		if o.Filter == "" {
 			log.Fatalf("--filter is required for vSphere.")
 		}
-		if c.NoConfirm {
+		if o.NoConfirm {
 			log.Fatalf("--no-confirm is not supported for vSphere.")
 		}
-		l, err = vsphere.NewLeftovers(logger, c.VSphereVCenterIP, c.VSphereVCenterUser, c.VSphereVCenterPassword, c.VSphereVCenterDC)
-	case "nsxt":
-		l, err = nsxt.NewLeftovers(logger, c.NSXTManagerHost, c.NSXTUser, c.NSXTPassword)
+		l, err = vsphere.NewLeftovers(logger, o.VSphereVCenterIP, o.VSphereVCenterUser, o.VSphereVCenterPassword, o.VSphereVCenterDC)
+	case NSXT:
+		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)
 	default:
 		err = errors.New("Missing or unsupported BBL_IAAS.")
 	}
@@ -105,21 +114,38 @@ func main() {
 		return
 	}
 
-	if c.DryRun {
-		l.List(c.Filter)
+	if o.DryRun {
+		l.List(o.Filter)
 		return
 	}
 
-	if c.Type != "" {
-		err = l.DeleteType(c.Filter, c.Type)
+	if o.Type != "" {
+		err = l.DeleteType(o.Filter, o.Type)
 	} else {
-		err = l.Delete(c.Filter)
+		err = l.Delete(o.Filter)
 	}
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
 
-	if !c.DryRun {
-		log.Println(fmt.Sprintf("Try %s to list remaining resources!", fmt.Sprintf(color.BlueString("leftovers --filter %s --dry-run"), c.Filter)))
+	if !o.DryRun {
+		log.Println(fmt.Sprintf("Try %s to list remaining resources!", fmt.Sprintf(color.BlueString("leftovers --filter %s --dry-run"), o.Filter)))
 	}
+}
+
+func otherEnvVars(o opts, iaas string) opts {
+	switch iaas {
+	case AWS:
+		if o.AWSAccessKeyID == "" {
+			o.AWSAccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
+		}
+		if o.AWSSecretAccessKey == "" {
+			o.AWSSecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+		}
+		if o.AWSRegion == "" {
+			o.AWSRegion = os.Getenv("AWS_DEFAULT_REGION")
+		}
+	}
+
+	return o
 }
