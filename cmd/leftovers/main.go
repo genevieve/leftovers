@@ -88,6 +88,7 @@ func main() {
 		o = useOtherEnvVars(o, AWS)
 		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSRegion)
 	case Azure:
+		o = useOtherEnvVars(o, Azure)
 		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
 	case GCP:
 		o = useOtherEnvVars(o, GCP)
@@ -145,6 +146,19 @@ func useOtherEnvVars(o opts, iaas string) opts {
 		}
 		if o.AWSRegion == "" {
 			o.AWSRegion = os.Getenv("AWS_DEFAULT_REGION")
+		}
+	case Azure:
+		if o.AzureClientID == "" {
+			o.AzureClientID = os.Getenv("ARM_CLIENT_ID")
+		}
+		if o.AzureClientSecret == "" {
+			o.AzureClientSecret = os.Getenv("ARM_CLIENT_SECRET")
+		}
+		if o.AzureSubscriptionID == "" {
+			o.AzureSubscriptionID = os.Getenv("ARM_SUBSCRIPTION_ID")
+		}
+		if o.AzureTenantID == "" {
+			o.AzureTenantID = os.Getenv("ARM_TENANT_ID")
 		}
 	case GCP:
 		if o.GCPServiceAccountKey == "" {
