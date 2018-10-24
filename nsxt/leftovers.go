@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/common"
+	"github.com/genevieve/leftovers/nsxt/groupingobjects"
 	"github.com/genevieve/leftovers/nsxt/logicalrouting"
 	nsxt "github.com/vmware/go-vmware-nsxt"
 )
@@ -131,6 +132,7 @@ func NewLeftovers(logger logger, managerHost, user, password string) (Leftovers,
 		asyncDeleter: app.NewAsyncDeleter(logger),
 		resources: []resource{
 			logicalrouting.NewTier1Routers(nsxtClient.LogicalRoutingAndServicesApi, nsxtClient.Context, logger),
+			groupingobjects.NewIPSets(nsxtClient.GroupingObjectsApi, nsxtClient.Context, logger),
 			// TBD
 		},
 	}, nil
