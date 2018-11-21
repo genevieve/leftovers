@@ -7,15 +7,12 @@ import (
 )
 
 type client struct {
-	project string
 	logger  logger
-
 	service *gophercloud.ServiceClient
 }
 
-func NewClient(project string, service *gophercloud.ServiceClient, logger logger) client {
+func NewClient(service *gophercloud.ServiceClient, logger logger) client {
 	return client{
-		project: project,
 		logger:  logger,
 		service: service,
 	}

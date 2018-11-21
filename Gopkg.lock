@@ -107,7 +107,12 @@
   name = "github.com/gophercloud/gophercloud"
   packages = [
     ".",
+    "openstack",
     "openstack/compute/v2/extensions/floatingips",
+    "openstack/identity/v2/tenants",
+    "openstack/identity/v2/tokens",
+    "openstack/identity/v3/tokens",
+    "openstack/utils",
     "pagination"
   ]
   revision = "3a7818a07cfc862267a0b03635075a444c92dcda"
@@ -341,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "212cba7320a46b43e2b26a97bcfa712aaf02aaa80d14e7fc63d086be879ea98d"
+  inputs-digest = "c52b570d0e090e575bfa72b646d0eeec76ae8236118dc15305fe3e6acef6a45a"
   solver-name = "gps-cdcl"
   solver-version = 1
