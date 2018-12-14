@@ -71,6 +71,7 @@
   + compute http health checks
   + compute https health checks
   + compute images
+  + compute routes
   + compute subnetworks
   + compute networks
   + compute ssl certificates
