@@ -133,6 +133,7 @@ func NewLeftovers(logger logger, managerHost, user, password string) (Leftovers,
 		resources: []resource{
 			logicalrouting.NewTier1Routers(nsxtClient.LogicalRoutingAndServicesApi, nsxtClient.Context, logger),
 			groupingobjects.NewIPSets(nsxtClient.GroupingObjectsApi, nsxtClient.Context, logger),
+			groupingobjects.NewNSServices(nsxtClient.GroupingObjectsApi, nsxtClient.Context, logger),
 			// TBD
 		},
 	}, nil
