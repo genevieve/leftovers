@@ -40,7 +40,7 @@ var _ = Describe("IP Set", func() {
 			Expect(client.DeleteIPSetCall.Receives.Context).To(Equal(ctx))
 		})
 
-		Context("when the client fails to delete the router", func() {
+		Context("when the client fails to delete the ip set", func() {
 			BeforeEach(func() {
 				client.DeleteIPSetCall.Returns.Error = errors.New("insufficient funds")
 			})
