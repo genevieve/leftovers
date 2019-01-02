@@ -9,5 +9,5 @@ import (
 
 func TestGroupingobjects(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Groupingobjects Suite")
+	RunSpecs(t, "nsxt/groupingobjects")
 }
