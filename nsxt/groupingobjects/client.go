@@ -13,4 +13,7 @@ type groupingObjectsAPI interface {
 
 	DeleteNSService(context.Context, string, map[string]interface{}) (*http.Response, error)
 	ListNSServices(context.Context, map[string]interface{}) (manager.NsServiceListResult, *http.Response, error)
+
+	DeleteNSGroup(context.Context, string, map[string]interface{}) (*http.Response, error)
+	ListNSGroups(context.Context, map[string]interface{}) (manager.NsGroupListResult, *http.Response, error)
 }

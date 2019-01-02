@@ -57,6 +57,31 @@ type GroupingObjectsAPI struct {
 			Error    error
 		}
 	}
+
+	ListNSGroupsCall struct {
+		CallCount int
+		Receives  struct {
+			Context           context.Context
+			LocalVarOptionals map[string]interface{}
+		}
+		Returns struct {
+			NSGroupListResult manager.NsGroupListResult
+			Response          *http.Response
+			Error             error
+		}
+	}
+	DeleteNSGroupCall struct {
+		CallCount int
+		Receives  struct {
+			Context           context.Context
+			ID                string
+			LocalVarOptionals map[string]interface{}
+		}
+		Returns struct {
+			Response *http.Response
+			Error    error
+		}
+	}
 }
 
 func (g *GroupingObjectsAPI) ListIPSets(ctx context.Context, localVarOptionals map[string]interface{}) (manager.IpSetListResult, *http.Response, error) {
@@ -95,4 +120,23 @@ func (g *GroupingObjectsAPI) DeleteNSService(ctx context.Context, id string, loc
 	g.DeleteNSServiceCall.Receives.LocalVarOptionals = localVarOptionals
 
 	return g.DeleteNSServiceCall.Returns.Response, g.DeleteNSServiceCall.Returns.Error
+}
+
+func (g *GroupingObjectsAPI) ListNSGroups(ctx context.Context, localVarOptionals map[string]interface{}) (manager.NsGroupListResult, *http.Response, error) {
+	g.ListNSGroupsCall.CallCount++
+
+	g.ListNSGroupsCall.Receives.Context = ctx
+	g.ListNSGroupsCall.Receives.LocalVarOptionals = localVarOptionals
+
+	return g.ListNSGroupsCall.Returns.NSGroupListResult, g.ListNSGroupsCall.Returns.Response, g.ListNSGroupsCall.Returns.Error
+}
+
+func (g *GroupingObjectsAPI) DeleteNSGroup(ctx context.Context, id string, localVarOptionals map[string]interface{}) (*http.Response, error) {
+	g.DeleteNSGroupCall.CallCount++
+
+	g.DeleteNSGroupCall.Receives.Context = ctx
+	g.DeleteNSGroupCall.Receives.ID = id
+	g.DeleteNSGroupCall.Receives.LocalVarOptionals = localVarOptionals
+
+	return g.DeleteNSGroupCall.Returns.Response, g.DeleteNSGroupCall.Returns.Error
 }
