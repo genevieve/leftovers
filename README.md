@@ -78,6 +78,10 @@ brew tap genevieve/tap
 brew install leftovers
 ```
 
+### Option 3
+
+Linux binaries can be found on the [releases page](https://github.com/genevieve/leftovers/releases).
+
 
 
 ## <a name='how'></a>Usage
