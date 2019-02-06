@@ -88,7 +88,7 @@
   + kubernetes clusters
   + storage buckets
   + sql db instances
-  - compute routes
+  + compute routes
   - compute snapshots
   ```
 
@@ -105,23 +105,15 @@
   - dhcp relay profile
   - dhcp relay service
   - firewall section
-  - ip set
+  + ip set
   - logical port
   - logical router downlink port
   - logical router link port on tier0
   - logical router link port on tier1
   - logical switch
   + logical tier1 router
-  - nat rule
-  - ns group
-  - static route
-  - vm tags
-  - algorithm type ns service
-  - ether type ns service
-  - icmp type ns service
-  - igmp type ns service
-  - ip protocol ns service
-  - l4 port set ns service
+  + ns group
+  + ns service
   ```
 
 ### OpenStack
