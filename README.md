@@ -107,6 +107,9 @@ Application Options:
       --vsphere-vcenter-password= vSphere vCenter password. [$BBL_VSPHERE_VCENTER_PASSWORD]
       --vsphere-vcenter-user=     vSphere vCenter username. [$BBL_VSPHERE_VCENTER_USER]
       --vsphere-vcenter-dc=       vSphere vCenter datacenter. [$BBL_VSPHERE_VCENTER_DC]
+      --nsxt-manager-host=        NSX-T manager IP address or domain name. [$BBL_NSXT_MANAGER_HOST]
+      --nsxt-username=            NSX-T manager username. [$BBL_NSXT_USERNAME]
+      --nsxt-password=            NSX-T manager password. [$BBL_NSXT_PASSWORD]
 
 Help Options:
   -h, --help                     Show this help message
