@@ -12,6 +12,7 @@ import (
 	"github.com/genevieve/leftovers/azure"
 	"github.com/genevieve/leftovers/gcp"
 	"github.com/genevieve/leftovers/nsxt"
+	"github.com/genevieve/leftovers/openstack"
 	"github.com/genevieve/leftovers/vsphere"
 	flags "github.com/jessevdk/go-flags"
 )
@@ -40,6 +41,12 @@ type opts struct {
 	NSXTManagerHost      string `long:"nsxt-manager-host"        env:"BBL_NSXT_MANAGER_HOST"        description:"NSX-T manager IP address or domain name."`
 	NSXTUser             string `long:"nsxt-username"            env:"BBL_NSXT_USERNAME"            description:"NSX-T manager username."`
 	NSXTPassword         string `long:"nsxt-password"            env:"BBL_NSXT_PASSWORD"            description:"NSX-T manager password."`
+	OpenstackAuthUrl     string `long:"openstack-auth-url"       env:"BBL_OPENSTACK_AUTH_URL"       description:"Openstack auth URL."`
+	OpenstackUsername    string `long:"openstack-username"       env:"BBL_OPENSTACK_USERNAME"       description:"Openstack username."`
+	OpenstackPassword    string `long:"openstack-password"       env:"BBL_OPENSTACK_PASSWORD"       description:"Openstack password."`
+	OpenstackDomain      string `long:"openstack-domain-name"    env:"BBL_OPENSTACK_DOMAIN"         description:"Openstack domain name."`
+	OpenstackTenant      string `long:"openstack-project-name"   env:"BBL_OPENSTACK_PROJECT"        description:"Openstack project name."`
+	OpenstackRegion      string `long:"openstack-region-name"    env:"BBL_OPENSTACK_REGION"         description:"Openstack region name."`
 }
 
 type leftovers interface {
@@ -52,11 +59,12 @@ type leftovers interface {
 var Version = "dev"
 
 const (
-	AWS     = "aws"
-	GCP     = "gcp"
-	Azure   = "azure"
-	VSphere = "vsphere"
-	NSXT    = "nsxt"
+	AWS       = "aws"
+	GCP       = "gcp"
+	Azure     = "azure"
+	VSphere   = "vsphere"
+	NSXT      = "nsxt"
+	Openstack = "openstack"
 )
 
 func main() {
@@ -104,6 +112,18 @@ func main() {
 			log.Fatalf("--no-confirm is not supported for vSphere.")
 		}
 		l, err = vsphere.NewLeftovers(logger, o.VSphereIP, o.VSphereUser, o.VSpherePassword, o.VSphereDC)
+	case Openstack:
+		if o.Filter != "" {
+			log.Fatalf("--filter is not supported for OpenStack")
+		}
+		l, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
+			AuthURL:    o.OpenstackAuthUrl,
+			Username:   o.OpenstackUsername,
+			Password:   o.OpenstackPassword,
+			Domain:     o.OpenstackDomain,
+			TenantName: o.OpenstackTenant,
+			Region:     o.OpenstackRegion,
+		})
 	default:
 		err = errors.New("Missing or unsupported BBL_IAAS.")
 	}
