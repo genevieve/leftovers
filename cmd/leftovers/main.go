@@ -27,6 +27,7 @@ type opts struct {
 
 	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
 	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
+	AWSSessionToken      string `long:"aws-session-token"        env:"BBL_AWS_SESSION_TOKEN"        description:"AWS session token."`
 	AWSRegion            string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
 	AzureClientID        string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
 	AzureClientSecret    string `long:"azure-client-secret"      env:"BBL_AZURE_CLIENT_SECRET"      description:"Azure client secret."`
@@ -86,7 +87,7 @@ func main() {
 	switch o.IAAS {
 	case AWS:
 		o = useOtherEnvVars(o, AWS)
-		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSRegion)
+		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSSessionToken, o.AWSRegion)
 	case Azure:
 		o = useOtherEnvVars(o, Azure)
 		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
@@ -144,6 +145,9 @@ func useOtherEnvVars(o opts, iaas string) opts {
 		}
 		if o.AWSSecretAccessKey == "" {
 			o.AWSSecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+		}
+		if o.AWSSessionToken == "" {
+			o.AWSSessionToken = os.Getenv("AWS_SESSION_TOKEN")
 		}
 		if o.AWSRegion == "" {
 			o.AWSRegion = os.Getenv("AWS_DEFAULT_REGION")
