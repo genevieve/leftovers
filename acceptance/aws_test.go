@@ -35,7 +35,7 @@ var _ = Describe("AWS", func() {
 		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
 
 		var err error
-		deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.Region)
+		deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.SessionToken, acc.Region)
 		Expect(err).NotTo(HaveOccurred())
 
 		color.NoColor = true
