@@ -15,6 +15,7 @@ import (
 type AWSAcceptance struct {
 	AccessKeyId     string
 	SecretAccessKey string
+	SessionToken    string
 	Region          string
 	Logger          *app.Logger
 }
@@ -26,12 +27,16 @@ func NewAWSAcceptance() AWSAcceptance {
 	secretAccessKey := os.Getenv("BBL_AWS_SECRET_ACCESS_KEY")
 	Expect(secretAccessKey).NotTo(Equal(""), "Missing $BBL_AWS_SECRET_ACCESS_KEY.")
 
+	sessionToken := os.Getenv("BBL_AWS_SESSION_TOKEN")
+	Expect(sessionToken).To(Equal(""), "Optional field")
+
 	region := os.Getenv("BBL_AWS_REGION")
 	Expect(region).NotTo(Equal(""), "Missing $BBL_AWS_REGION.")
 
 	return AWSAcceptance{
 		AccessKeyId:     accessKeyId,
 		SecretAccessKey: secretAccessKey,
+		SessionToken:    sessionToken,
 		Region:          region,
 		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
 	}
