@@ -13,7 +13,7 @@ import (
 var _ = Describe("Volumes", func() {
 	Context("when Type method is called", func() {
 		It("should return volume", func() {
-			volumes, err := openstack.NewVolumes(nil)
+			volumes, err := openstack.NewVolumes(nil, nil)
 			Expect(err).ToNot(HaveOccurred())
 
 			result := volumes.Type()
@@ -25,16 +25,17 @@ var _ = Describe("Volumes", func() {
 	Context("when List method is called", func() {
 		var fakeVolumesLister *openstackfakes.FakeVolumesLister
 		var subject openstack.Volumes
+		var fakeLogger *openstackfakes.FakeLogger
 
 		BeforeEach(func() {
+			fakeLogger = &openstackfakes.FakeLogger{}
 			fakeVolumesLister = &openstackfakes.FakeVolumesLister{}
 			fakeVolumesDeleter := &openstackfakes.FakeVolumesDeleter{}
 			fakeVolumesServiceProvider := &openstackfakes.FakeVolumesServiceProvider{}
 			fakeVolumesServiceProvider.GetVolumesListerReturns(fakeVolumesLister)
 			fakeVolumesServiceProvider.GetVolumesDeleterReturns(fakeVolumesDeleter)
-
 			var err error
-			subject, err = openstack.NewVolumes(fakeVolumesServiceProvider)
+			subject, err = openstack.NewVolumes(fakeVolumesServiceProvider, fakeLogger)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -62,6 +63,10 @@ var _ = Describe("Volumes", func() {
 
 		Context("and there are many volumes", func() {
 			It("should return the corresponding deletables", func() {
+				fakeLogger.PromptWithDetailsReturnsOnCall(0, true)
+				fakeLogger.PromptWithDetailsReturnsOnCall(1, true)
+				fakeLogger.PromptWithDetailsReturnsOnCall(2, false)
+
 				volume := volumes.Volume{
 					ID:   "some-ID",
 					Name: "some-name",
@@ -70,9 +75,14 @@ var _ = Describe("Volumes", func() {
 					ID:   "other-ID",
 					Name: "some-name",
 				}
+				anotherVolume := volumes.Volume{
+					ID:   "another-ID",
+					Name: "another-name",
+				}
 				fakeVolumesLister.ListReturns([]volumes.Volume{
 					volume,
 					otherVolume,
+					anotherVolume,
 				}, nil)
 
 				result, err := subject.List()

@@ -23,10 +23,11 @@ type VolumesServiceProvider interface {
 
 type Volumes struct {
 	volumesServiceProvider VolumesServiceProvider
+	logger                 logger
 }
 
-func NewVolumes(volumesServiceProvider VolumesServiceProvider) (Volumes, error) {
-	return Volumes{volumesServiceProvider}, nil
+func NewVolumes(volumesServiceProvider VolumesServiceProvider, logger logger) (Volumes, error) {
+	return Volumes{volumesServiceProvider, logger}, nil
 }
 
 func (volumes Volumes) Type() string {
@@ -43,7 +44,12 @@ func (volumes Volumes) List() ([]common.Deletable, error) {
 
 	var deletables []common.Deletable
 	for _, volume := range result {
-		deletables = append(deletables, NewVolume(volume.Name, volume.ID, serviceProvider.GetVolumesDeleter()))
+		deletable := NewVolume(volume.Name, volume.ID, serviceProvider.GetVolumesDeleter())
+		confirm := volumes.logger.PromptWithDetails(deletable.Type(), deletable.Name())
+
+		if confirm {
+			deletables = append(deletables, NewVolume(volume.Name, volume.ID, serviceProvider.GetVolumesDeleter()))
+		}
 	}
 
 	return deletables, nil

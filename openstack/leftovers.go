@@ -18,6 +18,7 @@ type listTyper interface {
 	Type() string
 }
 
+//go:generate counterfeiter . logger
 type logger interface {
 	Printf(message string, a ...interface{})
 	Println(message string)
@@ -80,7 +81,7 @@ func NewLeftovers(logger logger, authArgs AuthArgs) (Leftovers, error) {
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("failed to create network client for V2: %s", err)
 	}
-	volumes, _ := NewVolumes(NewVolumesBlockStorageClient(serviceBS, VolumesAPI{}))
+	volumes, _ := NewVolumes(NewVolumesBlockStorageClient(serviceBS, VolumesAPI{}), logger)
 	return Leftovers{
 		logger:       logger,
 		asyncDeleter: app.NewAsyncDeleter(logger),
