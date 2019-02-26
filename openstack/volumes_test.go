@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/genevieve/leftovers/openstack"
-	"github.com/genevieve/leftovers/openstack/openstackfakes"
+	"github.com/genevieve/leftovers/openstack/fakes"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -23,17 +23,20 @@ var _ = Describe("Volumes", func() {
 	})
 
 	Context("when List method is called", func() {
-		var fakeVolumesLister *openstackfakes.FakeVolumesLister
-		var subject openstack.Volumes
-		var fakeLogger *openstackfakes.FakeLogger
+		var (
+			fakeVolumesLister *fakes.VolumesLister
+			subject           openstack.Volumes
+			fakeLogger        *fakes.Logger
+		)
 
 		BeforeEach(func() {
-			fakeLogger = &openstackfakes.FakeLogger{}
-			fakeVolumesLister = &openstackfakes.FakeVolumesLister{}
-			fakeVolumesDeleter := &openstackfakes.FakeVolumesDeleter{}
-			fakeVolumesServiceProvider := &openstackfakes.FakeVolumesServiceProvider{}
-			fakeVolumesServiceProvider.GetVolumesListerReturns(fakeVolumesLister)
-			fakeVolumesServiceProvider.GetVolumesDeleterReturns(fakeVolumesDeleter)
+			fakeLogger = &fakes.Logger{}
+			fakeVolumesLister = &fakes.VolumesLister{}
+			fakeVolumesDeleter := &fakes.VolumesDeleter{}
+			fakeVolumesServiceProvider := &fakes.VolumesServiceProvider{}
+			fakeVolumesServiceProvider.GetVolumesListerCall.Returns.VolumesLister = fakeVolumesLister
+			fakeVolumesServiceProvider.GetVolumesDeleterCall.Returns.VolumesDeleter = fakeVolumesDeleter
+
 			var err error
 			subject, err = openstack.NewVolumes(fakeVolumesServiceProvider, fakeLogger)
 			Expect(err).NotTo(HaveOccurred())
@@ -41,7 +44,7 @@ var _ = Describe("Volumes", func() {
 
 		Context("and there is a volumes service error", func() {
 			It("should propogate the error", func() {
-				fakeVolumesLister.ListReturns(nil, errors.New("error-description"))
+				fakeVolumesLister.ListCall.Returns.Error = errors.New("error-description")
 
 				result, err := subject.List()
 
@@ -53,8 +56,6 @@ var _ = Describe("Volumes", func() {
 
 		Context("and there are no volumes", func() {
 			It("should return an empty list", func() {
-				fakeVolumesLister.ListReturns(nil, nil)
-
 				result, err := subject.List()
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(BeEmpty())
@@ -63,9 +64,12 @@ var _ = Describe("Volumes", func() {
 
 		Context("and there are many volumes", func() {
 			It("should return the corresponding deletables", func() {
-				fakeLogger.PromptWithDetailsReturnsOnCall(0, true)
-				fakeLogger.PromptWithDetailsReturnsOnCall(1, true)
-				fakeLogger.PromptWithDetailsReturnsOnCall(2, false)
+				fakeLogger.PromptWithDetailsCall.ReturnsForCall = append(
+					fakeLogger.PromptWithDetailsCall.ReturnsForCall,
+					fakes.LoggerPromptWithDetailsCallReturn{Bool: true},
+					fakes.LoggerPromptWithDetailsCallReturn{Bool: true},
+					fakes.LoggerPromptWithDetailsCallReturn{Bool: false},
+				)
 
 				volume := volumes.Volume{
 					ID:   "some-ID",
@@ -73,24 +77,24 @@ var _ = Describe("Volumes", func() {
 				}
 				otherVolume := volumes.Volume{
 					ID:   "other-ID",
-					Name: "some-name",
+					Name: "other-name",
 				}
 				anotherVolume := volumes.Volume{
 					ID:   "another-ID",
 					Name: "another-name",
 				}
-				fakeVolumesLister.ListReturns([]volumes.Volume{
+				fakeVolumesLister.ListCall.Returns.Volumes = []volumes.Volume{
 					volume,
 					otherVolume,
 					anotherVolume,
-				}, nil)
+				}
 
 				result, err := subject.List()
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(HaveLen(2))
 				Expect(result[0].Name()).To(Equal("some-name some-ID"))
-				Expect(result[1].Name()).To(Equal("some-name other-ID"))
+				Expect(result[1].Name()).To(Equal("other-name other-ID"))
 				Expect((result[0].(openstack.Volume)).VolumesDeleter).NotTo(BeNil())
 				Expect((result[1].(openstack.Volume)).VolumesDeleter).NotTo(BeNil())
 			})

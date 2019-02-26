@@ -18,7 +18,6 @@ type listTyper interface {
 	Type() string
 }
 
-//go:generate counterfeiter . logger
 type logger interface {
 	Printf(message string, a ...interface{})
 	Println(message string)

@@ -11,7 +11,6 @@ type VolumesBlockStorageClient struct {
 	volumesAPI    volumesAPI
 }
 
-//go:generate counterfeiter . volumesAPI
 type volumesAPI interface {
 	PagerToPage(pager pagination.Pager) (pagination.Page, error)
 	PageToVolumes(pagination.Page) ([]volumes.Volume, error)

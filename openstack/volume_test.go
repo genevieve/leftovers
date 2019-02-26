@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/genevieve/leftovers/openstack"
-	"github.com/genevieve/leftovers/openstack/openstackfakes"
+	"github.com/genevieve/leftovers/openstack/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -23,15 +23,15 @@ var _ = Describe("Volume", func() {
 		})
 
 		Context("when Delete is called", func() {
-			var mockVolumesDeleter *openstackfakes.FakeVolumesDeleter
+			var fakeVolumesDeleter *fakes.VolumesDeleter
 			var volume openstack.Volume
 			BeforeEach(func() {
-				mockVolumesDeleter = &openstackfakes.FakeVolumesDeleter{}
-				volume = openstack.NewVolume("some-name", "some-id", mockVolumesDeleter)
+				fakeVolumesDeleter = &fakes.VolumesDeleter{}
+				volume = openstack.NewVolume("some-name", "some-id", fakeVolumesDeleter)
 			})
 			Context("when there is an error", func() {
 				It("should delete the volume", func() {
-					mockVolumesDeleter.DeleteReturns(errors.New("error description"))
+					fakeVolumesDeleter.DeleteCall.Returns.Error = errors.New("error description")
 					err := volume.Delete()
 
 					Expect(err).To(HaveOccurred())
@@ -40,12 +40,10 @@ var _ = Describe("Volume", func() {
 			})
 
 			It("should delete the correct volume", func() {
-				mockVolumesDeleter.DeleteReturns(nil)
-
 				err := volume.Delete()
 
 				Expect(err).NotTo(HaveOccurred())
-				Expect(mockVolumesDeleter.DeleteArgsForCall(0)).To(Equal("some-id"))
+				Expect(fakeVolumesDeleter.DeleteCall.Receives.VolumeID).To(Equal("some-id"))
 			})
 
 		})

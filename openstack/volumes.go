@@ -5,17 +5,14 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
-//go:generate counterfeiter . VolumesLister
 type VolumesLister interface {
 	List() ([]volumes.Volume, error)
 }
 
-//go:generate counterfeiter . VolumesDeleter
 type VolumesDeleter interface {
 	Delete(volumeID string) error
 }
 
-//go:generate counterfeiter . VolumesServiceProvider
 type VolumesServiceProvider interface {
 	GetVolumesLister() VolumesLister
 	GetVolumesDeleter() VolumesDeleter
