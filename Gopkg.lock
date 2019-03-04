@@ -120,12 +120,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:aa79cf24dfd2f6c0558a1cf343108c75083cfb6626d2fb0bdf839e25757790cd"
+  digest = "1:c3b85ac8e30f3478c107b4908c55ff271edb70d2e4c8e3561c534627847c3079"
   name = "github.com/gophercloud/gophercloud"
   packages = [
     ".",
     "openstack",
-    "openstack/blockstorage/v2/volumes",
     "openstack/blockstorage/v3/volumes",
     "openstack/identity/v2/tenants",
     "openstack/identity/v2/tokens",
@@ -424,7 +423,6 @@
     "github.com/fatih/color",
     "github.com/gophercloud/gophercloud",
     "github.com/gophercloud/gophercloud/openstack",
-    "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes",
     "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes",
     "github.com/gophercloud/gophercloud/pagination",
     "github.com/hashicorp/go-multierror",
