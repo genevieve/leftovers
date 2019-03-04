@@ -5,15 +5,15 @@ import gcpcompute "google.golang.org/api/compute/v1"
 type RoutesClient struct {
 	ListRoutesCall struct {
 		CallCount int
-		Returns struct {
+		Returns   struct {
 			Output []*gcpcompute.Route
-			Error error
+			Error  error
 		}
 	}
 
 	DeleteRouteCall struct {
 		CallCount int
-		Receives struct {
+		Receives  struct {
 			Route string
 		}
 		Returns struct {
