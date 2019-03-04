@@ -121,7 +121,7 @@ func (o *OpenStackAcceptance) SafeDeleteVolume(volumeID string) error {
 		isSafeToDelete, err := o.IsSafeToDelete(volumeID)
 		Expect(err).NotTo(HaveOccurred())
 		return isSafeToDelete
-	}, 100).Should(BeTrue())
+	}, "1s").Should(BeTrue())
 
 	return o.DeleteVolume(volumeID)
 }

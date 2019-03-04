@@ -22,35 +22,29 @@ var _ = Describe("Openstack", func() {
 	)
 
 	BeforeEach(func() {
+		color.NoColor = true
+
 		iaas := os.Getenv(LEFTOVERS_ACCEPTANCE)
 		if strings.ToLower(iaas) != "openstack" {
 			Skip("Skipping Openstack acceptance tests.")
 		}
+		acc = NewOpenStackAcceptance()
+		err := acc.configureAuthClient()
+		Expect(err).NotTo(HaveOccurred())
 	})
 
-	Context("with incorrect openstack credentials", func() {
-		Describe("NewLeftovers", func() {
-			Context("given incorrect openstack credentials", func() {
-				It("should return an empty Leftovers and write an error", func() {
-					incorrectAuthArgs := openstack.AuthArgs{}
+	Describe("a deletable volume journey", func() {
+		It("deletes volumes", func() {
+			By("failing to create a new Leftovers when openstack can't authenticate")
+			incorrectAuthArgs := openstack.AuthArgs{}
+			var err error
+			leftovers, err = openstack.NewLeftovers(nil, incorrectAuthArgs)
 
-					leftovers, err := openstack.NewLeftovers(nil, incorrectAuthArgs)
+			Expect(leftovers).To(Equal(openstack.Leftovers{}))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("failed to make authenticated client"))
 
-					Expect(leftovers).To(Equal(openstack.Leftovers{}))
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(ContainSubstring("failed to make authenticated client"))
-				})
-			})
-		})
-	})
-
-	Context("with correct openstack credentials and config", func() {
-		BeforeEach(func() {
-
-			acc = NewOpenStackAcceptance()
-			err := acc.configureAuthClient()
-			Expect(err).NotTo(HaveOccurred())
-
+			By("listing all resources when calling Types")
 			noConfirm := true
 			stdout = bytes.NewBuffer([]byte{})
 			logger := app.NewLogger(stdout, os.Stdin, noConfirm)
@@ -65,136 +59,70 @@ var _ = Describe("Openstack", func() {
 			})
 			Expect(err).NotTo(HaveOccurred())
 
-			color.NoColor = true
-		})
+			leftovers.Types()
+			Expect(stdout.String()).To(ContainSubstring("Volume"))
 
-		Describe("Dry run for Volumes", func() {
-			var volumeID string
+			By("warning the user when a filter is passed to List")
+			volumeID := acc.CreateVolume("some name")
+			leftovers.List("filter")
 
-			BeforeEach(func() {
-				volumeID = acc.CreateVolume("some name")
-			})
+			Expect(stdout.String()).To(ContainSubstring("Warning: Filters are not supported for OpenStack."))
+			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
 
-			AfterEach(func() {
-				err := acc.SafeDeleteVolume(volumeID)
+			By("listing all resources when a filter isn't passed to List")
+			leftovers.List("")
+
+			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", "some name", volumeID)))
+
+			By("warning the user and aborting when a filter is passed to Delete")
+			err = leftovers.Delete("filter")
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
+			Expect(stdout.String()).To(ContainSubstring("Error: Filters are not supported for OpenStack. Aborting deletion!"))
+			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
+
+			By("deleting all resources when a filter isn't passed to Delete")
+			Eventually(func() bool {
+				isSafeToDelete, err := acc.IsSafeToDelete(volumeID)
 				Expect(err).NotTo(HaveOccurred())
-			})
+				return isSafeToDelete
+			}, "1s").Should(BeTrue())
 
-			Context("a filter is supplied", func() {
-				It("should log a warning", func() {
-					leftovers.List("filter")
+			err = leftovers.Delete("")
+			Expect(err).NotTo(HaveOccurred())
+			Eventually(func() bool {
+				return acc.VolumeExists(volumeID)
+			}, "1s").Should(BeFalse())
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some name", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some name", volumeID)))
 
-					Expect(stdout.String()).To(ContainSubstring("Warning: Filters are not supported for OpenStack."))
-					Expect(acc.VolumeExists(volumeID)).To(BeTrue())
-				})
-			})
+			By("deleting based on the type")
+			volumeID = acc.CreateVolume("some name")
+			Eventually(func() (bool, error) {
+				return acc.IsSafeToDelete(volumeID)
+			}, "1s").Should(BeTrue())
 
-			It("lists resources without deleting", func() {
-				leftovers.List("")
+			By("returning an error with a warning when a filter is passed to DeleteType")
+			err = leftovers.DeleteType("some filter", "Volume")
+			Consistently(func() bool {
+				return acc.VolumeExists(volumeID)
+			}, "2s", "100ms").Should(BeTrue())
 
-				Expect(acc.VolumeExists(volumeID)).To(BeTrue())
-				Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", "some name", volumeID)))
-			})
-		})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("Error: Filters are not supported for OpenStack. Aborting deletion!")))
 
-		Describe("Types", func() {
-			It("lists the resource types that can be deleted", func() {
-				leftovers.Types()
+			By("deleting the correct type when DeleteType is passed no filter and volume")
+			err = leftovers.DeleteType("", "Volume")
+			Expect(err).NotTo(HaveOccurred())
 
-				Expect(stdout.String()).To(ContainSubstring("Volume"))
-			})
-		})
+			Eventually(func() bool {
+				return acc.VolumeExists(volumeID)
+			}, "1s").Should(BeFalse())
 
-		Describe("Delete", func() {
-			var volumeID string
-
-			BeforeEach(func() {
-				volumeID = acc.CreateVolume("some name")
-			})
-
-			AfterEach(func() {
-				if acc.VolumeExists(volumeID) {
-					err := acc.SafeDeleteVolume(volumeID)
-					Expect(err).ToNot(HaveOccurred())
-				}
-			})
-
-			Context("a filter is supplied", func() {
-				It("should panic with an error", func() {
-					err := leftovers.Delete("filter")
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
-					Expect(stdout.String()).To(ContainSubstring("Error: Filters are not supported for OpenStack. Aborting deletion!"))
-					Expect(acc.VolumeExists(volumeID)).To(BeTrue())
-				})
-			})
-			Context("given one volume associated with a project id", func() {
-				BeforeEach(func() {
-					Eventually(func() bool {
-						isSafeToDelete, err := acc.IsSafeToDelete(volumeID)
-						Expect(err).NotTo(HaveOccurred())
-						return isSafeToDelete
-					}, 100).Should(BeTrue())
-				})
-
-				It("deletes only that volume", func() {
-					err := leftovers.Delete("")
-					Expect(err).NotTo(HaveOccurred())
-					Eventually(func() bool {
-						return acc.VolumeExists(volumeID)
-					}, 100).Should(BeFalse())
-					Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some name", volumeID)))
-					Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some name", volumeID)))
-				})
-			})
-		})
-
-		Describe("DeleteType for Volumes", func() {
-			var volumeID string
-
-			BeforeEach(func() {
-				volumeID = acc.CreateVolume("some name")
-				Eventually(func() bool {
-					isSafeToDelete, err := acc.IsSafeToDelete(volumeID)
-					Expect(err).NotTo(HaveOccurred())
-					return isSafeToDelete
-				}, 100).Should(BeTrue())
-			})
-
-			AfterEach(func() {
-				if acc.VolumeExists(volumeID) {
-					err := acc.SafeDeleteVolume(volumeID)
-					Expect(err).ToNot(HaveOccurred())
-				}
-			})
-
-			Context("when a filter is passed", func() {
-				It("returns an error with a warning and doesnt delete anything", func() {
-					err := leftovers.DeleteType("some filter", "Volume")
-					Consistently(func() bool {
-						return acc.VolumeExists(volumeID)
-					}, "2s", "100ms").Should(BeTrue())
-
-					Expect(err).To(HaveOccurred())
-					Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
-					Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("Error: Filters are not supported for OpenStack. Aborting deletion!")))
-				})
-			})
-
-			Context("when a filter isn't passed", func() {
-				// TODO: update with other resources
-				It("deletes only volumes", func() {
-					err := leftovers.DeleteType("", "Volume")
-					Expect(err).NotTo(HaveOccurred())
-
-					Eventually(func() bool {
-						return acc.VolumeExists(volumeID)
-					}, 100).Should(BeFalse())
-
-					Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some name", volumeID)))
-					Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some name", volumeID)))
-				})
-			})
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some name", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some name", volumeID)))
 		})
 	})
 })
