@@ -13,9 +13,7 @@ import (
 var _ = Describe("Volumes", func() {
 	Context("when Type method is called", func() {
 		It("should return volume", func() {
-			volumes, err := openstack.NewVolumes(nil, nil)
-			Expect(err).ToNot(HaveOccurred())
-
+			volumes := openstack.NewVolumes(nil, nil)
 			result := volumes.Type()
 
 			Expect(result).To(Equal("Volume"))
@@ -37,9 +35,7 @@ var _ = Describe("Volumes", func() {
 			fakeVolumesServiceProvider.GetVolumesListerCall.Returns.VolumesLister = fakeVolumesLister
 			fakeVolumesServiceProvider.GetVolumesDeleterCall.Returns.VolumesDeleter = fakeVolumesDeleter
 
-			var err error
-			subject, err = openstack.NewVolumes(fakeVolumesServiceProvider, fakeLogger)
-			Expect(err).NotTo(HaveOccurred())
+			subject = openstack.NewVolumes(fakeVolumesServiceProvider, fakeLogger)
 		})
 
 		Context("and there is a volumes service error", func() {

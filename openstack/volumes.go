@@ -23,8 +23,8 @@ type Volumes struct {
 	logger                 logger
 }
 
-func NewVolumes(volumesServiceProvider VolumesServiceProvider, logger logger) (Volumes, error) {
-	return Volumes{volumesServiceProvider, logger}, nil
+func NewVolumes(volumesServiceProvider VolumesServiceProvider, logger logger) Volumes {
+	return Volumes{volumesServiceProvider, logger}
 }
 
 func (volumes Volumes) Type() string {
