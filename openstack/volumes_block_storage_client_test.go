@@ -11,22 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type fakePage struct {
-	name string
-}
-
-func (fakePage fakePage) NextPageURL() (string, error) {
-	return "", nil
-}
-
-func (fakePage fakePage) IsEmpty() (bool, error) {
-	return false, nil
-}
-
-func (fakePage fakePage) GetBody() interface{} {
-	return nil
-}
-
 var _ = Describe("VolumesBlockStorageClient", func() {
 	Context("when listing", func() {
 		var (
@@ -63,14 +47,14 @@ var _ = Describe("VolumesBlockStorageClient", func() {
 		Context("when a volume exists and no errors occur", func() {
 			It("should return the volume", func() {
 				volumesAPI.GetVolumesPagerCall.Returns.Pager = pagination.Pager{Headers: map[string]string{"header": "test"}}
-				volumesAPI.PagerToPageCall.Returns.Page = fakePage{name: "page name"}
+				volumesAPI.PagerToPageCall.Returns.Page = fakes.Page{Name: "page name"}
 				volume := volumes.Volume{Name: "volume name"}
 				volumesAPI.PageToVolumesCall.Returns.Volumes = []volumes.Volume{volume}
 
 				result, err := volumesBlockStorageClient.List()
 
 				Expect(volumesAPI.PagerToPageCall.Receives.Pager.Headers["header"]).To(Equal("test"))
-				Expect((volumesAPI.PageToVolumesCall.Receives.Page.(fakePage)).name).To(Equal("page name"))
+				Expect((volumesAPI.PageToVolumesCall.Receives.Page.(fakes.Page)).Name).To(Equal("page name"))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(HaveLen(1))
 				Expect(result[0].Name).To(Equal("volume name"))

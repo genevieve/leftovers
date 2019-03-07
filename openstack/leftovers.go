@@ -70,22 +70,36 @@ func NewLeftovers(logger logger, authArgs AuthArgs) (Leftovers, error) {
 		TenantName:       authArgs.TenantName,
 		AllowReauth:      true,
 	})
+
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("failed to make authenticated client: %s", err)
 	}
-	serviceBS, err := openstack.NewBlockStorageV3(provider, gophercloud.EndpointOpts{
+
+	openstackOptions := gophercloud.EndpointOpts{
 		Region:       authArgs.Region,
 		Availability: gophercloud.AvailabilityPublic,
-	})
-	if err != nil {
-		return Leftovers{}, fmt.Errorf("failed to create network client for V2: %s", err)
 	}
+
+	serviceBS, err := openstack.NewBlockStorageV3(provider, openstackOptions)
+
+	if err != nil {
+		return Leftovers{}, fmt.Errorf("failed to create volume block storage client: %s", err)
+	}
+
+	serviceComputeInstance, err := openstack.NewComputeV2(provider, openstackOptions)
+
+	if err != nil {
+		return Leftovers{}, fmt.Errorf("failed to create compute instance client: %s", err)
+	}
+
 	volumes, _ := NewVolumes(NewVolumesBlockStorageClient(serviceBS, VolumesAPI{}), logger)
+
 	return Leftovers{
 		logger:       logger,
 		asyncDeleter: app.NewAsyncDeleter(logger),
 		resources: []listTyper{
 			volumes,
+			NewComputeInstances(NewComputeInstanceClient(serviceComputeInstance, ComputeAPI{}), logger),
 		}}, nil
 }
 

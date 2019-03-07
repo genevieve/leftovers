@@ -3,11 +3,15 @@ package acceptance
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
 	. "github.com/onsi/gomega"
 )
@@ -22,7 +26,22 @@ type OpenStackAcceptance struct {
 	Region      string
 	TenantName  string
 
-	client *gophercloud.ServiceClient
+	testResources         []deletable
+	client                *gophercloud.ServiceClient
+	computeInstanceClient *gophercloud.ServiceClient
+	imagesClient          *gophercloud.ServiceClient
+}
+
+type deletable interface {
+	Delete() error
+}
+
+type testResource struct {
+	deleteFunction func() error
+}
+
+func (t testResource) Delete() error {
+	return t.deleteFunction()
 }
 
 func NewOpenStackAcceptance() *OpenStackAcceptance {
@@ -55,15 +74,32 @@ func (o *OpenStackAcceptance) configureAuthClient() error {
 		return fmt.Errorf("could not create authenticated client provider: %s", err)
 	}
 
-	blockStorage, err := openstack.NewBlockStorageV3(provider, gophercloud.EndpointOpts{
+	endpointOpts := gophercloud.EndpointOpts{
 		Region:       o.Region,
 		Availability: gophercloud.AvailabilityPublic,
-	})
+	}
+
+	blockStorage, err := openstack.NewBlockStorageV3(provider, endpointOpts)
+
 	if err != nil {
 		return fmt.Errorf("some authentication error creating networking client: %s", err)
 	}
 
+	instanceClient, err := openstack.NewComputeV2(provider, endpointOpts)
+
+	if err != nil {
+		return fmt.Errorf("some authentication error creating compute instance client: %s", err)
+	}
+
+	imagesClient, err := openstack.NewImageServiceV2(provider, endpointOpts)
+
+	if err != nil {
+		return fmt.Errorf("some authentication error creating images client: %s", err)
+	}
+
 	o.client = blockStorage
+	o.computeInstanceClient = instanceClient
+	o.imagesClient = imagesClient
 	return nil
 }
 
@@ -75,6 +111,37 @@ func (o *OpenStackAcceptance) CreateVolume(name string) string {
 	Expect(err).NotTo(HaveOccurred())
 
 	return vol.ID
+}
+
+func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
+	image, err := images.Create(o.imagesClient, images.CreateOpts{
+		Name:            "my awesome empty image",
+		DiskFormat:      "iso",
+		ContainerFormat: "ami",
+	}).Extract()
+	Expect(err).NotTo(HaveOccurred())
+
+	//store image for clean up at a later time
+	testResource := struct{ testResource }{}
+	testResource.deleteFunction = func() error {
+		return images.Delete(o.imagesClient, image.ID).ExtractErr()
+	}
+	o.testResources = append(o.testResources, testResource)
+
+	// upload iso for awesome empty image
+	res := imagedata.Upload(o.imagesClient, image.ID, strings.NewReader(""))
+	Expect(res.Err).NotTo(HaveOccurred())
+
+	instance, err := servers.Create(o.computeInstanceClient, servers.CreateOpts{
+		Name:          name,
+		FlavorName:    "m1.tiny",
+		ImageRef:      image.ID,
+		ServiceClient: o.computeInstanceClient,
+	}).Extract()
+
+	Expect(err).NotTo(HaveOccurred())
+
+	return instance.ID
 }
 
 func (o *OpenStackAcceptance) GetVolume(volumeID string) (volumes.Volume, error) {
@@ -103,7 +170,17 @@ func (o *OpenStackAcceptance) VolumeExists(volumeID string) bool {
 	return true
 }
 
-func (o OpenStackAcceptance) IsSafeToDelete(volumeID string) (bool, error) {
+func (o *OpenStackAcceptance) ComputeInstanceExists(instanceID string) bool {
+	_, err := servers.Get(o.computeInstanceClient, instanceID).Extract()
+	if err != nil {
+		_, ok := err.(gophercloud.ErrDefault404)
+		Expect(ok).To(BeTrue(), fmt.Sprintf("Unexpected error: %s", err.Error()))
+		return false
+	}
+	return true
+}
+
+func (o OpenStackAcceptance) IsSafeToDeleteVolume(volumeID string) (bool, error) {
 	volume, err := o.GetVolume(volumeID)
 	if err != nil {
 		return false, err
@@ -118,10 +195,22 @@ func (o OpenStackAcceptance) IsSafeToDelete(volumeID string) (bool, error) {
 
 func (o *OpenStackAcceptance) SafeDeleteVolume(volumeID string) error {
 	Eventually(func() bool {
-		isSafeToDelete, err := o.IsSafeToDelete(volumeID)
+		isSafeToDelete, err := o.IsSafeToDeleteVolume(volumeID)
 		Expect(err).NotTo(HaveOccurred())
 		return isSafeToDelete
 	}, "1s").Should(BeTrue())
 
 	return o.DeleteVolume(volumeID)
+}
+
+func (o *OpenStackAcceptance) CleanUpTestResources() error {
+	for _, resource := range o.testResources {
+		err := resource.Delete()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

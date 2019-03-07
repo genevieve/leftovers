@@ -33,8 +33,13 @@ var _ = Describe("Openstack", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	Describe("a deletable volume journey", func() {
-		It("deletes volumes", func() {
+	AfterEach(func() {
+		err := acc.CleanUpTestResources()
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	Describe("Deleting OpenStack Resources Journey", func() {
+		It("should delete the appropriate OpenStack resources", func() {
 			By("failing to create a new Leftovers when openstack can't authenticate")
 			incorrectAuthArgs := openstack.AuthArgs{}
 			var err error
@@ -48,7 +53,6 @@ var _ = Describe("Openstack", func() {
 			noConfirm := true
 			stdout = bytes.NewBuffer([]byte{})
 			logger := app.NewLogger(stdout, os.Stdin, noConfirm)
-
 			leftovers, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
 				AuthURL:    acc.AuthURL,
 				Username:   acc.Username,
@@ -58,71 +62,92 @@ var _ = Describe("Openstack", func() {
 				TenantName: acc.TenantName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-
 			leftovers.Types()
+
 			Expect(stdout.String()).To(ContainSubstring("Volume"))
+			Expect(stdout.String()).To(ContainSubstring("Compute Instance"))
 
 			By("warning the user when a filter is passed to List")
-			volumeID := acc.CreateVolume("some name")
+			volumeID := acc.CreateVolume("some volume")
+			instanceID := acc.CreateComputeInstance("some instance")
 			leftovers.List("filter")
 
 			Expect(stdout.String()).To(ContainSubstring("Warning: Filters are not supported for OpenStack."))
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
+			Expect(acc.ComputeInstanceExists(instanceID)).To(BeTrue())
 
 			By("listing all resources when a filter isn't passed to List")
 			leftovers.List("")
 
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", "some volume", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s]", "some instance", instanceID)))
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", "some name", volumeID)))
+			Expect(acc.ComputeInstanceExists(instanceID)).To(BeTrue())
 
-			By("warning the user and aborting when a filter is passed to Delete")
-			err = leftovers.Delete("filter")
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
-			Expect(stdout.String()).To(ContainSubstring("Error: Filters are not supported for OpenStack. Aborting deletion!"))
-			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
-
-			By("deleting all resources when a filter isn't passed to Delete")
-			Eventually(func() bool {
-				isSafeToDelete, err := acc.IsSafeToDelete(volumeID)
-				Expect(err).NotTo(HaveOccurred())
-				return isSafeToDelete
-			}, "2s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
-
-			err = leftovers.Delete("")
-			Expect(err).NotTo(HaveOccurred())
-			Eventually(func() bool {
-				return acc.VolumeExists(volumeID)
-			}, "2s").Should(BeFalse(), "Volume should have been deleted")
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some name", volumeID)))
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some name", volumeID)))
-
-			By("deleting based on the type")
-			volumeID = acc.CreateVolume("some name")
-			Eventually(func() (bool, error) {
-				return acc.IsSafeToDelete(volumeID)
-			}, "2s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
-
-			By("returning an error with a warning when a filter is passed to DeleteType")
+			By("passing a filter to DeleteType")
 			err = leftovers.DeleteType("some filter", "Volume")
-			Consistently(func() bool {
-				return acc.VolumeExists(volumeID)
-			}, "2s", "100ms").Should(BeTrue(), "Volume should not have been deleted")
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("Error: Filters are not supported for OpenStack. Aborting deletion!")))
+			Consistently(func() bool {
+				return acc.VolumeExists(volumeID) && acc.ComputeInstanceExists(instanceID)
+			}, "2s", "100ms").Should(BeTrue(), "Resources should not have been deleted")
 
-			By("deleting the correct type when DeleteType is passed no filter and volume")
+			By("deleting by type 'Volume'")
+			Eventually(func() (bool, error) {
+				return acc.IsSafeToDeleteVolume(volumeID)
+			}, "2s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
 			err = leftovers.DeleteType("", "Volume")
-			Expect(err).NotTo(HaveOccurred())
 
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some volume", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some volume", volumeID)))
 			Eventually(func() bool {
 				return acc.VolumeExists(volumeID)
-			}, "2s").Should(BeFalse(), "Volume should have been deleted")
+			}, "2s", "100ms").Should(BeFalse(), "Volume should have been deleted")
+			Consistently(func() bool {
+				return acc.ComputeInstanceExists(instanceID)
+			}, "2s", "100ms").Should(BeTrue(), "Compute Instance should not have been deleted")
 
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some name", volumeID)))
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some name", volumeID)))
+			By("deleting by type 'Compute Instance'")
+			volumeID = acc.CreateVolume("some other volume")
+			err = leftovers.DeleteType("", "Compute Instance")
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleting...", "some instance", instanceID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleted!", "some instance", instanceID)))
+			Consistently(func() bool {
+				return acc.VolumeExists(volumeID)
+			}, "2s", "100ms").Should(BeTrue(), "Volume should not have been deleted")
+			Eventually(func() bool {
+				return acc.ComputeInstanceExists(instanceID)
+			}, "2s", "100ms").Should(BeFalse(), "Compute Instance should have been deleted")
+
+			By("passing a filter to Delete")
+			instanceID = acc.CreateComputeInstance("some other instance")
+			err = leftovers.Delete("filter")
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
+			Expect(stdout.String()).To(ContainSubstring("Error: Filters are not supported for OpenStack. Aborting deletion!"))
+			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
+			Expect(acc.ComputeInstanceExists(instanceID)).To(BeTrue())
+
+			By("deleting all resources when a filter isn't passed to Delete")
+			Eventually(func() (bool, error) {
+				return acc.IsSafeToDeleteVolume(volumeID)
+			}, "2s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
+			err = leftovers.Delete("")
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some other volume", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "some other volume", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleted!", "some other instance", instanceID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleting...", "some other instance", instanceID)))
+			Eventually(func() bool {
+				return !acc.VolumeExists(volumeID) && !acc.ComputeInstanceExists(instanceID)
+			}, "2s", "100ms").Should(BeTrue(), "Resources should have been deleted")
 		})
 	})
 })
