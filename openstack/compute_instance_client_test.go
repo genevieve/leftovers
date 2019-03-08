@@ -18,7 +18,7 @@ var _ = Describe("ComputeInstanceClient", func() {
 	)
 	BeforeEach(func() {
 		computeInstanceAPI = &fakes.ComputeInstanceAPI{}
-		computeInstanceClient = openstack.NewComputeInstanceClient(nil, computeInstanceAPI)
+		computeInstanceClient = openstack.NewComputeInstanceClient(computeInstanceAPI)
 	})
 	Context("when listing", func() {
 		Context("when converting a pager to a page returns an error", func() {

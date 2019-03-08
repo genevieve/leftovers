@@ -1,29 +1,29 @@
 package openstack
 
 import (
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
-type VolumesBlockStorageClient struct {
-	serviceClient *gophercloud.ServiceClient
-	volumesAPI    volumesAPI
-}
-
 type volumesAPI interface {
 	PagerToPage(pager pagination.Pager) (pagination.Page, error)
 	PageToVolumes(pagination.Page) ([]volumes.Volume, error)
-	GetVolumesPager(*gophercloud.ServiceClient, volumes.ListOpts) pagination.Pager
-	DeleteVolume(*gophercloud.ServiceClient, string, volumes.DeleteOpts) error
+	GetVolumesPager() pagination.Pager
+	DeleteVolume(volumeID string) error
 }
 
-func NewVolumesBlockStorageClient(serviceClient *gophercloud.ServiceClient, volumesAPI volumesAPI) VolumesBlockStorageClient {
-	return VolumesBlockStorageClient{serviceClient, volumesAPI}
+type VolumesBlockStorageClient struct {
+	volumesAPI volumesAPI
+}
+
+func NewVolumesBlockStorageClient(volumesAPI volumesAPI) VolumesBlockStorageClient {
+	return VolumesBlockStorageClient{
+		volumesAPI: volumesAPI,
+	}
 }
 
 func (vs VolumesBlockStorageClient) List() ([]volumes.Volume, error) {
-	pager := vs.volumesAPI.GetVolumesPager(vs.serviceClient, volumes.ListOpts{})
+	pager := vs.volumesAPI.GetVolumesPager()
 
 	page, err := vs.volumesAPI.PagerToPage(pager)
 	if err != nil {
@@ -39,13 +39,5 @@ func (vs VolumesBlockStorageClient) List() ([]volumes.Volume, error) {
 }
 
 func (vs VolumesBlockStorageClient) Delete(volumeID string) error {
-	return vs.volumesAPI.DeleteVolume(vs.serviceClient, volumeID, volumes.DeleteOpts{})
-}
-
-func (vs VolumesBlockStorageClient) GetVolumesDeleter() VolumesDeleter {
-	return vs
-}
-
-func (vs VolumesBlockStorageClient) GetVolumesLister() VolumesLister {
-	return vs
+	return vs.volumesAPI.DeleteVolume(volumeID)
 }

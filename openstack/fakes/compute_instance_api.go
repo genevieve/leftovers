@@ -1,7 +1,6 @@
 package fakes
 
 import (
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/pagination"
 )
@@ -29,18 +28,14 @@ type ComputeInstanceAPI struct {
 	}
 	GetComputeInstancePagerCall struct {
 		CallCount int
-		Receives  struct {
-			Service *gophercloud.ServiceClient
-		}
-		Returns struct {
+		Returns   struct {
 			ComputeInstancePager pagination.Pager
 		}
 	}
 	DeleteCall struct {
 		CallCount int
 		Receives  struct {
-			ServiceClient *gophercloud.ServiceClient
-			InstanceID    string
+			InstanceID string
 		}
 		Returns struct {
 			Error error
@@ -48,9 +43,8 @@ type ComputeInstanceAPI struct {
 	}
 }
 
-func (api *ComputeInstanceAPI) GetComputeInstancePager(service *gophercloud.ServiceClient) pagination.Pager {
+func (api *ComputeInstanceAPI) GetComputeInstancePager() pagination.Pager {
 	api.GetComputeInstancePagerCall.CallCount++
-	api.GetComputeInstancePagerCall.Receives.Service = service
 
 	return api.GetComputeInstancePagerCall.Returns.ComputeInstancePager
 }
@@ -69,10 +63,9 @@ func (api *ComputeInstanceAPI) PageToServers(page pagination.Page) ([]servers.Se
 	return api.PageToServersCall.Returns.Servers, api.PageToServersCall.Returns.Error
 }
 
-func (api *ComputeInstanceAPI) Delete(serviceClient *gophercloud.ServiceClient, instanceID string) error {
+func (api *ComputeInstanceAPI) Delete(instanceID string) error {
 	api.DeleteCall.CallCount++
 	api.DeleteCall.Receives.InstanceID = instanceID
-	api.DeleteCall.Receives.ServiceClient = serviceClient
 
 	return api.DeleteCall.Returns.Error
 }

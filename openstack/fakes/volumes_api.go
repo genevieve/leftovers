@@ -1,7 +1,6 @@
 package fakes
 
 import (
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
 )
@@ -31,11 +30,7 @@ type VolumesAPI struct {
 
 	GetVolumesPagerCall struct {
 		CallCount int
-		Receives  struct {
-			Client  *gophercloud.ServiceClient
-			Options volumes.ListOpts
-		}
-		Returns struct {
+		Returns   struct {
 			Pager pagination.Pager
 		}
 	}
@@ -43,14 +38,10 @@ type VolumesAPI struct {
 	DeleteVolumeCall struct {
 		CallCount int
 		Receives  struct {
-			Client   *gophercloud.ServiceClient
 			VolumeID string
-			Options  volumes.DeleteOpts
 		}
 		ReceivesForCall []struct {
-			Client   *gophercloud.ServiceClient
 			VolumeID string
-			Options  volumes.DeleteOpts
 		}
 		Returns struct {
 			Error error
@@ -72,19 +63,15 @@ func (v *VolumesAPI) PageToVolumes(page pagination.Page) ([]volumes.Volume, erro
 	return v.PageToVolumesCall.Returns.Volumes, v.PageToVolumesCall.Returns.Error
 }
 
-func (v *VolumesAPI) GetVolumesPager(client *gophercloud.ServiceClient, options volumes.ListOpts) pagination.Pager {
+func (v *VolumesAPI) GetVolumesPager() pagination.Pager {
 	v.GetVolumesPagerCall.CallCount++
-	v.GetVolumesPagerCall.Receives.Client = client
-	v.GetVolumesPagerCall.Receives.Options = options
 
 	return v.GetVolumesPagerCall.Returns.Pager
 }
 
-func (v *VolumesAPI) DeleteVolume(client *gophercloud.ServiceClient, volumeID string, options volumes.DeleteOpts) error {
+func (v *VolumesAPI) DeleteVolume(volumeID string) error {
 	v.DeleteVolumeCall.CallCount++
-	v.DeleteVolumeCall.Receives.Client = client
 	v.DeleteVolumeCall.Receives.VolumeID = volumeID
-	v.DeleteVolumeCall.Receives.Options = options
 
 	v.DeleteVolumeCall.ReceivesForCall = append(v.DeleteVolumeCall.ReceivesForCall, v.DeleteVolumeCall.Receives)
 
