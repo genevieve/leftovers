@@ -6,10 +6,12 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
-type ComputeAPI struct{}
+type ComputeAPI struct {
+	serviceClient *gophercloud.ServiceClient
+}
 
-func (api ComputeAPI) GetComputeInstancePager(serviceClient *gophercloud.ServiceClient) pagination.Pager {
-	return servers.List(serviceClient, servers.ListOpts{})
+func (api ComputeAPI) GetComputeInstancePager() pagination.Pager {
+	return servers.List(api.serviceClient, servers.ListOpts{})
 }
 
 func (api ComputeAPI) PagerToPage(pager pagination.Pager) (pagination.Page, error) {
@@ -20,6 +22,6 @@ func (api ComputeAPI) PageToServers(page pagination.Page) ([]servers.Server, err
 	return servers.ExtractServers(page)
 }
 
-func (api ComputeAPI) Delete(serviceClient *gophercloud.ServiceClient, instanceID string) error {
-	return servers.Delete(serviceClient, instanceID).ExtractErr()
+func (api ComputeAPI) Delete(instanceID string) error {
+	return servers.Delete(api.serviceClient, instanceID).ExtractErr()
 }

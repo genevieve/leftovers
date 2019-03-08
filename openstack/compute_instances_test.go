@@ -6,6 +6,7 @@ import (
 	"github.com/genevieve/leftovers/openstack"
 	"github.com/genevieve/leftovers/openstack/fakes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -23,21 +24,20 @@ var _ = Describe("Compute Instance", func() {
 
 	Context("when List method is called", func() {
 		var (
-			fakeLister       *fakes.ComputeInstanceLister
-			fakeProvider     *fakes.ComputeInstanceProvider
+			fakeClient       *fakes.ComputeInstanceClient
 			fakeLogger       *fakes.Logger
 			computeInstances openstack.ComputeInstances
 		)
+
 		BeforeEach(func() {
-			fakeLister = &fakes.ComputeInstanceLister{}
-			fakeProvider = &fakes.ComputeInstanceProvider{}
+			fakeClient = &fakes.ComputeInstanceClient{}
 			fakeLogger = &fakes.Logger{}
-			fakeProvider.GetComputeInstanceListerCall.Returns.Lister = fakeLister
-			computeInstances = openstack.NewComputeInstances(fakeProvider, fakeLogger)
+			computeInstances = openstack.NewComputeInstances(fakeClient, fakeLogger)
 		})
+
 		It("should return many compute instances", func() {
 			fakeLogger.PromptWithDetailsCall.Returns.Bool = true
-			fakeLister.ListCall.Returns.ComputeInstances = []servers.Server{
+			fakeClient.ListCall.Returns.ComputeInstances = []servers.Server{
 				servers.Server{
 					ID:   "some id",
 					Name: "some name",
@@ -58,7 +58,7 @@ var _ = Describe("Compute Instance", func() {
 
 		Context("when prompt with details is false", func() {
 			It("should not return a compute instance", func() {
-				fakeLister.ListCall.Returns.ComputeInstances = []servers.Server{
+				fakeClient.ListCall.Returns.ComputeInstances = []servers.Server{
 					servers.Server{},
 				}
 
@@ -66,18 +66,20 @@ var _ = Describe("Compute Instance", func() {
 
 				result, err := computeInstances.List()
 				Expect(err).NotTo(HaveOccurred())
+
 				Expect(result).To(HaveLen(0))
 			})
 		})
 
 		Context("and there is an error", func() {
 			It("should return the error", func() {
-				fakeLister.ListCall.Returns.Error = errors.New("error getting list")
+				fakeClient.ListCall.Returns.Error = errors.New("error getting list")
 
 				result, err := computeInstances.List()
-				Expect(result).To(BeNil())
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error getting list"))
+
+				Expect(result).To(BeNil())
+				Expect(err).To(MatchError("error getting list"))
 			})
 		})
 	})

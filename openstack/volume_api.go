@@ -6,7 +6,13 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
-type VolumesAPI struct{}
+type VolumesAPI struct {
+	serviceClient *gophercloud.ServiceClient
+}
+
+func (api VolumesAPI) GetVolumesPager() pagination.Pager {
+	return volumes.List(api.serviceClient, volumes.ListOpts{})
+}
 
 func (api VolumesAPI) PagerToPage(pager pagination.Pager) (pagination.Page, error) {
 	return pager.AllPages()
@@ -16,10 +22,6 @@ func (api VolumesAPI) PageToVolumes(page pagination.Page) ([]volumes.Volume, err
 	return volumes.ExtractVolumes(page)
 }
 
-func (api VolumesAPI) GetVolumesPager(serviceClient *gophercloud.ServiceClient, opts volumes.ListOpts) pagination.Pager {
-	return volumes.List(serviceClient, opts)
-}
-
-func (api VolumesAPI) DeleteVolume(serviceClient *gophercloud.ServiceClient, id string, opts volumes.DeleteOpts) error {
-	return volumes.Delete(serviceClient, id, opts).ExtractErr()
+func (api VolumesAPI) DeleteVolume(id string) error {
+	return volumes.Delete(api.serviceClient, id, volumes.DeleteOpts{}).ExtractErr()
 }

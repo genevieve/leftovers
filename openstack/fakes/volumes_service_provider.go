@@ -1,31 +1,35 @@
 package fakes
 
-import "github.com/genevieve/leftovers/openstack"
+import "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 
-type VolumesServiceProvider struct {
-	GetVolumesListerCall struct {
+type VolumesClient struct {
+	ListCall struct {
 		CallCount int
 		Returns   struct {
-			VolumesLister openstack.VolumesLister
+			Volumes []volumes.Volume
+			Error   error
 		}
 	}
-
-	GetVolumesDeleterCall struct {
+	DeleteCall struct {
 		CallCount int
-		Returns   struct {
-			VolumesDeleter openstack.VolumesDeleter
+		Receives  struct {
+			VolumeID string
+		}
+		Returns struct {
+			Error error
 		}
 	}
 }
 
-func (v *VolumesServiceProvider) GetVolumesLister() openstack.VolumesLister {
-	v.GetVolumesListerCall.CallCount++
+func (v *VolumesClient) Delete(volumeID string) error {
+	v.DeleteCall.CallCount++
+	v.DeleteCall.Receives.VolumeID = volumeID
 
-	return v.GetVolumesListerCall.Returns.VolumesLister
+	return v.DeleteCall.Returns.Error
 }
 
-func (v *VolumesServiceProvider) GetVolumesDeleter() openstack.VolumesDeleter {
-	v.GetVolumesDeleterCall.CallCount++
+func (v *VolumesClient) List() ([]volumes.Volume, error) {
+	v.ListCall.CallCount++
 
-	return v.GetVolumesDeleterCall.Returns.VolumesDeleter
+	return v.ListCall.Returns.Volumes, v.ListCall.Returns.Error
 }

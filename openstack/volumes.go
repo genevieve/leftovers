@@ -5,26 +5,21 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
-type VolumesLister interface {
+type VolumesClient interface {
 	List() ([]volumes.Volume, error)
-}
-
-type VolumesDeleter interface {
 	Delete(volumeID string) error
 }
 
-type VolumesServiceProvider interface {
-	GetVolumesLister() VolumesLister
-	GetVolumesDeleter() VolumesDeleter
-}
-
 type Volumes struct {
-	volumesServiceProvider VolumesServiceProvider
-	logger                 logger
+	volumesClient VolumesClient
+	logger        logger
 }
 
-func NewVolumes(volumesServiceProvider VolumesServiceProvider, logger logger) Volumes {
-	return Volumes{volumesServiceProvider, logger}
+func NewVolumes(volumesClient VolumesClient, logger logger) Volumes {
+	return Volumes{
+		volumesClient: volumesClient,
+		logger:        logger,
+	}
 }
 
 func (volumes Volumes) Type() string {
@@ -32,8 +27,7 @@ func (volumes Volumes) Type() string {
 }
 
 func (volumes Volumes) List() ([]common.Deletable, error) {
-	serviceProvider := volumes.volumesServiceProvider
-	result, err := serviceProvider.GetVolumesLister().List()
+	result, err := volumes.volumesClient.List()
 
 	if err != nil {
 		return nil, err
@@ -41,11 +35,11 @@ func (volumes Volumes) List() ([]common.Deletable, error) {
 
 	var deletables []common.Deletable
 	for _, volume := range result {
-		deletable := NewVolume(volume.Name, volume.ID, serviceProvider.GetVolumesDeleter())
+		deletable := NewVolume(volume.Name, volume.ID, volumes.volumesClient)
 		confirm := volumes.logger.PromptWithDetails(deletable.Type(), deletable.Name())
 
 		if confirm {
-			deletables = append(deletables, NewVolume(volume.Name, volume.ID, serviceProvider.GetVolumesDeleter()))
+			deletables = append(deletables, deletable)
 		}
 	}
 

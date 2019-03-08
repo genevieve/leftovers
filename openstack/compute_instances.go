@@ -5,43 +5,37 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 )
 
-type ComputeInstanceLister interface {
-	List() ([]servers.Server, error)
+type ComputeInstances struct {
+	computeClient ComputeClient
+	logger        logger
 }
 
-type ComputeInstanceDeleter interface {
+type ComputeClient interface {
+	List() ([]servers.Server, error)
 	Delete(instanceID string) error
 }
 
-type ComputeInstances struct {
-	provider ComputeInstanceProvider
-	logger   logger
-}
-
-type ComputeInstanceProvider interface {
-	GetComputeInstanceLister() ComputeInstanceLister
-	GetComputeInstanceDeleter() ComputeInstanceDeleter
-}
-
-func NewComputeInstances(computeInstanceProvider ComputeInstanceProvider, logger logger) ComputeInstances {
+func NewComputeInstances(computeClient ComputeClient, logger logger) ComputeInstances {
 	return ComputeInstances{
-		provider: computeInstanceProvider,
-		logger:   logger,
+		computeClient: computeClient,
+		logger:        logger,
 	}
 }
 
 func (ci ComputeInstances) List() ([]common.Deletable, error) {
-	computeInstances, err := ci.provider.GetComputeInstanceLister().List()
+	computeInstances, err := ci.computeClient.List()
 	if err != nil {
 		return nil, err
 	}
+
 	var deletables []common.Deletable
 	for _, instance := range computeInstances {
-		deletable := NewComputeInstance(instance.Name, instance.ID, ci.provider.GetComputeInstanceDeleter())
+		deletable := NewComputeInstance(instance.Name, instance.ID, ci.computeClient)
 		if ci.logger.PromptWithDetails(deletable.Type(), deletable.Name()) {
 			deletables = append(deletables, deletable)
 		}
 	}
+
 	return deletables, nil
 }
 
