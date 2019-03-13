@@ -33,22 +33,46 @@ var _ = Describe("Images", func() {
 			skipUserConfirmation := true
 			fakeLogger.PromptWithDetailsCall.Returns.Bool = skipUserConfirmation
 
-			subject = openstack.NewImages(fakeImageClient, fakeLogger)
-		})
-
-		It("should return the corresponding resources", func() {
 			fakeImageClient.ListCall.Returns.Images = []images.Image{
 				images.Image{ID: "id 1", Name: "name 1"},
 				images.Image{ID: "id 2", Name: "name 2"},
 			}
 
+			subject = openstack.NewImages(fakeImageClient, fakeLogger)
+		})
+
+		It("returns the corresponding resources", func() {
 			res, err := subject.List()
-
 			Expect(err).NotTo(HaveOccurred())
-			Expect(res[0].Name()).To(Equal("name 1 id 1"))
 
-			Expect(res[1].Name()).To(Equal("name 2 id 2"))
 			Expect(len(res)).To(Equal(2))
+			Expect(res[0].Name()).To(Equal("name 1 id 1"))
+			Expect(res[1].Name()).To(Equal("name 2 id 2"))
+		})
+
+		Context("when the user wants to confirm deletions", func() {
+			BeforeEach(func() {
+				fakeLogger.PromptWithDetailsCall.ReturnsForCall = append(fakeLogger.PromptWithDetailsCall.ReturnsForCall,
+					fakes.LoggerPromptWithDetailsCallReturn{Bool: false},
+					fakes.LoggerPromptWithDetailsCallReturn{Bool: true},
+				)
+			})
+
+			It("only returns confirmed images", func() {
+				res, err := subject.List()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(len(res)).To(Equal(1))
+				Expect(res[0].Name()).To(Equal("name 2 id 2"))
+			})
+
+			It("prompts the user", func() {
+				subject.List()
+
+				Expect(fakeLogger.PromptWithDetailsCall.CallCount).To(Equal(2))
+				Expect(fakeLogger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Image"))
+				Expect(fakeLogger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("name 2 id 2"))
+			})
 		})
 
 		Context("when an error occurs", func() {
@@ -57,8 +81,8 @@ var _ = Describe("Images", func() {
 				fakeImageClient.ListCall.Returns.Error = errors.New("error getting list")
 
 				res, err := subject.List()
-
 				Expect(err).To(HaveOccurred())
+
 				Expect(err.Error()).To(Equal("error getting list"))
 				Expect(res).To(BeNil())
 			})

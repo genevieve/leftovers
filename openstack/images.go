@@ -29,7 +29,11 @@ func (images Images) List() ([]common.Deletable, error) {
 	}
 	var deletables []common.Deletable
 	for _, resource := range res {
-		deletables = append(deletables, NewImage(resource.Name, resource.ID, images.imageServiceClient))
+		deletable := NewImage(resource.Name, resource.ID, images.imageServiceClient)
+		confirm := images.logger.PromptWithDetails(deletable.Type(), deletable.Name())
+		if confirm {
+			deletables = append(deletables, deletable)
+		}
 	}
 	return deletables, err
 }
