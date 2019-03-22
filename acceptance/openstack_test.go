@@ -101,7 +101,7 @@ var _ = Describe("Openstack", func() {
 			By("deleting by type 'Volume'")
 			Eventually(func() (bool, error) {
 				return acc.IsSafeToDeleteVolume(volumeID)
-			}, "2s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
+			}, "10s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
 			err = leftovers.DeleteType("", "Volume")
 
 			Expect(err).NotTo(HaveOccurred())
@@ -147,8 +147,9 @@ var _ = Describe("Openstack", func() {
 			})
 
 			By("passing a filter to Delete")
-			instanceID = acc.CreateComputeInstance("some other instance")
+			instanceID = acc.CreateComputeInstanceWithNetwork("some other instance", true)
 			imageID = acc.CreateImage("some other image")
+			acc.AttachVolumeToComputeInstance(volumeID, instanceID)
 			err = leftovers.Delete("filter")
 
 			Expect(err).To(HaveOccurred())
@@ -159,16 +160,16 @@ var _ = Describe("Openstack", func() {
 			Expect(acc.ImageExists(imageID)).To(BeTrue())
 
 			By("deleting all resources when a filter isn't passed to Delete")
-			Eventually(func() (bool, error) {
-				return acc.IsSafeToDeleteVolume(volumeID)
-			}, "10s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
+			// Eventually(func() (bool, error) {
+			// 	return acc.IsSafeToDeleteVolume(volumeID)
+			// }, "10s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
 			err = leftovers.Delete("")
-
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "yet another volume", volumeID)))
-			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "yet another volume", volumeID)))
+
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleted!", "some other instance", instanceID)))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleting...", "some other instance", instanceID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "yet another volume", volumeID)))
+			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleted!", "yet another volume", volumeID)))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Image: %s %s] Deleted!", "some other image", imageID)))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Image: %s %s] Deleting...", "some other image", imageID)))
 			Eventually(func() bool {

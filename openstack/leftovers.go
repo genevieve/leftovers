@@ -3,6 +3,7 @@ package openstack
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
@@ -78,8 +79,12 @@ func NewLeftovers(logger logger, authArgs AuthArgs) (Leftovers, error) {
 		logger:       logger,
 		asyncDeleter: app.NewAsyncDeleter(logger),
 		resources: []listTyper{
-			NewVolumes(NewVolumesBlockStorageClient(VolumesAPI{serviceClient: serviceBS}), logger),
 			NewComputeInstances(NewComputeInstanceClient(ComputeAPI{serviceClient: serviceComputeInstance}), logger),
+			NewVolumes(NewVolumesBlockStorageClient(VolumesAPI{
+				serviceClient: serviceBS,
+				waitTime:      200 * time.Millisecond,
+				maxRetries:    50,
+			}), logger),
 			NewImages(NewImagesClient(ImageAPI{serviceClient: serviceImages}), logger),
 		}}, nil
 }

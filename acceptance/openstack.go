@@ -9,9 +9,12 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 
 	. "github.com/onsi/gomega"
 )
@@ -30,6 +33,7 @@ type OpenStackAcceptance struct {
 	volumesClient         *gophercloud.ServiceClient
 	computeInstanceClient *gophercloud.ServiceClient
 	imagesClient          *gophercloud.ServiceClient
+	networkClient         *gophercloud.ServiceClient
 }
 
 type deletable interface {
@@ -97,9 +101,17 @@ func (o *OpenStackAcceptance) configureAuthClient() error {
 		return fmt.Errorf("some authentication error creating images client: %s", err)
 	}
 
+	networkClient, err := openstack.NewNetworkV2(provider, endpointOpts)
+
+	if err != nil {
+		return fmt.Errorf("some authentication error creating network client: %s", err)
+	}
+
 	o.volumesClient = blockStorage
 	o.computeInstanceClient = instanceClient
 	o.imagesClient = imagesClient
+	o.networkClient = networkClient
+
 	return nil
 }
 
@@ -117,14 +129,55 @@ func (o *OpenStackAcceptance) CreateVolume(name string) string {
 	return vol.ID
 }
 
-func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
+func (o *OpenStackAcceptance) CreateNetworkWithCIDR(name, CIDR string) string {
+	t := true
+
+	network, err := networks.Create(o.networkClient, networks.CreateOpts{
+		Name:         name,
+		AdminStateUp: &t,
+	}).Extract()
+	Expect(err).NotTo(HaveOccurred())
+	networkID := network.ID
+
+	o.addTestResource(func() error {
+		return networks.Delete(o.networkClient, networkID).ExtractErr()
+	})
+
+	gateway := "192.168.0.1"
+	subnet, err := subnets.Create(o.networkClient, subnets.CreateOpts{
+		NetworkID:   networkID,
+		Name:        "leftovers-test-network",
+		Description: "this is only for testing",
+		CIDR:        CIDR,
+		IPVersion:   gophercloud.IPv4,
+		GatewayIP:   &gateway,
+	}).Extract()
+	Expect(err).NotTo(HaveOccurred())
+
+	o.addTestResource(func() error {
+		return subnets.Delete(o.networkClient, subnet.ID).ExtractErr()
+	})
+
+	return networkID
+}
+
+func (o *OpenStackAcceptance) CreateComputeInstanceWithNetwork(name string, withNetwork bool) string {
 	imageID := o.CreateImage("my awesome empty image")
-	instance, err := servers.Create(o.computeInstanceClient, servers.CreateOpts{
+	serverCreateOpts := servers.CreateOpts{
 		Name:          name,
 		FlavorName:    "m1.tiny",
 		ImageRef:      imageID,
 		ServiceClient: o.computeInstanceClient,
-	}).Extract()
+	}
+
+	if withNetwork {
+		networkID := o.CreateNetworkWithCIDR("leftovers-test-network", "192.168.0.0/16")
+		serverCreateOpts.Networks = []servers.Network{
+			{UUID: networkID},
+		}
+	}
+
+	instance, err := servers.Create(o.computeInstanceClient, serverCreateOpts).Extract()
 	Expect(err).NotTo(HaveOccurred())
 
 	o.addTestResource(func() error {
@@ -132,6 +185,24 @@ func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
 	})
 
 	return instance.ID
+}
+
+func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
+	return o.CreateComputeInstanceWithNetwork(name, false)
+}
+
+func (o *OpenStackAcceptance) AttachVolumeToComputeInstance(volumeID string, computeID string) {
+	waitTimeInSeconds := 60
+	err := servers.WaitForStatus(o.computeInstanceClient, computeID, "ACTIVE", waitTimeInSeconds)
+	Expect(err).NotTo(HaveOccurred())
+
+	// time.Sleep(180 * time.Second)
+
+	_, err = volumeattach.Create(o.computeInstanceClient, computeID, volumeattach.CreateOpts{
+		Device:   "/dev/ice",
+		VolumeID: volumeID,
+	}).Extract()
+	Expect(err).NotTo(HaveOccurred())
 }
 
 func (o *OpenStackAcceptance) addTestResource(deleteFunc func() error) {
@@ -154,7 +225,7 @@ func (o *OpenStackAcceptance) CreateImage(name string) string {
 	})
 
 	// upload iso for awesome empty image
-	res := imagedata.Upload(o.imagesClient, image.ID, strings.NewReader(""))
+	res := imagedata.Upload(o.imagesClient, image.ID, strings.NewReader("rubbish"))
 	Expect(res.Err).NotTo(HaveOccurred())
 
 	return image.ID
