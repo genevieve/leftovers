@@ -91,12 +91,15 @@ Usage:
   leftovers [OPTIONS]
 
 Application Options:
-  -i, --iaas=                     The IaaS for clean up. (default: aws) [$BBL_IAAS]
+  -v, --version                   Print version.
+  -i, --iaas=                     The IaaS for clean up. [$BBL_IAAS]
   -n, --no-confirm                Destroy resources without prompting. This is dangerous, make good choices!
-  -f, --filter=                   Filtering resources by an environment name.
   -d, --dry-run                   List all resources without deleting any.
+  -f, --filter=                   Filtering resources by an environment name.
+  -t, --type=                     Type of resource to delete.
       --aws-access-key-id=        AWS access key id. [$BBL_AWS_ACCESS_KEY_ID]
       --aws-secret-access-key=    AWS secret access key. [$BBL_AWS_SECRET_ACCESS_KEY]
+      --aws-session-token=        AWS session token. [$BBL_AWS_SESSION_TOKEN]
       --aws-region=               AWS region. [$BBL_AWS_REGION]
       --azure-client-id=          Azure client id. [$BBL_AZURE_CLIENT_ID]
       --azure-client-secret=      Azure client secret. [$BBL_AZURE_CLIENT_SECRET]
@@ -110,9 +113,15 @@ Application Options:
       --nsxt-manager-host=        NSX-T manager IP address or domain name. [$BBL_NSXT_MANAGER_HOST]
       --nsxt-username=            NSX-T manager username. [$BBL_NSXT_USERNAME]
       --nsxt-password=            NSX-T manager password. [$BBL_NSXT_PASSWORD]
+      --openstack-auth-url=       Openstack auth URL. [$BBL_OPENSTACK_AUTH_URL]
+      --openstack-username=       Openstack username. [$BBL_OPENSTACK_USERNAME]
+      --openstack-password=       Openstack password. [$BBL_OPENSTACK_PASSWORD]
+      --openstack-domain-name=    Openstack domain name. [$BBL_OPENSTACK_DOMAIN]
+      --openstack-project-name=   Openstack project name. [$BBL_OPENSTACK_PROJECT]
+      --openstack-region-name=    Openstack region name. [$BBL_OPENSTACK_REGION]
 
 Help Options:
-  -h, --help                     Show this help message
+  -h, --help                      Show this help message
 ```
 
 ## <a name='maintainers'></a>Maintainers
