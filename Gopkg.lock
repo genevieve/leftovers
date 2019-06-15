@@ -139,12 +139,6 @@
   revision = "3d5d8f294aa03d8e98859feac328afbdf1ae0703"
 
 [[projects]]
-  name = "github.com/hashicorp/terraform"
-  packages = ["helper/mutexkv"]
-  revision = "12c3170748efe30a36bb2e937c02c2f2a600e120"
-  version = "v0.12.1"
-
-[[projects]]
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
   revision = "96dc06278ce32a0e9d957d590bb987c81ee66407"
@@ -361,6 +355,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "53431fe29411cdcd588f325b6714e6764fbec39dd40373eb6d67e4a5074d4ff5"
+  inputs-digest = "b3b89c560be74baf88eeb220d66ee9e9af98131916f342a07d6a900d558d1308"
   solver-name = "gps-cdcl"
   solver-version = 1
