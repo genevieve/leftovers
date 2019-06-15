@@ -107,10 +107,10 @@ func main() {
 		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)
 	case VSphere:
 		if o.Filter == "" {
-			log.Fatalf("--filter is required for vSphere.")
+			log.Fatal("--filter is required for vSphere.")
 		}
 		if o.NoConfirm {
-			log.Fatalf("--no-confirm is not supported for vSphere.")
+			log.Fatal("--no-confirm is not supported for vSphere.")
 		}
 		l, err = vsphere.NewLeftovers(logger, o.VSphereIP, o.VSphereUser, o.VSpherePassword, o.VSphereDC)
 	case Openstack:
