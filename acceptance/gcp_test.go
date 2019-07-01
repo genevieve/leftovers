@@ -72,6 +72,7 @@ var _ = Describe("GCP", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acceptance"
 			acc.InsertDisk(filter)
+			acc.InsertCloudRouter(filter)
 		})
 
 		It("deletes resources with the filter", func() {
@@ -80,6 +81,9 @@ var _ = Describe("GCP", func() {
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleting..."))
 			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleted!"))
+
+			Expect(stdout.String()).To(ContainSubstring("[Router: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Router: leftovers-acceptance] Deleted!"))
 		})
 	})
 

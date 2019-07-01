@@ -149,6 +149,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewVpnTunnels(client, logger, regions),
 			compute.NewTargetVpnGateways(client, logger, regions),
 			compute.NewRoutes(client, logger),
+			compute.NewRouters(client, logger, regions),
 			compute.NewSubnetworks(client, logger, regions),
 			compute.NewGlobalAddresses(client, logger),
 			compute.NewNetworks(client, logger),
