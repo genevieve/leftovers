@@ -54,6 +54,7 @@ type leftovers interface {
 	Delete(filter string) error
 	DeleteType(filter, rType string) error
 	List(filter string)
+	ListByType(filter, rType string)
 	Types()
 }
 
@@ -139,7 +140,11 @@ func main() {
 	}
 
 	if o.DryRun {
-		l.List(o.Filter)
+		if o.Type == "" {
+			l.List(o.Filter)
+		} else {
+			l.ListByType(o.Filter, o.Type)
+		}
 		return
 	}
 

@@ -168,18 +168,31 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 func (l Leftovers) List(filter string) {
 	l.logger.NoConfirm()
 
-	var deletables []common.Deletable
+	for _, r := range l.resources {
+		l.list(r, filter)
+	}
+}
+
+// ListByType will print resources of the specified type with
+// names that match the provided filter.
+func (l Leftovers) ListByType(filter, rtype string) {
+	l.logger.NoConfirm()
 
 	for _, r := range l.resources {
-		list, err := r.List(filter)
-		if err != nil {
-			l.logger.Println(color.YellowString(err.Error()))
+		if r.Type() == rtype {
+			l.list(r, filter)
+			return
 		}
+	}
+}
 
-		deletables = append(deletables, list...)
+func (l Leftovers) list(r resource, filter string) {
+	list, err := r.List(filter)
+	if err != nil {
+		l.logger.Println(color.YellowString(err.Error()))
 	}
 
-	for _, d := range deletables {
+	for _, d := range list {
 		l.logger.Println(fmt.Sprintf("[%s: %s]", d.Type(), d.Name()))
 	}
 }

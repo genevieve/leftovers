@@ -40,9 +40,9 @@ var _ = Describe("GCP", func() {
 		color.NoColor = true
 	})
 
-	Describe("Dry run", func() {
+	Describe("List", func() {
 		BeforeEach(func() {
-			filter = "leftovers-dry-run"
+			filter = "leftovers-acc-list-all"
 			acc.InsertDisk(filter)
 		})
 
@@ -51,16 +51,37 @@ var _ = Describe("GCP", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("lists resources without deleting", func() {
+		It("lists only the deletable resources that contain the specified filter", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-dry-run]"))
-			Expect(stdout.String()).NotTo(ContainSubstring("[Disk: leftovers-dry-run] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: %s]", filter))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Disk: %s] Deleting...", filter))
+		})
+	})
+
+	Describe("ListByType", func() {
+		BeforeEach(func() {
+			filter = "leftovers-acc-list-type"
+			acc.InsertDisk(filter)
+			acc.InsertCloudRouter(filter)
+		})
+
+		AfterEach(func() {
+			err := deleter.Delete(filter)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("lists only the deletable resources of the specified type", func() {
+			deleter.ListByType(filter, "disk")
+
+			Expect(stdout.String()).To(ContainSubstring("[Disk: %s]", filter))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Disk: %s] Deleting...", filter))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Router: %s] Deleting...", filter))
 		})
 	})
 
 	Describe("Types", func() {
-		It("lists the resource types that can be deleted", func() {
+		It("lists the resource types that leftovers can delete", func() {
 			deleter.Types()
 
 			Expect(stdout.String()).To(ContainSubstring("address"))
@@ -70,7 +91,7 @@ var _ = Describe("GCP", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			filter = "leftovers-acceptance"
+			filter = "leftovers-acc-delete-all"
 			acc.InsertDisk(filter)
 			acc.InsertCloudRouter(filter)
 		})
@@ -79,17 +100,17 @@ var _ = Describe("GCP", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleting..."))
-			Expect(stdout.String()).To(ContainSubstring("[Disk: leftovers-acceptance] Deleted!"))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleted!", filter))
 
-			Expect(stdout.String()).To(ContainSubstring("[Router: leftovers-acceptance] Deleting..."))
-			Expect(stdout.String()).To(ContainSubstring("[Router: leftovers-acceptance] Deleted!"))
+			Expect(stdout.String()).To(ContainSubstring("[Router: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[Router: %s] Deleted!", filter))
 		})
 	})
 
 	Describe("DeleteType", func() {
 		BeforeEach(func() {
-			filter = "lftvrs-acceptance-delete-type"
+			filter = "leftovers-acc-delete-type"
 			acc.InsertDisk(filter)
 		})
 
@@ -97,8 +118,8 @@ var _ = Describe("GCP", func() {
 			err := deleter.DeleteType(filter, "disk")
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("[Disk: lftvrs-acceptance-delete-type] Deleting..."))
-			Expect(stdout.String()).To(ContainSubstring("[Disk: lftvrs-acceptance-delete-type] Deleted!"))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleted!", filter))
 		})
 	})
 })

@@ -40,9 +40,9 @@ var _ = Describe("Azure", func() {
 		color.NoColor = true
 	})
 
-	Describe("Dry run", func() {
+	Describe("List", func() {
 		BeforeEach(func() {
-			filter = "leftovers-dry-run"
+			filter = "leftovers-acc-list"
 			acc.CreateResourceGroup(filter)
 		})
 
@@ -54,8 +54,8 @@ var _ = Describe("Azure", func() {
 		It("lists resources without deleting", func() {
 			deleter.List(filter)
 
-			Expect(stdout.String()).To(ContainSubstring("[Resource Group: leftovers-dry-run]"))
-			Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: leftovers-acceptance] Deleting..."))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s]", filter))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: %s] Deleting...", filter))
 		})
 	})
 
@@ -69,7 +69,7 @@ var _ = Describe("Azure", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			filter = "leftovers-acceptance"
+			filter = "leftovers-acc-delete"
 			acc.CreateResourceGroup(filter)
 		})
 
@@ -77,8 +77,8 @@ var _ = Describe("Azure", func() {
 			err := deleter.Delete(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(ContainSubstring("[Resource Group: leftovers-acceptance] Deleting..."))
-			Expect(stdout.String()).To(ContainSubstring("[Resource Group: leftovers-acceptance] Deleted!"))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleted!", filter))
 		})
 	})
 })
