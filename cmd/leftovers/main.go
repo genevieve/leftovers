@@ -52,7 +52,7 @@ type opts struct {
 
 type leftovers interface {
 	Delete(filter string) error
-	DeleteType(filter, rType string) error
+	DeleteByType(filter, rType string) error
 	List(filter string)
 	ListByType(filter, rType string)
 	Types()
@@ -148,10 +148,10 @@ func main() {
 		return
 	}
 
-	if o.Type != "" {
-		err = l.DeleteType(o.Filter, o.Type)
-	} else {
+	if o.Type == "" {
 		err = l.Delete(o.Filter)
+	} else {
+		err = l.DeleteByType(o.Filter, o.Type)
 	}
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)

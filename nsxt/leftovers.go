@@ -82,11 +82,11 @@ func (l Leftovers) Delete(filter string) error {
 	return l.asyncDeleter.Run(deletables)
 }
 
-// DeleteType will collect all resources of the provied type that contain
+// DeleteByType will collect all resources of the provied type that contain
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
-func (l Leftovers) DeleteType(filter, rType string) error {
+func (l Leftovers) DeleteByType(filter, rType string) error {
 	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
