@@ -108,14 +108,14 @@ var _ = Describe("GCP", func() {
 		})
 	})
 
-	Describe("DeleteType", func() {
+	Describe("DeleteByType", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-delete-type"
 			acc.InsertDisk(filter)
 		})
 
 		It("deletes resources with the filter", func() {
-			err := deleter.DeleteType(filter, "disk")
+			err := deleter.DeleteByType(filter, "disk")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleting...", filter))

@@ -88,8 +88,8 @@ var _ = Describe("Openstack", func() {
 			Expect(acc.ComputeInstanceExists(instanceID)).To(BeTrue())
 			Expect(acc.ImageExists(imageID)).To(BeTrue())
 
-			By("passing a filter to DeleteType")
-			err = leftovers.DeleteType("some filter", "Volume")
+			By("passing a filter to DeleteByType")
+			err = leftovers.DeleteByType("some filter", "Volume")
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
@@ -102,7 +102,7 @@ var _ = Describe("Openstack", func() {
 			Eventually(func() (bool, error) {
 				return acc.IsSafeToDeleteVolume(volumeID)
 			}, "10s").Should(BeTrue(), "Volume status should have transitioned to a deletable status")
-			err = leftovers.DeleteType("", "Volume")
+			err = leftovers.DeleteByType("", "Volume")
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s] Deleting...", "some volume", volumeID)))
@@ -116,7 +116,7 @@ var _ = Describe("Openstack", func() {
 
 			By("deleting by type 'Compute Instance'")
 			volumeID = acc.CreateVolume("some other volume")
-			err = leftovers.DeleteType("", "Compute Instance")
+			err = leftovers.DeleteByType("", "Compute Instance")
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleting...", "some instance", instanceID)))
@@ -131,7 +131,7 @@ var _ = Describe("Openstack", func() {
 			By("deleting by type 'Image'", func() {
 				volumeID = acc.CreateVolume("yet another volume")
 				instanceID = acc.CreateComputeInstance("yet another compute instance")
-				err = leftovers.DeleteType("", "Image")
+				err = leftovers.DeleteByType("", "Image")
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Image: %s %s] Deleting...", "some image", imageID)))

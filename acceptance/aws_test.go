@@ -104,14 +104,14 @@ var _ = Describe("AWS", func() {
 		})
 	})
 
-	Describe("DeleteType", func() {
+	Describe("DeleteByType", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-delete-type"
 			acc.CreateKeyPair(filter)
 		})
 
 		It("deletes the key pair resources with the filter", func() {
-			err := deleter.DeleteType(filter, "ec2-key-pair")
+			err := deleter.DeleteByType(filter, "ec2-key-pair")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
