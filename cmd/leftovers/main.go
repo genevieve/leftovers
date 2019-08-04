@@ -157,9 +157,7 @@ func main() {
 		log.Fatalf("\n\n%s\n", err)
 	}
 
-	if !o.DryRun {
-		log.Println(fmt.Sprintf("Try %s to list remaining resources!", fmt.Sprintf(color.BlueString("leftovers --filter %s --dry-run"), o.Filter)))
-	}
+	log.Println(fmt.Sprintf("Try %s to list remaining resources!", fmt.Sprintf(color.BlueString("leftovers --filter %s --dry-run"), o.Filter)))
 }
 
 func useOtherEnvVars(o opts, iaas string) opts {
