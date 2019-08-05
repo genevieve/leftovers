@@ -8,6 +8,9 @@ import (
 )
 
 type logicalRoutingAPI interface {
-	DeleteLogicalRouter(context.Context, string, map[string]interface{}) (*http.Response, error)
 	ListLogicalRouters(context.Context, map[string]interface{}) (manager.LogicalRouterListResult, *http.Response, error)
+	DeleteLogicalRouter(context.Context, string, map[string]interface{}) (*http.Response, error)
+
+	ListLogicalRouterPorts(context.Context, map[string]interface{}) (manager.LogicalRouterPortListResult, *http.Response, error)
+	DeleteLogicalRouterPort(context.Context, string, map[string]interface{}) (*http.Response, error)
 }
