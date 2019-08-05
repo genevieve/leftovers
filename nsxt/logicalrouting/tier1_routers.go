@@ -26,6 +26,7 @@ func (t Tier1Routers) List(filter string) ([]common.Deletable, error) {
 	result, _, err := t.client.ListLogicalRouters(t.ctx, map[string]interface{}{
 		"routerType": "TIER1",
 	})
+
 	if err != nil {
 		return []common.Deletable{}, fmt.Errorf("List Tier 1 Routers: %s", err)
 	}
