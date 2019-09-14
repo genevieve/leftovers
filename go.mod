@@ -20,6 +20,7 @@ require (
 	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
 	github.com/onsi/ginkgo v1.4.0
 	github.com/onsi/gomega v1.2.0
+	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
 	github.com/vmware/govmomi v0.17.0
 	golang.org/x/net v0.0.0-20171207222016-dc871a5d77e2 // indirect
