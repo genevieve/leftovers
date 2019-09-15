@@ -3,8 +3,6 @@ package azure_test
 import (
 	"errors"
 
-	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/genevieve/leftovers/azure"
 	"github.com/genevieve/leftovers/azure/fakes"
 	. "github.com/onsi/ginkgo"
@@ -31,18 +29,15 @@ var _ = Describe("Groups", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListCall.Returns.Output = resources.GroupListResult{
-				Value: &[]resources.Group{{
-					Name: aws.String("banana-group"),
-				}},
-			}
+
+			client.ListGroupsCall.Returns.List = []string{"banana-group", "kiwi-group"}
 		})
 
 		It("returns a list of resource groups to delete", func() {
 			items, err := groups.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(client.ListCall.CallCount).To(Equal(1))
+			Expect(client.ListGroupsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 
 			Expect(items).To(HaveLen(1))
@@ -50,7 +45,7 @@ var _ = Describe("Groups", func() {
 
 		Context("when client fails to list resource groups", func() {
 			BeforeEach(func() {
-				client.ListCall.Returns.Error = errors.New("some error")
+				client.ListGroupsCall.Returns.Error = errors.New("some error")
 			})
 
 			It("returns the error", func() {

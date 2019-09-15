@@ -1,48 +1,34 @@
 package fakes
 
-import (
-	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	"github.com/Azure/go-autorest/autorest"
-)
-
 type GroupsClient struct {
-	ListCall struct {
+	ListGroupsCall struct {
 		CallCount int
-		Receives  struct {
-			Filter string
-			Top    *int32
-		}
-		Returns struct {
-			Output resources.GroupListResult
-			Error  error
+		Returns   struct {
+			List  []string
+			Error error
 		}
 	}
 
-	DeleteCall struct {
+	DeleteGroupCall struct {
 		CallCount int
 		Receives  struct {
-			Name    string
-			Channel <-chan struct{}
+			Name string
 		}
 		Returns struct {
-			Output <-chan autorest.Response
-			Error  <-chan error
+			Error error
 		}
 	}
 }
 
-func (i *GroupsClient) List(filter string, top *int32) (resources.GroupListResult, error) {
-	i.ListCall.CallCount++
-	i.ListCall.Receives.Filter = filter
-	i.ListCall.Receives.Top = top
+func (i *GroupsClient) ListGroups() ([]string, error) {
+	i.ListGroupsCall.CallCount++
 
-	return i.ListCall.Returns.Output, i.ListCall.Returns.Error
+	return i.ListGroupsCall.Returns.List, i.ListGroupsCall.Returns.Error
 }
 
-func (i *GroupsClient) Delete(name string, channel <-chan struct{}) (<-chan autorest.Response, <-chan error) {
-	i.DeleteCall.CallCount++
-	i.DeleteCall.Receives.Name = name
-	i.DeleteCall.Receives.Channel = channel
+func (i *GroupsClient) DeleteGroup(name string) error {
+	i.DeleteGroupCall.CallCount++
+	i.DeleteGroupCall.Receives.Name = name
 
-	return i.DeleteCall.Returns.Output, i.DeleteCall.Returns.Error
+	return i.DeleteGroupCall.Returns.Error
 }

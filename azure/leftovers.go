@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
 	azurelib "github.com/Azure/go-autorest/autorest/azure"
@@ -119,10 +119,12 @@ func NewLeftovers(logger logger, clientId, clientSecret, subscriptionId, tenantI
 	}
 
 	gc := resources.NewGroupsClient(subscriptionId)
-	gc.ManagementClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	gc.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+
+	client := NewClient(gc)
 
 	return Leftovers{
 		logger:   logger,
-		resource: NewGroups(gc, logger),
+		resource: NewGroups(client, logger),
 	}, nil
 }
