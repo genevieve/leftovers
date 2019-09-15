@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-04-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
@@ -58,6 +59,7 @@ func (l Leftovers) Delete(filter string) error {
 		result     *multierror.Error
 	)
 
+	// TODO: If they say no to the Resource Group, prompt for individual resources.
 	deletables, err := l.resource.List(filter)
 	if err != nil {
 		l.logger.Println(color.YellowString(err.Error()))
@@ -113,15 +115,18 @@ func NewLeftovers(logger logger, clientId, clientSecret, subscriptionId, tenantI
 		return Leftovers{}, fmt.Errorf("Creating oauth config: %s\n", err)
 	}
 
-	servicePrincipalToken, err := adal.NewServicePrincipalToken(*oauthConfig, clientId, clientSecret, azurelib.PublicCloud.ResourceManagerEndpoint)
+	token, err := adal.NewServicePrincipalToken(*oauthConfig, clientId, clientSecret, azurelib.PublicCloud.ResourceManagerEndpoint)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating service principal token: %s\n", err)
 	}
 
-	gc := resources.NewGroupsClient(subscriptionId)
-	gc.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	rg := resources.NewGroupsClient(subscriptionId)
+	rg.Authorizer = autorest.NewBearerAuthorizer(token)
 
-	client := NewClient(gc)
+	sg := network.NewApplicationSecurityGroupsClient(subscriptionId)
+	sg.Authorizer = autorest.NewBearerAuthorizer(token)
+
+	client := NewClient(rg, sg)
 
 	return Leftovers{
 		logger:   logger,

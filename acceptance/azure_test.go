@@ -80,5 +80,24 @@ var _ = Describe("Azure", func() {
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleting...", filter))
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleted!", filter))
 		})
+
+		Context("when the user wants to delete subresources of the resource group", func() {
+			BeforeEach(func() {
+				filter = "leftovers-acc-sub-delete"
+				acc.CreateResourceGroup(filter)
+				// acc.CreateAppSecurityGroup(filter)
+			})
+
+			PIt("prompts them for subresources after they say no to the resource group", func() {
+				err := deleter.Delete(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: %s] Deleting...", filter))
+				Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: %s] Deleted!", filter))
+
+				Expect(stdout.String()).To(ContainSubstring("[Application Security Group: %s] Deleting...", filter))
+				Expect(stdout.String()).To(ContainSubstring("[Application Security Group: %s] Deleted!", filter))
+			})
+		})
 	})
 })
