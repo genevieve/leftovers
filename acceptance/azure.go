@@ -1,6 +1,7 @@
 package acceptance
 
 import (
+	"context"
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
@@ -53,6 +54,7 @@ func (a AzureAcceptance) CreateResourceGroup(name string) {
 	groupsClient.Sender = autorest.CreateSender(autorest.AsIs())
 
 	location := "West US"
-	_, err = groupsClient.CreateOrUpdate(name, resources.Group{Name: &name, Location: &location})
+	group := resources.Group{Name: &name, Location: &location}
+	_, err = groupsClient.CreateOrUpdate(context.Background(), name, group)
 	Expect(err).NotTo(HaveOccurred())
 }
