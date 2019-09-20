@@ -135,8 +135,7 @@ func (l Leftovers) Types() {
 // that are selected.
 func (l Leftovers) Delete(filter string) error {
 	if filter != "" {
-		l.logger.Println(color.RedString("Error: Filters are not supported for OpenStack. Aborting deletion!"))
-		return errors.New("cannot delete openstack resources using a filter")
+		return errors.New("--filter is not supported for OpenStack.")
 	}
 
 	deletables := [][]common.Deletable{}

@@ -110,9 +110,6 @@ func main() {
 		}
 		l, err = vsphere.NewLeftovers(logger, o.VSphereIP, o.VSphereUser, o.VSpherePassword, o.VSphereDC)
 	case Openstack:
-		if o.Filter != "" {
-			log.Fatalf("--filter is not supported for OpenStack")
-		}
 		l, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
 			AuthURL:    o.OpenstackAuthUrl,
 			Username:   o.OpenstackUsername,
