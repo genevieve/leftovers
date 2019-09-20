@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 
 	homedir "github.com/mitchellh/go-homedir"
 
@@ -107,7 +108,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 	if err != nil {
 		return Leftovers{}, err
 	}
-	projectNumber := string(project.ProjectNumber)
+	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 
 	iamService, err := gcpiam.New(httpClient)
 	if err != nil {
