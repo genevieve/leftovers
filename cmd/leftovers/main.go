@@ -105,9 +105,6 @@ func main() {
 		o = useOtherEnvVars(o, NSXT)
 		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)
 	case VSphere:
-		if o.Filter == "" {
-			log.Fatal("--filter is required for vSphere.")
-		}
 		if o.NoConfirm {
 			log.Fatal("--no-confirm is not supported for vSphere.")
 		}

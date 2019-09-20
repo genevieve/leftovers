@@ -68,6 +68,10 @@ func (l Leftovers) Delete(filter string) error {
 // you to confirm deletion, and delete those
 // that are selected.
 func (l Leftovers) DeleteByType(filter, rType string) error {
+	if filter == "" {
+		return errors.New("--filter is required for vSphere.")
+	}
+
 	var (
 		deletables []common.Deletable
 		result     *multierror.Error
