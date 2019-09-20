@@ -16,16 +16,21 @@ var _ = Describe("ServiceAccounts", func() {
 		client *fakes.ServiceAccountsClient
 		logger *fakes.Logger
 
+		projectName   string
+		projectNumber string
+
 		serviceAccounts iam.ServiceAccounts
 	)
 
 	BeforeEach(func() {
 		client = &fakes.ServiceAccountsClient{}
+		projectName = "projectName"
+		projectNumber = "11111"
 		logger = &fakes.Logger{}
 
 		logger.PromptWithDetailsCall.Returns.Proceed = true
 
-		serviceAccounts = iam.NewServiceAccounts(client, logger)
+		serviceAccounts = iam.NewServiceAccounts(client, projectName, projectNumber, logger)
 	})
 
 	Describe("List", func() {
@@ -59,6 +64,42 @@ var _ = Describe("ServiceAccounts", func() {
 			It("returns the error", func() {
 				_, err := serviceAccounts.List(filter)
 				Expect(err).To(MatchError("List IAM Service Accounts: some error"))
+			})
+		})
+
+		Context("when the serviceAccount email is projectName@appspot.gserviceaccount.com", func() {
+			BeforeEach(func() {
+				client.ListServiceAccountsCall.Returns.Output = []*gcpiam.ServiceAccount{{
+					Name:  "banana-service-account",
+					Email: "projectName@appspot.gserviceaccount.com",
+				}}
+				filter = "banana"
+			})
+
+			It("does not add it to the list", func() {
+				list, err := serviceAccounts.List("banana")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
+			})
+		})
+
+		Context("when the serviceAccount email is 11111-compute@developer.gserviceaccount.com", func() {
+			BeforeEach(func() {
+				client.ListServiceAccountsCall.Returns.Output = []*gcpiam.ServiceAccount{{
+					Name:  "banana-service-account",
+					Email: "11111-compute@developer.gserviceaccount.com",
+				}}
+				filter = "banana"
+			})
+
+			It("does not add it to the list", func() {
+				list, err := serviceAccounts.List("banana")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
+				Expect(list).To(HaveLen(0))
 			})
 		})
 

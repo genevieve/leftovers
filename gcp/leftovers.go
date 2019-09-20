@@ -103,6 +103,12 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 		return Leftovers{}, err
 	}
 
+	project, err := crmService.Projects.Get(p.ProjectId).Do()
+	if err != nil {
+		return Leftovers{}, err
+	}
+	projectNumber := string(project.ProjectNumber)
+
 	iamService, err := gcpiam.New(httpClient)
 	if err != nil {
 		return Leftovers{}, err
@@ -155,7 +161,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewNetworks(client, logger),
 			compute.NewAddresses(client, logger, regions),
 			compute.NewSslCertificates(client, logger),
-			iam.NewServiceAccounts(iamClient, logger),
+			iam.NewServiceAccounts(iamClient, p.ProjectId, projectNumber, logger),
 			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
 			sql.NewInstances(sqlClient, logger),
 			storage.NewBuckets(storageClient, logger),
