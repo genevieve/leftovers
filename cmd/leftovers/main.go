@@ -89,20 +89,18 @@ func main() {
 
 	logger := app.NewLogger(os.Stdout, os.Stdin, o.NoConfirm)
 
+	useOtherEnvVars(&o)
+
 	var l leftovers
 
 	switch o.IAAS {
 	case AWS:
-		o = useOtherEnvVars(o, AWS)
 		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSSessionToken, o.AWSRegion)
 	case Azure:
-		o = useOtherEnvVars(o, Azure)
 		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
 	case GCP:
-		o = useOtherEnvVars(o, GCP)
 		l, err = gcp.NewLeftovers(logger, o.GCPServiceAccountKey)
 	case NSXT:
-		o = useOtherEnvVars(o, NSXT)
 		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)
 	case VSphere:
 		if o.NoConfirm {
@@ -150,8 +148,8 @@ func main() {
 	}
 }
 
-func useOtherEnvVars(o opts, iaas string) opts {
-	switch iaas {
+func useOtherEnvVars(o *opts) {
+	switch o.IAAS {
 	case AWS:
 		if o.AWSAccessKeyID == "" {
 			o.AWSAccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
@@ -206,6 +204,4 @@ func useOtherEnvVars(o opts, iaas string) opts {
 			o.VSphereIP = os.Getenv("VSPHERE_IP")
 		}
 	}
-
-	return o
 }
