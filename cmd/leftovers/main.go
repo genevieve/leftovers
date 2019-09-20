@@ -2,11 +2,9 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/aws"
 	"github.com/genevieve/leftovers/azure"
@@ -156,8 +154,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
-
-	log.Println(fmt.Sprintf("Try %s to list remaining resources!", fmt.Sprintf(color.BlueString("leftovers --filter %s --dry-run"), o.Filter)))
 }
 
 func useOtherEnvVars(o opts, iaas string) opts {
