@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"fmt"
+
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
 )
@@ -9,35 +11,35 @@ type volumesAPI interface {
 	PagerToPage(pager pagination.Pager) (pagination.Page, error)
 	PageToVolumes(pagination.Page) ([]volumes.Volume, error)
 	GetVolumesPager() pagination.Pager
-	DeleteVolume(volumeID string) error
+	DeleteVolume(id string) error
 }
 
 type VolumesBlockStorageClient struct {
-	volumesAPI volumesAPI
+	api volumesAPI
 }
 
-func NewVolumesBlockStorageClient(volumesAPI volumesAPI) VolumesBlockStorageClient {
+func NewVolumesBlockStorageClient(api volumesAPI) VolumesBlockStorageClient {
 	return VolumesBlockStorageClient{
-		volumesAPI: volumesAPI,
+		api: api,
 	}
 }
 
-func (vs VolumesBlockStorageClient) List() ([]volumes.Volume, error) {
-	pager := vs.volumesAPI.GetVolumesPager()
+func (v VolumesBlockStorageClient) List() ([]volumes.Volume, error) {
+	pager := v.api.GetVolumesPager()
 
-	page, err := vs.volumesAPI.PagerToPage(pager)
+	page, err := v.api.PagerToPage(pager)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("pager to page: %s", err)
 	}
-	result, err := vs.volumesAPI.PageToVolumes(page)
 
+	result, err := v.api.PageToVolumes(page)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("page to volumes: %s", err)
 	}
 
 	return result, nil
 }
 
-func (vs VolumesBlockStorageClient) Delete(volumeID string) error {
-	return vs.volumesAPI.DeleteVolume(volumeID)
+func (v VolumesBlockStorageClient) Delete(volumeID string) error {
+	return v.api.DeleteVolume(volumeID)
 }

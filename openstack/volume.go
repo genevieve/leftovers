@@ -3,25 +3,27 @@ package openstack
 import "fmt"
 
 type Volume struct {
-	name          string
-	id            string
-	volumesClient VolumesClient
+	name   string
+	id     string
+	client volumesClient
 }
 
-func NewVolume(name string, id string, volumesClient VolumesClient) Volume {
+func NewVolume(name string, id string, client volumesClient) Volume {
 	return Volume{
-		name:          name,
-		id:            id,
-		volumesClient: volumesClient,
+		name:   name,
+		id:     id,
+		client: client,
 	}
 }
 
-func (volume Volume) Name() string {
-	return fmt.Sprintf("%s %s", volume.name, volume.id)
+func (v Volume) Name() string {
+	return fmt.Sprintf("%s %s", v.name, v.id)
 }
-func (volume Volume) Type() string {
+
+func (Volume) Type() string {
 	return "Volume"
 }
-func (volume Volume) Delete() error {
-	return volume.volumesClient.Delete(volume.id)
+
+func (v Volume) Delete() error {
+	return v.client.Delete(v.id)
 }

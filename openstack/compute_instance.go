@@ -3,16 +3,16 @@ package openstack
 import "fmt"
 
 type ComputeInstance struct {
-	name          string
-	id            string
-	computeClient ComputeClient
+	name   string
+	id     string
+	client ComputeClient
 }
 
-func NewComputeInstance(name string, id string, computeClient ComputeClient) ComputeInstance {
+func NewComputeInstance(name string, id string, client ComputeClient) ComputeInstance {
 	return ComputeInstance{
-		name:          fmt.Sprintf("%s %s", name, id),
-		id:            id,
-		computeClient: computeClient,
+		name:   fmt.Sprintf("%s %s", name, id),
+		id:     id,
+		client: client,
 	}
 }
 
@@ -20,11 +20,10 @@ func (ci ComputeInstance) Name() string {
 	return ci.name
 }
 
-func (ci ComputeInstance) Type() string {
+func (ComputeInstance) Type() string {
 	return "Compute Instance"
 }
 
 func (ci ComputeInstance) Delete() error {
-	return ci.computeClient.Delete(ci.id)
-
+	return ci.client.Delete(ci.id)
 }

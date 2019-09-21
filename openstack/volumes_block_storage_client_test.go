@@ -14,83 +14,73 @@ import (
 
 var _ = Describe("VolumesBlockStorageClient", func() {
 	var (
-		volumesAPI                *fakes.VolumesAPI
-		volumesBlockStorageClient openstack.VolumesBlockStorageClient
+		api    *fakes.VolumesAPI
+		client openstack.VolumesBlockStorageClient
 	)
 
 	BeforeEach(func() {
-		volumesAPI = &fakes.VolumesAPI{}
-		volumesBlockStorageClient = openstack.NewVolumesBlockStorageClient(volumesAPI)
+		api = &fakes.VolumesAPI{}
+		client = openstack.NewVolumesBlockStorageClient(api)
 	})
 
 	Describe("List", func() {
-		It("returns all the volumes", func() {
-			volumesAPI.GetVolumesPagerCall.Returns.Pager = pagination.Pager{Headers: map[string]string{"header": "test"}}
-			volumesAPI.PagerToPageCall.Returns.Page = fakes.Page{Name: "page name"}
-			volume := volumes.Volume{Name: "volume name"}
-			volumesAPI.PageToVolumesCall.Returns.Volumes = []volumes.Volume{volume}
-
-			result, err := volumesBlockStorageClient.List()
-
-			Expect(volumesAPI.PagerToPageCall.Receives.Pager.Headers["header"]).To(Equal("test"))
-			Expect((volumesAPI.PageToVolumesCall.Receives.Page.(fakes.Page)).Name).To(Equal("page name"))
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result).To(HaveLen(1))
-			Expect(result[0].Name).To(Equal("volume name"))
+		BeforeEach(func() {
+			api.GetVolumesPagerCall.Returns.Pager = pagination.Pager{Headers: map[string]string{"header": "test"}}
+			api.PagerToPageCall.Returns.Page = fakes.Page{Name: "page name"}
+			api.PageToVolumesCall.Returns.Volumes = []volumes.Volume{{Name: "volume name"}}
 		})
 
-		Context("when an error occurs", func() {
-			Context("when converting a pager to page fails", func() {
-				It("returns an error", func() {
-					volumesAPI.PagerToPageCall.Returns.Error = errors.New("error description")
+		It("returns all the volumes", func() {
+			list, err := client.List()
+			Expect(err).NotTo(HaveOccurred())
 
-					result, err := volumesBlockStorageClient.List()
-					Expect(err).To(HaveOccurred())
+			Expect(api.PagerToPageCall.Receives.Pager.Headers["header"]).To(Equal("test"))
+			Expect((api.PageToVolumesCall.Receives.Page.(fakes.Page)).Name).To(Equal("page name"))
 
-					Expect(result).To(BeNil())
-					Expect(err).To(MatchError("error description"))
-				})
+			Expect(list).To(HaveLen(1))
+			Expect(list[0].Name).To(Equal("volume name"))
+		})
+
+		Context("when converting a pager to page fails", func() {
+			BeforeEach(func() {
+				api.PagerToPageCall.Returns.Error = errors.New("error description")
 			})
 
-			Context("when converting a page to volumes fails", func() {
-				It("returns an error", func() {
-					volumesAPI.PageToVolumesCall.Returns.Error = errors.New("error description")
+			It("returns a helpful error message", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("pager to page: error description"))
+			})
+		})
 
-					result, err := volumesBlockStorageClient.List()
-					Expect(err).To(HaveOccurred())
+		Context("when converting a page to volumes fails", func() {
+			BeforeEach(func() {
+				api.PageToVolumesCall.Returns.Error = errors.New("error description")
+			})
 
-					Expect(result).To(BeNil())
-					Expect(err).To(MatchError("error description"))
-				})
+			It("returns a helpful error message", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("page to volumes: error description"))
 			})
 		})
 	})
 
 	Describe("Delete", func() {
 		It("delete the correct volume", func() {
-			err := volumesBlockStorageClient.Delete("some id")
+			err := client.Delete("some id")
 			Expect(err).NotTo(HaveOccurred())
 
-			err = volumesBlockStorageClient.Delete("some other id")
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(volumesAPI.DeleteVolumeCall.CallCount).To(Equal(2))
-
-			id := volumesAPI.DeleteVolumeCall.ReceivesForCall[0].VolumeID
-			Expect(id).To(Equal("some id"))
-			id = volumesAPI.DeleteVolumeCall.ReceivesForCall[1].VolumeID
-			Expect(id).To(Equal("some other id"))
+			Expect(api.DeleteVolumeCall.CallCount).To(Equal(1))
+			Expect(api.DeleteVolumeCall.ReceivesForCall[0].VolumeID).To(Equal("some id"))
 		})
 
-		Context("when an error occurs", func() {
-			Context("when the api fails", func() {
-				It("returns an error", func() {
-					volumesAPI.DeleteVolumeCall.Returns.Error = errors.New("some error")
+		Context("when the api fails", func() {
+			BeforeEach(func() {
+				api.DeleteVolumeCall.Returns.Error = errors.New("some error")
+			})
 
-					err := volumesBlockStorageClient.Delete("some id")
-					Expect(err).To(HaveOccurred())
-					Expect(err).To(MatchError("some error"))
-				})
+			It("returns an error", func() {
+				err := client.Delete("some id")
+				Expect(err).To(MatchError("some error"))
 			})
 		})
 	})

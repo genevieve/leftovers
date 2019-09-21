@@ -11,42 +11,45 @@ import (
 )
 
 var _ = Describe("Volume", func() {
-	Describe("NewVolume", func() {
-		It("has a name and type", func() {
-			volume := openstack.NewVolume("some-name", "some-id", nil)
+	var (
+		client *fakes.VolumesClient
+		volume openstack.Volume
+	)
 
-			Expect(volume.Name()).To(Equal("some-name some-id"))
-			Expect(volume.Type()).To(Equal("Volume"))
-		})
+	BeforeEach(func() {
+		client = &fakes.VolumesClient{}
+		volume = openstack.NewVolume("some-name", "some-id", client)
 	})
 
 	Describe("Delete", func() {
-		var (
-			fakeVolumesClient *fakes.VolumesClient
-			volume            openstack.Volume
-		)
-
-		BeforeEach(func() {
-			fakeVolumesClient = &fakes.VolumesClient{}
-			volume = openstack.NewVolume("some-name", "some-id", fakeVolumesClient)
-		})
-
 		It("deletes the correct volume", func() {
 			err := volume.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(fakeVolumesClient.DeleteCall.Receives.VolumeID).To(Equal("some-id"))
+			Expect(client.DeleteCall.Receives.VolumeID).To(Equal("some-id"))
 		})
 
-		Context("when an error occurs", func() {
-			It("returns an error", func() {
-				fakeVolumesClient.DeleteCall.Returns.Error = errors.New("error description")
+		Context("when the client fails to delete", func() {
+			BeforeEach(func() {
+				client.DeleteCall.Returns.Error = errors.New("error description")
+			})
 
+			It("returns the error", func() {
 				err := volume.Delete()
-				Expect(err).To(HaveOccurred())
-
 				Expect(err).To(MatchError("error description"))
 			})
+		})
+	})
+
+	Describe("Type", func() {
+		It("returns the type", func() {
+			Expect(volume.Type()).To(Equal("Volume"))
+		})
+	})
+
+	Describe("Name", func() {
+		It("returns the name", func() {
+			Expect(volume.Name()).To(Equal("some-name some-id"))
 		})
 	})
 })

@@ -24,6 +24,6 @@ func (i Image) Name() string {
 	return i.name
 }
 
-func (i Image) Type() string {
+func (Image) Type() string {
 	return "Image"
 }
