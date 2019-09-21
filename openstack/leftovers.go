@@ -64,28 +64,31 @@ func NewLeftovers(logger logger, authArgs AuthArgs) (Leftovers, error) {
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("failed to create volume block storage client: %s", err)
 	}
+	volumesClient := NewVolumesBlockStorageClient(VolumesAPI{
+		serviceClient: serviceBS,
+		waitTime:      200 * time.Millisecond,
+		maxRetries:    50,
+	})
 
 	serviceComputeInstance, err := openstack.NewComputeV2(provider, openstackOptions)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("failed to create compute instance client: %s", err)
 	}
+	instancesClient := NewComputeInstanceClient(ComputeAPI{serviceClient: serviceComputeInstance})
 
 	serviceImages, err := openstack.NewImageServiceV2(provider, openstackOptions)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("failed to create images client: %s", err)
 	}
+	imagesClient := NewImagesClient(ImageAPI{serviceClient: serviceImages})
 
 	return Leftovers{
 		logger:       logger,
 		asyncDeleter: app.NewAsyncDeleter(logger),
 		resources: []listTyper{
-			NewComputeInstances(NewComputeInstanceClient(ComputeAPI{serviceClient: serviceComputeInstance}), logger),
-			NewVolumes(NewVolumesBlockStorageClient(VolumesAPI{
-				serviceClient: serviceBS,
-				waitTime:      200 * time.Millisecond,
-				maxRetries:    50,
-			}), logger),
-			NewImages(NewImagesClient(ImageAPI{serviceClient: serviceImages}), logger),
+			NewComputeInstances(instancesClient, logger),
+			NewVolumes(volumesClient, logger),
+			NewImages(imagesClient, logger),
 		}}, nil
 }
 
