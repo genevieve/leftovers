@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"fmt"
+
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/pagination"
 )
@@ -24,14 +26,17 @@ func NewComputeInstanceClient(api ComputeInstanceAPI) ComputeInstanceClient {
 
 func (client ComputeInstanceClient) List() ([]servers.Server, error) {
 	pager := client.api.GetComputeInstancePager()
+
 	page, err := client.api.PagerToPage(pager)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("pager to page: %s", err)
 	}
+
 	servers, err := client.api.PageToServers(page)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("page to servers: %s", err)
 	}
+
 	return servers, nil
 }
 

@@ -13,73 +13,79 @@ import (
 
 var _ = Describe("ComputeInstanceClient", func() {
 	var (
-		computeInstanceAPI    *fakes.ComputeInstanceAPI
-		computeInstanceClient openstack.ComputeInstanceClient
+		api    *fakes.ComputeInstanceAPI
+		client openstack.ComputeInstanceClient
 	)
-	BeforeEach(func() {
-		computeInstanceAPI = &fakes.ComputeInstanceAPI{}
-		computeInstanceClient = openstack.NewComputeInstanceClient(computeInstanceAPI)
-	})
-	Context("when listing", func() {
-		Context("when converting a pager to a page returns an error", func() {
-			It("should propogate the error", func() {
-				computeInstanceAPI.PagerToPageCall.Returns.Error = errors.New("error description")
 
-				result, err := computeInstanceClient.List()
-				Expect(result).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error description"))
+	BeforeEach(func() {
+		api = &fakes.ComputeInstanceAPI{}
+		client = openstack.NewComputeInstanceClient(api)
+	})
+
+	Describe("List", func() {
+		BeforeEach(func() {
+			pager := pagination.Pager{Headers: map[string]string{"header": "test"}}
+			api.GetComputeInstancePagerCall.Returns.ComputeInstancePager = pager
+			api.PageToServersCall.Returns.Servers = []servers.Server{servers.Server{ID: "server-id"}}
+			api.PagerToPageCall.Returns.Page = fakes.Page{Name: "server page"}
+		})
+
+		It("returns a list of servers", func() {
+			result, err := client.List()
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(api.GetComputeInstancePagerCall.CallCount).To(Equal(1))
+			Expect(api.PagerToPageCall.CallCount).To(Equal(1))
+
+			pagerToPageArgCapture := api.PagerToPageCall.Receives.Pager
+			Expect(pagerToPageArgCapture.Headers["header"]).To(Equal("test"))
+
+			Expect(api.PageToServersCall.CallCount).To(Equal(1))
+			Expect(((api.PageToServersCall.Receives.Page).(fakes.Page)).Name).To(Equal("server page"))
+
+			Expect(len(result)).To(Equal(1))
+			Expect(result[0].ID).To(Equal("server-id"))
+		})
+
+		Context("when converting a pager to a page returns an error", func() {
+			BeforeEach(func() {
+				api.PagerToPageCall.Returns.Error = errors.New("banana")
+			})
+			It("should propogate the error", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("pager to page: banana"))
 			})
 		})
 
 		Context("when converting a page to servers returns an error", func() {
-			It("should propogate the error", func() {
-				computeInstanceAPI.PageToServersCall.Returns.Error = errors.New("error description")
+			BeforeEach(func() {
+				api.PageToServersCall.Returns.Error = errors.New("banana")
 
-				result, err := computeInstanceClient.List()
-				Expect(result).To(BeNil())
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error description"))
 			})
-		})
-
-		Context("when servers exist and there are no errors", func() {
-			It("should return a list of servers", func() {
-				pager := pagination.Pager{Headers: map[string]string{"header": "test"}}
-				computeInstanceAPI.GetComputeInstancePagerCall.Returns.ComputeInstancePager = pager
-				computeInstanceAPI.PageToServersCall.Returns.Servers = []servers.Server{servers.Server{ID: "server-id"}}
-				computeInstanceAPI.PagerToPageCall.Returns.Page = fakes.Page{Name: "server page"}
-
-				result, err := computeInstanceClient.List()
-
-				Expect(computeInstanceAPI.GetComputeInstancePagerCall.CallCount).To(Equal(1))
-				Expect(computeInstanceAPI.PagerToPageCall.CallCount).To(Equal(1))
-				pagerToPageArgCapture := computeInstanceAPI.PagerToPageCall.Receives.Pager
-				Expect(pagerToPageArgCapture.Headers["header"]).To(Equal("test"))
-				Expect(computeInstanceAPI.PageToServersCall.CallCount).To(Equal(1))
-				Expect(((computeInstanceAPI.PageToServersCall.Receives.Page).(fakes.Page)).Name).To(Equal("server page"))
-				Expect(len(result)).To(Equal(1))
-				Expect(result[0].ID).To(Equal("server-id"))
-				Expect(err).ToNot(HaveOccurred())
+			It("should propogate the error", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("page to servers: banana"))
 			})
 		})
 	})
 
-	Context("when deleting", func() {
-		Context("when there is an error", func() {
-			It("should return the error", func() {
-				computeInstanceAPI.DeleteCall.Returns.Error = errors.New("error deleting instance")
-				err := computeInstanceClient.Delete("some instance id")
-
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error deleting instance"))
-			})
-		})
-		It("should delete the compute instance", func() {
-			err := computeInstanceClient.Delete("some instance id")
-
-			Expect(computeInstanceAPI.DeleteCall.Receives.InstanceID).To(Equal("some instance id"))
+	Describe("Delete", func() {
+		It("deletes the compute instance", func() {
+			err := client.Delete("some instance id")
 			Expect(err).NotTo(HaveOccurred())
+
+			Expect(api.DeleteCall.Receives.InstanceID).To(Equal("some instance id"))
+		})
+
+		Context("when the api returns an error", func() {
+			BeforeEach(func() {
+				api.DeleteCall.Returns.Error = errors.New("error deleting instance")
+			})
+
+			It("should return a helpful error message", func() {
+				err := client.Delete("some instance id")
+				Expect(err).To(MatchError("error deleting instance"))
+			})
 		})
 	})
 })
