@@ -3,26 +3,27 @@ package openstack
 import "fmt"
 
 type Image struct {
-	name               string
-	id                 string
-	imageServiceClient ImageServiceClient
+	name   string
+	id     string
+	client imageServiceClient
 }
 
-func NewImage(name string, id string, imageServiceClient ImageServiceClient) Image {
+func NewImage(name string, id string, client imageServiceClient) Image {
 	return Image{
-		name:               name,
-		id:                 id,
-		imageServiceClient: imageServiceClient,
+		name:   fmt.Sprintf("%s %s", name, id),
+		id:     id,
+		client: client,
 	}
 }
 
-func (image Image) Delete() error {
-	return image.imageServiceClient.Delete(image.id)
-}
-func (image Image) Name() string {
-	return fmt.Sprintf("%s %s", image.name, image.id)
+func (i Image) Delete() error {
+	return i.client.Delete(i.id)
 }
 
-func (image Image) Type() string {
+func (i Image) Name() string {
+	return i.name
+}
+
+func (i Image) Type() string {
 	return "Image"
 }

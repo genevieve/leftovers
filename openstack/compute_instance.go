@@ -10,14 +10,14 @@ type ComputeInstance struct {
 
 func NewComputeInstance(name string, id string, computeClient ComputeClient) ComputeInstance {
 	return ComputeInstance{
-		name:          name,
+		name:          fmt.Sprintf("%s %s", name, id),
 		id:            id,
 		computeClient: computeClient,
 	}
 }
 
 func (ci ComputeInstance) Name() string {
-	return fmt.Sprintf("%s %s", ci.name, ci.id)
+	return ci.name
 }
 
 func (ci ComputeInstance) Type() string {

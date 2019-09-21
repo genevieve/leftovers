@@ -14,104 +14,94 @@ import (
 
 var _ = Describe("ImagesClient", func() {
 	var (
-		fakeImageAPI *fakes.ImageAPI
-		subject      openstack.ImageServiceClient
+		api    *fakes.ImageAPI
+		client openstack.ImagesClient
 	)
 
 	BeforeEach(func() {
-		fakeImageAPI = &fakes.ImageAPI{}
-		subject = openstack.NewImagesClient(fakeImageAPI)
+		api = &fakes.ImageAPI{}
+		client = openstack.NewImagesClient(api)
 	})
 
 	Describe("List", func() {
-		It("lists all the images available for deletion", func() {
-			pager := pagination.Pager{}
-			page := fakes.Page{}
-			imgs := []images.Image{
-				images.Image{ID: "hello there"},
-				images.Image{ID: "general"},
+		var (
+			pager pagination.Pager
+			page  fakes.Page
+			imgs  []images.Image
+		)
+
+		BeforeEach(func() {
+			pager = pagination.Pager{}
+			page = fakes.Page{}
+			imgs = []images.Image{
+				{ID: "hello there"},
+				{ID: "general"},
 			}
-			fakeImageAPI.GetImagePagerCall.Returns.Pager = pager
-			fakeImageAPI.PagerToPageCall.Returns.Page = page
-			fakeImageAPI.PageToImagesCall.Returns.Images = imgs
-
-			result, err := subject.List()
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(len(result)).To(Equal(2))
-			Expect(result[0].ID).To(Equal("hello there"))
-			Expect(result[1].ID).To(Equal("general"))
-			Expect(fakeImageAPI.PagerToPageCall.Receives.Pager).To(Equal(pager))
-			Expect(fakeImageAPI.PageToImagesCall.Receives.Page).To(Equal(page))
+			api.GetImagePagerCall.Returns.Pager = pager
+			api.PagerToPageCall.Returns.Page = page
+			api.PageToImagesCall.Returns.Images = imgs
 		})
 
-		Context("when an error occurs", func() {
-			Context("when there is an error getting a page", func() {
-				It("propogates the error", func() {
-					pager := pagination.Pager{}
-					pager.Err = errors.New("something went horridly wrong")
+		It("lists all the images available for deletion", func() {
+			list, err := client.List()
+			Expect(err).NotTo(HaveOccurred())
 
-					fakeImageAPI.GetImagePagerCall.Returns.Pager = pager
+			Expect(list).To(HaveLen(2))
+			Expect(list[0].ID).To(Equal("hello there"))
+			Expect(list[1].ID).To(Equal("general"))
+		})
 
-					result, err := subject.List()
-					Expect(err).To(HaveOccurred())
-
-					Expect(err).To(MatchError("something went horridly wrong"))
-					Expect(result).To(BeNil())
-				})
+		Context("when there is an error getting a page", func() {
+			BeforeEach(func() {
+				pager.Err = errors.New("something went horridly wrong")
+				api.GetImagePagerCall.Returns.Pager = pager
 			})
 
-			Context("when a pager cannot turn into a page", func() {
-				It("propogates the error", func() {
-					pager := pagination.Pager{}
-					page := fakes.Page{}
-					fakeImageAPI.GetImagePagerCall.Returns.Pager = pager
-					fakeImageAPI.PagerToPageCall.Returns.Page = page
-					fakeImageAPI.PagerToPageCall.Returns.Error = errors.New("oh heck")
+			It("returns a helpful error message", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("get images pager: something went horridly wrong"))
+			})
+		})
 
-					result, err := subject.List()
-					Expect(err).To(HaveOccurred())
-
-					Expect(err).To(MatchError("oh heck"))
-					Expect(result).To(BeNil())
-				})
+		Context("when a pager cannot turn into a page", func() {
+			BeforeEach(func() {
+				api.PagerToPageCall.Returns.Error = errors.New("banana")
 			})
 
-			Context("when the page cannot be turned into images", func() {
-				It("propogates the error", func() {
-					pager := pagination.Pager{}
-					page := fakes.Page{}
-					fakeImageAPI.GetImagePagerCall.Returns.Pager = pager
-					fakeImageAPI.PagerToPageCall.Returns.Page = page
-					fakeImageAPI.PageToImagesCall.Returns.Error = errors.New("oh no")
+			It("returns a helpful error message", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("pager to page: banana"))
+			})
+		})
 
-					result, err := subject.List()
-					Expect(err).To(HaveOccurred())
+		Context("when the page cannot be turned into images", func() {
+			BeforeEach(func() {
+				api.PageToImagesCall.Returns.Error = errors.New("oh no")
+			})
 
-					Expect(err).To(MatchError("oh no"))
-					Expect(result).To(BeNil())
-				})
+			It("returns a helpful error message", func() {
+				_, err := client.List()
+				Expect(err).To(MatchError("page to images: oh no"))
 			})
 		})
 	})
 
 	Describe("Delete", func() {
 		It("delete a given image id", func() {
-			err := subject.Delete("image-id")
+			err := client.Delete("image-id")
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(fakeImageAPI.DeleteCall.Receives.ImageID).To(Equal("image-id"))
+			Expect(api.DeleteCall.Receives.ImageID).To(Equal("image-id"))
 		})
 
-		Context("when an error occurs", func() {
-			Context("when deleting fails", func() {
-				It("propogates the error", func() {
-					fakeImageAPI.DeleteCall.Returns.Error = errors.New("some error")
-					err := subject.Delete("image-id")
-					Expect(err).To(HaveOccurred())
+		Context("when the api fails to delete", func() {
+			BeforeEach(func() {
+				api.DeleteCall.Returns.Error = errors.New("some error")
+			})
 
-					Expect(err).To(MatchError("some error"))
-				})
+			It("returns a helpful error message", func() {
+				err := client.Delete("image-id")
+				Expect(err).To(MatchError("some error"))
 			})
 		})
 	})

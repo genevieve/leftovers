@@ -17,12 +17,12 @@ type LoggerPromptWithDetailsCallReturn struct {
 }
 
 func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
+	l.PromptWithDetailsCall.CallCount++
+	l.PromptWithDetailsCall.Receives.ResourceType = resourceType
+	l.PromptWithDetailsCall.Receives.ResourceName = resourceName
+
 	if len(l.PromptWithDetailsCall.ReturnsForCall) > 0 {
-		i := l.PromptWithDetailsCall.CallCount
-		l.PromptWithDetailsCall.CallCount++
-		l.PromptWithDetailsCall.Receives.ResourceType = resourceType
-		l.PromptWithDetailsCall.Receives.ResourceName = resourceName
-		return l.PromptWithDetailsCall.ReturnsForCall[i].Bool
+		return l.PromptWithDetailsCall.ReturnsForCall[l.PromptWithDetailsCall.CallCount-1].Bool
 	}
 
 	return l.PromptWithDetailsCall.Returns.Bool

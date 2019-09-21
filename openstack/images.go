@@ -1,43 +1,50 @@
 package openstack
 
 import (
+	"fmt"
+
 	"github.com/genevieve/leftovers/common"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 )
 
 type Images struct {
-	imageServiceClient ImageServiceClient
-	logger             logger
+	client imageServiceClient
+	logger logger
 }
 
-type ImageServiceClient interface {
+type imageServiceClient interface {
 	List() ([]images.Image, error)
-	Delete(imageID string) error
+	Delete(id string) error
 }
 
-func NewImages(imageServiceClient ImageServiceClient, logger logger) Images {
+func NewImages(client imageServiceClient, logger logger) Images {
 	return Images{
-		imageServiceClient: imageServiceClient,
-		logger:             logger,
+		client: client,
+		logger: logger,
 	}
 }
 
-func (images Images) List() ([]common.Deletable, error) {
-	res, err := images.imageServiceClient.List()
+func (i Images) List() ([]common.Deletable, error) {
+	images, err := i.client.List()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("List Images: %s", err)
 	}
-	var deletables []common.Deletable
-	for _, resource := range res {
-		deletable := NewImage(resource.Name, resource.ID, images.imageServiceClient)
-		confirm := images.logger.PromptWithDetails(deletable.Type(), deletable.Name())
-		if confirm {
-			deletables = append(deletables, deletable)
+
+	var resources []common.Deletable
+	for _, image := range images {
+		r := NewImage(image.Name, image.ID, i.client)
+
+		proceed := i.logger.PromptWithDetails(r.Type(), r.Name())
+		if !proceed {
+			continue
 		}
+
+		resources = append(resources, r)
 	}
-	return deletables, err
+
+	return resources, err
 }
 
-func (images Images) Type() string {
+func (i Images) Type() string {
 	return "Image"
 }

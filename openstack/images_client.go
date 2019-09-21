@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"fmt"
+
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/pagination"
 )
@@ -25,16 +27,19 @@ func NewImagesClient(imageAPI imageAPI) ImagesClient {
 func (ic ImagesClient) List() ([]images.Image, error) {
 	pager := ic.imageAPI.GetImagesPager()
 	if pager.Err != nil {
-		return nil, pager.Err
+		return nil, fmt.Errorf("get images pager: %s", pager.Err)
 	}
+
 	page, err := ic.imageAPI.PagerToPage(pager)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("pager to page: %s", err)
 	}
+
 	imgs, err := ic.imageAPI.PageToImages(page)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("page to images: %s", err)
 	}
+
 	return imgs, err
 }
 
