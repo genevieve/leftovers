@@ -1,6 +1,8 @@
 package openstack
 
 import (
+	"fmt"
+
 	"github.com/genevieve/leftovers/common"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 )
@@ -25,18 +27,22 @@ func NewComputeInstances(computeClient ComputeClient, logger logger) ComputeInst
 func (ci ComputeInstances) List() ([]common.Deletable, error) {
 	computeInstances, err := ci.computeClient.List()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("List Compute Instances: %s", err)
 	}
 
-	var deletables []common.Deletable
+	var resources []common.Deletable
 	for _, instance := range computeInstances {
-		deletable := NewComputeInstance(instance.Name, instance.ID, ci.computeClient)
-		if ci.logger.PromptWithDetails(deletable.Type(), deletable.Name()) {
-			deletables = append(deletables, deletable)
+		r := NewComputeInstance(instance.Name, instance.ID, ci.computeClient)
+
+		proceed := ci.logger.PromptWithDetails(r.Type(), r.Name())
+		if !proceed {
+			continue
 		}
+
+		resources = append(resources, r)
 	}
 
-	return deletables, nil
+	return resources, nil
 }
 
 func (ci ComputeInstances) Type() string {

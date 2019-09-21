@@ -12,30 +12,20 @@ import (
 )
 
 var _ = Describe("Compute Instance", func() {
-	Context("when Type method is called", func() {
-		It("should return Compute Instance", func() {
-			computeInstances := openstack.NewComputeInstances(nil, nil)
+	var (
+		fakeClient       *fakes.ComputeInstanceClient
+		fakeLogger       *fakes.Logger
+		computeInstances openstack.ComputeInstances
+	)
 
-			result := computeInstances.Type()
-
-			Expect(result).To(Equal("Compute Instance"))
-		})
+	BeforeEach(func() {
+		fakeClient = &fakes.ComputeInstanceClient{}
+		fakeLogger = &fakes.Logger{}
+		computeInstances = openstack.NewComputeInstances(fakeClient, fakeLogger)
 	})
 
-	Context("when List method is called", func() {
-		var (
-			fakeClient       *fakes.ComputeInstanceClient
-			fakeLogger       *fakes.Logger
-			computeInstances openstack.ComputeInstances
-		)
-
+	Describe("List", func() {
 		BeforeEach(func() {
-			fakeClient = &fakes.ComputeInstanceClient{}
-			fakeLogger = &fakes.Logger{}
-			computeInstances = openstack.NewComputeInstances(fakeClient, fakeLogger)
-		})
-
-		It("should return many compute instances", func() {
 			fakeLogger.PromptWithDetailsCall.Returns.Bool = true
 			fakeClient.ListCall.Returns.ComputeInstances = []servers.Server{
 				servers.Server{
@@ -47,7 +37,9 @@ var _ = Describe("Compute Instance", func() {
 					Name: "other name",
 				},
 			}
+		})
 
+		It("should return many compute instances", func() {
 			result, err := computeInstances.List()
 			Expect(err).NotTo(HaveOccurred())
 
@@ -57,13 +49,11 @@ var _ = Describe("Compute Instance", func() {
 		})
 
 		Context("when prompt with details is false", func() {
-			It("should not return a compute instance", func() {
-				fakeClient.ListCall.Returns.ComputeInstances = []servers.Server{
-					servers.Server{},
-				}
-
+			BeforeEach(func() {
 				fakeLogger.PromptWithDetailsCall.Returns.Bool = false
+			})
 
+			It("should not return a compute instance", func() {
 				result, err := computeInstances.List()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -71,16 +61,23 @@ var _ = Describe("Compute Instance", func() {
 			})
 		})
 
-		Context("and there is an error", func() {
-			It("should return the error", func() {
+		Context("when there is an error", func() {
+			BeforeEach(func() {
 				fakeClient.ListCall.Returns.Error = errors.New("error getting list")
-
-				result, err := computeInstances.List()
-				Expect(err).To(HaveOccurred())
-
-				Expect(result).To(BeNil())
-				Expect(err).To(MatchError("error getting list"))
 			})
+
+			It("should return a helpful error message", func() {
+				_, err := computeInstances.List()
+				Expect(err).To(MatchError("List Compute Instances: error getting list"))
+			})
+		})
+	})
+
+	Describe("Type", func() {
+		It("should return Compute Instance", func() {
+			result := computeInstances.Type()
+
+			Expect(result).To(Equal("Compute Instance"))
 		})
 	})
 })
