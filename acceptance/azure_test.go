@@ -30,7 +30,7 @@ var _ = Describe("Azure", func() {
 		acc = NewAzureAcceptance()
 
 		noConfirm := true
-		debug := false
+		debug := true
 		stdout = bytes.NewBuffer([]byte{})
 		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
@@ -56,6 +56,7 @@ var _ = Describe("Azure", func() {
 			deleter.List(filter)
 
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s]", filter))
+			Expect(stdout.String()).To(ContainSubstring("Listing Resource Groups..."))
 			Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: %s] Deleting...", filter))
 		})
 	})
