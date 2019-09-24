@@ -1,6 +1,15 @@
 package fakes
 
+import "fmt"
+
 type Logger struct {
+	DebuglnCall struct {
+		Receives struct {
+			Message string
+		}
+		Messages []string
+	}
+
 	PromptWithDetailsCall struct {
 		CallCount int
 		Receives  struct {
@@ -14,6 +23,12 @@ type Logger struct {
 
 type LoggerPromptWithDetailsCallReturn struct {
 	Bool bool
+}
+
+func (l *Logger) Debugln(message string) {
+	l.DebuglnCall.Receives.Message = message
+
+	l.DebuglnCall.Messages = append(l.DebuglnCall.Messages, fmt.Sprintln(message))
 }
 
 func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {

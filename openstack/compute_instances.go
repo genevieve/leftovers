@@ -25,6 +25,7 @@ func NewComputeInstances(computeClient ComputeClient, logger logger) ComputeInst
 }
 
 func (ci ComputeInstances) List() ([]common.Deletable, error) {
+	ci.logger.Debugln("Listing Compute Instances...")
 	computeInstances, err := ci.computeClient.List()
 	if err != nil {
 		return nil, fmt.Errorf("List Compute Instances: %s", err)

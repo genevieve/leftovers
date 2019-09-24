@@ -20,6 +20,7 @@ type listTyper interface {
 type logger interface {
 	Printf(message string, a ...interface{})
 	Println(message string)
+	Debugln(message string)
 	PromptWithDetails(resourceType, resourceName string) bool
 	NoConfirm()
 }
