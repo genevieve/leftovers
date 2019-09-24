@@ -26,6 +26,7 @@ func NewGlobalAddresses(client globalAddressesClient, logger logger) GlobalAddre
 }
 
 func (a GlobalAddresses) List(filter string) ([]common.Deletable, error) {
+	a.logger.Debugln("Listing Global Addresses...")
 	addresses, err := a.client.ListGlobalAddresses()
 	if err != nil {
 		return nil, fmt.Errorf("List Global Addresses: %s", err)

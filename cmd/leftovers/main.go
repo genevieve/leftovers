@@ -45,7 +45,7 @@ func main() {
 		return
 	}
 
-	logger := app.NewLogger(os.Stdout, os.Stdin, o.NoConfirm)
+	logger := app.NewLogger(os.Stdout, os.Stdin, o.NoConfirm, o.Debug)
 
 	otherEnvVars := app.NewOtherEnvVars()
 	otherEnvVars.LoadConfig(&o)

@@ -13,15 +13,18 @@ type recordSetsClient interface {
 
 type RecordSets struct {
 	client recordSetsClient
+	logger logger
 }
 
-func NewRecordSets(client recordSetsClient) RecordSets {
+func NewRecordSets(client recordSetsClient, logger logger) RecordSets {
 	return RecordSets{
 		client: client,
+		logger: logger,
 	}
 }
 
 func (r RecordSets) Delete(managedZone string) error {
+	r.logger.Debugln("Listing DNS Record Sets...")
 	recordSets, err := r.client.ListRecordSets(managedZone)
 	if err != nil {
 		return fmt.Errorf("Listing DNS Record Sets: %s", err)

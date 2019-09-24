@@ -64,7 +64,7 @@ func NewVSphereAcceptance() VSphereAcceptance {
 		Datastore:       datastore,
 		ResourcePool:    resourcePool,
 		VCenterClient:   vimClient,
-		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:          app.NewLogger(os.Stdin, os.Stdout, true, false),
 	}
 }
 

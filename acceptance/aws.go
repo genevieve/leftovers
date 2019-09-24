@@ -38,7 +38,7 @@ func NewAWSAcceptance() AWSAcceptance {
 		SecretAccessKey: secretAccessKey,
 		SessionToken:    sessionToken,
 		Region:          region,
-		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:          app.NewLogger(os.Stdin, os.Stdout, true, false),
 	}
 }
 

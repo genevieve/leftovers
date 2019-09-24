@@ -29,8 +29,9 @@ var _ = Describe("NSX-T", func() {
 		acc = NewNSXTAcceptance()
 
 		noConfirm := true
+		debug := false
 		stdout = bytes.NewBuffer([]byte{})
-		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
 		var err error
 		deleter, err = nsxt.NewLeftovers(logger, acc.ManagerHost, acc.User, acc.Password)

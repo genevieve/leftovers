@@ -163,7 +163,7 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 			compute.NewAddresses(client, logger, regions),
 			compute.NewSslCertificates(client, logger),
 			iam.NewServiceAccounts(iamClient, p.ProjectId, projectNumber, logger),
-			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient), logger),
+			dns.NewManagedZones(dnsClient, dns.NewRecordSets(dnsClient, logger), logger),
 			sql.NewInstances(sqlClient, logger),
 			storage.NewBuckets(storageClient, logger),
 			container.NewClusters(containerClient, zones, logger),

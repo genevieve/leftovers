@@ -45,7 +45,7 @@ func NewGCPAcceptance() GCPAcceptance {
 		ProjectId: p.ProjectId,
 		Zone:      "us-east1-b",
 		Region:    "us-east1",
-		Logger:    app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:    app.NewLogger(os.Stdin, os.Stdout, true, false),
 	}
 }
 

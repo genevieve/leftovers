@@ -51,8 +51,9 @@ var _ = Describe("Openstack", func() {
 
 			By("listing all resources when calling Types")
 			noConfirm := true
+			debug := false
 			stdout = bytes.NewBuffer([]byte{})
-			logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+			logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 			leftovers, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
 				AuthURL:    acc.AuthURL,
 				Username:   acc.Username,

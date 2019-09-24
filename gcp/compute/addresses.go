@@ -30,6 +30,7 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 func (a Addresses) List(filter string) ([]common.Deletable, error) {
 	addresses := []*gcpcompute.Address{}
 	for _, region := range a.regions {
+		a.logger.Debugf("Listing Addresses for Region %s...\n", region)
 		l, err := a.client.ListAddresses(region)
 		if err != nil {
 			return nil, fmt.Errorf("List Addresses for Region %s: %s", region, err)

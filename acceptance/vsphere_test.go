@@ -35,8 +35,9 @@ var _ = Describe("vSphere", func() {
 		acc = NewVSphereAcceptance()
 
 		noConfirm := true
+		debug := false
 		stdout = bytes.NewBuffer([]byte{})
-		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
 		var err error
 		deleter, err = vsphere.NewLeftovers(logger, acc.VCenterIP, acc.VCenterUser, acc.VCenterPassword, acc.Datacenter)

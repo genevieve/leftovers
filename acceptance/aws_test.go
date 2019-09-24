@@ -31,8 +31,9 @@ var _ = Describe("AWS", func() {
 		acc = NewAWSAcceptance()
 
 		noConfirm := true
+		debug := false
 		stdout = bytes.NewBuffer([]byte{})
-		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
 		var err error
 		deleter, err = aws.NewLeftovers(logger, acc.AccessKeyId, acc.SecretAccessKey, acc.SessionToken, acc.Region)

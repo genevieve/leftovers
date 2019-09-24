@@ -38,7 +38,7 @@ func NewAzureAcceptance() AzureAcceptance {
 		TenantId:       tenantId,
 		ClientId:       clientId,
 		ClientSecret:   clientSecret,
-		Logger:         app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:         app.NewLogger(os.Stdin, os.Stdout, true, false),
 	}
 }
 

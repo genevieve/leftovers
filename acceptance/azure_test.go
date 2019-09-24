@@ -30,8 +30,9 @@ var _ = Describe("Azure", func() {
 		acc = NewAzureAcceptance()
 
 		noConfirm := true
+		debug := false
 		stdout = bytes.NewBuffer([]byte{})
-		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
 		var err error
 		deleter, err = azure.NewLeftovers(logger, acc.ClientId, acc.ClientSecret, acc.SubscriptionId, acc.TenantId)

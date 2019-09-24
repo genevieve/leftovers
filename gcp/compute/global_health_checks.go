@@ -26,6 +26,7 @@ func NewGlobalHealthChecks(client globalHealthChecksClient, logger logger) Globa
 }
 
 func (h GlobalHealthChecks) List(filter string) ([]common.Deletable, error) {
+	h.logger.Debugln("Listing Global Health Checks...")
 	checks, err := h.client.ListGlobalHealthChecks()
 	if err != nil {
 		return nil, fmt.Errorf("List Global Health Checks: %s", err)

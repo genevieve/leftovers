@@ -31,6 +31,7 @@ func (t TargetVpnGateways) List(filter string) ([]common.Deletable, error) {
 	gateways := []*gcpcompute.TargetVpnGateway{}
 
 	for _, region := range t.regions {
+		t.logger.Debugf("Listing Target Vpn Gateways for region %s...\n", region)
 		l, err := t.client.ListTargetVpnGateways(region)
 		if err != nil {
 			return nil, fmt.Errorf("List Target Vpn Gateways: %s", err)

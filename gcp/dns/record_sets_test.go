@@ -14,14 +14,16 @@ import (
 var _ = Describe("RecordSets", func() {
 	var (
 		client *fakes.RecordSetsClient
+		logger *fakes.Logger
 
 		recordSets dns.RecordSets
 	)
 
 	BeforeEach(func() {
 		client = &fakes.RecordSetsClient{}
+		logger = &fakes.Logger{}
 
-		recordSets = dns.NewRecordSets(client)
+		recordSets = dns.NewRecordSets(client, logger)
 	})
 
 	Describe("Delete", func() {

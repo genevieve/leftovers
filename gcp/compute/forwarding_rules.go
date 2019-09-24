@@ -30,6 +30,7 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 func (f ForwardingRules) List(filter string) ([]common.Deletable, error) {
 	rules := []*gcpcompute.ForwardingRule{}
 	for _, region := range f.regions {
+		f.logger.Debugf("Listing Forwarding Rules for Region %s...\n", region)
 		l, err := f.client.ListForwardingRules(region)
 		if err != nil {
 			return nil, fmt.Errorf("List Forwarding Rules for region %s: %s", region, err)

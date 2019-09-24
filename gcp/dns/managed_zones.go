@@ -32,6 +32,7 @@ func NewManagedZones(client managedZonesClient, recordSets recordSets, logger lo
 }
 
 func (m ManagedZones) List(filter string) ([]common.Deletable, error) {
+	m.logger.Debugln("Listing DNS Managed Zones...")
 	managedZones, err := m.client.ListManagedZones()
 	if err != nil {
 		return nil, fmt.Errorf("Listing DNS Managed Zones: %s", err)

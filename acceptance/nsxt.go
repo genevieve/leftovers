@@ -53,7 +53,7 @@ func NewNSXTAcceptance() NSXTAcceptance {
 		Password:    nsxtPassword,
 		NSXTClient:  nsxtClient,
 		EdgeCluster: edgeCluster,
-		Logger:      app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:      app.NewLogger(os.Stdin, os.Stdout, true, false),
 	}
 }
 
