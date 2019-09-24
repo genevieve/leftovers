@@ -28,6 +28,7 @@ func NewFolders(client client, logger logger) Folders {
 // List not only lists top-level folders, it also lists child and grandchild
 // folders, and all VMs within those folders.
 func (v Folders) List(filter string, rType string) ([]common.Deletable, error) {
+	v.logger.Debugln("Getting root folder...")
 	root, err := v.client.GetRootFolder(filter)
 	if err != nil {
 		return nil, fmt.Errorf("Getting root folder: %s", err)
@@ -41,6 +42,13 @@ func (f Folders) listChildren(parent *object.Folder, rType string) ([]common.Del
 
 	ctx := context.Background()
 	children, err := parent.Children(ctx)
+
+	parentName, err := parent.Common.ObjectName(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Folder name: %s", err)
+	}
+
+	f.logger.Debugf("Listing children of folder %s...\n", parentName)
 	if err != nil {
 		return nil, fmt.Errorf("listing children: %s", err)
 	}
@@ -65,16 +73,17 @@ func (f Folders) listChildren(parent *object.Folder, rType string) ([]common.Del
 
 		childFolder, ok := child.(*object.Folder)
 		if ok {
+			childFolderName, err := childFolder.Common.ObjectName(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("Folder name: %s", err)
+			}
+
+			f.logger.Debugf("Listing children of folder %s...\n", childFolderName)
 			grandchildren, err := f.listChildren(childFolder, rType)
 			if err != nil {
 				return nil, fmt.Errorf("listing grandchildren: %s", err)
 			}
 			deletable = append(deletable, grandchildren...)
-
-			childFolderName, err := childFolder.Common.ObjectName(ctx)
-			if err != nil {
-				return nil, fmt.Errorf("Folder name: %s", err)
-			}
 
 			childFolderToDelete := NewFolder(childFolder, childFolderName)
 

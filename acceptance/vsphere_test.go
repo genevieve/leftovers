@@ -29,13 +29,13 @@ var _ = Describe("vSphere", func() {
 		}
 		filter = os.Getenv("LEFTOVERS_VSPHERE_FILTER")
 		if filter == "" {
-			filter = "khaleesi"
+			filter = "eevee" // use the Toolsmiths team's test resource pool
 		}
 
 		acc = NewVSphereAcceptance()
 
 		noConfirm := true
-		debug := false
+		debug := true
 		stdout = bytes.NewBuffer([]byte{})
 		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
@@ -65,6 +65,7 @@ var _ = Describe("vSphere", func() {
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm]"))
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-nested-vm]"))
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm]"))
+				Expect(stdout.String()).To(ContainSubstring("Listing children of folder leftovers-acceptance..."))
 				Expect(stdout.String()).NotTo(ContainSubstring("[Virtual Machine: leftover-vm] Deleting..."))
 				Expect(stdout.String()).NotTo(ContainSubstring("[Virtual Machine: leftover-nested-vm] Deleting..."))
 				Expect(stdout.String()).NotTo(ContainSubstring("[Virtual Machine: leftover-twice-nested-vm] Deleting..."))
