@@ -46,14 +46,28 @@ export LEFTOVERS_ACCEPTANCE=azure
 ginkgo -r -p -race acceptance
 ```
 
-### WMware vSphere
+### VMware vSphere
 
 ```bash
 export BBL_VSPHERE_VCENTER_IP=
 export BBL_VSPHERE_VCENTER_PASSWORD=
 export BBL_VSPHERE_VCENTER_USER=
 export BBL_VSPHERE_VCENTER_DC=
+export BBL_VSPHERE_VCENTER_DS=
+export BBL_VSPHERE_VCENTER_RP=
 export LEFTOVERS_ACCEPTANCE=vsphere
+
+ginkgo -r -p -race acceptance
+```
+
+### VMware NSX-T
+
+```bash
+export NSXT_MANAGER_HOST=
+export NSXT_PASSWORD=
+export NSXT_USER=
+export NSXT_EDGE_CLUSTER=
+export LEFTOVERS_ACCEPTANCE=nsxt
 
 ginkgo -r -p -race acceptance
 ```

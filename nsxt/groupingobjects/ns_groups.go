@@ -23,6 +23,7 @@ func NewNSGroups(client groupingObjectsAPI, ctx context.Context, logger logger) 
 }
 
 func (n NSGroups) List(filter string) ([]common.Deletable, error) {
+	n.logger.Debugln("Listing NS Groups...")
 	result, _, err := n.client.ListNSGroups(n.ctx, map[string]interface{}{})
 
 	if err != nil {

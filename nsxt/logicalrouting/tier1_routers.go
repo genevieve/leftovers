@@ -23,6 +23,7 @@ func NewTier1Routers(client logicalRoutingAPI, ctx context.Context, logger logge
 }
 
 func (t Tier1Routers) List(filter string) ([]common.Deletable, error) {
+	t.logger.Debugln("Listing Tier 1 Routers...")
 	result, _, err := t.client.ListLogicalRouters(t.ctx, map[string]interface{}{
 		"routerType": "TIER1",
 	})

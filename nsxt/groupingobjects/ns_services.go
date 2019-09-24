@@ -23,6 +23,7 @@ func NewNSServices(client groupingObjectsAPI, ctx context.Context, logger logger
 }
 
 func (n NSServices) List(filter string) ([]common.Deletable, error) {
+	n.logger.Debugln("Listing NS Services...")
 	result, _, err := n.client.ListNSServices(n.ctx, map[string]interface{}{})
 
 	if err != nil {

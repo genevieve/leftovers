@@ -29,7 +29,7 @@ var _ = Describe("NSX-T", func() {
 		acc = NewNSXTAcceptance()
 
 		noConfirm := true
-		debug := false
+		debug := true
 		stdout = bytes.NewBuffer([]byte{})
 		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
@@ -50,6 +50,7 @@ var _ = Describe("NSX-T", func() {
 				deleter.List("leftover")
 				Expect(stdout.String()).NotTo(ContainSubstring("403"))
 
+				Expect(stdout.String()).To(ContainSubstring("Listing Tier 1 Routers..."))
 				Expect(stdout.String()).To(ContainSubstring("[Tier 1 Router: leftover-tier1-router]"))
 				Expect(stdout.String()).NotTo(ContainSubstring("[Tier 1 Router: leftover-tier1-router] Deleting"))
 			})
