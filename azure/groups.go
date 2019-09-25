@@ -25,7 +25,7 @@ func NewGroups(client groupsClient, logger logger) Groups {
 }
 
 func (g Groups) List(filter string) ([]common.Deletable, error) {
-	g.logger.Debugln("Listing Resource Groups")
+	g.logger.Debugln("Listing Resource Groups...")
 	groups, err := g.client.ListGroups()
 	if err != nil {
 		return []common.Deletable{}, fmt.Errorf("Listing Resource Groups: %s", err)
