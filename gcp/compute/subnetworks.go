@@ -30,6 +30,7 @@ func NewSubnetworks(client subnetworksClient, logger logger, regions map[string]
 func (n Subnetworks) List(filter string) ([]common.Deletable, error) {
 	subnetworks := []*gcpcompute.Subnetwork{}
 	for _, region := range n.regions {
+		n.logger.Debugf("Listing Subnetworks for region %s...\n", region)
 		l, err := n.client.ListSubnetworks(region)
 		if err != nil {
 			return nil, fmt.Errorf("List Subnetworks for region %s: %s", region, err)

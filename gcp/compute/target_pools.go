@@ -30,6 +30,7 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 func (t TargetPools) List(filter string) ([]common.Deletable, error) {
 	pools := []*gcpcompute.TargetPool{}
 	for _, region := range t.regions {
+		t.logger.Debugf("Listing Target Pools for region %s...\n", region)
 		l, err := t.client.ListTargetPools(region)
 		if err != nil {
 			return nil, fmt.Errorf("List Target Pools for region %s: %s", region, err)

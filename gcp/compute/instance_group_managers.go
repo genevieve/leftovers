@@ -30,6 +30,7 @@ func NewInstanceGroupManagers(client instanceGroupManagersClient, logger logger,
 func (i InstanceGroupManagers) List(filter string) ([]common.Deletable, error) {
 	managers := []*gcpcompute.InstanceGroupManager{}
 	for _, zone := range i.zones {
+		i.logger.Debugf("Listing Instance Group Managers for Zone %s...\n", zone)
 		l, err := i.client.ListInstanceGroupManagers(zone)
 		if err != nil {
 			return nil, fmt.Errorf("List Instance Group Managers for zone %s: %s", zone, err)

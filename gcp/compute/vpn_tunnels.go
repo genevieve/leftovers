@@ -31,6 +31,7 @@ func (v VpnTunnels) List(filter string) ([]common.Deletable, error) {
 	tunnels := []*gcpcompute.VpnTunnel{}
 
 	for _, region := range v.regions {
+		v.logger.Debugf("Listing Vpn Tunnels for Region %s...\n", region)
 		l, err := v.client.ListVpnTunnels(region)
 		if err != nil {
 			return nil, fmt.Errorf("List Vpn Tunnels: %s", err)

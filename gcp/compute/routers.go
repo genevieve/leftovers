@@ -30,6 +30,7 @@ func NewRouters(routersClient routersClient, logger logger, regions map[string]s
 func (r Routers) List(filter string) ([]common.Deletable, error) {
 	routers := []*gcpcompute.Router{}
 	for _, region := range r.regions {
+		r.logger.Debugf("Listing Routers for Region %s...\n", region)
 		l, err := r.routersClient.ListRouters(region)
 		if err != nil {
 			return []common.Deletable{}, fmt.Errorf("List Routers for region %s: %s", region, err)

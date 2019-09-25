@@ -30,8 +30,9 @@ var _ = Describe("GCP", func() {
 		acc = NewGCPAcceptance()
 
 		noConfirm := true
+		debug := true
 		stdout = bytes.NewBuffer([]byte{})
-		logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
 		var err error
 		deleter, err = gcp.NewLeftovers(logger, acc.KeyPath)
@@ -55,6 +56,7 @@ var _ = Describe("GCP", func() {
 			deleter.List(filter)
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: %s]", filter))
+			Expect(stdout.String()).To(ContainSubstring("Listing Disks for Zone"))
 			Expect(stdout.String()).NotTo(ContainSubstring("[Disk: %s] Deleting...", filter))
 		})
 	})

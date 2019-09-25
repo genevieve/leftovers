@@ -26,6 +26,7 @@ func NewUrlMaps(client urlMapsClient, logger logger) UrlMaps {
 }
 
 func (u UrlMaps) List(filter string) ([]common.Deletable, error) {
+	u.logger.Debugln("Listing Url Maps...")
 	urlMaps, err := u.client.ListUrlMaps()
 	if err != nil {
 		return nil, fmt.Errorf("List Url Maps: %s", err)

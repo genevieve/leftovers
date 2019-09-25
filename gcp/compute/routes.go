@@ -26,6 +26,7 @@ func NewRoutes(client routesClient, logger logger) Routes {
 }
 
 func (r Routes) List(filter string) ([]common.Deletable, error) {
+	r.logger.Debugln("Listing Routes...")
 	routes, err := r.client.ListRoutes()
 	if err != nil {
 		return nil, fmt.Errorf("List Routes: %s", err)

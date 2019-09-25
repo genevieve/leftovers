@@ -26,6 +26,7 @@ func NewInstances(client instancesClient, logger logger) Instances {
 }
 
 func (i Instances) List(filter string) ([]common.Deletable, error) {
+	i.logger.Debugln("Listing SQL Instances...")
 	instances, err := i.client.ListInstances()
 	if err != nil {
 		return nil, fmt.Errorf("List SQL Instances: %s", err)

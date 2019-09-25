@@ -34,6 +34,7 @@ func NewServiceAccounts(client serviceAccountsClient, projectName string, projec
 }
 
 func (s ServiceAccounts) List(filter string) ([]common.Deletable, error) {
+	s.logger.Debugln("Listing IAM Service Accounts...")
 	accounts, err := s.client.ListServiceAccounts()
 	if err != nil {
 		return nil, fmt.Errorf("List IAM Service Accounts: %s", err)

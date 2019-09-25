@@ -26,6 +26,7 @@ func NewTargetHttpProxies(client targetHttpProxiesClient, logger logger) TargetH
 }
 
 func (t TargetHttpProxies) List(filter string) ([]common.Deletable, error) {
+	t.logger.Debugln("Listing Target Http Proxies...")
 	targetHttpProxies, err := t.client.ListTargetHttpProxies()
 	if err != nil {
 		return nil, fmt.Errorf("List Target Http Proxies: %s", err)

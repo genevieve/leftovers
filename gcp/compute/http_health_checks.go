@@ -26,6 +26,7 @@ func NewHttpHealthChecks(client httpHealthChecksClient, logger logger) HttpHealt
 }
 
 func (h HttpHealthChecks) List(filter string) ([]common.Deletable, error) {
+	h.logger.Debugln("Listing Http Health Checks...")
 	checks, err := h.client.ListHttpHealthChecks()
 	if err != nil {
 		return nil, fmt.Errorf("List Http Health Checks: %s", err)

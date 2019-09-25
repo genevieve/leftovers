@@ -29,6 +29,7 @@ func NewBuckets(client bucketsClient, logger logger) Buckets {
 }
 
 func (i Buckets) List(filter string) ([]common.Deletable, error) {
+	i.logger.Debugln("Listing Storage Buckets...")
 	buckets, err := i.client.ListBuckets()
 	if err != nil {
 		return nil, fmt.Errorf("List Storage Buckets: %s", err)

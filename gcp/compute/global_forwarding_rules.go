@@ -26,6 +26,7 @@ func NewGlobalForwardingRules(client globalForwardingRulesClient, logger logger)
 }
 
 func (g GlobalForwardingRules) List(filter string) ([]common.Deletable, error) {
+	g.logger.Debugln("Listing Global Forwarding Rules...")
 	rules, err := g.client.ListGlobalForwardingRules()
 	if err != nil {
 		return nil, fmt.Errorf("List Global Forwarding Rules: %s", err)

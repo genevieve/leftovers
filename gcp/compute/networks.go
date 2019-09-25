@@ -26,6 +26,7 @@ func NewNetworks(client networksClient, logger logger) Networks {
 }
 
 func (n Networks) List(filter string) ([]common.Deletable, error) {
+	n.logger.Debugln("Listing Networks...")
 	networks, err := n.client.ListNetworks()
 	if err != nil {
 		return nil, fmt.Errorf("List Networks: %s", err)

@@ -27,6 +27,7 @@ func NewAppSecurityGroups(client appSecurityGroupsClient, rgName string, logger 
 }
 
 func (g AppSecurityGroups) List(filter string) ([]common.Deletable, error) {
+	g.logger.Debugln("Listing Application Security Groups")
 	groups, err := g.client.ListAppSecurityGroups(g.rgName)
 	if err != nil {
 		return nil, fmt.Errorf("Listing Application Security Groups: %s", err)

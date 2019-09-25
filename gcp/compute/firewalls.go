@@ -26,9 +26,10 @@ func NewFirewalls(client firewallsClient, logger logger) Firewalls {
 }
 
 func (f Firewalls) List(filter string) ([]common.Deletable, error) {
+	f.logger.Debugln("Listing Firewalls...")
 	firewalls, err := f.client.ListFirewalls()
 	if err != nil {
-		return nil, fmt.Errorf("Listing firewalls: %s", err)
+		return nil, fmt.Errorf("Listing Firewalls: %s", err)
 	}
 
 	var resources []common.Deletable

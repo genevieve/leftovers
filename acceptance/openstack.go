@@ -50,7 +50,7 @@ func (t testResource) Delete() error {
 
 func NewOpenStackAcceptance() *OpenStackAcceptance {
 	return &OpenStackAcceptance{
-		Logger:      app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:      app.NewLogger(os.Stdin, os.Stdout, true, false),
 		AuthURL:     os.Getenv("BBL_OPENSTACK_AUTH_URL"),
 		Domain:      os.Getenv("BBL_OPENSTACK_DOMAIN"),
 		Username:    os.Getenv("BBL_OPENSTACK_USERNAME"),

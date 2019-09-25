@@ -18,6 +18,13 @@ type Logger struct {
 		Messages []string
 	}
 
+	DebuglnCall struct {
+		Receives struct {
+			Message string
+		}
+		Messages []string
+	}
+
 	PromptWithDetailsCall struct {
 		CallCount int
 		Receives  struct {
@@ -43,6 +50,12 @@ func (l *Logger) PromptWithDetails(resourceType, resourceName string) bool {
 	l.PromptWithDetailsCall.Receives.Name = resourceName
 
 	return l.PromptWithDetailsCall.Returns.Proceed
+}
+
+func (l *Logger) Debugln(message string) {
+	l.DebuglnCall.Receives.Message = message
+
+	l.DebuglnCall.Messages = append(l.DebuglnCall.Messages, fmt.Sprintln(message))
 }
 
 func (l *Logger) Println(message string) {

@@ -25,6 +25,7 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 }
 
 func (v Volumes) List() ([]common.Deletable, error) {
+	v.logger.Debugln("Listing Volumes...")
 	result, err := v.client.List()
 	if err != nil {
 		return nil, fmt.Errorf("List Volumes: %s", err)

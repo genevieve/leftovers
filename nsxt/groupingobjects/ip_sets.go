@@ -23,6 +23,7 @@ func NewIPSets(client groupingObjectsAPI, ctx context.Context, logger logger) IP
 }
 
 func (i IPSets) List(filter string) ([]common.Deletable, error) {
+	i.logger.Debugln("Listing IP Sets...")
 	result, _, err := i.client.ListIPSets(i.ctx, map[string]interface{}{})
 
 	if err != nil {

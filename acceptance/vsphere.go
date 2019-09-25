@@ -44,7 +44,7 @@ func NewVSphereAcceptance() VSphereAcceptance {
 	Expect(datastore).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_DS.")
 
 	resourcePool := os.Getenv("BBL_VSPHERE_VCENTER_RP")
-	Expect(datastore).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_RP.")
+	Expect(resourcePool).NotTo(Equal(""), "Missing $BBL_VSPHERE_VCENTER_RP.")
 
 	vCenterUrl, err := url.Parse("https://" + vcenterIP + "/sdk")
 	Expect(err).NotTo(HaveOccurred())
@@ -64,7 +64,7 @@ func NewVSphereAcceptance() VSphereAcceptance {
 		Datastore:       datastore,
 		ResourcePool:    resourcePool,
 		VCenterClient:   vimClient,
-		Logger:          app.NewLogger(os.Stdin, os.Stdout, true),
+		Logger:          app.NewLogger(os.Stdin, os.Stdout, true, false),
 	}
 }
 

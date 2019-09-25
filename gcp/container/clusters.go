@@ -30,6 +30,7 @@ func NewClusters(client clustersClient, zones map[string]string, logger logger) 
 func (c Clusters) List(filter string) ([]common.Deletable, error) {
 	clusters := []*gcpcontainer.Cluster{}
 	for _, zone := range c.zones {
+		c.logger.Debugf("Listing Clusters for Zone %s...\n", zone)
 		resp, err := c.client.ListClusters(zone)
 		if err != nil {
 			return nil, fmt.Errorf("List Clusters for Zone %s: %s", zone, err)

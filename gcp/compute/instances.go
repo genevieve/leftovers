@@ -30,6 +30,7 @@ func NewInstances(client instancesClient, logger logger, zones map[string]string
 func (i Instances) List(filter string) ([]common.Deletable, error) {
 	instances := []*gcpcompute.Instance{}
 	for _, zone := range i.zones {
+		i.logger.Debugf("Listing Instances for Zone %s...\n", zone)
 		l, err := i.client.ListInstances(zone)
 		if err != nil {
 			return nil, fmt.Errorf("List Instances for zone %s: %s", zone, err)

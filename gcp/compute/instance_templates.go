@@ -26,6 +26,7 @@ func NewInstanceTemplates(client instanceTemplatesClient, logger logger) Instanc
 }
 
 func (i InstanceTemplates) List(filter string) ([]common.Deletable, error) {
+	i.logger.Debugln("Listing Instance Templates...")
 	templates, err := i.client.ListInstanceTemplates()
 	if err != nil {
 		return nil, fmt.Errorf("List Instance Templates: %s", err)

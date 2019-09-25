@@ -51,8 +51,9 @@ var _ = Describe("Openstack", func() {
 
 			By("listing all resources when calling Types")
 			noConfirm := true
+			debug := true
 			stdout = bytes.NewBuffer([]byte{})
-			logger := app.NewLogger(stdout, os.Stdin, noConfirm)
+			logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 			leftovers, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
 				AuthURL:    acc.AuthURL,
 				Username:   acc.Username,
@@ -82,6 +83,7 @@ var _ = Describe("Openstack", func() {
 			By("listing all resources when a filter isn't passed to List")
 			leftovers.List("")
 
+			Expect(stdout.String()).To(ContainSubstring("Listing Volumes..."))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", "some volume", volumeID)))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s]", "some instance", instanceID)))
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())

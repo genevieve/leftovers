@@ -56,7 +56,7 @@ var _ = Describe("Firewalls", func() {
 
 			It("returns the error", func() {
 				_, err := firewalls.List(filter)
-				Expect(err).To(MatchError("Listing firewalls: some error"))
+				Expect(err).To(MatchError("Listing Firewalls: some error"))
 			})
 		})
 
