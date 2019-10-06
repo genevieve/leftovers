@@ -31,7 +31,7 @@ var _ = Describe("Snapshot", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteSnapshotCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSnapshotCall.Receives.Input.SnapshotId).To(Equal(id))
+			Expect(client.DeleteSnapshotCall.Receives.DeleteSnapshotInput.SnapshotId).To(Equal(id))
 		})
 
 		Context("when the client fails", func() {

@@ -1,41 +1,55 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/elb"
+import (
+	"sync"
+
+	awselb "github.com/aws/aws-sdk-go/service/elb"
+)
 
 type LoadBalancersClient struct {
-	DescribeLoadBalancersCall struct {
-		CallCount int
-		Receives  struct {
-			Input *elb.DescribeLoadBalancersInput
-		}
-		Returns struct {
-			Output *elb.DescribeLoadBalancersOutput
-			Error  error
-		}
-	}
-
 	DeleteLoadBalancerCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *elb.DeleteLoadBalancerInput
+			DeleteLoadBalancerInput *awselb.DeleteLoadBalancerInput
 		}
 		Returns struct {
-			Output *elb.DeleteLoadBalancerOutput
-			Error  error
+			DeleteLoadBalancerOutput *awselb.DeleteLoadBalancerOutput
+			Error                    error
 		}
+		Stub func(*awselb.DeleteLoadBalancerInput) (*awselb.DeleteLoadBalancerOutput, error)
+	}
+	DescribeLoadBalancersCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeLoadBalancersInput *awselb.DescribeLoadBalancersInput
+		}
+		Returns struct {
+			DescribeLoadBalancersOutput *awselb.DescribeLoadBalancersOutput
+			Error                       error
+		}
+		Stub func(*awselb.DescribeLoadBalancersInput) (*awselb.DescribeLoadBalancersOutput, error)
 	}
 }
 
-func (e *LoadBalancersClient) DescribeLoadBalancers(input *elb.DescribeLoadBalancersInput) (*elb.DescribeLoadBalancersOutput, error) {
-	e.DescribeLoadBalancersCall.CallCount++
-	e.DescribeLoadBalancersCall.Receives.Input = input
-
-	return e.DescribeLoadBalancersCall.Returns.Output, e.DescribeLoadBalancersCall.Returns.Error
+func (f *LoadBalancersClient) DeleteLoadBalancer(param1 *awselb.DeleteLoadBalancerInput) (*awselb.DeleteLoadBalancerOutput, error) {
+	f.DeleteLoadBalancerCall.Lock()
+	defer f.DeleteLoadBalancerCall.Unlock()
+	f.DeleteLoadBalancerCall.CallCount++
+	f.DeleteLoadBalancerCall.Receives.DeleteLoadBalancerInput = param1
+	if f.DeleteLoadBalancerCall.Stub != nil {
+		return f.DeleteLoadBalancerCall.Stub(param1)
+	}
+	return f.DeleteLoadBalancerCall.Returns.DeleteLoadBalancerOutput, f.DeleteLoadBalancerCall.Returns.Error
 }
-
-func (e *LoadBalancersClient) DeleteLoadBalancer(input *elb.DeleteLoadBalancerInput) (*elb.DeleteLoadBalancerOutput, error) {
-	e.DeleteLoadBalancerCall.CallCount++
-	e.DeleteLoadBalancerCall.Receives.Input = input
-
-	return e.DeleteLoadBalancerCall.Returns.Output, e.DeleteLoadBalancerCall.Returns.Error
+func (f *LoadBalancersClient) DescribeLoadBalancers(param1 *awselb.DescribeLoadBalancersInput) (*awselb.DescribeLoadBalancersOutput, error) {
+	f.DescribeLoadBalancersCall.Lock()
+	defer f.DescribeLoadBalancersCall.Unlock()
+	f.DescribeLoadBalancersCall.CallCount++
+	f.DescribeLoadBalancersCall.Receives.DescribeLoadBalancersInput = param1
+	if f.DescribeLoadBalancersCall.Stub != nil {
+		return f.DescribeLoadBalancersCall.Stub(param1)
+	}
+	return f.DescribeLoadBalancersCall.Returns.DescribeLoadBalancersOutput, f.DescribeLoadBalancersCall.Returns.Error
 }

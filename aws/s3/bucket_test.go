@@ -31,7 +31,7 @@ var _ = Describe("Bucket", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteBucketCall.CallCount).To(Equal(1))
-			Expect(client.DeleteBucketCall.Receives.Input.Bucket).To(Equal(name))
+			Expect(client.DeleteBucketCall.Receives.DeleteBucketInput.Bucket).To(Equal(name))
 		})
 
 		Context("the client fails", func() {

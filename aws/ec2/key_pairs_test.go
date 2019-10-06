@@ -31,7 +31,7 @@ var _ = Describe("KeyPairs", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeKeyPairsCall.Returns.Output = &awsec2.DescribeKeyPairsOutput{
+			client.DescribeKeyPairsCall.Returns.DescribeKeyPairsOutput = &awsec2.DescribeKeyPairsOutput{
 				KeyPairs: []*awsec2.KeyPairInfo{{
 					KeyName: aws.String("banana"),
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("KeyPairs", func() {
 
 			Expect(client.DescribeKeyPairsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Key Pair"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Key Pair"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

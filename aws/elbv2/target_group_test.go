@@ -33,7 +33,7 @@ var _ = Describe("TargetGroup", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteTargetGroupCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTargetGroupCall.Receives.Input.TargetGroupArn).To(Equal(arn))
+			Expect(client.DeleteTargetGroupCall.Receives.DeleteTargetGroupInput.TargetGroupArn).To(Equal(arn))
 		})
 
 		Context("when the client fails", func() {

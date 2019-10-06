@@ -2,6 +2,7 @@ package ec2_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
@@ -16,21 +17,26 @@ var _ = Describe("Subnets", func() {
 		client       *fakes.SubnetsClient
 		logger       *fakes.Logger
 		resourceTags *fakes.ResourceTags
+		messages     []string
 
 		subnets ec2.Subnets
 	)
 
 	BeforeEach(func() {
 		client = &fakes.SubnetsClient{}
-		logger = &fakes.Logger{}
 		resourceTags = &fakes.ResourceTags{}
+		messages = []string{}
+		logger = &fakes.Logger{}
+		logger.PrintfCall.Stub = func(format string, v ...interface{}) {
+			messages = append(messages, fmt.Sprintf(format, v...))
+		}
 
 		subnets = ec2.NewSubnets(client, logger, resourceTags)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.DescribeSubnetsCall.Returns.Output = &awsec2.DescribeSubnetsOutput{
+			client.DescribeSubnetsCall.Returns.DescribeSubnetsOutput = &awsec2.DescribeSubnetsOutput{
 				Subnets: []*awsec2.Subnet{{
 					SubnetId: aws.String("the-subnet-id"),
 					VpcId:    aws.String("the-vpc-id"),
@@ -43,17 +49,17 @@ var _ = Describe("Subnets", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeSubnetsCall.CallCount).To(Equal(1))
-			Expect(client.DescribeSubnetsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("vpc-id")))
-			Expect(client.DescribeSubnetsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("the-vpc-id")))
+			Expect(client.DescribeSubnetsCall.Receives.DescribeSubnetsInput.Filters[0].Name).To(Equal(aws.String("vpc-id")))
+			Expect(client.DescribeSubnetsCall.Receives.DescribeSubnetsInput.Filters[0].Values[0]).To(Equal(aws.String("the-vpc-id")))
 
 			Expect(client.DeleteSubnetCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSubnetCall.Receives.Input.SubnetId).To(Equal(aws.String("the-subnet-id")))
+			Expect(client.DeleteSubnetCall.Receives.DeleteSubnetInput.SubnetId).To(Equal(aws.String("the-subnet-id")))
 
 			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
-			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("subnet"))
-			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-subnet-id"))
+			Expect(resourceTags.DeleteCall.Receives.FilterName).To(Equal("subnet"))
+			Expect(resourceTags.DeleteCall.Receives.FilterValue).To(Equal("the-subnet-id"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
+			Expect(messages).To(Equal([]string{
 				"[EC2 VPC: the-vpc-id] Deleted subnet the-subnet-id tags \n",
 			}))
 		})
@@ -91,7 +97,7 @@ var _ = Describe("Subnets", func() {
 				err := subnets.Delete("banana")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[EC2 VPC: banana] Delete subnet the-subnet-id tags: some error \n",
 				}))
 			})

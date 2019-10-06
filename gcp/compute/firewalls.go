@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface firewallsClient --output fakes/firewalls_client.go
 type firewallsClient interface {
 	ListFirewalls() ([]*gcpcompute.Firewall, error)
 	DeleteFirewall(firewall string) error

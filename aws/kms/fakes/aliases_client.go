@@ -1,41 +1,55 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/kms"
+import (
+	"sync"
+
+	awskms "github.com/aws/aws-sdk-go/service/kms"
+)
 
 type AliasesClient struct {
-	ListAliasesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *kms.ListAliasesInput
-		}
-		Returns struct {
-			Output *kms.ListAliasesOutput
-			Error  error
-		}
-	}
-
 	DeleteAliasCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *kms.DeleteAliasInput
+			DeleteAliasInput *awskms.DeleteAliasInput
 		}
 		Returns struct {
-			Output *kms.DeleteAliasOutput
-			Error  error
+			DeleteAliasOutput *awskms.DeleteAliasOutput
+			Error             error
 		}
+		Stub func(*awskms.DeleteAliasInput) (*awskms.DeleteAliasOutput, error)
+	}
+	ListAliasesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListAliasesInput *awskms.ListAliasesInput
+		}
+		Returns struct {
+			ListAliasesOutput *awskms.ListAliasesOutput
+			Error             error
+		}
+		Stub func(*awskms.ListAliasesInput) (*awskms.ListAliasesOutput, error)
 	}
 }
 
-func (a *AliasesClient) ListAliases(input *kms.ListAliasesInput) (*kms.ListAliasesOutput, error) {
-	a.ListAliasesCall.CallCount++
-	a.ListAliasesCall.Receives.Input = input
-
-	return a.ListAliasesCall.Returns.Output, a.ListAliasesCall.Returns.Error
+func (f *AliasesClient) DeleteAlias(param1 *awskms.DeleteAliasInput) (*awskms.DeleteAliasOutput, error) {
+	f.DeleteAliasCall.Lock()
+	defer f.DeleteAliasCall.Unlock()
+	f.DeleteAliasCall.CallCount++
+	f.DeleteAliasCall.Receives.DeleteAliasInput = param1
+	if f.DeleteAliasCall.Stub != nil {
+		return f.DeleteAliasCall.Stub(param1)
+	}
+	return f.DeleteAliasCall.Returns.DeleteAliasOutput, f.DeleteAliasCall.Returns.Error
 }
-
-func (a *AliasesClient) DeleteAlias(input *kms.DeleteAliasInput) (*kms.DeleteAliasOutput, error) {
-	a.DeleteAliasCall.CallCount++
-	a.DeleteAliasCall.Receives.Input = input
-
-	return a.DeleteAliasCall.Returns.Output, a.DeleteAliasCall.Returns.Error
+func (f *AliasesClient) ListAliases(param1 *awskms.ListAliasesInput) (*awskms.ListAliasesOutput, error) {
+	f.ListAliasesCall.Lock()
+	defer f.ListAliasesCall.Unlock()
+	f.ListAliasesCall.CallCount++
+	f.ListAliasesCall.Receives.ListAliasesInput = param1
+	if f.ListAliasesCall.Stub != nil {
+		return f.ListAliasesCall.Stub(param1)
+	}
+	return f.ListAliasesCall.Returns.ListAliasesOutput, f.ListAliasesCall.Returns.Error
 }

@@ -31,7 +31,7 @@ var _ = Describe("NatGateways", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeNatGatewaysCall.Returns.Output = &awsec2.DescribeNatGatewaysOutput{
+			client.DescribeNatGatewaysCall.Returns.DescribeNatGatewaysOutput = &awsec2.DescribeNatGatewaysOutput{
 				NatGateways: []*awsec2.NatGateway{{
 					NatGatewayId: aws.String("banana"),
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("NatGateways", func() {
 
 			Expect(client.DescribeNatGatewaysCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Nat Gateway"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Nat Gateway"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

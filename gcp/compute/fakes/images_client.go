@@ -1,17 +1,14 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type ImagesClient struct {
-	ListImagesCall struct {
-		CallCount int
-		Returns   struct {
-			Output []*gcpcompute.Image
-			Error  error
-		}
-	}
-
 	DeleteImageCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Image string
@@ -19,18 +16,35 @@ type ImagesClient struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
+	}
+	ListImagesCall struct {
+		sync.Mutex
+		CallCount int
+		Returns   struct {
+			ImageSlice []*gcpcompute.Image
+			Error      error
+		}
+		Stub func() ([]*gcpcompute.Image, error)
 	}
 }
 
-func (n *ImagesClient) ListImages() ([]*gcpcompute.Image, error) {
-	n.ListImagesCall.CallCount++
-
-	return n.ListImagesCall.Returns.Output, n.ListImagesCall.Returns.Error
+func (f *ImagesClient) DeleteImage(param1 string) error {
+	f.DeleteImageCall.Lock()
+	defer f.DeleteImageCall.Unlock()
+	f.DeleteImageCall.CallCount++
+	f.DeleteImageCall.Receives.Image = param1
+	if f.DeleteImageCall.Stub != nil {
+		return f.DeleteImageCall.Stub(param1)
+	}
+	return f.DeleteImageCall.Returns.Error
 }
-
-func (n *ImagesClient) DeleteImage(image string) error {
-	n.DeleteImageCall.CallCount++
-	n.DeleteImageCall.Receives.Image = image
-
-	return n.DeleteImageCall.Returns.Error
+func (f *ImagesClient) ListImages() ([]*gcpcompute.Image, error) {
+	f.ListImagesCall.Lock()
+	defer f.ListImagesCall.Unlock()
+	f.ListImagesCall.CallCount++
+	if f.ListImagesCall.Stub != nil {
+		return f.ListImagesCall.Stub()
+	}
+	return f.ListImagesCall.Returns.ImageSlice, f.ListImagesCall.Returns.Error
 }

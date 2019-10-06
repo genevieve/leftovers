@@ -7,6 +7,7 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+//go:generate faux --interface resourceTags --output fakes/resource_tags.go
 type resourceTags interface {
 	Delete(filterName, filterValue string) error
 }

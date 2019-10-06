@@ -13,14 +13,14 @@ import (
 
 var _ = Describe("Tier 1 Routers", func() {
 	var (
-		client       *fakes.LogicalRoutingAndServicesAPI
+		client       *fakes.LogicalRoutingAPI
 		logger       *fakes.Logger
 		ctx          context.Context
 		tier1Routers logicalrouting.Tier1Routers
 	)
 
 	BeforeEach(func() {
-		client = &fakes.LogicalRoutingAndServicesAPI{}
+		client = &fakes.LogicalRoutingAPI{}
 		logger = &fakes.Logger{}
 
 		ctx = context.WithValue(context.Background(), "fruit", "soursop")
@@ -34,7 +34,7 @@ var _ = Describe("Tier 1 Routers", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListLogicalRoutersCall.Returns.ListResult = manager.LogicalRouterListResult{
+			client.ListLogicalRoutersCall.Returns.LogicalRouterListResult = manager.LogicalRouterListResult{
 				Results: []manager.LogicalRouter{
 					manager.LogicalRouter{
 						Id:          "soursop-123",
@@ -55,12 +55,12 @@ var _ = Describe("Tier 1 Routers", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListLogicalRoutersCall.CallCount).To(Equal(1))
-			Expect(client.ListLogicalRoutersCall.Receives.Context).To(Equal(ctx))
+			Expect(client.ListLogicalRoutersCall.Receives.Ctx).To(Equal(ctx))
 			Expect(client.ListLogicalRoutersCall.Receives.LocalVarOptionals).To(HaveKeyWithValue("routerType", "TIER1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Tier 1 Router"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("soursop"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Tier 1 Router"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("soursop"))
 
 			Expect(list).To(HaveLen(1))
 			Expect(list[0].Name()).NotTo(Equal("cherimoya"))
@@ -68,7 +68,7 @@ var _ = Describe("Tier 1 Routers", func() {
 
 		Context("when system owned resources appear in the list returned by the client", func() {
 			BeforeEach(func() {
-				client.ListLogicalRoutersCall.Returns.ListResult = manager.LogicalRouterListResult{
+				client.ListLogicalRoutersCall.Returns.LogicalRouterListResult = manager.LogicalRouterListResult{
 					Results: []manager.LogicalRouter{
 						manager.LogicalRouter{
 							Id:          "soursop-123",
@@ -88,8 +88,8 @@ var _ = Describe("Tier 1 Routers", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-				Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Tier 1 Router"))
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("soursop"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Tier 1 Router"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("soursop"))
 
 				Expect(list).To(HaveLen(1))
 				Expect(list[0].Name()).NotTo(Equal("soursop-system"))

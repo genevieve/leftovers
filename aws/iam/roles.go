@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface rolesClient --output fakes/roles_client.go
 type rolesClient interface {
 	ListRoles(*awsiam.ListRolesInput) (*awsiam.ListRolesOutput, error)
 	DeleteRole(*awsiam.DeleteRoleInput) (*awsiam.DeleteRoleOutput, error)

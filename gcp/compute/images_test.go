@@ -30,7 +30,7 @@ var _ = Describe("Images", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListImagesCall.Returns.Output = []*gcpcompute.Image{{
+			client.ListImagesCall.Returns.ImageSlice = []*gcpcompute.Image{{
 				Name: "banana-image",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("Images", func() {
 			Expect(client.ListImagesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Image"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-image"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Image"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-image"))
 
 			Expect(list).To(HaveLen(1))
 		})

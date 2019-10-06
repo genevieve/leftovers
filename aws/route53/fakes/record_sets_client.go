@@ -1,51 +1,55 @@
 package fakes
 
 import (
+	"sync"
+
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
 )
 
 type RecordSetsClient struct {
-	ListResourceRecordSetsCall struct {
-		CallCount int
-		Receives  []ListResourceRecordSetsCallReceive
-		Returns   []ListResourceRecordSetsCallReturn
-	}
-
 	ChangeResourceRecordSetsCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *awsroute53.ChangeResourceRecordSetsInput
+			ChangeResourceRecordSetsInput *awsroute53.ChangeResourceRecordSetsInput
 		}
 		Returns struct {
-			Output *awsroute53.ChangeResourceRecordSetsOutput
-			Error  error
+			ChangeResourceRecordSetsOutput *awsroute53.ChangeResourceRecordSetsOutput
+			Error                          error
 		}
+		Stub func(*awsroute53.ChangeResourceRecordSetsInput) (*awsroute53.ChangeResourceRecordSetsOutput, error)
+	}
+	ListResourceRecordSetsCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListResourceRecordSetsInput *awsroute53.ListResourceRecordSetsInput
+		}
+		Returns struct {
+			ListResourceRecordSetsOutput *awsroute53.ListResourceRecordSetsOutput
+			Error                        error
+		}
+		Stub func(*awsroute53.ListResourceRecordSetsInput) (*awsroute53.ListResourceRecordSetsOutput, error)
 	}
 }
 
-type ListResourceRecordSetsCallReceive struct {
-	Input *awsroute53.ListResourceRecordSetsInput
-}
-
-type ListResourceRecordSetsCallReturn struct {
-	Output *awsroute53.ListResourceRecordSetsOutput
-	Error  error
-}
-
-func (r *RecordSetsClient) ListResourceRecordSets(input *awsroute53.ListResourceRecordSetsInput) (*awsroute53.ListResourceRecordSetsOutput, error) {
-	r.ListResourceRecordSetsCall.CallCount++
-	r.ListResourceRecordSetsCall.Receives = append(r.ListResourceRecordSetsCall.Receives, ListResourceRecordSetsCallReceive{Input: input})
-
-	if len(r.ListResourceRecordSetsCall.Returns) < r.ListResourceRecordSetsCall.CallCount {
-		return nil, nil
+func (f *RecordSetsClient) ChangeResourceRecordSets(param1 *awsroute53.ChangeResourceRecordSetsInput) (*awsroute53.ChangeResourceRecordSetsOutput, error) {
+	f.ChangeResourceRecordSetsCall.Lock()
+	defer f.ChangeResourceRecordSetsCall.Unlock()
+	f.ChangeResourceRecordSetsCall.CallCount++
+	f.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput = param1
+	if f.ChangeResourceRecordSetsCall.Stub != nil {
+		return f.ChangeResourceRecordSetsCall.Stub(param1)
 	}
-
-	return r.ListResourceRecordSetsCall.Returns[r.ListResourceRecordSetsCall.CallCount-1].Output, r.ListResourceRecordSetsCall.Returns[r.ListResourceRecordSetsCall.CallCount-1].Error
+	return f.ChangeResourceRecordSetsCall.Returns.ChangeResourceRecordSetsOutput, f.ChangeResourceRecordSetsCall.Returns.Error
 }
-
-func (r *RecordSetsClient) ChangeResourceRecordSets(input *awsroute53.ChangeResourceRecordSetsInput) (*awsroute53.ChangeResourceRecordSetsOutput, error) {
-	r.ChangeResourceRecordSetsCall.CallCount++
-	r.ChangeResourceRecordSetsCall.Receives.Input = input
-
-	return r.ChangeResourceRecordSetsCall.Returns.Output, r.ChangeResourceRecordSetsCall.Returns.Error
+func (f *RecordSetsClient) ListResourceRecordSets(param1 *awsroute53.ListResourceRecordSetsInput) (*awsroute53.ListResourceRecordSetsOutput, error) {
+	f.ListResourceRecordSetsCall.Lock()
+	defer f.ListResourceRecordSetsCall.Unlock()
+	f.ListResourceRecordSetsCall.CallCount++
+	f.ListResourceRecordSetsCall.Receives.ListResourceRecordSetsInput = param1
+	if f.ListResourceRecordSetsCall.Stub != nil {
+		return f.ListResourceRecordSetsCall.Stub(param1)
+	}
+	return f.ListResourceRecordSetsCall.Returns.ListResourceRecordSetsOutput, f.ListResourceRecordSetsCall.Returns.Error
 }

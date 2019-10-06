@@ -31,14 +31,12 @@ var _ = Describe("RecordSets", func() {
 
 	Describe("Get", func() {
 		BeforeEach(func() {
-			client.ListResourceRecordSetsCall.Returns = []fakes.ListResourceRecordSetsCallReturn{{
-				Output: &awsroute53.ListResourceRecordSetsOutput{
-					ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
-						Name: aws.String("the-name"),
-						Type: aws.String("something-else"),
-					}},
-					IsTruncated: aws.Bool(false),
+			client.ListResourceRecordSetsCall.Returns.ListResourceRecordSetsOutput = &awsroute53.ListResourceRecordSetsOutput{
+				ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
+					Name: aws.String("the-name"),
+					Type: aws.String("something-else"),
 				}},
+				IsTruncated: aws.Bool(false),
 			}
 		})
 
@@ -49,29 +47,36 @@ var _ = Describe("RecordSets", func() {
 			Expect(records).To(HaveLen(1))
 
 			Expect(client.ListResourceRecordSetsCall.CallCount).To(Equal(1))
-			Expect(client.ListResourceRecordSetsCall.Receives[0].Input.HostedZoneId).To(Equal(hostedZoneId))
+			Expect(client.ListResourceRecordSetsCall.Receives.ListResourceRecordSetsInput.HostedZoneId).To(Equal(hostedZoneId))
 		})
 
 		Context("when there are pages of record sets", func() {
+			var inputs []*awsroute53.ListResourceRecordSetsInput
+
 			BeforeEach(func() {
-				client.ListResourceRecordSetsCall.Returns = []fakes.ListResourceRecordSetsCallReturn{
-					{
-						Output: &awsroute53.ListResourceRecordSetsOutput{
+				client.ListResourceRecordSetsCall.Stub = func(input *awsroute53.ListResourceRecordSetsInput) (*awsroute53.ListResourceRecordSetsOutput, error) {
+					inputs = append(inputs, input)
+
+					switch client.ListResourceRecordSetsCall.CallCount {
+					case 1:
+						return &awsroute53.ListResourceRecordSetsOutput{
 							ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
 								Type: aws.String("something-else"),
 							}},
 							NextRecordName: aws.String("one-more-thing"),
 							IsTruncated:    aws.Bool(true),
-						},
-					},
-					{
-						Output: &awsroute53.ListResourceRecordSetsOutput{
+						}, nil
+					case 2:
+						return &awsroute53.ListResourceRecordSetsOutput{
 							ResourceRecordSets: []*awsroute53.ResourceRecordSet{{
 								Type: aws.String("one-more-thing"),
 							}},
 							IsTruncated: aws.Bool(false),
-						},
-					},
+						}, nil
+					default:
+						return nil, nil
+					}
+
 				}
 			})
 
@@ -82,15 +87,15 @@ var _ = Describe("RecordSets", func() {
 				Expect(records).To(HaveLen(2))
 
 				Expect(client.ListResourceRecordSetsCall.CallCount).To(Equal(2))
-				Expect(client.ListResourceRecordSetsCall.Receives[0].Input.HostedZoneId).To(Equal(hostedZoneId))
-				Expect(client.ListResourceRecordSetsCall.Receives[0].Input.StartRecordName).To(BeNil())
-				Expect(client.ListResourceRecordSetsCall.Receives[1].Input.StartRecordName).To(Equal(aws.String("one-more-thing")))
+				Expect(inputs[0].HostedZoneId).To(Equal(hostedZoneId))
+				Expect(inputs[0].StartRecordName).To(BeNil())
+				Expect(inputs[1].StartRecordName).To(Equal(aws.String("one-more-thing")))
 			})
 		})
 
 		Context("when the client fails to list resource record sets", func() {
 			BeforeEach(func() {
-				client.ListResourceRecordSetsCall.Returns = []fakes.ListResourceRecordSetsCallReturn{{Error: errors.New("banana")}}
+				client.ListResourceRecordSetsCall.Returns.Error = errors.New("banana")
 			})
 
 			It("returns the error", func() {
@@ -115,9 +120,9 @@ var _ = Describe("RecordSets", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
-			Expect(client.ChangeResourceRecordSetsCall.Receives.Input.HostedZoneId).To(Equal(hostedZoneId))
-			Expect(client.ChangeResourceRecordSetsCall.Receives.Input.ChangeBatch.Changes[0].Action).To(Equal(aws.String("DELETE")))
-			Expect(client.ChangeResourceRecordSetsCall.Receives.Input.ChangeBatch.Changes[0].ResourceRecordSet.Type).To(Equal(aws.String("something-else")))
+			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.HostedZoneId).To(Equal(hostedZoneId))
+			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].Action).To(Equal(aws.String("DELETE")))
+			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].ResourceRecordSet.Type).To(Equal(aws.String("something-else")))
 		})
 
 		Context("when the resource record set is of type NS", func() {

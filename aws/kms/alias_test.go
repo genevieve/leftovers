@@ -31,7 +31,7 @@ var _ = Describe("Alias", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteAliasCall.CallCount).To(Equal(1))
-			Expect(client.DeleteAliasCall.Receives.Input.AliasName).To(Equal(name))
+			Expect(client.DeleteAliasCall.Receives.DeleteAliasInput.AliasName).To(Equal(name))
 		})
 
 		Context("when the client fails", func() {

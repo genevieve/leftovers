@@ -14,13 +14,13 @@ import (
 var _ = Describe("DBCluster", func() {
 	var (
 		dbCluster    rds.DBCluster
-		client       *fakes.DBClustersClient
+		client       *fakes.DbClustersClient
 		name         *string
 		skipSnapshot *bool
 	)
 
 	BeforeEach(func() {
-		client = &fakes.DBClustersClient{}
+		client = &fakes.DbClustersClient{}
 		name = aws.String("the-name")
 		skipSnapshot = aws.Bool(true)
 
@@ -33,8 +33,8 @@ var _ = Describe("DBCluster", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteDBClusterCall.CallCount).To(Equal(1))
-			Expect(client.DeleteDBClusterCall.Receives.Input.DBClusterIdentifier).To(Equal(name))
-			Expect(client.DeleteDBClusterCall.Receives.Input.SkipFinalSnapshot).To(Equal(skipSnapshot))
+			Expect(client.DeleteDBClusterCall.Receives.DeleteDBClusterInput.DBClusterIdentifier).To(Equal(name))
+			Expect(client.DeleteDBClusterCall.Receives.DeleteDBClusterInput.SkipFinalSnapshot).To(Equal(skipSnapshot))
 		})
 
 		Context("when the client fails", func() {

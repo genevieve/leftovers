@@ -32,7 +32,7 @@ var _ = Describe("ForwardingRules", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListForwardingRulesCall.Returns.Output = []*gcpcompute.ForwardingRule{{
+			client.ListForwardingRulesCall.Returns.ForwardingRuleSlice = []*gcpcompute.ForwardingRule{{
 				Name:   "banana-rule",
 				Region: "https://region-1",
 			}}
@@ -47,8 +47,8 @@ var _ = Describe("ForwardingRules", func() {
 			Expect(client.ListForwardingRulesCall.Receives.Region).To(Equal("region-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Forwarding Rule"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-rule"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Forwarding Rule"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-rule"))
 
 			Expect(list).To(HaveLen(1))
 		})

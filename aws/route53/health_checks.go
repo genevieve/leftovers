@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface healthChecksClient --output fakes/health_checks_client.go
 type healthChecksClient interface {
 	ListHealthChecks(*awsroute53.ListHealthChecksInput) (*awsroute53.ListHealthChecksOutput, error)
 	DeleteHealthCheck(*awsroute53.DeleteHealthCheckInput) (*awsroute53.DeleteHealthCheckOutput, error)

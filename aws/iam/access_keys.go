@@ -7,11 +7,13 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
+//go:generate faux --interface accessKeysClient --output fakes/access_keys_client.go
 type accessKeysClient interface {
 	ListAccessKeys(*awsiam.ListAccessKeysInput) (*awsiam.ListAccessKeysOutput, error)
 	DeleteAccessKey(*awsiam.DeleteAccessKeyInput) (*awsiam.DeleteAccessKeyOutput, error)
 }
 
+//go:generate faux --interface accessKeys --output fakes/access_keys.go
 type accessKeys interface {
 	Delete(userName string) error
 }

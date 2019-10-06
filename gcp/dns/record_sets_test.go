@@ -28,7 +28,7 @@ var _ = Describe("RecordSets", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.ListRecordSetsCall.Returns.Output = &gcpdns.ResourceRecordSetsListResponse{
+			client.ListRecordSetsCall.Returns.ResourceRecordSetsListResponse = &gcpdns.ResourceRecordSetsListResponse{
 				Rrsets: []*gcpdns.ResourceRecordSet{{
 					Name: "banana-record",
 					Type: "not-ns-or-soa",
@@ -52,7 +52,7 @@ var _ = Describe("RecordSets", func() {
 
 		Context("when the record type is NS", func() {
 			BeforeEach(func() {
-				client.ListRecordSetsCall.Returns.Output = &gcpdns.ResourceRecordSetsListResponse{
+				client.ListRecordSetsCall.Returns.ResourceRecordSetsListResponse = &gcpdns.ResourceRecordSetsListResponse{
 					Rrsets: []*gcpdns.ResourceRecordSet{{
 						Name: "banana-record",
 						Type: "NS",
@@ -71,7 +71,7 @@ var _ = Describe("RecordSets", func() {
 
 		Context("when the record type is SOA", func() {
 			BeforeEach(func() {
-				client.ListRecordSetsCall.Returns.Output = &gcpdns.ResourceRecordSetsListResponse{
+				client.ListRecordSetsCall.Returns.ResourceRecordSetsListResponse = &gcpdns.ResourceRecordSetsListResponse{
 					Rrsets: []*gcpdns.ResourceRecordSet{{
 						Name: "banana-record",
 						Type: "SOA",

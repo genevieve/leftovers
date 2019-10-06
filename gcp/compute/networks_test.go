@@ -30,7 +30,7 @@ var _ = Describe("Networks", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListNetworksCall.Returns.Output = []*gcpcompute.Network{{
+			client.ListNetworksCall.Returns.NetworkSlice = []*gcpcompute.Network{{
 				Name: "banana-network",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("Networks", func() {
 			Expect(client.ListNetworksCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Network"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-network"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Network"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-network"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -72,7 +72,7 @@ var _ = Describe("Networks", func() {
 
 		Context("when it is the default network", func() {
 			BeforeEach(func() {
-				client.ListNetworksCall.Returns.Output = []*gcpcompute.Network{{
+				client.ListNetworksCall.Returns.NetworkSlice = []*gcpcompute.Network{{
 					Name: "default",
 				}}
 			})

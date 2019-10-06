@@ -1,43 +1,55 @@
 package fakes
 
 import (
+	"sync"
+
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
 )
 
 type HostedZonesClient struct {
-	ListHostedZonesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *awsroute53.ListHostedZonesInput
-		}
-		Returns struct {
-			Output *awsroute53.ListHostedZonesOutput
-			Error  error
-		}
-	}
-
 	DeleteHostedZoneCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *awsroute53.DeleteHostedZoneInput
+			DeleteHostedZoneInput *awsroute53.DeleteHostedZoneInput
 		}
 		Returns struct {
-			Output *awsroute53.DeleteHostedZoneOutput
-			Error  error
+			DeleteHostedZoneOutput *awsroute53.DeleteHostedZoneOutput
+			Error                  error
 		}
+		Stub func(*awsroute53.DeleteHostedZoneInput) (*awsroute53.DeleteHostedZoneOutput, error)
+	}
+	ListHostedZonesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListHostedZonesInput *awsroute53.ListHostedZonesInput
+		}
+		Returns struct {
+			ListHostedZonesOutput *awsroute53.ListHostedZonesOutput
+			Error                 error
+		}
+		Stub func(*awsroute53.ListHostedZonesInput) (*awsroute53.ListHostedZonesOutput, error)
 	}
 }
 
-func (h *HostedZonesClient) ListHostedZones(input *awsroute53.ListHostedZonesInput) (*awsroute53.ListHostedZonesOutput, error) {
-	h.ListHostedZonesCall.CallCount++
-	h.ListHostedZonesCall.Receives.Input = input
-
-	return h.ListHostedZonesCall.Returns.Output, h.ListHostedZonesCall.Returns.Error
+func (f *HostedZonesClient) DeleteHostedZone(param1 *awsroute53.DeleteHostedZoneInput) (*awsroute53.DeleteHostedZoneOutput, error) {
+	f.DeleteHostedZoneCall.Lock()
+	defer f.DeleteHostedZoneCall.Unlock()
+	f.DeleteHostedZoneCall.CallCount++
+	f.DeleteHostedZoneCall.Receives.DeleteHostedZoneInput = param1
+	if f.DeleteHostedZoneCall.Stub != nil {
+		return f.DeleteHostedZoneCall.Stub(param1)
+	}
+	return f.DeleteHostedZoneCall.Returns.DeleteHostedZoneOutput, f.DeleteHostedZoneCall.Returns.Error
 }
-
-func (h *HostedZonesClient) DeleteHostedZone(input *awsroute53.DeleteHostedZoneInput) (*awsroute53.DeleteHostedZoneOutput, error) {
-	h.DeleteHostedZoneCall.CallCount++
-	h.DeleteHostedZoneCall.Receives.Input = input
-
-	return h.DeleteHostedZoneCall.Returns.Output, h.DeleteHostedZoneCall.Returns.Error
+func (f *HostedZonesClient) ListHostedZones(param1 *awsroute53.ListHostedZonesInput) (*awsroute53.ListHostedZonesOutput, error) {
+	f.ListHostedZonesCall.Lock()
+	defer f.ListHostedZonesCall.Unlock()
+	f.ListHostedZonesCall.CallCount++
+	f.ListHostedZonesCall.Receives.ListHostedZonesInput = param1
+	if f.ListHostedZonesCall.Stub != nil {
+		return f.ListHostedZonesCall.Stub(param1)
+	}
+	return f.ListHostedZonesCall.Returns.ListHostedZonesOutput, f.ListHostedZonesCall.Returns.Error
 }

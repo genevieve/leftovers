@@ -32,7 +32,7 @@ var _ = Describe("TargetGroups", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeTargetGroupsCall.Returns.Output = &awselbv2.DescribeTargetGroupsOutput{
+			client.DescribeTargetGroupsCall.Returns.DescribeTargetGroupsOutput = &awselbv2.DescribeTargetGroupsOutput{
 				TargetGroups: []*awselbv2.TargetGroup{{
 					TargetGroupName: aws.String("precursor-banana"),
 					TargetGroupArn:  aws.String("precursor-arn"),
@@ -48,8 +48,8 @@ var _ = Describe("TargetGroups", func() {
 			Expect(client.DescribeTargetGroupsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("ELBV2 Target Group"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("precursor-banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("ELBV2 Target Group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("precursor-banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

@@ -31,7 +31,7 @@ var _ = Describe("Aliases", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListAliasesCall.Returns.Output = &awskms.ListAliasesOutput{
+			client.ListAliasesCall.Returns.ListAliasesOutput = &awskms.ListAliasesOutput{
 				Aliases: []*awskms.AliasListEntry{{
 					AliasName: aws.String("banana"),
 				}},
@@ -44,8 +44,8 @@ var _ = Describe("Aliases", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAliasesCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("KMS Alias"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("KMS Alias"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -53,7 +53,7 @@ var _ = Describe("Aliases", func() {
 		Context("when the alias name does not contain the filter", func() {
 			BeforeEach(func() {
 				logger.PromptWithDetailsCall.Returns.Proceed = true
-				client.ListAliasesCall.Returns.Output = &awskms.ListAliasesOutput{
+				client.ListAliasesCall.Returns.ListAliasesOutput = &awskms.ListAliasesOutput{
 					Aliases: []*awskms.AliasListEntry{{
 						AliasName: aws.String("nope"),
 					}},

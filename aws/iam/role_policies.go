@@ -7,6 +7,7 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
+//go:generate faux --interface rolePoliciesClient --output fakes/role_policies_client.go
 type rolePoliciesClient interface {
 	ListAttachedRolePolicies(*awsiam.ListAttachedRolePoliciesInput) (*awsiam.ListAttachedRolePoliciesOutput, error)
 	ListRolePolicies(*awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error)
@@ -14,6 +15,7 @@ type rolePoliciesClient interface {
 	DeleteRolePolicy(*awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error)
 }
 
+//go:generate faux --interface rolePolicies --output fakes/role_policies.go
 type rolePolicies interface {
 	Delete(roleName string) error
 }

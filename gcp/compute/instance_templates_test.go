@@ -30,7 +30,7 @@ var _ = Describe("InstanceTemplates", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListInstanceTemplatesCall.Returns.Output = []*gcpcompute.InstanceTemplate{{
+			client.ListInstanceTemplatesCall.Returns.InstanceTemplateSlice = []*gcpcompute.InstanceTemplate{{
 				Name: "banana-template",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("InstanceTemplates", func() {
 			Expect(client.ListInstanceTemplatesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Instance Template"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-template"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Instance Template"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-template"))
 
 			Expect(list).To(HaveLen(1))
 		})

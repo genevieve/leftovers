@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface instanceTemplatesClient --output fakes/instance_templates_client.go
 type instanceTemplatesClient interface {
 	ListInstanceTemplates() ([]*gcpcompute.InstanceTemplate, error)
 	DeleteInstanceTemplate(template string) error

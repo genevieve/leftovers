@@ -12,6 +12,7 @@ type Images struct {
 	logger logger
 }
 
+//go:generate faux --interface imageServiceClient --output fakes/image_service_client.go
 type imageServiceClient interface {
 	List() ([]images.Image, error)
 	Delete(id string) error

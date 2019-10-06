@@ -1,7 +1,10 @@
 package fakes
 
+import "sync"
+
 type UserPolicies struct {
 	DeleteCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			UserName string
@@ -9,12 +12,17 @@ type UserPolicies struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
 	}
 }
 
-func (u *UserPolicies) Delete(userName string) error {
-	u.DeleteCall.CallCount++
-	u.DeleteCall.Receives.UserName = userName
-
-	return u.DeleteCall.Returns.Error
+func (f *UserPolicies) Delete(param1 string) error {
+	f.DeleteCall.Lock()
+	defer f.DeleteCall.Unlock()
+	f.DeleteCall.CallCount++
+	f.DeleteCall.Receives.UserName = param1
+	if f.DeleteCall.Stub != nil {
+		return f.DeleteCall.Stub(param1)
+	}
+	return f.DeleteCall.Returns.Error
 }

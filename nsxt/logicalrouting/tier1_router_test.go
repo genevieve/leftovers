@@ -12,7 +12,7 @@ import (
 
 var _ = Describe("Tier 1 Router", func() {
 	var (
-		client *fakes.LogicalRoutingAndServicesAPI
+		client *fakes.LogicalRoutingAPI
 		ctx    context.Context
 		name   string
 		id     string
@@ -21,7 +21,7 @@ var _ = Describe("Tier 1 Router", func() {
 	)
 
 	BeforeEach(func() {
-		client = &fakes.LogicalRoutingAndServicesAPI{}
+		client = &fakes.LogicalRoutingAPI{}
 		name = "ackee"
 		id = "ackee-123"
 
@@ -36,8 +36,8 @@ var _ = Describe("Tier 1 Router", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteLogicalRouterCall.CallCount).To(Equal(1))
-			Expect(client.DeleteLogicalRouterCall.Receives.ID).To(Equal(id))
-			Expect(client.DeleteLogicalRouterCall.Receives.Context).To(Equal(ctx))
+			Expect(client.DeleteLogicalRouterCall.Receives.Id).To(Equal(id))
+			Expect(client.DeleteLogicalRouterCall.Receives.Ctx).To(Equal(ctx))
 			Expect(client.DeleteLogicalRouterCall.Receives.LocalVarOptionals).To(HaveKeyWithValue("force", true))
 		})
 

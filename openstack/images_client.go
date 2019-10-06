@@ -7,6 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
+//go:generate faux --interface imageAPI --output fakes/image_api.go
 type imageAPI interface {
 	GetImagesPager() pagination.Pager
 	PagerToPage(pager pagination.Pager) (pagination.Page, error)

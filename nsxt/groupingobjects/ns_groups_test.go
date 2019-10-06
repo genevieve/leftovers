@@ -34,7 +34,7 @@ var _ = Describe("NS Groups", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListNSGroupsCall.Returns.NSGroupListResult = manager.NsGroupListResult{
+			client.ListNSGroupsCall.Returns.NsGroupListResult = manager.NsGroupListResult{
 				Results: []manager.NsGroup{
 					manager.NsGroup{
 						Id:          "pineapple-123",
@@ -58,8 +58,8 @@ var _ = Describe("NS Groups", func() {
 			Expect(client.ListNSGroupsCall.Receives.Context).To(Equal(ctx))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("NS Group"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("pineapple"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("NS Group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("pineapple"))
 
 			Expect(list).To(HaveLen(1))
 			Expect(list[0].Name()).NotTo(Equal("cherimoya"))

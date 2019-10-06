@@ -10,6 +10,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface snapshotsClient --output fakes/snapshots_client.go
 type snapshotsClient interface {
 	DescribeSnapshots(*awsec2.DescribeSnapshotsInput) (*awsec2.DescribeSnapshotsOutput, error)
 	DeleteSnapshot(*awsec2.DeleteSnapshotInput) (*awsec2.DeleteSnapshotOutput, error)

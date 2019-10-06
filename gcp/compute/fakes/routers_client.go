@@ -1,42 +1,56 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type RoutersClient struct {
-	ListRoutersCall struct {
-		CallCount int
-		Receives  struct {
-			Region string
-		}
-		Returns struct {
-			Output []*gcpcompute.Router
-			Error  error
-		}
-	}
-
 	DeleteRouterCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Router string
 			Region string
+			Router string
 		}
 		Returns struct {
 			Error error
 		}
+		Stub func(string, string) error
+	}
+	ListRoutersCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Region string
+		}
+		Returns struct {
+			RouterSlice []*gcpcompute.Router
+			Error       error
+		}
+		Stub func(string) ([]*gcpcompute.Router, error)
 	}
 }
 
-func (n *RoutersClient) ListRouters(region string) ([]*gcpcompute.Router, error) {
-	n.ListRoutersCall.CallCount++
-	n.ListRoutersCall.Receives.Region = region
-
-	return n.ListRoutersCall.Returns.Output, n.ListRoutersCall.Returns.Error
+func (f *RoutersClient) DeleteRouter(param1 string, param2 string) error {
+	f.DeleteRouterCall.Lock()
+	defer f.DeleteRouterCall.Unlock()
+	f.DeleteRouterCall.CallCount++
+	f.DeleteRouterCall.Receives.Region = param1
+	f.DeleteRouterCall.Receives.Router = param2
+	if f.DeleteRouterCall.Stub != nil {
+		return f.DeleteRouterCall.Stub(param1, param2)
+	}
+	return f.DeleteRouterCall.Returns.Error
 }
-
-func (n *RoutersClient) DeleteRouter(region, router string) error {
-	n.DeleteRouterCall.CallCount++
-	n.DeleteRouterCall.Receives.Region = region
-	n.DeleteRouterCall.Receives.Router = router
-
-	return n.DeleteRouterCall.Returns.Error
+func (f *RoutersClient) ListRouters(param1 string) ([]*gcpcompute.Router, error) {
+	f.ListRoutersCall.Lock()
+	defer f.ListRoutersCall.Unlock()
+	f.ListRoutersCall.CallCount++
+	f.ListRoutersCall.Receives.Region = param1
+	if f.ListRoutersCall.Stub != nil {
+		return f.ListRoutersCall.Stub(param1)
+	}
+	return f.ListRoutersCall.Returns.RouterSlice, f.ListRoutersCall.Returns.Error
 }

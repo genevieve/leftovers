@@ -1,59 +1,77 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/iam"
+import (
+	"sync"
+
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+)
 
 type UserPoliciesClient struct {
-	ListAttachedUserPoliciesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *iam.ListAttachedUserPoliciesInput
-		}
-		Returns struct {
-			Output *iam.ListAttachedUserPoliciesOutput
-			Error  error
-		}
-	}
-
-	DetachUserPolicyCall struct {
-		CallCount int
-		Receives  struct {
-			Input *iam.DetachUserPolicyInput
-		}
-		Returns struct {
-			Output *iam.DetachUserPolicyOutput
-			Error  error
-		}
-	}
-
 	DeleteUserPolicyCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *iam.DeleteUserPolicyInput
+			DeleteUserPolicyInput *awsiam.DeleteUserPolicyInput
 		}
 		Returns struct {
-			Output *iam.DeleteUserPolicyOutput
-			Error  error
+			DeleteUserPolicyOutput *awsiam.DeleteUserPolicyOutput
+			Error                  error
 		}
+		Stub func(*awsiam.DeleteUserPolicyInput) (*awsiam.DeleteUserPolicyOutput, error)
+	}
+	DetachUserPolicyCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DetachUserPolicyInput *awsiam.DetachUserPolicyInput
+		}
+		Returns struct {
+			DetachUserPolicyOutput *awsiam.DetachUserPolicyOutput
+			Error                  error
+		}
+		Stub func(*awsiam.DetachUserPolicyInput) (*awsiam.DetachUserPolicyOutput, error)
+	}
+	ListAttachedUserPoliciesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListAttachedUserPoliciesInput *awsiam.ListAttachedUserPoliciesInput
+		}
+		Returns struct {
+			ListAttachedUserPoliciesOutput *awsiam.ListAttachedUserPoliciesOutput
+			Error                          error
+		}
+		Stub func(*awsiam.ListAttachedUserPoliciesInput) (*awsiam.ListAttachedUserPoliciesOutput, error)
 	}
 }
 
-func (i *UserPoliciesClient) ListAttachedUserPolicies(input *iam.ListAttachedUserPoliciesInput) (*iam.ListAttachedUserPoliciesOutput, error) {
-	i.ListAttachedUserPoliciesCall.CallCount++
-	i.ListAttachedUserPoliciesCall.Receives.Input = input
-
-	return i.ListAttachedUserPoliciesCall.Returns.Output, i.ListAttachedUserPoliciesCall.Returns.Error
+func (f *UserPoliciesClient) DeleteUserPolicy(param1 *awsiam.DeleteUserPolicyInput) (*awsiam.DeleteUserPolicyOutput, error) {
+	f.DeleteUserPolicyCall.Lock()
+	defer f.DeleteUserPolicyCall.Unlock()
+	f.DeleteUserPolicyCall.CallCount++
+	f.DeleteUserPolicyCall.Receives.DeleteUserPolicyInput = param1
+	if f.DeleteUserPolicyCall.Stub != nil {
+		return f.DeleteUserPolicyCall.Stub(param1)
+	}
+	return f.DeleteUserPolicyCall.Returns.DeleteUserPolicyOutput, f.DeleteUserPolicyCall.Returns.Error
 }
-
-func (i *UserPoliciesClient) DetachUserPolicy(input *iam.DetachUserPolicyInput) (*iam.DetachUserPolicyOutput, error) {
-	i.DetachUserPolicyCall.CallCount++
-	i.DetachUserPolicyCall.Receives.Input = input
-
-	return i.DetachUserPolicyCall.Returns.Output, i.DetachUserPolicyCall.Returns.Error
+func (f *UserPoliciesClient) DetachUserPolicy(param1 *awsiam.DetachUserPolicyInput) (*awsiam.DetachUserPolicyOutput, error) {
+	f.DetachUserPolicyCall.Lock()
+	defer f.DetachUserPolicyCall.Unlock()
+	f.DetachUserPolicyCall.CallCount++
+	f.DetachUserPolicyCall.Receives.DetachUserPolicyInput = param1
+	if f.DetachUserPolicyCall.Stub != nil {
+		return f.DetachUserPolicyCall.Stub(param1)
+	}
+	return f.DetachUserPolicyCall.Returns.DetachUserPolicyOutput, f.DetachUserPolicyCall.Returns.Error
 }
-
-func (i *UserPoliciesClient) DeleteUserPolicy(input *iam.DeleteUserPolicyInput) (*iam.DeleteUserPolicyOutput, error) {
-	i.DeleteUserPolicyCall.CallCount++
-	i.DeleteUserPolicyCall.Receives.Input = input
-
-	return i.DeleteUserPolicyCall.Returns.Output, i.DeleteUserPolicyCall.Returns.Error
+func (f *UserPoliciesClient) ListAttachedUserPolicies(param1 *awsiam.ListAttachedUserPoliciesInput) (*awsiam.ListAttachedUserPoliciesOutput, error) {
+	f.ListAttachedUserPoliciesCall.Lock()
+	defer f.ListAttachedUserPoliciesCall.Unlock()
+	f.ListAttachedUserPoliciesCall.CallCount++
+	f.ListAttachedUserPoliciesCall.Receives.ListAttachedUserPoliciesInput = param1
+	if f.ListAttachedUserPoliciesCall.Stub != nil {
+		return f.ListAttachedUserPoliciesCall.Stub(param1)
+	}
+	return f.ListAttachedUserPoliciesCall.Returns.ListAttachedUserPoliciesOutput, f.ListAttachedUserPoliciesCall.Returns.Error
 }

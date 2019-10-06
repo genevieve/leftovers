@@ -32,7 +32,7 @@ var _ = Describe("Instances", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListInstancesCall.Returns.Output = &gcpsql.InstancesListResponse{
+			client.ListInstancesCall.Returns.InstancesListResponse = &gcpsql.InstancesListResponse{
 				Items: []*gcpsql.DatabaseInstance{{
 					Name: "banana-instance",
 				}},
@@ -47,8 +47,8 @@ var _ = Describe("Instances", func() {
 			Expect(client.ListInstancesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("SQL Instance"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-instance"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("SQL Instance"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-instance"))
 
 			Expect(list).To(HaveLen(1))
 		})

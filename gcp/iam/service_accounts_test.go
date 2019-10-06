@@ -37,7 +37,7 @@ var _ = Describe("ServiceAccounts", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListServiceAccountsCall.Returns.Output = []*gcpiam.ServiceAccount{{
+			client.ListServiceAccountsCall.Returns.ServiceAccountSlice = []*gcpiam.ServiceAccount{{
 				Name: "banana-service-account",
 			}}
 			filter = "banana"
@@ -50,8 +50,8 @@ var _ = Describe("ServiceAccounts", func() {
 			Expect(client.ListServiceAccountsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Service Account"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-service-account"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Service Account"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-service-account"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -69,7 +69,7 @@ var _ = Describe("ServiceAccounts", func() {
 
 		Context("when the serviceAccount email is projectName@appspot.gserviceaccount.com", func() {
 			BeforeEach(func() {
-				client.ListServiceAccountsCall.Returns.Output = []*gcpiam.ServiceAccount{{
+				client.ListServiceAccountsCall.Returns.ServiceAccountSlice = []*gcpiam.ServiceAccount{{
 					Name:  "banana-service-account",
 					Email: "projectName@appspot.gserviceaccount.com",
 				}}
@@ -87,7 +87,7 @@ var _ = Describe("ServiceAccounts", func() {
 
 		Context("when the serviceAccount email is 11111-compute@developer.gserviceaccount.com", func() {
 			BeforeEach(func() {
-				client.ListServiceAccountsCall.Returns.Output = []*gcpiam.ServiceAccount{{
+				client.ListServiceAccountsCall.Returns.ServiceAccountSlice = []*gcpiam.ServiceAccount{{
 					Name:  "banana-service-account",
 					Email: "11111-compute@developer.gserviceaccount.com",
 				}}

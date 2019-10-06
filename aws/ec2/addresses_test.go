@@ -31,7 +31,7 @@ var _ = Describe("Addresses", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeAddressesCall.Returns.Output = &awsec2.DescribeAddressesOutput{
+			client.DescribeAddressesCall.Returns.DescribeAddressesOutput = &awsec2.DescribeAddressesOutput{
 				Addresses: []*awsec2.Address{{
 					PublicIp:     aws.String("banana"),
 					AllocationId: aws.String("the-allocation-id"),
@@ -46,8 +46,8 @@ var _ = Describe("Addresses", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Address"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Address"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

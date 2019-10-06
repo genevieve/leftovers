@@ -1,20 +1,28 @@
 package fakes
 
+import "sync"
+
 type BucketManager struct {
 	IsInRegionCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Bucket string
 		}
 		Returns struct {
-			Output bool
+			Bool bool
 		}
+		Stub func(string) bool
 	}
 }
 
-func (b *BucketManager) IsInRegion(bucket string) bool {
-	b.IsInRegionCall.CallCount++
-	b.IsInRegionCall.Receives.Bucket = bucket
-
-	return b.IsInRegionCall.Returns.Output
+func (f *BucketManager) IsInRegion(param1 string) bool {
+	f.IsInRegionCall.Lock()
+	defer f.IsInRegionCall.Unlock()
+	f.IsInRegionCall.CallCount++
+	f.IsInRegionCall.Receives.Bucket = param1
+	if f.IsInRegionCall.Stub != nil {
+		return f.IsInRegionCall.Stub(param1)
+	}
+	return f.IsInRegionCall.Returns.Bool
 }

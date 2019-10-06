@@ -8,6 +8,7 @@ import (
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
 )
 
+//go:generate faux --interface recordSetsClient --output fakes/record_sets_client.go
 type recordSetsClient interface {
 	ListResourceRecordSets(*awsroute53.ListResourceRecordSetsInput) (*awsroute53.ListResourceRecordSetsOutput, error)
 	ChangeResourceRecordSets(*awsroute53.ChangeResourceRecordSetsInput) (*awsroute53.ChangeResourceRecordSetsOutput, error)

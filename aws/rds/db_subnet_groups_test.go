@@ -14,14 +14,14 @@ import (
 
 var _ = Describe("DBSubnetGroups", func() {
 	var (
-		client *fakes.DBSubnetGroupsClient
+		client *fakes.DbSubnetGroupsClient
 		logger *fakes.Logger
 
 		dbSubnetGroups rds.DBSubnetGroups
 	)
 
 	BeforeEach(func() {
-		client = &fakes.DBSubnetGroupsClient{}
+		client = &fakes.DbSubnetGroupsClient{}
 		logger = &fakes.Logger{}
 
 		dbSubnetGroups = rds.NewDBSubnetGroups(client, logger)
@@ -32,7 +32,7 @@ var _ = Describe("DBSubnetGroups", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeDBSubnetGroupsCall.Returns.Output = &awsrds.DescribeDBSubnetGroupsOutput{
+			client.DescribeDBSubnetGroupsCall.Returns.DescribeDBSubnetGroupsOutput = &awsrds.DescribeDBSubnetGroupsOutput{
 				DBSubnetGroups: []*awsrds.DBSubnetGroup{{
 					DBSubnetGroupName: aws.String("banana"),
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("DBSubnetGroups", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBSubnetGroupsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("RDS DB Subnet Group"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("RDS DB Subnet Group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

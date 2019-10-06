@@ -14,12 +14,12 @@ import (
 var _ = Describe("NetworkInterface", func() {
 	var (
 		networkInterface ec2.NetworkInterface
-		client           *fakes.NetworkInterfaceClient
+		client           *fakes.NetworkInterfacesClient
 		id               *string
 	)
 
 	BeforeEach(func() {
-		client = &fakes.NetworkInterfaceClient{}
+		client = &fakes.NetworkInterfacesClient{}
 		id = aws.String("the-id")
 		tags := []*awsec2.Tag{}
 
@@ -32,7 +32,7 @@ var _ = Describe("NetworkInterface", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteNetworkInterfaceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNetworkInterfaceCall.Receives.Input.NetworkInterfaceId).To(Equal(id))
+			Expect(client.DeleteNetworkInterfaceCall.Receives.DeleteNetworkInterfaceInput.NetworkInterfaceId).To(Equal(id))
 		})
 
 		Context("when the client fails", func() {

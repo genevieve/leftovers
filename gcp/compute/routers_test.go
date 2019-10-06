@@ -32,7 +32,7 @@ var _ = Describe("Routers", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListRoutersCall.Returns.Output = []*gcpcompute.Router{
+			client.ListRoutersCall.Returns.RouterSlice = []*gcpcompute.Router{
 				{
 					Name:   "banana-router",
 					Region: "https://region-1",
@@ -51,8 +51,8 @@ var _ = Describe("Routers", func() {
 
 			Expect(client.ListRoutersCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-router"))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Router"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-router"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Router"))
 
 			Expect(list).To(HaveLen(1))
 		})

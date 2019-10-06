@@ -41,7 +41,7 @@ var _ = Describe("User", func() {
 			Expect(accessKeys.DeleteCall.Receives.UserName).To(Equal(*name))
 
 			Expect(client.DeleteUserCall.CallCount).To(Equal(1))
-			Expect(client.DeleteUserCall.Receives.Input.UserName).To(Equal(name))
+			Expect(client.DeleteUserCall.Receives.DeleteUserInput.UserName).To(Equal(name))
 		})
 
 		Context("when deleting the user's access keys fails", func() {

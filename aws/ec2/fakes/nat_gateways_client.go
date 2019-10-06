@@ -1,41 +1,55 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"sync"
+
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type NatGatewaysClient struct {
-	DescribeNatGatewaysCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.DescribeNatGatewaysInput
-		}
-		Returns struct {
-			Output *ec2.DescribeNatGatewaysOutput
-			Error  error
-		}
-	}
-
 	DeleteNatGatewayCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *ec2.DeleteNatGatewayInput
+			DeleteNatGatewayInput *awsec2.DeleteNatGatewayInput
 		}
 		Returns struct {
-			Output *ec2.DeleteNatGatewayOutput
-			Error  error
+			DeleteNatGatewayOutput *awsec2.DeleteNatGatewayOutput
+			Error                  error
 		}
+		Stub func(*awsec2.DeleteNatGatewayInput) (*awsec2.DeleteNatGatewayOutput, error)
+	}
+	DescribeNatGatewaysCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeNatGatewaysInput *awsec2.DescribeNatGatewaysInput
+		}
+		Returns struct {
+			DescribeNatGatewaysOutput *awsec2.DescribeNatGatewaysOutput
+			Error                     error
+		}
+		Stub func(*awsec2.DescribeNatGatewaysInput) (*awsec2.DescribeNatGatewaysOutput, error)
 	}
 }
 
-func (e *NatGatewaysClient) DescribeNatGateways(input *ec2.DescribeNatGatewaysInput) (*ec2.DescribeNatGatewaysOutput, error) {
-	e.DescribeNatGatewaysCall.CallCount++
-	e.DescribeNatGatewaysCall.Receives.Input = input
-
-	return e.DescribeNatGatewaysCall.Returns.Output, e.DescribeNatGatewaysCall.Returns.Error
+func (f *NatGatewaysClient) DeleteNatGateway(param1 *awsec2.DeleteNatGatewayInput) (*awsec2.DeleteNatGatewayOutput, error) {
+	f.DeleteNatGatewayCall.Lock()
+	defer f.DeleteNatGatewayCall.Unlock()
+	f.DeleteNatGatewayCall.CallCount++
+	f.DeleteNatGatewayCall.Receives.DeleteNatGatewayInput = param1
+	if f.DeleteNatGatewayCall.Stub != nil {
+		return f.DeleteNatGatewayCall.Stub(param1)
+	}
+	return f.DeleteNatGatewayCall.Returns.DeleteNatGatewayOutput, f.DeleteNatGatewayCall.Returns.Error
 }
-
-func (e *NatGatewaysClient) DeleteNatGateway(input *ec2.DeleteNatGatewayInput) (*ec2.DeleteNatGatewayOutput, error) {
-	e.DeleteNatGatewayCall.CallCount++
-	e.DeleteNatGatewayCall.Receives.Input = input
-
-	return e.DeleteNatGatewayCall.Returns.Output, e.DeleteNatGatewayCall.Returns.Error
+func (f *NatGatewaysClient) DescribeNatGateways(param1 *awsec2.DescribeNatGatewaysInput) (*awsec2.DescribeNatGatewaysOutput, error) {
+	f.DescribeNatGatewaysCall.Lock()
+	defer f.DescribeNatGatewaysCall.Unlock()
+	f.DescribeNatGatewaysCall.CallCount++
+	f.DescribeNatGatewaysCall.Receives.DescribeNatGatewaysInput = param1
+	if f.DescribeNatGatewaysCall.Stub != nil {
+		return f.DescribeNatGatewaysCall.Stub(param1)
+	}
+	return f.DescribeNatGatewaysCall.Returns.DescribeNatGatewaysOutput, f.DescribeNatGatewaysCall.Returns.Error
 }

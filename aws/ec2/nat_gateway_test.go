@@ -30,7 +30,7 @@ var _ = Describe("NatGateway", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.DescribeNatGatewaysCall.Returns.Output = &awsec2.DescribeNatGatewaysOutput{
+			client.DescribeNatGatewaysCall.Returns.DescribeNatGatewaysOutput = &awsec2.DescribeNatGatewaysOutput{
 				NatGateways: []*awsec2.NatGateway{{
 					NatGatewayId: id,
 					State:        aws.String("deleted"),
@@ -42,7 +42,7 @@ var _ = Describe("NatGateway", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteNatGatewayCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNatGatewayCall.Receives.Input.NatGatewayId).To(Equal(id))
+			Expect(client.DeleteNatGatewayCall.Receives.DeleteNatGatewayInput.NatGatewayId).To(Equal(id))
 		})
 
 		Context("when the client fails", func() {

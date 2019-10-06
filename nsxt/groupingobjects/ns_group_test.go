@@ -36,7 +36,7 @@ var _ = Describe("NS Group", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteNSGroupCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNSGroupCall.Receives.ID).To(Equal(id))
+			Expect(client.DeleteNSGroupCall.Receives.String).To(Equal(id))
 			Expect(client.DeleteNSGroupCall.Receives.Context).To(Equal(ctx))
 		})
 

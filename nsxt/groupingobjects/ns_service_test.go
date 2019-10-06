@@ -36,7 +36,7 @@ var _ = Describe("NS Service", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteNSServiceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteNSServiceCall.Receives.ID).To(Equal(id))
+			Expect(client.DeleteNSServiceCall.Receives.String).To(Equal(id))
 			Expect(client.DeleteNSServiceCall.Receives.Context).To(Equal(ctx))
 		})
 

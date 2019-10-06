@@ -30,18 +30,18 @@ var _ = Describe("Keys", func() {
 		var filter string
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListKeysCall.Returns.Output = &awskms.ListKeysOutput{
+			client.ListKeysCall.Returns.ListKeysOutput = &awskms.ListKeysOutput{
 				Keys: []*awskms.KeyListEntry{{
 					KeyId: aws.String("banana"),
 				}},
 			}
-			client.DescribeKeyCall.Returns.Output = &awskms.DescribeKeyOutput{
+			client.DescribeKeyCall.Returns.DescribeKeyOutput = &awskms.DescribeKeyOutput{
 				KeyMetadata: &awskms.KeyMetadata{
 					Description: aws.String(""),
 					KeyState:    aws.String("Enabled"),
 				},
 			}
-			client.ListResourceTagsCall.Returns.Output = &awskms.ListResourceTagsOutput{
+			client.ListResourceTagsCall.Returns.ListResourceTagsOutput = &awskms.ListResourceTagsOutput{
 				Tags: []*awskms.Tag{},
 			}
 			filter = "ban"
@@ -52,8 +52,8 @@ var _ = Describe("Keys", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListKeysCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("KMS Key"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("KMS Key"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -61,7 +61,7 @@ var _ = Describe("Keys", func() {
 		Context("when the alias name does not contain the filter", func() {
 			BeforeEach(func() {
 				logger.PromptWithDetailsCall.Returns.Proceed = true
-				client.ListKeysCall.Returns.Output = &awskms.ListKeysOutput{
+				client.ListKeysCall.Returns.ListKeysOutput = &awskms.ListKeysOutput{
 					Keys: []*awskms.KeyListEntry{{
 						KeyId: aws.String("banana"),
 					}},

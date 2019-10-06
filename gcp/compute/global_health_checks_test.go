@@ -30,7 +30,7 @@ var _ = Describe("GlobalHealthChecks", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListGlobalHealthChecksCall.Returns.Output = []*gcpcompute.HealthCheck{{
+			client.ListGlobalHealthChecksCall.Returns.HealthCheckSlice = []*gcpcompute.HealthCheck{{
 				Name: "banana-check",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("GlobalHealthChecks", func() {
 			Expect(client.ListGlobalHealthChecksCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Global Health Check"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-check"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Global Health Check"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-check"))
 
 			Expect(list).To(HaveLen(1))
 		})

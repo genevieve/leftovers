@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface disksClient --output fakes/disks_client.go
 type disksClient interface {
 	ListDisks(zone string) ([]*gcpcompute.Disk, error)
 	DeleteDisk(zone, disk string) error

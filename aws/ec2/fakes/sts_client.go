@@ -1,23 +1,33 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/sts"
+import (
+	"sync"
+
+	awssts "github.com/aws/aws-sdk-go/service/sts"
+)
 
 type StsClient struct {
 	GetCallerIdentityCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *sts.GetCallerIdentityInput
+			GetCallerIdentityInput *awssts.GetCallerIdentityInput
 		}
 		Returns struct {
-			Output *sts.GetCallerIdentityOutput
-			Error  error
+			GetCallerIdentityOutput *awssts.GetCallerIdentityOutput
+			Error                   error
 		}
+		Stub func(*awssts.GetCallerIdentityInput) (*awssts.GetCallerIdentityOutput, error)
 	}
 }
 
-func (s *StsClient) GetCallerIdentity(input *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
-	s.GetCallerIdentityCall.CallCount++
-	s.GetCallerIdentityCall.Receives.Input = input
-
-	return s.GetCallerIdentityCall.Returns.Output, s.GetCallerIdentityCall.Returns.Error
+func (f *StsClient) GetCallerIdentity(param1 *awssts.GetCallerIdentityInput) (*awssts.GetCallerIdentityOutput, error) {
+	f.GetCallerIdentityCall.Lock()
+	defer f.GetCallerIdentityCall.Unlock()
+	f.GetCallerIdentityCall.CallCount++
+	f.GetCallerIdentityCall.Receives.GetCallerIdentityInput = param1
+	if f.GetCallerIdentityCall.Stub != nil {
+		return f.GetCallerIdentityCall.Stub(param1)
+	}
+	return f.GetCallerIdentityCall.Returns.GetCallerIdentityOutput, f.GetCallerIdentityCall.Returns.Error
 }

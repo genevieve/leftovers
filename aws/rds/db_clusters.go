@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface dbClustersClient --output fakes/db_clusters_client.go
 type dbClustersClient interface {
 	DescribeDBClusters(*awsrds.DescribeDBClustersInput) (*awsrds.DescribeDBClustersOutput, error)
 	DeleteDBCluster(*awsrds.DeleteDBClusterInput) (*awsrds.DeleteDBClusterOutput, error)

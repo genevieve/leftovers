@@ -28,7 +28,7 @@ var _ = Describe("Volumes", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Bool = true
-			client.ListCall.Returns.Volumes = []openstackvolumes.Volume{
+			client.ListCall.Returns.VolumeSlice = []openstackvolumes.Volume{
 				{ID: "some-ID", Name: "some-name"},
 				{ID: "other-ID", Name: "other-name"},
 			}

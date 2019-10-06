@@ -7,6 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
 
+//go:generate faux --interface volumesClient --output fakes/volumes_client.go
 type volumesClient interface {
 	List() ([]volumes.Volume, error)
 	Delete(volumeID string) error

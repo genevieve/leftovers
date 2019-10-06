@@ -9,6 +9,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface natGatewaysClient --output fakes/nat_gateways_client.go
 type natGatewaysClient interface {
 	DescribeNatGateways(*awsec2.DescribeNatGatewaysInput) (*awsec2.DescribeNatGatewaysOutput, error)
 	DeleteNatGateway(*awsec2.DeleteNatGatewayInput) (*awsec2.DeleteNatGatewayOutput, error)

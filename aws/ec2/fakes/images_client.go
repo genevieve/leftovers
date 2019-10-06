@@ -1,41 +1,55 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"sync"
+
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type ImagesClient struct {
-	DescribeImagesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.DescribeImagesInput
-		}
-		Returns struct {
-			Output *ec2.DescribeImagesOutput
-			Error  error
-		}
-	}
-
 	DeregisterImageCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *ec2.DeregisterImageInput
+			DeregisterImageInput *awsec2.DeregisterImageInput
 		}
 		Returns struct {
-			Output *ec2.DeregisterImageOutput
-			Error  error
+			DeregisterImageOutput *awsec2.DeregisterImageOutput
+			Error                 error
 		}
+		Stub func(*awsec2.DeregisterImageInput) (*awsec2.DeregisterImageOutput, error)
+	}
+	DescribeImagesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeImagesInput *awsec2.DescribeImagesInput
+		}
+		Returns struct {
+			DescribeImagesOutput *awsec2.DescribeImagesOutput
+			Error                error
+		}
+		Stub func(*awsec2.DescribeImagesInput) (*awsec2.DescribeImagesOutput, error)
 	}
 }
 
-func (i *ImagesClient) DescribeImages(input *ec2.DescribeImagesInput) (*ec2.DescribeImagesOutput, error) {
-	i.DescribeImagesCall.CallCount++
-	i.DescribeImagesCall.Receives.Input = input
-
-	return i.DescribeImagesCall.Returns.Output, i.DescribeImagesCall.Returns.Error
+func (f *ImagesClient) DeregisterImage(param1 *awsec2.DeregisterImageInput) (*awsec2.DeregisterImageOutput, error) {
+	f.DeregisterImageCall.Lock()
+	defer f.DeregisterImageCall.Unlock()
+	f.DeregisterImageCall.CallCount++
+	f.DeregisterImageCall.Receives.DeregisterImageInput = param1
+	if f.DeregisterImageCall.Stub != nil {
+		return f.DeregisterImageCall.Stub(param1)
+	}
+	return f.DeregisterImageCall.Returns.DeregisterImageOutput, f.DeregisterImageCall.Returns.Error
 }
-
-func (i *ImagesClient) DeregisterImage(input *ec2.DeregisterImageInput) (*ec2.DeregisterImageOutput, error) {
-	i.DeregisterImageCall.CallCount++
-	i.DeregisterImageCall.Receives.Input = input
-
-	return i.DeregisterImageCall.Returns.Output, i.DeregisterImageCall.Returns.Error
+func (f *ImagesClient) DescribeImages(param1 *awsec2.DescribeImagesInput) (*awsec2.DescribeImagesOutput, error) {
+	f.DescribeImagesCall.Lock()
+	defer f.DescribeImagesCall.Unlock()
+	f.DescribeImagesCall.CallCount++
+	f.DescribeImagesCall.Receives.DescribeImagesInput = param1
+	if f.DescribeImagesCall.Stub != nil {
+		return f.DescribeImagesCall.Stub(param1)
+	}
+	return f.DescribeImagesCall.Returns.DescribeImagesOutput, f.DescribeImagesCall.Returns.Error
 }

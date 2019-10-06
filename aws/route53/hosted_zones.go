@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface hostedZonesClient --output fakes/hosted_zones_client.go
 type hostedZonesClient interface {
 	ListHostedZones(*awsroute53.ListHostedZonesInput) (*awsroute53.ListHostedZonesOutput, error)
 	DeleteHostedZone(*awsroute53.DeleteHostedZoneInput) (*awsroute53.DeleteHostedZoneOutput, error)
@@ -19,6 +20,7 @@ type HostedZones struct {
 	recordSets recordSets
 }
 
+//go:generate faux --interface recordSets --output fakes/record_sets.go
 type recordSets interface {
 	Get(hostedZoneId *string) ([]*awsroute53.ResourceRecordSet, error)
 	Delete(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet) error

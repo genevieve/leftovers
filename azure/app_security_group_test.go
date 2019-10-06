@@ -33,7 +33,7 @@ var _ = Describe("AppSecurityGroup", func() {
 
 			Expect(client.DeleteAppSecurityGroupCall.CallCount).To(Equal(1))
 			Expect(client.DeleteAppSecurityGroupCall.Receives.Name).To(Equal(name))
-			Expect(client.DeleteAppSecurityGroupCall.Receives.ResourceGroupName).To(Equal(rgName))
+			Expect(client.DeleteAppSecurityGroupCall.Receives.RgName).To(Equal(rgName))
 		})
 
 		Context("when client fails to delete the app security group", func() {

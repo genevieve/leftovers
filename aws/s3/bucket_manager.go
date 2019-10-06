@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+//go:generate faux --interface bucketManager --output fakes/bucket_manager.go
 type bucketManager interface {
 	IsInRegion(bucket string) bool
 }

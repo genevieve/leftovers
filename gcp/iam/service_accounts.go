@@ -9,6 +9,7 @@ import (
 	gcpiam "google.golang.org/api/iam/v1"
 )
 
+//go:generate faux --interface serviceAccountsClient --output fakes/service_accounts_client.go
 type serviceAccountsClient interface {
 	ListServiceAccounts() ([]*gcpiam.ServiceAccount, error)
 	DeleteServiceAccount(account string) error

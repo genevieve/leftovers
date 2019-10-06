@@ -36,7 +36,7 @@ var _ = Describe("ManagedZone", func() {
 			Expect(recordSets.DeleteCall.Receives.ManagedZone).To(Equal(name))
 
 			Expect(client.DeleteManagedZoneCall.CallCount).To(Equal(1))
-			Expect(client.DeleteManagedZoneCall.Receives.ManagedZone).To(Equal(name))
+			Expect(client.DeleteManagedZoneCall.Receives.Zone).To(Equal(name))
 		})
 
 		Context("when the client fails to delete the record sets", func() {

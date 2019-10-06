@@ -9,11 +9,13 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface imagesClient --output fakes/images_client.go
 type imagesClient interface {
 	DescribeImages(*awsec2.DescribeImagesInput) (*awsec2.DescribeImagesOutput, error)
 	DeregisterImage(*awsec2.DeregisterImageInput) (*awsec2.DeregisterImageOutput, error)
 }
 
+//go:generate faux --interface stsClient --output fakes/sts_client.go
 type stsClient interface {
 	GetCallerIdentity(*awssts.GetCallerIdentityInput) (*awssts.GetCallerIdentityOutput, error)
 }

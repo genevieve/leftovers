@@ -31,7 +31,7 @@ var _ = Describe("Tags", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeTagsCall.Returns.Output = &awsec2.DescribeTagsOutput{
+			client.DescribeTagsCall.Returns.DescribeTagsOutput = &awsec2.DescribeTagsOutput{
 				Tags: []*awsec2.TagDescription{{
 					Key:        aws.String("the-key"),
 					Value:      aws.String("banana-tag"),
@@ -47,8 +47,8 @@ var _ = Describe("Tags", func() {
 
 			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Tag"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-key:banana-tag"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Tag"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-key:banana-tag"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -77,7 +77,7 @@ var _ = Describe("Tags", func() {
 
 		Context("when the tag has a resource id", func() {
 			BeforeEach(func() {
-				client.DescribeTagsCall.Returns.Output = &awsec2.DescribeTagsOutput{
+				client.DescribeTagsCall.Returns.DescribeTagsOutput = &awsec2.DescribeTagsOutput{
 					Tags: []*awsec2.TagDescription{{
 						Key:        aws.String("the-key"),
 						Value:      aws.String("banana-tag"),

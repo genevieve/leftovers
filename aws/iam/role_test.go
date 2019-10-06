@@ -36,7 +36,7 @@ var _ = Describe("Role", func() {
 			Expect(policies.DeleteCall.Receives.RoleName).To(Equal(*name))
 
 			Expect(client.DeleteRoleCall.CallCount).To(Equal(1))
-			Expect(client.DeleteRoleCall.Receives.Input.RoleName).To(Equal(name))
+			Expect(client.DeleteRoleCall.Receives.DeleteRoleInput.RoleName).To(Equal(name))
 		})
 
 		Context("when deleting the role's policies fails", func() {

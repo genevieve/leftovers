@@ -26,20 +26,20 @@ var _ = Describe("ImagesClient", func() {
 	Describe("List", func() {
 		var (
 			pager pagination.Pager
-			page  fakes.Page
+			page  *fakes.Page
 			imgs  []images.Image
 		)
 
 		BeforeEach(func() {
 			pager = pagination.Pager{}
-			page = fakes.Page{}
+			page = &fakes.Page{}
 			imgs = []images.Image{
 				{ID: "hello there"},
 				{ID: "general"},
 			}
-			api.GetImagePagerCall.Returns.Pager = pager
+			api.GetImagesPagerCall.Returns.Pager = pager
 			api.PagerToPageCall.Returns.Page = page
-			api.PageToImagesCall.Returns.Images = imgs
+			api.PageToImagesCall.Returns.ImageSlice = imgs
 		})
 
 		It("lists all the images available for deletion", func() {
@@ -54,7 +54,7 @@ var _ = Describe("ImagesClient", func() {
 		Context("when there is an error getting a page", func() {
 			BeforeEach(func() {
 				pager.Err = errors.New("something went horridly wrong")
-				api.GetImagePagerCall.Returns.Pager = pager
+				api.GetImagesPagerCall.Returns.Pager = pager
 			})
 
 			It("returns a helpful error message", func() {

@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface targetVpnGatewaysClient --output fakes/target_vpn_gateways_client.go
 type targetVpnGatewaysClient interface {
 	ListTargetVpnGateways(region string) ([]*gcpcompute.TargetVpnGateway, error)
 	DeleteTargetVpnGateway(region, targetVpnGateway string) error

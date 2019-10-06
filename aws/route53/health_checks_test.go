@@ -31,7 +31,7 @@ var _ = Describe("HealthChecks", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListHealthChecksCall.Returns.Output = &awsroute53.ListHealthChecksOutput{
+			client.ListHealthChecksCall.Returns.ListHealthChecksOutput = &awsroute53.ListHealthChecksOutput{
 				HealthChecks: []*awsroute53.HealthCheck{{
 					Id: aws.String("the-id"),
 				}},
@@ -46,8 +46,8 @@ var _ = Describe("HealthChecks", func() {
 			Expect(client.ListHealthChecksCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Route53 Health Check"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-id"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Route53 Health Check"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-id"))
 
 			Expect(items).To(HaveLen(1))
 		})

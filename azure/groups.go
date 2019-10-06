@@ -7,9 +7,10 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface groupsClient --output fakes/groups_client.go
 type groupsClient interface {
-	ListGroups() ([]string, error)
-	DeleteGroup(string) error
+	ListGroups() (groups []string, err error)
+	DeleteGroup(name string) error
 }
 
 type Groups struct {

@@ -14,6 +14,7 @@ type Clusters struct {
 	logger logger
 }
 
+//go:generate faux --interface clustersClient --output fakes/clusters_client.go
 type clustersClient interface {
 	ListClusters(zone string) (*gcpcontainer.ListClustersResponse, error)
 	DeleteCluster(zone, cluster string) error

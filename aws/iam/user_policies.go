@@ -8,12 +8,14 @@ import (
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
 )
 
+//go:generate faux --interface userPoliciesClient --output fakes/user_policies_client.go
 type userPoliciesClient interface {
 	ListAttachedUserPolicies(*awsiam.ListAttachedUserPoliciesInput) (*awsiam.ListAttachedUserPoliciesOutput, error)
 	DetachUserPolicy(*awsiam.DetachUserPolicyInput) (*awsiam.DetachUserPolicyOutput, error)
 	DeleteUserPolicy(*awsiam.DeleteUserPolicyInput) (*awsiam.DeleteUserPolicyOutput, error)
 }
 
+//go:generate faux --interface userPolicies --output fakes/user_policies.go
 type userPolicies interface {
 	Delete(userName string) error
 }

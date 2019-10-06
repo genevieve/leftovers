@@ -32,7 +32,7 @@ var _ = Describe("InstanceGroupManagers", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListInstanceGroupManagersCall.Returns.Output = []*gcpcompute.InstanceGroupManager{{
+			client.ListInstanceGroupManagersCall.Returns.InstanceGroupManagerSlice = []*gcpcompute.InstanceGroupManager{{
 				Name: "banana-group",
 				Zone: "https://zone-1",
 			}}
@@ -47,8 +47,8 @@ var _ = Describe("InstanceGroupManagers", func() {
 			Expect(client.ListInstanceGroupManagersCall.Receives.Zone).To(Equal("zone-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Instance Group Manager"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Instance Group Manager"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-group"))
 
 			Expect(list).To(HaveLen(1))
 		})

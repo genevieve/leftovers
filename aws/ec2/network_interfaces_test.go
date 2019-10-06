@@ -13,14 +13,14 @@ import (
 
 var _ = Describe("NetworkInterfaces", func() {
 	var (
-		client *fakes.NetworkInterfaceClient
+		client *fakes.NetworkInterfacesClient
 		logger *fakes.Logger
 
 		networkInterfaces ec2.NetworkInterfaces
 	)
 
 	BeforeEach(func() {
-		client = &fakes.NetworkInterfaceClient{}
+		client = &fakes.NetworkInterfacesClient{}
 		logger = &fakes.Logger{}
 
 		networkInterfaces = ec2.NewNetworkInterfaces(client, logger)
@@ -31,7 +31,7 @@ var _ = Describe("NetworkInterfaces", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeNetworkInterfacesCall.Returns.Output = &awsec2.DescribeNetworkInterfacesOutput{
+			client.DescribeNetworkInterfacesCall.Returns.DescribeNetworkInterfacesOutput = &awsec2.DescribeNetworkInterfacesOutput{
 				NetworkInterfaces: []*awsec2.NetworkInterface{{
 					NetworkInterfaceId: aws.String("banana"),
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("NetworkInterfaces", func() {
 
 			Expect(client.DescribeNetworkInterfacesCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Network Interface"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Network Interface"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -75,7 +75,7 @@ var _ = Describe("NetworkInterfaces", func() {
 
 		Context("when the network interface has tags", func() {
 			BeforeEach(func() {
-				client.DescribeNetworkInterfacesCall.Returns.Output = &awsec2.DescribeNetworkInterfacesOutput{
+				client.DescribeNetworkInterfacesCall.Returns.DescribeNetworkInterfacesOutput = &awsec2.DescribeNetworkInterfacesOutput{
 					NetworkInterfaces: []*awsec2.NetworkInterface{{
 						NetworkInterfaceId: aws.String("banana"),
 						TagSet: []*awsec2.Tag{{
@@ -90,7 +90,7 @@ var _ = Describe("NetworkInterfaces", func() {
 				_, err := networkInterfaces.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana (the-key:the-value)"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana (the-key:the-value)"))
 			})
 		})
 

@@ -14,12 +14,12 @@ import (
 var _ = Describe("DBSubnetGroup", func() {
 	var (
 		dbSubnetGroup rds.DBSubnetGroup
-		client        *fakes.DBSubnetGroupsClient
+		client        *fakes.DbSubnetGroupsClient
 		name          *string
 	)
 
 	BeforeEach(func() {
-		client = &fakes.DBSubnetGroupsClient{}
+		client = &fakes.DbSubnetGroupsClient{}
 		name = aws.String("the-name")
 
 		dbSubnetGroup = rds.NewDBSubnetGroup(client, name)
@@ -31,7 +31,7 @@ var _ = Describe("DBSubnetGroup", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteDBSubnetGroupCall.CallCount).To(Equal(1))
-			Expect(client.DeleteDBSubnetGroupCall.Receives.Input.DBSubnetGroupName).To(Equal(name))
+			Expect(client.DeleteDBSubnetGroupCall.Receives.DeleteDBSubnetGroupInput.DBSubnetGroupName).To(Equal(name))
 		})
 
 		Context("when the client fails", func() {

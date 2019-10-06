@@ -1,41 +1,55 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"sync"
+
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type VolumesClient struct {
-	DescribeVolumesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.DescribeVolumesInput
-		}
-		Returns struct {
-			Output *ec2.DescribeVolumesOutput
-			Error  error
-		}
-	}
-
 	DeleteVolumeCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *ec2.DeleteVolumeInput
+			DeleteVolumeInput *awsec2.DeleteVolumeInput
 		}
 		Returns struct {
-			Output *ec2.DeleteVolumeOutput
-			Error  error
+			DeleteVolumeOutput *awsec2.DeleteVolumeOutput
+			Error              error
 		}
+		Stub func(*awsec2.DeleteVolumeInput) (*awsec2.DeleteVolumeOutput, error)
+	}
+	DescribeVolumesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeVolumesInput *awsec2.DescribeVolumesInput
+		}
+		Returns struct {
+			DescribeVolumesOutput *awsec2.DescribeVolumesOutput
+			Error                 error
+		}
+		Stub func(*awsec2.DescribeVolumesInput) (*awsec2.DescribeVolumesOutput, error)
 	}
 }
 
-func (e *VolumesClient) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {
-	e.DescribeVolumesCall.CallCount++
-	e.DescribeVolumesCall.Receives.Input = input
-
-	return e.DescribeVolumesCall.Returns.Output, e.DescribeVolumesCall.Returns.Error
+func (f *VolumesClient) DeleteVolume(param1 *awsec2.DeleteVolumeInput) (*awsec2.DeleteVolumeOutput, error) {
+	f.DeleteVolumeCall.Lock()
+	defer f.DeleteVolumeCall.Unlock()
+	f.DeleteVolumeCall.CallCount++
+	f.DeleteVolumeCall.Receives.DeleteVolumeInput = param1
+	if f.DeleteVolumeCall.Stub != nil {
+		return f.DeleteVolumeCall.Stub(param1)
+	}
+	return f.DeleteVolumeCall.Returns.DeleteVolumeOutput, f.DeleteVolumeCall.Returns.Error
 }
-
-func (e *VolumesClient) DeleteVolume(input *ec2.DeleteVolumeInput) (*ec2.DeleteVolumeOutput, error) {
-	e.DeleteVolumeCall.CallCount++
-	e.DeleteVolumeCall.Receives.Input = input
-
-	return e.DeleteVolumeCall.Returns.Output, e.DeleteVolumeCall.Returns.Error
+func (f *VolumesClient) DescribeVolumes(param1 *awsec2.DescribeVolumesInput) (*awsec2.DescribeVolumesOutput, error) {
+	f.DescribeVolumesCall.Lock()
+	defer f.DescribeVolumesCall.Unlock()
+	f.DescribeVolumesCall.CallCount++
+	f.DescribeVolumesCall.Receives.DescribeVolumesInput = param1
+	if f.DescribeVolumesCall.Stub != nil {
+		return f.DescribeVolumesCall.Stub(param1)
+	}
+	return f.DescribeVolumesCall.Returns.DescribeVolumesOutput, f.DescribeVolumesCall.Returns.Error
 }

@@ -34,7 +34,7 @@ var _ = Describe("IP Sets", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListIPSetsCall.Returns.IPSetListResult = manager.IpSetListResult{
+			client.ListIPSetsCall.Returns.IpSetListResult = manager.IpSetListResult{
 				Results: []manager.IpSet{
 					manager.IpSet{
 						Id:          "pineapple-123",
@@ -58,8 +58,8 @@ var _ = Describe("IP Sets", func() {
 			Expect(client.ListIPSetsCall.Receives.Context).To(Equal(ctx))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IP Set"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("pineapple"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IP Set"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("pineapple"))
 
 			Expect(list).To(HaveLen(1))
 			Expect(list[0].Name()).NotTo(Equal("cherimoya"))

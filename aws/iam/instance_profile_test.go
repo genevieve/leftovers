@@ -2,6 +2,7 @@ package iam_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
@@ -18,13 +19,19 @@ var _ = Describe("InstanceProfile", func() {
 		client          *fakes.InstanceProfilesClient
 		name            *string
 		logger          *fakes.Logger
+		messages        []string
 	)
 
 	BeforeEach(func() {
 		client = &fakes.InstanceProfilesClient{}
 		name = aws.String("the-name")
 		roles := []*awsiam.Role{}
+
+		messages = []string{}
 		logger = &fakes.Logger{}
+		logger.PrintfCall.Stub = func(format string, v ...interface{}) {
+			messages = append(messages, fmt.Sprintf(format, v...))
+		}
 
 		instanceProfile = iam.NewInstanceProfile(client, name, roles, logger)
 	})
@@ -35,7 +42,7 @@ var _ = Describe("InstanceProfile", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteInstanceProfileCall.CallCount).To(Equal(1))
-			Expect(client.DeleteInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(name))
+			Expect(client.DeleteInstanceProfileCall.Receives.DeleteInstanceProfileInput.InstanceProfileName).To(Equal(name))
 		})
 
 		Context("when the client fails", func() {
@@ -60,10 +67,10 @@ var _ = Describe("InstanceProfile", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.RemoveRoleFromInstanceProfileCall.CallCount).To(Equal(1))
-				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.InstanceProfileName).To(Equal(aws.String("the-name")))
-				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.Input.RoleName).To(Equal(aws.String("the-role")))
+				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.RemoveRoleFromInstanceProfileInput.InstanceProfileName).To(Equal(aws.String("the-name")))
+				Expect(client.RemoveRoleFromInstanceProfileCall.Receives.RemoveRoleFromInstanceProfileInput.RoleName).To(Equal(aws.String("the-role")))
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM Instance Profile: the-name (Role:the-role)] Removed role the-role \n",
 				}))
 			})
@@ -77,7 +84,7 @@ var _ = Describe("InstanceProfile", func() {
 					err := instanceProfile.Delete()
 					Expect(err).NotTo(HaveOccurred())
 
-					Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					Expect(messages).To(Equal([]string{
 						"[IAM Instance Profile: the-name (Role:the-role)] Remove role the-role: some error \n",
 					}))
 				})

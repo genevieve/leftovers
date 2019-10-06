@@ -31,7 +31,7 @@ var _ = Describe("InstanceProfiles", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListInstanceProfilesCall.Returns.Output = &awsiam.ListInstanceProfilesOutput{
+			client.ListInstanceProfilesCall.Returns.ListInstanceProfilesOutput = &awsiam.ListInstanceProfilesOutput{
 				InstanceProfiles: []*awsiam.InstanceProfile{{
 					InstanceProfileName: aws.String("banana-profile"),
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("InstanceProfiles", func() {
 			Expect(client.ListInstanceProfilesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Instance Profile"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-profile"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Instance Profile"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-profile"))
 
 			Expect(items).To(HaveLen(1))
 		})

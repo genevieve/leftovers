@@ -36,7 +36,7 @@ var _ = Describe("IP Set", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteIPSetCall.CallCount).To(Equal(1))
-			Expect(client.DeleteIPSetCall.Receives.ID).To(Equal(id))
+			Expect(client.DeleteIPSetCall.Receives.String).To(Equal(id))
 			Expect(client.DeleteIPSetCall.Receives.Context).To(Equal(ctx))
 		})
 

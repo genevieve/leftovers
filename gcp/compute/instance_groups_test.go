@@ -32,7 +32,7 @@ var _ = Describe("InstanceGroups", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListInstanceGroupsCall.Returns.Output = []*gcpcompute.InstanceGroup{{
+			client.ListInstanceGroupsCall.Returns.InstanceGroupSlice = []*gcpcompute.InstanceGroup{{
 				Name: "banana-group",
 				Zone: "https://zone-1",
 			}}
@@ -47,8 +47,8 @@ var _ = Describe("InstanceGroups", func() {
 			Expect(client.ListInstanceGroupsCall.Receives.Zone).To(Equal("zone-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Instance Group"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Instance Group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-group"))
 
 			Expect(list).To(HaveLen(1))
 		})

@@ -31,7 +31,7 @@ var _ = Describe("LoadBalancer", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteLoadBalancerCall.CallCount).To(Equal(1))
-			Expect(client.DeleteLoadBalancerCall.Receives.Input.LoadBalancerName).To(Equal(name))
+			Expect(client.DeleteLoadBalancerCall.Receives.DeleteLoadBalancerInput.LoadBalancerName).To(Equal(name))
 		})
 
 		Context("when the client fails", func() {

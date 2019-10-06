@@ -29,8 +29,7 @@ var _ = Describe("Groups", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-
-			client.ListGroupsCall.Returns.List = []string{"banana-group", "kiwi-group"}
+			client.ListGroupsCall.Returns.Groups = []string{"banana-group", "kiwi-group"}
 		})
 
 		It("returns a list of resource groups to delete", func() {
@@ -45,7 +44,7 @@ var _ = Describe("Groups", func() {
 
 		Context("when client fails to list resource groups", func() {
 			BeforeEach(func() {
-				client.ListGroupsCall.Returns.Error = errors.New("some error")
+				client.ListGroupsCall.Returns.Err = errors.New("some error")
 			})
 
 			It("returns the error", func() {
@@ -63,8 +62,8 @@ var _ = Describe("Groups", func() {
 				items, err := groups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Resource Group"))
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Resource Group"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-group"))
 
 				Expect(items).To(HaveLen(0))
 			})

@@ -35,12 +35,12 @@ var _ = Describe("Snapshots", func() {
 
 		BeforeEach(func() {
 			filter = "snap"
-			client.DescribeSnapshotsCall.Returns.Output = &awsec2.DescribeSnapshotsOutput{
+			client.DescribeSnapshotsCall.Returns.DescribeSnapshotsOutput = &awsec2.DescribeSnapshotsOutput{
 				Snapshots: []*awsec2.Snapshot{{
 					SnapshotId: aws.String("the-snapshot-id"),
 				}},
 			}
-			stsClient.GetCallerIdentityCall.Returns.Output = &awssts.GetCallerIdentityOutput{
+			stsClient.GetCallerIdentityCall.Returns.GetCallerIdentityOutput = &awssts.GetCallerIdentityOutput{
 				Account: aws.String("the-account-id"),
 			}
 		})
@@ -52,13 +52,13 @@ var _ = Describe("Snapshots", func() {
 			Expect(stsClient.GetCallerIdentityCall.CallCount).To(Equal(1))
 
 			Expect(client.DescribeSnapshotsCall.CallCount).To(Equal(1))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.OwnerIds[0]).To(Equal(aws.String("the-account-id")))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("status")))
-			Expect(client.DescribeSnapshotsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("completed")))
+			Expect(client.DescribeSnapshotsCall.Receives.DescribeSnapshotsInput.OwnerIds[0]).To(Equal(aws.String("the-account-id")))
+			Expect(client.DescribeSnapshotsCall.Receives.DescribeSnapshotsInput.Filters[0].Name).To(Equal(aws.String("status")))
+			Expect(client.DescribeSnapshotsCall.Receives.DescribeSnapshotsInput.Filters[0].Values[0]).To(Equal(aws.String("completed")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Snapshot"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-snapshot-id"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Snapshot"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-snapshot-id"))
 
 			Expect(items).To(HaveLen(1))
 		})

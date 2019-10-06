@@ -1,42 +1,56 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type VpnTunnelsClient struct {
+	DeleteVpnTunnelCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Region    string
+			VpnTunnel string
+		}
+		Returns struct {
+			Error error
+		}
+		Stub func(string, string) error
+	}
 	ListVpnTunnelsCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Region string
 		}
 		Returns struct {
-			Output []*gcpcompute.VpnTunnel
-			Error  error
+			VpnTunnelSlice []*gcpcompute.VpnTunnel
+			Error          error
 		}
-	}
-
-	DeleteVpnTunnelCall struct {
-		CallCount int
-		Receives  struct {
-			VpnTunnel string
-			Region    string
-		}
-		Returns struct {
-			Error error
-		}
+		Stub func(string) ([]*gcpcompute.VpnTunnel, error)
 	}
 }
 
-func (u *VpnTunnelsClient) ListVpnTunnels(region string) ([]*gcpcompute.VpnTunnel, error) {
-	u.ListVpnTunnelsCall.CallCount++
-	u.ListVpnTunnelsCall.Receives.Region = region
-
-	return u.ListVpnTunnelsCall.Returns.Output, u.ListVpnTunnelsCall.Returns.Error
+func (f *VpnTunnelsClient) DeleteVpnTunnel(param1 string, param2 string) error {
+	f.DeleteVpnTunnelCall.Lock()
+	defer f.DeleteVpnTunnelCall.Unlock()
+	f.DeleteVpnTunnelCall.CallCount++
+	f.DeleteVpnTunnelCall.Receives.Region = param1
+	f.DeleteVpnTunnelCall.Receives.VpnTunnel = param2
+	if f.DeleteVpnTunnelCall.Stub != nil {
+		return f.DeleteVpnTunnelCall.Stub(param1, param2)
+	}
+	return f.DeleteVpnTunnelCall.Returns.Error
 }
-
-func (u *VpnTunnelsClient) DeleteVpnTunnel(region, vpnTunnel string) error {
-	u.DeleteVpnTunnelCall.CallCount++
-	u.DeleteVpnTunnelCall.Receives.Region = region
-	u.DeleteVpnTunnelCall.Receives.VpnTunnel = vpnTunnel
-
-	return u.DeleteVpnTunnelCall.Returns.Error
+func (f *VpnTunnelsClient) ListVpnTunnels(param1 string) ([]*gcpcompute.VpnTunnel, error) {
+	f.ListVpnTunnelsCall.Lock()
+	defer f.ListVpnTunnelsCall.Unlock()
+	f.ListVpnTunnelsCall.CallCount++
+	f.ListVpnTunnelsCall.Receives.Region = param1
+	if f.ListVpnTunnelsCall.Stub != nil {
+		return f.ListVpnTunnelsCall.Stub(param1)
+	}
+	return f.ListVpnTunnelsCall.Returns.VpnTunnelSlice, f.ListVpnTunnelsCall.Returns.Error
 }

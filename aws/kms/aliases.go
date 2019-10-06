@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface aliasesClient --output fakes/aliases_client.go
 type aliasesClient interface {
 	ListAliases(*awskms.ListAliasesInput) (*awskms.ListAliasesOutput, error)
 	DeleteAlias(*awskms.DeleteAliasInput) (*awskms.DeleteAliasOutput, error)

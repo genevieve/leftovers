@@ -1,17 +1,14 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type FirewallsClient struct {
-	ListFirewallsCall struct {
-		CallCount int
-		Returns   struct {
-			Output []*gcpcompute.Firewall
-			Error  error
-		}
-	}
-
 	DeleteFirewallCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Firewall string
@@ -19,18 +16,35 @@ type FirewallsClient struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
+	}
+	ListFirewallsCall struct {
+		sync.Mutex
+		CallCount int
+		Returns   struct {
+			FirewallSlice []*gcpcompute.Firewall
+			Error         error
+		}
+		Stub func() ([]*gcpcompute.Firewall, error)
 	}
 }
 
-func (c *FirewallsClient) ListFirewalls() ([]*gcpcompute.Firewall, error) {
-	c.ListFirewallsCall.CallCount++
-
-	return c.ListFirewallsCall.Returns.Output, c.ListFirewallsCall.Returns.Error
+func (f *FirewallsClient) DeleteFirewall(param1 string) error {
+	f.DeleteFirewallCall.Lock()
+	defer f.DeleteFirewallCall.Unlock()
+	f.DeleteFirewallCall.CallCount++
+	f.DeleteFirewallCall.Receives.Firewall = param1
+	if f.DeleteFirewallCall.Stub != nil {
+		return f.DeleteFirewallCall.Stub(param1)
+	}
+	return f.DeleteFirewallCall.Returns.Error
 }
-
-func (c *FirewallsClient) DeleteFirewall(firewall string) error {
-	c.DeleteFirewallCall.CallCount++
-	c.DeleteFirewallCall.Receives.Firewall = firewall
-
-	return c.DeleteFirewallCall.Returns.Error
+func (f *FirewallsClient) ListFirewalls() ([]*gcpcompute.Firewall, error) {
+	f.ListFirewallsCall.Lock()
+	defer f.ListFirewallsCall.Unlock()
+	f.ListFirewallsCall.CallCount++
+	if f.ListFirewallsCall.Stub != nil {
+		return f.ListFirewallsCall.Stub()
+	}
+	return f.ListFirewallsCall.Returns.FirewallSlice, f.ListFirewallsCall.Returns.Error
 }

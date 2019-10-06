@@ -31,7 +31,7 @@ var _ = Describe("InstanceTemplate", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteInstanceTemplateCall.CallCount).To(Equal(1))
-			Expect(client.DeleteInstanceTemplateCall.Receives.InstanceTemplate).To(Equal(name))
+			Expect(client.DeleteInstanceTemplateCall.Receives.Template).To(Equal(name))
 		})
 
 		Context("when the client fails to delete", func() {

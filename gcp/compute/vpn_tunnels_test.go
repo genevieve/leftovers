@@ -32,7 +32,7 @@ var _ = Describe("VpnTunnels", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListVpnTunnelsCall.Returns.Output = []*gcpcompute.VpnTunnel{
+			client.ListVpnTunnelsCall.Returns.VpnTunnelSlice = []*gcpcompute.VpnTunnel{
 				{
 					Name:   "banana-vpn-tunnel",
 					Region: "https://region-1",
@@ -49,8 +49,8 @@ var _ = Describe("VpnTunnels", func() {
 			Expect(client.ListVpnTunnelsCall.Receives.Region).To(Equal("region-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Vpn Tunnel"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-vpn-tunnel"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Vpn Tunnel"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-vpn-tunnel"))
 
 			Expect(list).To(HaveLen(1))
 		})

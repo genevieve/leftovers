@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface urlMapsClient --output fakes/url_maps_client.go
 type urlMapsClient interface {
 	ListUrlMaps() (*gcpcompute.UrlMapList, error)
 	DeleteUrlMap(urlMap string) error

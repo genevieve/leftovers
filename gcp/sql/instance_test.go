@@ -31,7 +31,7 @@ var _ = Describe("Instance", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteInstanceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteInstanceCall.Receives.Instance).To(Equal(name))
+			Expect(client.DeleteInstanceCall.Receives.User).To(Equal(name))
 		})
 
 		Context("when the client fails to delete the instance", func() {

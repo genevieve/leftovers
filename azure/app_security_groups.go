@@ -7,6 +7,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface appSecurityGroupsClient --output fakes/app_security_groups_client.go
 type appSecurityGroupsClient interface {
 	ListAppSecurityGroups(rgName string) ([]string, error)
 	DeleteAppSecurityGroup(rgName string, name string) error

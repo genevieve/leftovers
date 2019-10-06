@@ -14,14 +14,14 @@ import (
 
 var _ = Describe("DBClusters", func() {
 	var (
-		client *fakes.DBClustersClient
+		client *fakes.DbClustersClient
 		logger *fakes.Logger
 
 		dbClusters rds.DBClusters
 	)
 
 	BeforeEach(func() {
-		client = &fakes.DBClustersClient{}
+		client = &fakes.DbClustersClient{}
 		logger = &fakes.Logger{}
 
 		dbClusters = rds.NewDBClusters(client, logger)
@@ -32,7 +32,7 @@ var _ = Describe("DBClusters", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeDBClustersCall.Returns.Output = &awsrds.DescribeDBClustersOutput{
+			client.DescribeDBClustersCall.Returns.DescribeDBClustersOutput = &awsrds.DescribeDBClustersOutput{
 				DBClusters: []*awsrds.DBCluster{{
 					DBClusterIdentifier: aws.String("banana"),
 					Status:              aws.String("status"),
@@ -46,8 +46,8 @@ var _ = Describe("DBClusters", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBClustersCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("RDS DB Cluster"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("RDS DB Cluster"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -76,7 +76,7 @@ var _ = Describe("DBClusters", func() {
 
 		Context("when the db cluster is being deleted", func() {
 			BeforeEach(func() {
-				client.DescribeDBClustersCall.Returns.Output = &awsrds.DescribeDBClustersOutput{
+				client.DescribeDBClustersCall.Returns.DescribeDBClustersOutput = &awsrds.DescribeDBClustersOutput{
 					DBClusters: []*awsrds.DBCluster{{
 						DBClusterIdentifier: aws.String("banana"),
 						Status:              aws.String("deleting"),

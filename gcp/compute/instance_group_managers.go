@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface instanceGroupManagersClient --output fakes/instance_group_managers_client.go
 type instanceGroupManagersClient interface {
 	ListInstanceGroupManagers(zone string) ([]*gcpcompute.InstanceGroupManager, error)
 	DeleteInstanceGroupManager(zone, instanceGroupManager string) error

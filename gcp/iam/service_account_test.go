@@ -27,7 +27,7 @@ var _ = Describe("ServiceAccount", func() {
 		name = "banana"
 		email = "banana@example.com"
 
-		client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
+		client.GetProjectIamPolicyCall.Returns.Policy = &gcpcrm.Policy{
 			Bindings: []*gcpcrm.Binding{},
 		}
 
@@ -42,14 +42,14 @@ var _ = Describe("ServiceAccount", func() {
 			Expect(client.GetProjectIamPolicyCall.CallCount).To(Equal(1))
 
 			Expect(client.DeleteServiceAccountCall.CallCount).To(Equal(1))
-			Expect(client.DeleteServiceAccountCall.Receives.ServiceAccount).To(Equal(name))
+			Expect(client.DeleteServiceAccountCall.Receives.Account).To(Equal(name))
 		})
 
 		Context("when there are bindings for the service account", func() {
 			var updatedPolicy *gcpcrm.Policy
 
 			BeforeEach(func() {
-				client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
+				client.GetProjectIamPolicyCall.Returns.Policy = &gcpcrm.Policy{
 					Bindings: []*gcpcrm.Binding{{
 						Members: []string{"serviceAccount:other", "serviceAccount:banana@example.com"},
 						Role:    "roles/some-role",
@@ -68,12 +68,12 @@ var _ = Describe("ServiceAccount", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.SetProjectIamPolicyCall.CallCount).To(Equal(1))
-				Expect(client.SetProjectIamPolicyCall.Receives.Input).To(Equal(updatedPolicy))
+				Expect(client.SetProjectIamPolicyCall.Receives.Policy).To(Equal(updatedPolicy))
 			})
 
 			Context("when there are no more members in a binding", func() {
 				BeforeEach(func() {
-					client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
+					client.GetProjectIamPolicyCall.Returns.Policy = &gcpcrm.Policy{
 						Bindings: []*gcpcrm.Binding{{
 							Members: []string{"serviceAccount:banana@example.com"},
 							Role:    "roles/some-role",
@@ -86,13 +86,13 @@ var _ = Describe("ServiceAccount", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(client.SetProjectIamPolicyCall.CallCount).To(Equal(1))
-					Expect(client.SetProjectIamPolicyCall.Receives.Input.Bindings).To(BeEmpty())
+					Expect(client.SetProjectIamPolicyCall.Receives.Policy.Bindings).To(BeEmpty())
 				})
 			})
 
 			Context("when the service account has more than one binding", func() {
 				BeforeEach(func() {
-					client.GetProjectIamPolicyCall.Returns.Output = &gcpcrm.Policy{
+					client.GetProjectIamPolicyCall.Returns.Policy = &gcpcrm.Policy{
 						Bindings: []*gcpcrm.Binding{
 							{
 								Members: []string{"serviceAccount:banana@example.com"},
@@ -131,7 +131,7 @@ var _ = Describe("ServiceAccount", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(client.SetProjectIamPolicyCall.CallCount).To(Equal(1))
-					Expect(client.SetProjectIamPolicyCall.Receives.Input).To(Equal(updatedPolicy))
+					Expect(client.SetProjectIamPolicyCall.Receives.Policy).To(Equal(updatedPolicy))
 				})
 			})
 		})

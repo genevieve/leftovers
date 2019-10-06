@@ -1,17 +1,14 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type RoutesClient struct {
-	ListRoutesCall struct {
-		CallCount int
-		Returns   struct {
-			Output []*gcpcompute.Route
-			Error  error
-		}
-	}
-
 	DeleteRouteCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Route string
@@ -19,18 +16,35 @@ type RoutesClient struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
+	}
+	ListRoutesCall struct {
+		sync.Mutex
+		CallCount int
+		Returns   struct {
+			RouteSlice []*gcpcompute.Route
+			Error      error
+		}
+		Stub func() ([]*gcpcompute.Route, error)
 	}
 }
 
-func (n *RoutesClient) ListRoutes() ([]*gcpcompute.Route, error) {
-	n.ListRoutesCall.CallCount++
-
-	return n.ListRoutesCall.Returns.Output, n.ListRoutesCall.Returns.Error
+func (f *RoutesClient) DeleteRoute(param1 string) error {
+	f.DeleteRouteCall.Lock()
+	defer f.DeleteRouteCall.Unlock()
+	f.DeleteRouteCall.CallCount++
+	f.DeleteRouteCall.Receives.Route = param1
+	if f.DeleteRouteCall.Stub != nil {
+		return f.DeleteRouteCall.Stub(param1)
+	}
+	return f.DeleteRouteCall.Returns.Error
 }
-
-func (n *RoutesClient) DeleteRoute(route string) error {
-	n.DeleteRouteCall.CallCount++
-	n.DeleteRouteCall.Receives.Route = route
-
-	return n.DeleteRouteCall.Returns.Error
+func (f *RoutesClient) ListRoutes() ([]*gcpcompute.Route, error) {
+	f.ListRoutesCall.Lock()
+	defer f.ListRoutesCall.Unlock()
+	f.ListRoutesCall.CallCount++
+	if f.ListRoutesCall.Stub != nil {
+		return f.ListRoutesCall.Stub()
+	}
+	return f.ListRoutesCall.Returns.RouteSlice, f.ListRoutesCall.Returns.Error
 }

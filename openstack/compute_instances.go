@@ -12,6 +12,7 @@ type ComputeInstances struct {
 	logger        logger
 }
 
+//go:generate faux --interface ComputeClient --output fakes/compute_client.go
 type ComputeClient interface {
 	List() ([]servers.Server, error)
 	Delete(instanceID string) error

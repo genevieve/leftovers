@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface imagesClient --output fakes/images_client.go
 type imagesClient interface {
 	ListImages() ([]*gcpcompute.Image, error)
 	DeleteImage(image string) error
