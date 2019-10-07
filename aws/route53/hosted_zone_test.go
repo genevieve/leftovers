@@ -42,7 +42,7 @@ var _ = Describe("HostedZone", func() {
 			Expect(recordSets.DeleteCall.Receives.HostedZoneId).To(Equal(id))
 
 			Expect(client.DeleteHostedZoneCall.CallCount).To(Equal(1))
-			Expect(client.DeleteHostedZoneCall.Receives.Input.Id).To(Equal(id))
+			Expect(client.DeleteHostedZoneCall.Receives.DeleteHostedZoneInput.Id).To(Equal(id))
 		})
 
 		Context("when record sets fails to get", func() {

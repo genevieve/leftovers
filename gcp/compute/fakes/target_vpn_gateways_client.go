@@ -1,42 +1,56 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type TargetVpnGatewaysClient struct {
+	DeleteTargetVpnGatewayCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Region           string
+			TargetVpnGateway string
+		}
+		Returns struct {
+			Error error
+		}
+		Stub func(string, string) error
+	}
 	ListTargetVpnGatewaysCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Region string
 		}
 		Returns struct {
-			Output []*gcpcompute.TargetVpnGateway
-			Error  error
+			TargetVpnGatewaySlice []*gcpcompute.TargetVpnGateway
+			Error                 error
 		}
-	}
-
-	DeleteTargetVpnGatewayCall struct {
-		CallCount int
-		Receives  struct {
-			TargetVpnGateway string
-			Region           string
-		}
-		Returns struct {
-			Error error
-		}
+		Stub func(string) ([]*gcpcompute.TargetVpnGateway, error)
 	}
 }
 
-func (u *TargetVpnGatewaysClient) ListTargetVpnGateways(region string) ([]*gcpcompute.TargetVpnGateway, error) {
-	u.ListTargetVpnGatewaysCall.CallCount++
-	u.ListTargetVpnGatewaysCall.Receives.Region = region
-
-	return u.ListTargetVpnGatewaysCall.Returns.Output, u.ListTargetVpnGatewaysCall.Returns.Error
+func (f *TargetVpnGatewaysClient) DeleteTargetVpnGateway(param1 string, param2 string) error {
+	f.DeleteTargetVpnGatewayCall.Lock()
+	defer f.DeleteTargetVpnGatewayCall.Unlock()
+	f.DeleteTargetVpnGatewayCall.CallCount++
+	f.DeleteTargetVpnGatewayCall.Receives.Region = param1
+	f.DeleteTargetVpnGatewayCall.Receives.TargetVpnGateway = param2
+	if f.DeleteTargetVpnGatewayCall.Stub != nil {
+		return f.DeleteTargetVpnGatewayCall.Stub(param1, param2)
+	}
+	return f.DeleteTargetVpnGatewayCall.Returns.Error
 }
-
-func (u *TargetVpnGatewaysClient) DeleteTargetVpnGateway(region, targetVpnGateway string) error {
-	u.DeleteTargetVpnGatewayCall.CallCount++
-	u.DeleteTargetVpnGatewayCall.Receives.Region = region
-	u.DeleteTargetVpnGatewayCall.Receives.TargetVpnGateway = targetVpnGateway
-
-	return u.DeleteTargetVpnGatewayCall.Returns.Error
+func (f *TargetVpnGatewaysClient) ListTargetVpnGateways(param1 string) ([]*gcpcompute.TargetVpnGateway, error) {
+	f.ListTargetVpnGatewaysCall.Lock()
+	defer f.ListTargetVpnGatewaysCall.Unlock()
+	f.ListTargetVpnGatewaysCall.CallCount++
+	f.ListTargetVpnGatewaysCall.Receives.Region = param1
+	if f.ListTargetVpnGatewaysCall.Stub != nil {
+		return f.ListTargetVpnGatewaysCall.Stub(param1)
+	}
+	return f.ListTargetVpnGatewaysCall.Returns.TargetVpnGatewaySlice, f.ListTargetVpnGatewaysCall.Returns.Error
 }

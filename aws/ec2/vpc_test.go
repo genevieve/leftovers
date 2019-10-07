@@ -15,7 +15,7 @@ import (
 var _ = Describe("Vpc", func() {
 	var (
 		vpc          ec2.Vpc
-		client       *fakes.VpcClient
+		client       *fakes.VpcsClient
 		routes       *fakes.RouteTables
 		subnets      *fakes.Subnets
 		gateways     *fakes.InternetGateways
@@ -24,7 +24,7 @@ var _ = Describe("Vpc", func() {
 	)
 
 	BeforeEach(func() {
-		client = &fakes.VpcClient{}
+		client = &fakes.VpcsClient{}
 		routes = &fakes.RouteTables{}
 		subnets = &fakes.Subnets{}
 		gateways = &fakes.InternetGateways{}
@@ -50,11 +50,11 @@ var _ = Describe("Vpc", func() {
 			Expect(gateways.DeleteCall.Receives.VpcId).To(Equal(*id))
 
 			Expect(client.DeleteVpcCall.CallCount).To(Equal(1))
-			Expect(client.DeleteVpcCall.Receives.Input.VpcId).To(Equal(id))
+			Expect(client.DeleteVpcCall.Receives.DeleteVpcInput.VpcId).To(Equal(id))
 
 			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
-			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("vpc"))
-			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-id"))
+			Expect(resourceTags.DeleteCall.Receives.FilterName).To(Equal("vpc"))
+			Expect(resourceTags.DeleteCall.Receives.FilterValue).To(Equal("the-id"))
 		})
 
 		Context("when deleting routes fails", func() {

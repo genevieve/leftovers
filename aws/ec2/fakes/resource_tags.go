@@ -1,22 +1,30 @@
 package fakes
 
+import "sync"
+
 type ResourceTags struct {
 	DeleteCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			ResourceType string
-			ResourceId   string
+			FilterName  string
+			FilterValue string
 		}
 		Returns struct {
 			Error error
 		}
+		Stub func(string, string) error
 	}
 }
 
-func (r *ResourceTags) Delete(resourceType, resourceId string) error {
-	r.DeleteCall.CallCount++
-	r.DeleteCall.Receives.ResourceType = resourceType
-	r.DeleteCall.Receives.ResourceId = resourceId
-
-	return r.DeleteCall.Returns.Error
+func (f *ResourceTags) Delete(param1 string, param2 string) error {
+	f.DeleteCall.Lock()
+	defer f.DeleteCall.Unlock()
+	f.DeleteCall.CallCount++
+	f.DeleteCall.Receives.FilterName = param1
+	f.DeleteCall.Receives.FilterValue = param2
+	if f.DeleteCall.Stub != nil {
+		return f.DeleteCall.Stub(param1, param2)
+	}
+	return f.DeleteCall.Returns.Error
 }

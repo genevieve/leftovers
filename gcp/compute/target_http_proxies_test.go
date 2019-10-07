@@ -30,7 +30,7 @@ var _ = Describe("TargetHttpProxies", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListTargetHttpProxiesCall.Returns.Output = &gcpcompute.TargetHttpProxyList{
+			client.ListTargetHttpProxiesCall.Returns.TargetHttpProxyList = &gcpcompute.TargetHttpProxyList{
 				Items: []*gcpcompute.TargetHttpProxy{{
 					Name: "banana-target-http-proxy",
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("TargetHttpProxies", func() {
 			Expect(client.ListTargetHttpProxiesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Target Http Proxy"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-target-http-proxy"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Target Http Proxy"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-target-http-proxy"))
 
 			Expect(list).To(HaveLen(1))
 		})

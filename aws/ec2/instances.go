@@ -9,10 +9,10 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface instancesClient --output fakes/instances_client.go
 type instancesClient interface {
 	DescribeInstances(*awsec2.DescribeInstancesInput) (*awsec2.DescribeInstancesOutput, error)
 	TerminateInstances(*awsec2.TerminateInstancesInput) (*awsec2.TerminateInstancesOutput, error)
-
 	DescribeAddresses(*awsec2.DescribeAddressesInput) (*awsec2.DescribeAddressesOutput, error)
 	ReleaseAddress(*awsec2.ReleaseAddressInput) (*awsec2.ReleaseAddressOutput, error)
 }

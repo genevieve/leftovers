@@ -2,6 +2,7 @@ package ec2_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
@@ -16,21 +17,27 @@ var _ = Describe("RouteTables", func() {
 		client       *fakes.RouteTablesClient
 		logger       *fakes.Logger
 		resourceTags *fakes.ResourceTags
+		messages     []string
 
 		routeTables ec2.RouteTables
 	)
 
 	BeforeEach(func() {
 		client = &fakes.RouteTablesClient{}
-		logger = &fakes.Logger{}
 		resourceTags = &fakes.ResourceTags{}
+
+		messages = []string{}
+		logger = &fakes.Logger{}
+		logger.PrintfCall.Stub = func(format string, v ...interface{}) {
+			messages = append(messages, fmt.Sprintf(format, v...))
+		}
 
 		routeTables = ec2.NewRouteTables(client, logger, resourceTags)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.DescribeRouteTablesCall.Returns.Output = &awsec2.DescribeRouteTablesOutput{
+			client.DescribeRouteTablesCall.Returns.DescribeRouteTablesOutput = &awsec2.DescribeRouteTablesOutput{
 				RouteTables: []*awsec2.RouteTable{{
 					RouteTableId: aws.String("the-route-table-id"),
 					VpcId:        aws.String("the-vpc-id"),
@@ -43,19 +50,19 @@ var _ = Describe("RouteTables", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeRouteTablesCall.CallCount).To(Equal(1))
-			Expect(client.DescribeRouteTablesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("vpc-id")))
-			Expect(client.DescribeRouteTablesCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("the-vpc-id")))
-			Expect(client.DescribeRouteTablesCall.Receives.Input.Filters[1].Name).To(Equal(aws.String("association.main")))
-			Expect(client.DescribeRouteTablesCall.Receives.Input.Filters[1].Values[0]).To(Equal(aws.String("false")))
+			Expect(client.DescribeRouteTablesCall.Receives.DescribeRouteTablesInput.Filters[0].Name).To(Equal(aws.String("vpc-id")))
+			Expect(client.DescribeRouteTablesCall.Receives.DescribeRouteTablesInput.Filters[0].Values[0]).To(Equal(aws.String("the-vpc-id")))
+			Expect(client.DescribeRouteTablesCall.Receives.DescribeRouteTablesInput.Filters[1].Name).To(Equal(aws.String("association.main")))
+			Expect(client.DescribeRouteTablesCall.Receives.DescribeRouteTablesInput.Filters[1].Values[0]).To(Equal(aws.String("false")))
 
 			Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
-			Expect(client.DeleteRouteTableCall.Receives.Input.RouteTableId).To(Equal(aws.String("the-route-table-id")))
+			Expect(client.DeleteRouteTableCall.Receives.DeleteRouteTableInput.RouteTableId).To(Equal(aws.String("the-route-table-id")))
 
 			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
-			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("route-table"))
-			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-route-table-id"))
+			Expect(resourceTags.DeleteCall.Receives.FilterName).To(Equal("route-table"))
+			Expect(resourceTags.DeleteCall.Receives.FilterValue).To(Equal("the-route-table-id"))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
+			Expect(messages).To(Equal([]string{
 				"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id \n",
 				"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id tags \n",
 			}))
@@ -76,7 +83,7 @@ var _ = Describe("RouteTables", func() {
 
 		Context("when the route table has an association id", func() {
 			BeforeEach(func() {
-				client.DescribeRouteTablesCall.Returns.Output = &awsec2.DescribeRouteTablesOutput{
+				client.DescribeRouteTablesCall.Returns.DescribeRouteTablesOutput = &awsec2.DescribeRouteTablesOutput{
 					RouteTables: []*awsec2.RouteTable{{
 						RouteTableId: aws.String("the-route-table-id"),
 						VpcId:        aws.String("the-vpc-id"),
@@ -96,10 +103,10 @@ var _ = Describe("RouteTables", func() {
 
 				Expect(client.DescribeRouteTablesCall.CallCount).To(Equal(1))
 				Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
-				Expect(client.DisassociateRouteTableCall.Receives.Input.AssociationId).To(Equal(aws.String("the-association-id")))
+				Expect(client.DisassociateRouteTableCall.Receives.DisassociateRouteTableInput.AssociationId).To(Equal(aws.String("the-association-id")))
 				Expect(client.DeleteRouteTableCall.CallCount).To(Equal(1))
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[EC2 VPC: the-vpc-id] Disassociated route table the-route-table-id \n",
 					"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id \n",
 					"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id tags \n",
@@ -116,7 +123,7 @@ var _ = Describe("RouteTables", func() {
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(client.DisassociateRouteTableCall.CallCount).To(Equal(1))
-					Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					Expect(messages).To(Equal([]string{
 						"[EC2 VPC: the-vpc-id] Disassociate route table the-route-table-id: some error \n",
 						"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id \n",
 						"[EC2 VPC: the-vpc-id] Deleted route table the-route-table-id tags \n",

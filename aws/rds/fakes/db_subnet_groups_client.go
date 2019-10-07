@@ -1,36 +1,55 @@
 package fakes
 
-import awsrds "github.com/aws/aws-sdk-go/service/rds"
+import (
+	"sync"
 
-type DBSubnetGroupsClient struct {
-	DescribeDBSubnetGroupsCall struct {
-		CallCount int
-		Returns   struct {
-			Output *awsrds.DescribeDBSubnetGroupsOutput
-			Error  error
-		}
-	}
+	awsrds "github.com/aws/aws-sdk-go/service/rds"
+)
+
+type DbSubnetGroupsClient struct {
 	DeleteDBSubnetGroupCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *awsrds.DeleteDBSubnetGroupInput
+			DeleteDBSubnetGroupInput *awsrds.DeleteDBSubnetGroupInput
 		}
 		Returns struct {
-			Output *awsrds.DeleteDBSubnetGroupOutput
-			Error  error
+			DeleteDBSubnetGroupOutput *awsrds.DeleteDBSubnetGroupOutput
+			Error                     error
 		}
+		Stub func(*awsrds.DeleteDBSubnetGroupInput) (*awsrds.DeleteDBSubnetGroupOutput, error)
+	}
+	DescribeDBSubnetGroupsCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeDBSubnetGroupsInput *awsrds.DescribeDBSubnetGroupsInput
+		}
+		Returns struct {
+			DescribeDBSubnetGroupsOutput *awsrds.DescribeDBSubnetGroupsOutput
+			Error                        error
+		}
+		Stub func(*awsrds.DescribeDBSubnetGroupsInput) (*awsrds.DescribeDBSubnetGroupsOutput, error)
 	}
 }
 
-func (d *DBSubnetGroupsClient) DeleteDBSubnetGroup(input *awsrds.DeleteDBSubnetGroupInput) (*awsrds.DeleteDBSubnetGroupOutput, error) {
-	d.DeleteDBSubnetGroupCall.CallCount++
-	d.DeleteDBSubnetGroupCall.Receives.Input = input
-
-	return d.DeleteDBSubnetGroupCall.Returns.Output, d.DeleteDBSubnetGroupCall.Returns.Error
+func (f *DbSubnetGroupsClient) DeleteDBSubnetGroup(param1 *awsrds.DeleteDBSubnetGroupInput) (*awsrds.DeleteDBSubnetGroupOutput, error) {
+	f.DeleteDBSubnetGroupCall.Lock()
+	defer f.DeleteDBSubnetGroupCall.Unlock()
+	f.DeleteDBSubnetGroupCall.CallCount++
+	f.DeleteDBSubnetGroupCall.Receives.DeleteDBSubnetGroupInput = param1
+	if f.DeleteDBSubnetGroupCall.Stub != nil {
+		return f.DeleteDBSubnetGroupCall.Stub(param1)
+	}
+	return f.DeleteDBSubnetGroupCall.Returns.DeleteDBSubnetGroupOutput, f.DeleteDBSubnetGroupCall.Returns.Error
 }
-
-func (d *DBSubnetGroupsClient) DescribeDBSubnetGroups(input *awsrds.DescribeDBSubnetGroupsInput) (*awsrds.DescribeDBSubnetGroupsOutput, error) {
-	d.DescribeDBSubnetGroupsCall.CallCount++
-
-	return d.DescribeDBSubnetGroupsCall.Returns.Output, d.DescribeDBSubnetGroupsCall.Returns.Error
+func (f *DbSubnetGroupsClient) DescribeDBSubnetGroups(param1 *awsrds.DescribeDBSubnetGroupsInput) (*awsrds.DescribeDBSubnetGroupsOutput, error) {
+	f.DescribeDBSubnetGroupsCall.Lock()
+	defer f.DescribeDBSubnetGroupsCall.Unlock()
+	f.DescribeDBSubnetGroupsCall.CallCount++
+	f.DescribeDBSubnetGroupsCall.Receives.DescribeDBSubnetGroupsInput = param1
+	if f.DescribeDBSubnetGroupsCall.Stub != nil {
+		return f.DescribeDBSubnetGroupsCall.Stub(param1)
+	}
+	return f.DescribeDBSubnetGroupsCall.Returns.DescribeDBSubnetGroupsOutput, f.DescribeDBSubnetGroupsCall.Returns.Error
 }

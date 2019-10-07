@@ -36,7 +36,7 @@ var _ = Describe("Address", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
-			Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(allocationId))
+			Expect(client.ReleaseAddressCall.Receives.ReleaseAddressInput.AllocationId).To(Equal(allocationId))
 		})
 
 		Context("the client fails to delete due to a NotFound error", func() {

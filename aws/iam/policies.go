@@ -9,6 +9,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface policiesClient --output fakes/policies_client.go
 type policiesClient interface {
 	ListPolicies(*awsiam.ListPoliciesInput) (*awsiam.ListPoliciesOutput, error)
 	ListPolicyVersions(*awsiam.ListPolicyVersionsInput) (*awsiam.ListPolicyVersionsOutput, error)

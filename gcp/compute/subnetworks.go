@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface subnetworksClient --output fakes/subnetworks_client.go
 type subnetworksClient interface {
 	ListSubnetworks(region string) ([]*gcpcompute.Subnetwork, error)
 	DeleteSubnetwork(region, network string) error

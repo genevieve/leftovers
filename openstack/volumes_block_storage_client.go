@@ -7,6 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
+//go:generate faux --interface volumesAPI --output fakes/volumes_api.go
 type volumesAPI interface {
 	PagerToPage(pager pagination.Pager) (pagination.Page, error)
 	PageToVolumes(pagination.Page) ([]volumes.Volume, error)

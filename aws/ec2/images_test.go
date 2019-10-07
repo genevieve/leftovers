@@ -34,12 +34,12 @@ var _ = Describe("Images", func() {
 
 	Describe("List", func() {
 		BeforeEach(func() {
-			client.DescribeImagesCall.Returns.Output = &awsec2.DescribeImagesOutput{
+			client.DescribeImagesCall.Returns.DescribeImagesOutput = &awsec2.DescribeImagesOutput{
 				Images: []*awsec2.Image{{
 					ImageId: aws.String("the-image-id"),
 				}},
 			}
-			stsClient.GetCallerIdentityCall.Returns.Output = &awssts.GetCallerIdentityOutput{
+			stsClient.GetCallerIdentityCall.Returns.GetCallerIdentityOutput = &awssts.GetCallerIdentityOutput{
 				Account: aws.String("the-account-id"),
 			}
 		})
@@ -49,11 +49,11 @@ var _ = Describe("Images", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeImagesCall.CallCount).To(Equal(1))
-			Expect(client.DescribeImagesCall.Receives.Input.Owners[0]).To(Equal(aws.String("the-account-id")))
+			Expect(client.DescribeImagesCall.Receives.DescribeImagesInput.Owners[0]).To(Equal(aws.String("the-account-id")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Image"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-image-id"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Image"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-image-id"))
 
 			Expect(items).To(HaveLen(1))
 		})

@@ -32,7 +32,7 @@ var _ = Describe("Subnetworks", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListSubnetworksCall.Returns.Output = []*gcpcompute.Subnetwork{{
+			client.ListSubnetworksCall.Returns.SubnetworkSlice = []*gcpcompute.Subnetwork{{
 				Name:   "banana-subnetwork",
 				Region: "https://region-1",
 			}}
@@ -47,8 +47,8 @@ var _ = Describe("Subnetworks", func() {
 			Expect(client.ListSubnetworksCall.Receives.Region).To(Equal("region-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Subnetwork"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-subnetwork"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Subnetwork"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-subnetwork"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -76,7 +76,7 @@ var _ = Describe("Subnetworks", func() {
 
 		Context("when it is the default subnetwork", func() {
 			BeforeEach(func() {
-				client.ListSubnetworksCall.Returns.Output = []*gcpcompute.Subnetwork{{
+				client.ListSubnetworksCall.Returns.SubnetworkSlice = []*gcpcompute.Subnetwork{{
 					Name:   "default",
 					Region: "https://region-1",
 				}}

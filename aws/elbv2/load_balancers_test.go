@@ -31,7 +31,7 @@ var _ = Describe("LoadBalancers", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeLoadBalancersCall.Returns.Output = &awselbv2.DescribeLoadBalancersOutput{
+			client.DescribeLoadBalancersCall.Returns.DescribeLoadBalancersOutput = &awselbv2.DescribeLoadBalancersOutput{
 				LoadBalancers: []*awselbv2.LoadBalancer{{
 					LoadBalancerName: aws.String("banana"),
 					LoadBalancerArn:  aws.String("the-arn"),
@@ -45,8 +45,8 @@ var _ = Describe("LoadBalancers", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("ELBV2 Load Balancer"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("ELBV2 Load Balancer"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

@@ -1,7 +1,10 @@
 package fakes
 
+import "sync"
+
 type RouteTables struct {
 	DeleteCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			VpcId string
@@ -9,12 +12,17 @@ type RouteTables struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
 	}
 }
 
-func (r *RouteTables) Delete(vpcId string) error {
-	r.DeleteCall.CallCount++
-	r.DeleteCall.Receives.VpcId = vpcId
-
-	return r.DeleteCall.Returns.Error
+func (f *RouteTables) Delete(param1 string) error {
+	f.DeleteCall.Lock()
+	defer f.DeleteCall.Unlock()
+	f.DeleteCall.CallCount++
+	f.DeleteCall.Receives.VpcId = param1
+	if f.DeleteCall.Stub != nil {
+		return f.DeleteCall.Stub(param1)
+	}
+	return f.DeleteCall.Returns.Error
 }

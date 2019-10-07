@@ -1,36 +1,50 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcp "google.golang.org/api/compute/v1"
+)
 
 type InstanceTemplatesClient struct {
-	ListInstanceTemplatesCall struct {
-		CallCount int
-		Returns   struct {
-			Output []*gcpcompute.InstanceTemplate
-			Error  error
-		}
-	}
-
 	DeleteInstanceTemplateCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			InstanceTemplate string
+			Template string
 		}
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
+	}
+	ListInstanceTemplatesCall struct {
+		sync.Mutex
+		CallCount int
+		Returns   struct {
+			InstanceTemplateSlice []*gcp.InstanceTemplate
+			Error                 error
+		}
+		Stub func() ([]*gcp.InstanceTemplate, error)
 	}
 }
 
-func (n *InstanceTemplatesClient) ListInstanceTemplates() ([]*gcpcompute.InstanceTemplate, error) {
-	n.ListInstanceTemplatesCall.CallCount++
-
-	return n.ListInstanceTemplatesCall.Returns.Output, n.ListInstanceTemplatesCall.Returns.Error
+func (f *InstanceTemplatesClient) DeleteInstanceTemplate(param1 string) error {
+	f.DeleteInstanceTemplateCall.Lock()
+	defer f.DeleteInstanceTemplateCall.Unlock()
+	f.DeleteInstanceTemplateCall.CallCount++
+	f.DeleteInstanceTemplateCall.Receives.Template = param1
+	if f.DeleteInstanceTemplateCall.Stub != nil {
+		return f.DeleteInstanceTemplateCall.Stub(param1)
+	}
+	return f.DeleteInstanceTemplateCall.Returns.Error
 }
-
-func (n *InstanceTemplatesClient) DeleteInstanceTemplate(instanceTemplate string) error {
-	n.DeleteInstanceTemplateCall.CallCount++
-	n.DeleteInstanceTemplateCall.Receives.InstanceTemplate = instanceTemplate
-
-	return n.DeleteInstanceTemplateCall.Returns.Error
+func (f *InstanceTemplatesClient) ListInstanceTemplates() ([]*gcp.InstanceTemplate, error) {
+	f.ListInstanceTemplatesCall.Lock()
+	defer f.ListInstanceTemplatesCall.Unlock()
+	f.ListInstanceTemplatesCall.CallCount++
+	if f.ListInstanceTemplatesCall.Stub != nil {
+		return f.ListInstanceTemplatesCall.Stub()
+	}
+	return f.ListInstanceTemplatesCall.Returns.InstanceTemplateSlice, f.ListInstanceTemplatesCall.Returns.Error
 }

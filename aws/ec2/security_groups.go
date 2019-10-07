@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface securityGroupsClient --output fakes/security_groups_client.go
 type securityGroupsClient interface {
 	DescribeSecurityGroups(*awsec2.DescribeSecurityGroupsInput) (*awsec2.DescribeSecurityGroupsOutput, error)
 	RevokeSecurityGroupIngress(*awsec2.RevokeSecurityGroupIngressInput) (*awsec2.RevokeSecurityGroupIngressOutput, error)

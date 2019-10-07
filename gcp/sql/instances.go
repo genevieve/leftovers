@@ -8,6 +8,7 @@ import (
 	gcpsql "google.golang.org/api/sqladmin/v1beta4"
 )
 
+//go:generate faux --interface instancesClient --output fakes/instances_client.go
 type instancesClient interface {
 	ListInstances() (*gcpsql.InstancesListResponse, error)
 	DeleteInstance(user string) error

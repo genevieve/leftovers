@@ -33,7 +33,7 @@ var _ = Describe("Disks", func() {
 		BeforeEach(func() {
 			filter = "banana"
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListDisksCall.Returns.Output = []*gcpcompute.Disk{{
+			client.ListDisksCall.Returns.DiskSlice = []*gcpcompute.Disk{{
 				Name: "banana-disk",
 				Zone: "https://zone-1",
 			}, {
@@ -50,8 +50,8 @@ var _ = Describe("Disks", func() {
 			Expect(client.ListDisksCall.Receives.Zone).To(Equal("zone-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Disk"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-disk"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Disk"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-disk"))
 
 			Expect(list).To(HaveLen(1))
 		})

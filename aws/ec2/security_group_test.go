@@ -45,7 +45,7 @@ var _ = Describe("SecurityGroup", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteSecurityGroupCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSecurityGroupCall.Receives.Input.GroupId).To(Equal(id))
+			Expect(client.DeleteSecurityGroupCall.Receives.DeleteSecurityGroupInput.GroupId).To(Equal(id))
 		})
 
 		Context("when the client fails", func() {
@@ -70,8 +70,8 @@ var _ = Describe("SecurityGroup", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.RevokeSecurityGroupIngressCall.CallCount).To(Equal(1))
-				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.GroupId).To(Equal(aws.String("the-id")))
-				Expect(client.RevokeSecurityGroupIngressCall.Receives.Input.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
+				Expect(client.RevokeSecurityGroupIngressCall.Receives.RevokeSecurityGroupIngressInput.GroupId).To(Equal(aws.String("the-id")))
+				Expect(client.RevokeSecurityGroupIngressCall.Receives.RevokeSecurityGroupIngressInput.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
 			})
 
 			Context("when the client fails to revoke ingress rules", func() {
@@ -97,8 +97,8 @@ var _ = Describe("SecurityGroup", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.RevokeSecurityGroupEgressCall.CallCount).To(Equal(1))
-				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.GroupId).To(Equal(aws.String("the-id")))
-				Expect(client.RevokeSecurityGroupEgressCall.Receives.Input.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
+				Expect(client.RevokeSecurityGroupEgressCall.Receives.RevokeSecurityGroupEgressInput.GroupId).To(Equal(aws.String("the-id")))
+				Expect(client.RevokeSecurityGroupEgressCall.Receives.RevokeSecurityGroupEgressInput.IpPermissions[0].IpProtocol).To(Equal(aws.String("tcp")))
 			})
 
 			Context("when the client fails to revoke egress rules", func() {

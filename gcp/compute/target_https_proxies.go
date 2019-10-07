@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface targetHttpsProxiesClient --output fakes/target_https_proxies_client.go
 type targetHttpsProxiesClient interface {
 	ListTargetHttpsProxies() (*gcpcompute.TargetHttpsProxyList, error)
 	DeleteTargetHttpsProxy(targetHttpsProxy string) error

@@ -32,7 +32,7 @@ var _ = Describe("HostedZones", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListHostedZonesCall.Returns.Output = &awsroute53.ListHostedZonesOutput{
+			client.ListHostedZonesCall.Returns.ListHostedZonesOutput = &awsroute53.ListHostedZonesOutput{
 				HostedZones: []*awsroute53.HostedZone{{
 					Id:   aws.String("the-id"),
 					Name: aws.String("banana"),
@@ -48,8 +48,8 @@ var _ = Describe("HostedZones", func() {
 			Expect(client.ListHostedZonesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Route53 Hosted Zone"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Route53 Hosted Zone"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})

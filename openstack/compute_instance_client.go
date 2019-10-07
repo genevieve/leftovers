@@ -7,6 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
+//go:generate faux --interface ComputeInstanceAPI --output fakes/compute_instance_api.go
 type ComputeInstanceAPI interface {
 	GetComputeInstancePager() pagination.Pager
 	PagerToPage(pagination.Pager) (pagination.Page, error)

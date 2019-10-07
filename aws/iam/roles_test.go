@@ -33,7 +33,7 @@ var _ = Describe("Roles", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListRolesCall.Returns.Output = &awsiam.ListRolesOutput{
+			client.ListRolesCall.Returns.ListRolesOutput = &awsiam.ListRolesOutput{
 				Roles: []*awsiam.Role{{
 					RoleName: aws.String("banana-role"),
 				}},
@@ -46,8 +46,8 @@ var _ = Describe("Roles", func() {
 
 			Expect(client.ListRolesCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Role"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-role"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Role"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-role"))
 
 			Expect(items).To(HaveLen(1))
 		})

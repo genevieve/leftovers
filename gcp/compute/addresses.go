@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface addressesClient --output fakes/addresses_client.go
 type addressesClient interface {
 	ListAddresses(region string) ([]*gcpcompute.Address, error)
 	DeleteAddress(region, address string) error

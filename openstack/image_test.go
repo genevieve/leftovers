@@ -21,12 +21,12 @@ var _ = Describe("Image", func() {
 
 		Describe("Delete", func() {
 			var (
-				fakeImageClient *fakes.ImageClient
+				fakeImageClient *fakes.ImageServiceClient
 				image           openstack.Image
 			)
 
 			BeforeEach(func() {
-				fakeImageClient = &fakes.ImageClient{}
+				fakeImageClient = &fakes.ImageServiceClient{}
 				image = openstack.NewImage("some-name", "some-id", fakeImageClient)
 			})
 
@@ -34,7 +34,7 @@ var _ = Describe("Image", func() {
 				err := image.Delete()
 
 				Expect(err).NotTo(HaveOccurred())
-				Expect(fakeImageClient.DeleteCall.Receives.ImageID).To(Equal("some-id"))
+				Expect(fakeImageClient.DeleteCall.Receives.Id).To(Equal("some-id"))
 			})
 
 			Context("when an error occurs", func() {

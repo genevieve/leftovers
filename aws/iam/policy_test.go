@@ -2,6 +2,7 @@ package iam_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
@@ -14,22 +15,28 @@ import (
 
 var _ = Describe("Policy", func() {
 	var (
-		policy iam.Policy
-		client *fakes.PoliciesClient
-		logger *fakes.Logger
-		name   *string
-		arn    *string
+		policy   iam.Policy
+		client   *fakes.PoliciesClient
+		logger   *fakes.Logger
+		messages []string
+		name     *string
+		arn      *string
 	)
 
 	BeforeEach(func() {
 		client = &fakes.PoliciesClient{}
-		logger = &fakes.Logger{}
 		name = aws.String("banana")
 		arn = aws.String("the-arn")
 
+		messages = []string{}
+		logger = &fakes.Logger{}
+		logger.PrintfCall.Stub = func(format string, v ...interface{}) {
+			messages = append(messages, fmt.Sprintf(format, v...))
+		}
+
 		policy = iam.NewPolicy(client, logger, name, arn)
 
-		client.ListPolicyVersionsCall.Returns.Output = &awsiam.ListPolicyVersionsOutput{
+		client.ListPolicyVersionsCall.Returns.ListPolicyVersionsOutput = &awsiam.ListPolicyVersionsOutput{
 			Versions: []*awsiam.PolicyVersion{},
 		}
 	})
@@ -40,12 +47,12 @@ var _ = Describe("Policy", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeletePolicyCall.CallCount).To(Equal(1))
-			Expect(client.DeletePolicyCall.Receives.Input.PolicyArn).To(Equal(arn))
+			Expect(client.DeletePolicyCall.Receives.DeletePolicyInput.PolicyArn).To(Equal(arn))
 		})
 
 		Context("when the policy has non-default versions", func() {
 			BeforeEach(func() {
-				client.ListPolicyVersionsCall.Returns.Output = &awsiam.ListPolicyVersionsOutput{
+				client.ListPolicyVersionsCall.Returns.ListPolicyVersionsOutput = &awsiam.ListPolicyVersionsOutput{
 					Versions: []*awsiam.PolicyVersion{
 						{IsDefaultVersion: aws.Bool(true), VersionId: aws.String("v2")},
 						{IsDefaultVersion: aws.Bool(false), VersionId: aws.String("v1")},
@@ -60,8 +67,8 @@ var _ = Describe("Policy", func() {
 				Expect(client.ListPolicyVersionsCall.CallCount).To(Equal(1))
 
 				Expect(client.DeletePolicyVersionCall.CallCount).To(Equal(1))
-				Expect(client.DeletePolicyVersionCall.Receives.Input.PolicyArn).To(Equal(arn))
-				Expect(client.DeletePolicyVersionCall.Receives.Input.VersionId).To(Equal(aws.String("v1")))
+				Expect(client.DeletePolicyVersionCall.Receives.DeletePolicyVersionInput.PolicyArn).To(Equal(arn))
+				Expect(client.DeletePolicyVersionCall.Receives.DeletePolicyVersionInput.VersionId).To(Equal(aws.String("v1")))
 			})
 
 			Context("when the client fails to delete policy versions", func() {
@@ -73,7 +80,7 @@ var _ = Describe("Policy", func() {
 					err := policy.Delete()
 					Expect(err).NotTo(HaveOccurred())
 
-					Expect(logger.PrintfCall.Messages).To(Equal([]string{
+					Expect(messages).To(Equal([]string{
 						"[IAM Policy: banana] Delete policy version v1: some error \n",
 					}))
 				})

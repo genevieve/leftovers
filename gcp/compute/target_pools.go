@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface targetPoolsClient --output fakes/target_pools_client.go
 type targetPoolsClient interface {
 	ListTargetPools(region string) (*gcpcompute.TargetPoolList, error)
 	DeleteTargetPool(region string, targetPool string) error

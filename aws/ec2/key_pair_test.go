@@ -32,7 +32,7 @@ var _ = Describe("KeyPair", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteKeyPairCall.CallCount).To(Equal(1))
-			Expect(client.DeleteKeyPairCall.Receives.Input.KeyName).To(Equal(name))
+			Expect(client.DeleteKeyPairCall.Receives.DeleteKeyPairInput.KeyName).To(Equal(name))
 		})
 
 		Context("when the client fails", func() {

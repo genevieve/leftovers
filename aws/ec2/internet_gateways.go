@@ -7,12 +7,14 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+//go:generate faux --interface internetGatewaysClient --output fakes/internet_gateways_client.go
 type internetGatewaysClient interface {
 	DescribeInternetGateways(*awsec2.DescribeInternetGatewaysInput) (*awsec2.DescribeInternetGatewaysOutput, error)
 	DetachInternetGateway(*awsec2.DetachInternetGatewayInput) (*awsec2.DetachInternetGatewayOutput, error)
 	DeleteInternetGateway(*awsec2.DeleteInternetGatewayInput) (*awsec2.DeleteInternetGatewayOutput, error)
 }
 
+//go:generate faux --interface internetGateways --output fakes/internet_gateways.go
 type internetGateways interface {
 	Delete(vpcId string) error
 }

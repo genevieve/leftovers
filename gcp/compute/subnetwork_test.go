@@ -35,7 +35,7 @@ var _ = Describe("Subnetwork", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteSubnetworkCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSubnetworkCall.Receives.Subnetwork).To(Equal(name))
+			Expect(client.DeleteSubnetworkCall.Receives.Network).To(Equal(name))
 			Expect(client.DeleteSubnetworkCall.Receives.Region).To(Equal(region))
 		})
 

@@ -31,7 +31,7 @@ var _ = Describe("GlobalForwardingRule", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteGlobalForwardingRuleCall.CallCount).To(Equal(1))
-			Expect(client.DeleteGlobalForwardingRuleCall.Receives.GlobalForwardingRule).To(Equal(name))
+			Expect(client.DeleteGlobalForwardingRuleCall.Receives.Rule).To(Equal(name))
 		})
 
 		Context("when the client fails to delete", func() {

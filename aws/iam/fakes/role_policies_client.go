@@ -1,77 +1,99 @@
 package fakes
 
-import awsiam "github.com/aws/aws-sdk-go/service/iam"
+import (
+	"sync"
+
+	awsiam "github.com/aws/aws-sdk-go/service/iam"
+)
 
 type RolePoliciesClient struct {
-	ListAttachedRolePoliciesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *awsiam.ListAttachedRolePoliciesInput
-		}
-		Returns struct {
-			Output *awsiam.ListAttachedRolePoliciesOutput
-			Error  error
-		}
-	}
-
-	ListRolePoliciesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *awsiam.ListRolePoliciesInput
-		}
-		Returns struct {
-			Output *awsiam.ListRolePoliciesOutput
-			Error  error
-		}
-	}
-
-	DetachRolePolicyCall struct {
-		CallCount int
-		Receives  struct {
-			Input *awsiam.DetachRolePolicyInput
-		}
-		Returns struct {
-			Output *awsiam.DetachRolePolicyOutput
-			Error  error
-		}
-	}
-
 	DeleteRolePolicyCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *awsiam.DeleteRolePolicyInput
+			DeleteRolePolicyInput *awsiam.DeleteRolePolicyInput
 		}
 		Returns struct {
-			Output *awsiam.DeleteRolePolicyOutput
-			Error  error
+			DeleteRolePolicyOutput *awsiam.DeleteRolePolicyOutput
+			Error                  error
 		}
+		Stub func(*awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error)
+	}
+	DetachRolePolicyCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DetachRolePolicyInput *awsiam.DetachRolePolicyInput
+		}
+		Returns struct {
+			DetachRolePolicyOutput *awsiam.DetachRolePolicyOutput
+			Error                  error
+		}
+		Stub func(*awsiam.DetachRolePolicyInput) (*awsiam.DetachRolePolicyOutput, error)
+	}
+	ListAttachedRolePoliciesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListAttachedRolePoliciesInput *awsiam.ListAttachedRolePoliciesInput
+		}
+		Returns struct {
+			ListAttachedRolePoliciesOutput *awsiam.ListAttachedRolePoliciesOutput
+			Error                          error
+		}
+		Stub func(*awsiam.ListAttachedRolePoliciesInput) (*awsiam.ListAttachedRolePoliciesOutput, error)
+	}
+	ListRolePoliciesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListRolePoliciesInput *awsiam.ListRolePoliciesInput
+		}
+		Returns struct {
+			ListRolePoliciesOutput *awsiam.ListRolePoliciesOutput
+			Error                  error
+		}
+		Stub func(*awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error)
 	}
 }
 
-func (i *RolePoliciesClient) ListAttachedRolePolicies(input *awsiam.ListAttachedRolePoliciesInput) (*awsiam.ListAttachedRolePoliciesOutput, error) {
-	i.ListAttachedRolePoliciesCall.CallCount++
-	i.ListAttachedRolePoliciesCall.Receives.Input = input
-
-	return i.ListAttachedRolePoliciesCall.Returns.Output, i.ListAttachedRolePoliciesCall.Returns.Error
+func (f *RolePoliciesClient) DeleteRolePolicy(param1 *awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error) {
+	f.DeleteRolePolicyCall.Lock()
+	defer f.DeleteRolePolicyCall.Unlock()
+	f.DeleteRolePolicyCall.CallCount++
+	f.DeleteRolePolicyCall.Receives.DeleteRolePolicyInput = param1
+	if f.DeleteRolePolicyCall.Stub != nil {
+		return f.DeleteRolePolicyCall.Stub(param1)
+	}
+	return f.DeleteRolePolicyCall.Returns.DeleteRolePolicyOutput, f.DeleteRolePolicyCall.Returns.Error
 }
-
-func (i *RolePoliciesClient) ListRolePolicies(input *awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error) {
-	i.ListRolePoliciesCall.CallCount++
-	i.ListRolePoliciesCall.Receives.Input = input
-
-	return i.ListRolePoliciesCall.Returns.Output, i.ListRolePoliciesCall.Returns.Error
+func (f *RolePoliciesClient) DetachRolePolicy(param1 *awsiam.DetachRolePolicyInput) (*awsiam.DetachRolePolicyOutput, error) {
+	f.DetachRolePolicyCall.Lock()
+	defer f.DetachRolePolicyCall.Unlock()
+	f.DetachRolePolicyCall.CallCount++
+	f.DetachRolePolicyCall.Receives.DetachRolePolicyInput = param1
+	if f.DetachRolePolicyCall.Stub != nil {
+		return f.DetachRolePolicyCall.Stub(param1)
+	}
+	return f.DetachRolePolicyCall.Returns.DetachRolePolicyOutput, f.DetachRolePolicyCall.Returns.Error
 }
-
-func (i *RolePoliciesClient) DetachRolePolicy(input *awsiam.DetachRolePolicyInput) (*awsiam.DetachRolePolicyOutput, error) {
-	i.DetachRolePolicyCall.CallCount++
-	i.DetachRolePolicyCall.Receives.Input = input
-
-	return i.DetachRolePolicyCall.Returns.Output, i.DetachRolePolicyCall.Returns.Error
+func (f *RolePoliciesClient) ListAttachedRolePolicies(param1 *awsiam.ListAttachedRolePoliciesInput) (*awsiam.ListAttachedRolePoliciesOutput, error) {
+	f.ListAttachedRolePoliciesCall.Lock()
+	defer f.ListAttachedRolePoliciesCall.Unlock()
+	f.ListAttachedRolePoliciesCall.CallCount++
+	f.ListAttachedRolePoliciesCall.Receives.ListAttachedRolePoliciesInput = param1
+	if f.ListAttachedRolePoliciesCall.Stub != nil {
+		return f.ListAttachedRolePoliciesCall.Stub(param1)
+	}
+	return f.ListAttachedRolePoliciesCall.Returns.ListAttachedRolePoliciesOutput, f.ListAttachedRolePoliciesCall.Returns.Error
 }
-
-func (i *RolePoliciesClient) DeleteRolePolicy(input *awsiam.DeleteRolePolicyInput) (*awsiam.DeleteRolePolicyOutput, error) {
-	i.DeleteRolePolicyCall.CallCount++
-	i.DeleteRolePolicyCall.Receives.Input = input
-
-	return i.DeleteRolePolicyCall.Returns.Output, i.DeleteRolePolicyCall.Returns.Error
+func (f *RolePoliciesClient) ListRolePolicies(param1 *awsiam.ListRolePoliciesInput) (*awsiam.ListRolePoliciesOutput, error) {
+	f.ListRolePoliciesCall.Lock()
+	defer f.ListRolePoliciesCall.Unlock()
+	f.ListRolePoliciesCall.CallCount++
+	f.ListRolePoliciesCall.Receives.ListRolePoliciesInput = param1
+	if f.ListRolePoliciesCall.Stub != nil {
+		return f.ListRolePoliciesCall.Stub(param1)
+	}
+	return f.ListRolePoliciesCall.Returns.ListRolePoliciesOutput, f.ListRolePoliciesCall.Returns.Error
 }

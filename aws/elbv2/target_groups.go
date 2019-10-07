@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface targetGroupsClient --output fakes/target_groups_client.go
 type targetGroupsClient interface {
 	DescribeTargetGroups(*awselbv2.DescribeTargetGroupsInput) (*awselbv2.DescribeTargetGroupsOutput, error)
 	DeleteTargetGroup(*awselbv2.DeleteTargetGroupInput) (*awselbv2.DeleteTargetGroupOutput, error)

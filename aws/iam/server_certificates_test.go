@@ -31,7 +31,7 @@ var _ = Describe("ServerCertificates", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListServerCertificatesCall.Returns.Output = &awsiam.ListServerCertificatesOutput{
+			client.ListServerCertificatesCall.Returns.ListServerCertificatesOutput = &awsiam.ListServerCertificatesOutput{
 				ServerCertificateMetadataList: []*awsiam.ServerCertificateMetadata{{
 					ServerCertificateName: aws.String("banana-cert"),
 				}},
@@ -44,8 +44,8 @@ var _ = Describe("ServerCertificates", func() {
 
 			Expect(client.ListServerCertificatesCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Server Certificate"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-cert"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Server Certificate"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-cert"))
 
 			Expect(items).To(HaveLen(1))
 		})

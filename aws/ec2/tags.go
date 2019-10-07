@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface tagsClient --output fakes/tags_client.go
 type tagsClient interface {
 	DescribeTags(*awsec2.DescribeTagsInput) (*awsec2.DescribeTagsOutput, error)
 	DeleteTags(*awsec2.DeleteTagsInput) (*awsec2.DeleteTagsOutput, error)

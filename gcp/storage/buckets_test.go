@@ -32,7 +32,7 @@ var _ = Describe("Buckets", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListBucketsCall.Returns.Output = &gcpstorage.Buckets{
+			client.ListBucketsCall.Returns.Buckets = &gcpstorage.Buckets{
 				Items: []*gcpstorage.Bucket{{
 					Name: "banana-bucket",
 				}},
@@ -47,8 +47,8 @@ var _ = Describe("Buckets", func() {
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Storage Bucket"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-bucket"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Storage Bucket"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-bucket"))
 
 			Expect(list).To(HaveLen(1))
 		})

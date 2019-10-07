@@ -34,11 +34,11 @@ var _ = Describe("Image", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeregisterImageCall.CallCount).To(Equal(1))
-			Expect(client.DeregisterImageCall.Receives.Input.ImageId).To(Equal(imageId))
+			Expect(client.DeregisterImageCall.Receives.DeregisterImageInput.ImageId).To(Equal(imageId))
 
 			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
-			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("image"))
-			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-image-id"))
+			Expect(resourceTags.DeleteCall.Receives.FilterName).To(Equal("image"))
+			Expect(resourceTags.DeleteCall.Receives.FilterValue).To(Equal("the-image-id"))
 		})
 
 		Context("when the client fails", func() {

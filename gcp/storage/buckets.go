@@ -8,6 +8,7 @@ import (
 	gcpstorage "google.golang.org/api/storage/v1"
 )
 
+//go:generate faux --interface bucketsClient --output fakes/buckets_client.go
 type bucketsClient interface {
 	ListBuckets() (*gcpstorage.Buckets, error)
 	DeleteBucket(bucket string) error

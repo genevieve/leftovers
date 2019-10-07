@@ -33,7 +33,7 @@ var _ = Describe("Addresses", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListAddressesCall.Returns.Output = []*gcpcompute.Address{{
+			client.ListAddressesCall.Returns.AddressSlice = []*gcpcompute.Address{{
 				Name:   "banana-address",
 				Region: "https://region-1",
 			}}
@@ -48,8 +48,8 @@ var _ = Describe("Addresses", func() {
 			Expect(client.ListAddressesCall.Receives.Region).To(Equal("region-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Address"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-address"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Address"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-address"))
 
 			Expect(list).To(HaveLen(1))
 		})

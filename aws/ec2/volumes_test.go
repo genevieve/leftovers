@@ -31,7 +31,7 @@ var _ = Describe("Volumes", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeVolumesCall.Returns.Output = &awsec2.DescribeVolumesOutput{
+			client.DescribeVolumesCall.Returns.DescribeVolumesOutput = &awsec2.DescribeVolumesOutput{
 				Volumes: []*awsec2.Volume{{
 					VolumeId: aws.String("banana"),
 					State:    aws.String("available"),
@@ -45,12 +45,12 @@ var _ = Describe("Volumes", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
-			Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("status")))
-			Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("available")))
+			Expect(client.DescribeVolumesCall.Receives.DescribeVolumesInput.Filters[0].Name).To(Equal(aws.String("status")))
+			Expect(client.DescribeVolumesCall.Receives.DescribeVolumesInput.Filters[0].Values[0]).To(Equal(aws.String("available")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Volume"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana (State:available)"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Volume"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana (State:available)"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -61,12 +61,12 @@ var _ = Describe("Volumes", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
-				Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("status")))
-				Expect(client.DescribeVolumesCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("available")))
+				Expect(client.DescribeVolumesCall.Receives.DescribeVolumesInput.Filters[0].Name).To(Equal(aws.String("status")))
+				Expect(client.DescribeVolumesCall.Receives.DescribeVolumesInput.Filters[0].Values[0]).To(Equal(aws.String("available")))
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-				Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Volume"))
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana (State:available)"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Volume"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana (State:available)"))
 
 				Expect(items).To(HaveLen(1))
 			})

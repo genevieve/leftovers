@@ -30,7 +30,7 @@ var _ = Describe("Firewalls", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListFirewallsCall.Returns.Output = []*gcpcompute.Firewall{{
+			client.ListFirewallsCall.Returns.FirewallSlice = []*gcpcompute.Firewall{{
 				Name: "banana-firewall",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("Firewalls", func() {
 			Expect(client.ListFirewallsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Firewall"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-firewall"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Firewall"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-firewall"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -72,7 +72,7 @@ var _ = Describe("Firewalls", func() {
 
 		Context("when the firewall name contains default", func() {
 			BeforeEach(func() {
-				client.ListFirewallsCall.Returns.Output = []*gcpcompute.Firewall{{
+				client.ListFirewallsCall.Returns.FirewallSlice = []*gcpcompute.Firewall{{
 					Name: "default-allow-banana",
 				}}
 			})

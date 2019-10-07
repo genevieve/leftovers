@@ -34,7 +34,7 @@ var _ = Describe("NS Services", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListNSServicesCall.Returns.NSServiceListResult = manager.NsServiceListResult{
+			client.ListNSServicesCall.Returns.NsServiceListResult = manager.NsServiceListResult{
 				Results: []manager.NsService{
 					manager.NsService{
 						Id:          "pineapple-123",
@@ -58,8 +58,8 @@ var _ = Describe("NS Services", func() {
 			Expect(client.ListNSServicesCall.Receives.Context).To(Equal(ctx))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("NS Service"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("pineapple"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("NS Service"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("pineapple"))
 
 			Expect(list).To(HaveLen(1))
 			Expect(list[0].Name()).NotTo(Equal("cherimoya"))

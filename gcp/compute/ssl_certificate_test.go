@@ -31,7 +31,7 @@ var _ = Describe("SslCertificate", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteSslCertificateCall.CallCount).To(Equal(1))
-			Expect(client.DeleteSslCertificateCall.Receives.SslCertificate).To(Equal(name))
+			Expect(client.DeleteSslCertificateCall.Receives.Certificate).To(Equal(name))
 		})
 
 		Context("when the client fails to delete", func() {

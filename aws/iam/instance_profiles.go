@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface instanceProfilesClient --output fakes/instance_profiles_client.go
 type instanceProfilesClient interface {
 	ListInstanceProfiles(*awsiam.ListInstanceProfilesInput) (*awsiam.ListInstanceProfilesOutput, error)
 	RemoveRoleFromInstanceProfile(*awsiam.RemoveRoleFromInstanceProfileInput) (*awsiam.RemoveRoleFromInstanceProfileOutput, error)

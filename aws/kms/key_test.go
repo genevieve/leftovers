@@ -36,9 +36,9 @@ var _ = Describe("Key", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DisableKeyCall.CallCount).To(Equal(1))
-			Expect(client.DisableKeyCall.Receives.Input.KeyId).To(Equal(id))
+			Expect(client.DisableKeyCall.Receives.DisableKeyInput.KeyId).To(Equal(id))
 			Expect(client.ScheduleKeyDeletionCall.CallCount).To(Equal(1))
-			Expect(client.ScheduleKeyDeletionCall.Receives.Input.KeyId).To(Equal(id))
+			Expect(client.ScheduleKeyDeletionCall.Receives.ScheduleKeyDeletionInput.KeyId).To(Equal(id))
 		})
 
 		Context("when the client fails to disable the key", func() {

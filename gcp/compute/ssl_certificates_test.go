@@ -30,7 +30,7 @@ var _ = Describe("SslCertificates", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListSslCertificatesCall.Returns.Output = []*gcpcompute.SslCertificate{{
+			client.ListSslCertificatesCall.Returns.SslCertificateSlice = []*gcpcompute.SslCertificate{{
 				Name: "banana-certificate",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("SslCertificates", func() {
 			Expect(client.ListSslCertificatesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Compute Ssl Certificate"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-certificate"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Compute Ssl Certificate"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-certificate"))
 
 			Expect(list).To(HaveLen(1))
 		})

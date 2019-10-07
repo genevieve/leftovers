@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface usersClient --output fakes/users_client.go
 type usersClient interface {
 	ListUsers(*awsiam.ListUsersInput) (*awsiam.ListUsersOutput, error)
 	DeleteUser(*awsiam.DeleteUserInput) (*awsiam.DeleteUserOutput, error)

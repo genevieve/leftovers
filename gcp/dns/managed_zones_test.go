@@ -34,7 +34,7 @@ var _ = Describe("ManagedZones", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.ListManagedZonesCall.Returns.Output = &gcpdns.ManagedZonesListResponse{
+			client.ListManagedZonesCall.Returns.ManagedZonesListResponse = &gcpdns.ManagedZonesListResponse{
 				ManagedZones: []*gcpdns.ManagedZone{{
 					Name: "banana-managed-zone",
 				}},
@@ -49,8 +49,8 @@ var _ = Describe("ManagedZones", func() {
 			Expect(client.ListManagedZonesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("DNS Managed Zone"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-managed-zone"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("DNS Managed Zone"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-managed-zone"))
 
 			Expect(list).To(HaveLen(1))
 		})

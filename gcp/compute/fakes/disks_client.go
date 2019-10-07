@@ -1,20 +1,14 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type DisksClient struct {
-	ListDisksCall struct {
-		CallCount int
-		Receives  struct {
-			Zone string
-		}
-		Returns struct {
-			Output []*gcpcompute.Disk
-			Error  error
-		}
-	}
-
 	DeleteDiskCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			Zone string
@@ -23,20 +17,40 @@ type DisksClient struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string, string) error
+	}
+	ListDisksCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Zone string
+		}
+		Returns struct {
+			DiskSlice []*gcpcompute.Disk
+			Error     error
+		}
+		Stub func(string) ([]*gcpcompute.Disk, error)
 	}
 }
 
-func (n *DisksClient) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
-	n.ListDisksCall.CallCount++
-	n.ListDisksCall.Receives.Zone = zone
-
-	return n.ListDisksCall.Returns.Output, n.ListDisksCall.Returns.Error
+func (f *DisksClient) DeleteDisk(param1 string, param2 string) error {
+	f.DeleteDiskCall.Lock()
+	defer f.DeleteDiskCall.Unlock()
+	f.DeleteDiskCall.CallCount++
+	f.DeleteDiskCall.Receives.Zone = param1
+	f.DeleteDiskCall.Receives.Disk = param2
+	if f.DeleteDiskCall.Stub != nil {
+		return f.DeleteDiskCall.Stub(param1, param2)
+	}
+	return f.DeleteDiskCall.Returns.Error
 }
-
-func (n *DisksClient) DeleteDisk(zone, disk string) error {
-	n.DeleteDiskCall.CallCount++
-	n.DeleteDiskCall.Receives.Zone = zone
-	n.DeleteDiskCall.Receives.Disk = disk
-
-	return n.DeleteDiskCall.Returns.Error
+func (f *DisksClient) ListDisks(param1 string) ([]*gcpcompute.Disk, error) {
+	f.ListDisksCall.Lock()
+	defer f.ListDisksCall.Unlock()
+	f.ListDisksCall.CallCount++
+	f.ListDisksCall.Receives.Zone = param1
+	if f.ListDisksCall.Stub != nil {
+		return f.ListDisksCall.Stub(param1)
+	}
+	return f.ListDisksCall.Returns.DiskSlice, f.ListDisksCall.Returns.Error
 }

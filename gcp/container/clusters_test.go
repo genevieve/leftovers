@@ -32,7 +32,7 @@ var _ = Describe("Clusters", func() {
 
 	Describe("List", func() {
 		BeforeEach(func() {
-			client.ListClustersCall.Returns.Output = &gcpcontainer.ListClustersResponse{
+			client.ListClustersCall.Returns.ListClustersResponse = &gcpcontainer.ListClustersResponse{
 				Clusters: []*gcpcontainer.Cluster{{
 					Name: "banana-cluster",
 				}},
@@ -43,8 +43,8 @@ var _ = Describe("Clusters", func() {
 			list, err := clusters.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Container Cluster"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-cluster"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Container Cluster"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-cluster"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -64,7 +64,7 @@ var _ = Describe("Clusters", func() {
 
 		Context("when the resource name does not contain the filter", func() {
 			BeforeEach(func() {
-				client.ListClustersCall.Returns.Output = &gcpcontainer.ListClustersResponse{
+				client.ListClustersCall.Returns.ListClustersResponse = &gcpcontainer.ListClustersResponse{
 					Clusters: []*gcpcontainer.Cluster{{
 						Name: "kiwi-cluster",
 					}},

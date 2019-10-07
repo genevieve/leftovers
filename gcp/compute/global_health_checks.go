@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface globalHealthChecksClient --output fakes/global_health_checks_client.go
 type globalHealthChecksClient interface {
 	ListGlobalHealthChecks() ([]*gcpcompute.HealthCheck, error)
 	DeleteGlobalHealthCheck(globalHealthCheck string) error

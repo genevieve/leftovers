@@ -33,12 +33,12 @@ var _ = Describe("Buckets", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListBucketsCall.Returns.Output = &awss3.ListBucketsOutput{
+			client.ListBucketsCall.Returns.ListBucketsOutput = &awss3.ListBucketsOutput{
 				Buckets: []*awss3.Bucket{{
 					Name: aws.String("banana"),
 				}},
 			}
-			manager.IsInRegionCall.Returns.Output = true
+			manager.IsInRegionCall.Returns.Bool = true
 			filter = "ban"
 		})
 
@@ -50,8 +50,8 @@ var _ = Describe("Buckets", func() {
 			Expect(manager.IsInRegionCall.CallCount).To(Equal(1))
 			Expect(manager.IsInRegionCall.Receives.Bucket).To(Equal("banana"))
 
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("S3 Bucket"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("S3 Bucket"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -81,7 +81,7 @@ var _ = Describe("Buckets", func() {
 
 		Context("when the bucket isn't in the region configured", func() {
 			BeforeEach(func() {
-				manager.IsInRegionCall.Returns.Output = false
+				manager.IsInRegionCall.Returns.Bool = false
 			})
 
 			It("does not return it in the list", func() {

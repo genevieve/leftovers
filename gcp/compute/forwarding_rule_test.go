@@ -33,7 +33,7 @@ var _ = Describe("ForwardingRule", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteForwardingRuleCall.CallCount).To(Equal(1))
-			Expect(client.DeleteForwardingRuleCall.Receives.ForwardingRule).To(Equal(name))
+			Expect(client.DeleteForwardingRuleCall.Receives.Rule).To(Equal(name))
 			Expect(client.DeleteForwardingRuleCall.Receives.Region).To(Equal(region))
 		})
 

@@ -36,7 +36,7 @@ var _ = Describe("Volume", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteVolumeCall.CallCount).To(Equal(1))
-			Expect(client.DeleteVolumeCall.Receives.Input.VolumeId).To(Equal(id))
+			Expect(client.DeleteVolumeCall.Receives.DeleteVolumeInput.VolumeId).To(Equal(id))
 		})
 
 		Context("the volume has already been deleted", func() {

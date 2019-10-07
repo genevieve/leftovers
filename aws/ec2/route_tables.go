@@ -7,23 +7,25 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type routesClient interface {
+//go:generate faux --interface routeTablesClient --output fakes/route_tables_client.go
+type routeTablesClient interface {
 	DescribeRouteTables(*awsec2.DescribeRouteTablesInput) (*awsec2.DescribeRouteTablesOutput, error)
 	DisassociateRouteTable(*awsec2.DisassociateRouteTableInput) (*awsec2.DisassociateRouteTableOutput, error)
 	DeleteRouteTable(*awsec2.DeleteRouteTableInput) (*awsec2.DeleteRouteTableOutput, error)
 }
 
+//go:generate faux --interface routeTables --output fakes/route_tables.go
 type routeTables interface {
 	Delete(vpcId string) error
 }
 
 type RouteTables struct {
-	client       routesClient
+	client       routeTablesClient
 	logger       logger
 	resourceTags resourceTags
 }
 
-func NewRouteTables(client routesClient, logger logger, resourceTags resourceTags) RouteTables {
+func NewRouteTables(client routeTablesClient, logger logger, resourceTags resourceTags) RouteTables {
 	return RouteTables{
 		client:       client,
 		logger:       logger,

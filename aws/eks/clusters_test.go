@@ -29,7 +29,7 @@ var _ = Describe("Clusters", func() {
 
 	Describe("List", func() {
 		BeforeEach(func() {
-			client.ListClustersCall.Returns.Output = &awseks.ListClustersOutput{
+			client.ListClustersCall.Returns.ListClustersOutput = &awseks.ListClustersOutput{
 				Clusters: []*string{aws.String("the-cluster-id")},
 			}
 		})
@@ -41,8 +41,8 @@ var _ = Describe("Clusters", func() {
 			Expect(client.ListClustersCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EKS Cluster"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-cluster-id"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EKS Cluster"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-cluster-id"))
 
 			Expect(items).To(HaveLen(1))
 		})

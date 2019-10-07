@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface sslCertificatesClient --output fakes/ssl_certificates_client.go
 type sslCertificatesClient interface {
 	ListSslCertificates() ([]*gcpcompute.SslCertificate, error)
 	DeleteSslCertificate(certificate string) error

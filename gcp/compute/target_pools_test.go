@@ -32,7 +32,7 @@ var _ = Describe("TargetPools", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListTargetPoolsCall.Returns.Output = &gcpcompute.TargetPoolList{
+			client.ListTargetPoolsCall.Returns.TargetPoolList = &gcpcompute.TargetPoolList{
 				Items: []*gcpcompute.TargetPool{{
 					Name:   "banana-pool",
 					Region: "https://region-1",
@@ -49,8 +49,8 @@ var _ = Describe("TargetPools", func() {
 			Expect(client.ListTargetPoolsCall.Receives.Region).To(Equal("region-1"))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Target Pool"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-pool"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Target Pool"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-pool"))
 
 			Expect(list).To(HaveLen(1))
 		})

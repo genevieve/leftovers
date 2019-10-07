@@ -24,7 +24,7 @@ var _ = Describe("ResourceTags", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.DescribeTagsCall.Returns.Output = &awsec2.DescribeTagsOutput{
+			client.DescribeTagsCall.Returns.DescribeTagsOutput = &awsec2.DescribeTagsOutput{
 				Tags: []*awsec2.TagDescription{{
 					ResourceId: aws.String("the-resource-id"),
 					Key:        aws.String("the-key"),
@@ -38,15 +38,15 @@ var _ = Describe("ResourceTags", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
-			Expect(client.DescribeTagsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("resource-type")))
-			Expect(client.DescribeTagsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("vpc")))
-			Expect(client.DescribeTagsCall.Receives.Input.Filters[1].Name).To(Equal(aws.String("resource-id")))
-			Expect(client.DescribeTagsCall.Receives.Input.Filters[1].Values[0]).To(Equal(aws.String("vpc-id")))
+			Expect(client.DescribeTagsCall.Receives.DescribeTagsInput.Filters[0].Name).To(Equal(aws.String("resource-type")))
+			Expect(client.DescribeTagsCall.Receives.DescribeTagsInput.Filters[0].Values[0]).To(Equal(aws.String("vpc")))
+			Expect(client.DescribeTagsCall.Receives.DescribeTagsInput.Filters[1].Name).To(Equal(aws.String("resource-id")))
+			Expect(client.DescribeTagsCall.Receives.DescribeTagsInput.Filters[1].Values[0]).To(Equal(aws.String("vpc-id")))
 
 			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(aws.String("the-key")))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Value).To(Equal(aws.String("the-value")))
-			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(aws.String("the-resource-id")))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Tags[0].Key).To(Equal(aws.String("the-key")))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Tags[0].Value).To(Equal(aws.String("the-value")))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Resources[0]).To(Equal(aws.String("the-resource-id")))
 		})
 
 		Context("when the client fails to describe tags", func() {

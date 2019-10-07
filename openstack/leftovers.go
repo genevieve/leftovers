@@ -17,6 +17,7 @@ type listTyper interface {
 	Type() string
 }
 
+//go:generate faux --interface logger --output fakes/logger.go
 type logger interface {
 	Printf(message string, a ...interface{})
 	Println(message string)

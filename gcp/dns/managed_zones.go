@@ -8,11 +8,13 @@ import (
 	gcpdns "google.golang.org/api/dns/v1"
 )
 
+//go:generate faux --interface managedZonesClient --output fakes/managed_zones_client.go
 type managedZonesClient interface {
 	ListManagedZones() (*gcpdns.ManagedZonesListResponse, error)
 	DeleteManagedZone(zone string) error
 }
 
+//go:generate faux --interface recordSets --output fakes/record_sets.go
 type recordSets interface {
 	Delete(managedZone string) error
 }

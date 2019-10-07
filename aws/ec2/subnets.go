@@ -7,11 +7,13 @@ import (
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 )
 
+//go:generate faux --interface subnetsClient --output fakes/subnets_client.go
 type subnetsClient interface {
 	DescribeSubnets(*awsec2.DescribeSubnetsInput) (*awsec2.DescribeSubnetsOutput, error)
 	DeleteSubnet(*awsec2.DeleteSubnetInput) (*awsec2.DeleteSubnetOutput, error)
 }
 
+//go:generate faux --interface subnets --output fakes/subnets.go
 type subnets interface {
 	Delete(vpcId string) error
 }

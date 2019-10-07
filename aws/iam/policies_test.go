@@ -31,7 +31,7 @@ var _ = Describe("Policies", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListPoliciesCall.Returns.Output = &awsiam.ListPoliciesOutput{
+			client.ListPoliciesCall.Returns.ListPoliciesOutput = &awsiam.ListPoliciesOutput{
 				Policies: []*awsiam.Policy{{
 					Arn:        aws.String("the-policy-arn"),
 					PolicyName: aws.String("banana-policy"),
@@ -46,8 +46,8 @@ var _ = Describe("Policies", func() {
 			Expect(client.ListPoliciesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Policy"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-policy"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Policy"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-policy"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -85,8 +85,8 @@ var _ = Describe("Policies", func() {
 				items, err := policies.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("IAM Policy"))
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-policy"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Policy"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-policy"))
 
 				Expect(items).To(HaveLen(0))
 			})

@@ -13,13 +13,13 @@ import (
 
 var _ = Describe("Compute Instance", func() {
 	var (
-		fakeClient       *fakes.ComputeInstanceClient
+		fakeClient       *fakes.ComputeClient
 		fakeLogger       *fakes.Logger
 		computeInstances openstack.ComputeInstances
 	)
 
 	BeforeEach(func() {
-		fakeClient = &fakes.ComputeInstanceClient{}
+		fakeClient = &fakes.ComputeClient{}
 		fakeLogger = &fakes.Logger{}
 		computeInstances = openstack.NewComputeInstances(fakeClient, fakeLogger)
 	})
@@ -27,7 +27,7 @@ var _ = Describe("Compute Instance", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			fakeLogger.PromptWithDetailsCall.Returns.Bool = true
-			fakeClient.ListCall.Returns.ComputeInstances = []servers.Server{
+			fakeClient.ListCall.Returns.ServerSlice = []servers.Server{
 				servers.Server{
 					ID:   "some id",
 					Name: "some name",

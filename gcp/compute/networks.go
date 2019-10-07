@@ -8,6 +8,7 @@ import (
 	gcp "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface networksClient --output fakes/networks_client.go
 type networksClient interface {
 	ListNetworks() ([]*gcp.Network, error)
 	DeleteNetwork(network string) error

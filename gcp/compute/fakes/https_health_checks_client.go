@@ -1,17 +1,14 @@
 package fakes
 
-import gcpcompute "google.golang.org/api/compute/v1"
+import (
+	"sync"
+
+	gcpcompute "google.golang.org/api/compute/v1"
+)
 
 type HttpsHealthChecksClient struct {
-	ListHttpsHealthChecksCall struct {
-		CallCount int
-		Returns   struct {
-			Output []*gcpcompute.HttpsHealthCheck
-			Error  error
-		}
-	}
-
 	DeleteHttpsHealthCheckCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
 			HttpsHealthCheck string
@@ -19,18 +16,35 @@ type HttpsHealthChecksClient struct {
 		Returns struct {
 			Error error
 		}
+		Stub func(string) error
+	}
+	ListHttpsHealthChecksCall struct {
+		sync.Mutex
+		CallCount int
+		Returns   struct {
+			HttpsHealthCheckSlice []*gcpcompute.HttpsHealthCheck
+			Error                 error
+		}
+		Stub func() ([]*gcpcompute.HttpsHealthCheck, error)
 	}
 }
 
-func (n *HttpsHealthChecksClient) ListHttpsHealthChecks() ([]*gcpcompute.HttpsHealthCheck, error) {
-	n.ListHttpsHealthChecksCall.CallCount++
-
-	return n.ListHttpsHealthChecksCall.Returns.Output, n.ListHttpsHealthChecksCall.Returns.Error
+func (f *HttpsHealthChecksClient) DeleteHttpsHealthCheck(param1 string) error {
+	f.DeleteHttpsHealthCheckCall.Lock()
+	defer f.DeleteHttpsHealthCheckCall.Unlock()
+	f.DeleteHttpsHealthCheckCall.CallCount++
+	f.DeleteHttpsHealthCheckCall.Receives.HttpsHealthCheck = param1
+	if f.DeleteHttpsHealthCheckCall.Stub != nil {
+		return f.DeleteHttpsHealthCheckCall.Stub(param1)
+	}
+	return f.DeleteHttpsHealthCheckCall.Returns.Error
 }
-
-func (n *HttpsHealthChecksClient) DeleteHttpsHealthCheck(httpsHealthCheck string) error {
-	n.DeleteHttpsHealthCheckCall.CallCount++
-	n.DeleteHttpsHealthCheckCall.Receives.HttpsHealthCheck = httpsHealthCheck
-
-	return n.DeleteHttpsHealthCheckCall.Returns.Error
+func (f *HttpsHealthChecksClient) ListHttpsHealthChecks() ([]*gcpcompute.HttpsHealthCheck, error) {
+	f.ListHttpsHealthChecksCall.Lock()
+	defer f.ListHttpsHealthChecksCall.Unlock()
+	f.ListHttpsHealthChecksCall.CallCount++
+	if f.ListHttpsHealthChecksCall.Stub != nil {
+		return f.ListHttpsHealthChecksCall.Stub()
+	}
+	return f.ListHttpsHealthChecksCall.Returns.HttpsHealthCheckSlice, f.ListHttpsHealthChecksCall.Returns.Error
 }

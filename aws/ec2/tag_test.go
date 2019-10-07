@@ -35,11 +35,11 @@ var _ = Describe("Tag", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteTagsCall.CallCount).To(Equal(1))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags).To(HaveLen(1))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Key).To(Equal(key))
-			Expect(client.DeleteTagsCall.Receives.Input.Tags[0].Value).To(Equal(value))
-			Expect(client.DeleteTagsCall.Receives.Input.Resources).To(HaveLen(1))
-			Expect(client.DeleteTagsCall.Receives.Input.Resources[0]).To(Equal(resourceId))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Tags).To(HaveLen(1))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Tags[0].Key).To(Equal(key))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Tags[0].Value).To(Equal(value))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Resources).To(HaveLen(1))
+			Expect(client.DeleteTagsCall.Receives.DeleteTagsInput.Resources[0]).To(Equal(resourceId))
 		})
 
 		Context("the client fails", func() {

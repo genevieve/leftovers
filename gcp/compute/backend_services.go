@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface backendServicesClient --output fakes/backend_services_client.go
 type backendServicesClient interface {
 	ListBackendServices() ([]*gcpcompute.BackendService, error)
 	DeleteBackendService(backendService string) error

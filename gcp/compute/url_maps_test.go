@@ -30,7 +30,7 @@ var _ = Describe("UrlMaps", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListUrlMapsCall.Returns.Output = &gcpcompute.UrlMapList{
+			client.ListUrlMapsCall.Returns.UrlMapList = &gcpcompute.UrlMapList{
 				Items: []*gcpcompute.UrlMap{{
 					Name: "banana-url-map",
 				}},
@@ -45,8 +45,8 @@ var _ = Describe("UrlMaps", func() {
 			Expect(client.ListUrlMapsCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Url Map"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-url-map"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Url Map"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-url-map"))
 
 			Expect(list).To(HaveLen(1))
 		})

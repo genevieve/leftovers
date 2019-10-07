@@ -37,12 +37,12 @@ var _ = Describe("Instance", func() {
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.DescribeAddressesCall.Returns.Output = &awsec2.DescribeAddressesOutput{
+			client.DescribeAddressesCall.Returns.DescribeAddressesOutput = &awsec2.DescribeAddressesOutput{
 				Addresses: []*awsec2.Address{{
 					AllocationId: aws.String("the-allocation-id"),
 				}},
 			}
-			client.DescribeInstancesCall.Returns.Output = &awsec2.DescribeInstancesOutput{
+			client.DescribeInstancesCall.Returns.DescribeInstancesOutput = &awsec2.DescribeInstancesOutput{
 				Reservations: []*awsec2.Reservation{{
 					Instances: []*awsec2.Instance{{
 						State: &awsec2.InstanceState{Name: aws.String("terminated")},
@@ -56,19 +56,19 @@ var _ = Describe("Instance", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
-			Expect(client.DescribeAddressesCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("instance-id")))
-			Expect(client.DescribeAddressesCall.Receives.Input.Filters[0].Values[0]).To(Equal(id))
+			Expect(client.DescribeAddressesCall.Receives.DescribeAddressesInput.Filters[0].Name).To(Equal(aws.String("instance-id")))
+			Expect(client.DescribeAddressesCall.Receives.DescribeAddressesInput.Filters[0].Values[0]).To(Equal(id))
 
 			Expect(client.TerminateInstancesCall.CallCount).To(Equal(1))
-			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds).To(HaveLen(1))
-			Expect(client.TerminateInstancesCall.Receives.Input.InstanceIds[0]).To(Equal(id))
+			Expect(client.TerminateInstancesCall.Receives.TerminateInstancesInput.InstanceIds).To(HaveLen(1))
+			Expect(client.TerminateInstancesCall.Receives.TerminateInstancesInput.InstanceIds[0]).To(Equal(id))
 
 			Expect(resourceTags.DeleteCall.CallCount).To(Equal(1))
-			Expect(resourceTags.DeleteCall.Receives.ResourceType).To(Equal("instance"))
-			Expect(resourceTags.DeleteCall.Receives.ResourceId).To(Equal("the-id"))
+			Expect(resourceTags.DeleteCall.Receives.FilterName).To(Equal("instance"))
+			Expect(resourceTags.DeleteCall.Receives.FilterValue).To(Equal("the-id"))
 
 			Expect(client.ReleaseAddressCall.CallCount).To(Equal(1))
-			Expect(client.ReleaseAddressCall.Receives.Input.AllocationId).To(Equal(aws.String("the-allocation-id")))
+			Expect(client.ReleaseAddressCall.Receives.ReleaseAddressInput.AllocationId).To(Equal(aws.String("the-allocation-id")))
 		})
 
 		Context("when the client fails to describe addresses", func() {

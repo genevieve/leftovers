@@ -14,20 +14,23 @@ import (
 
 var _ = Describe("VolumesBlockStorageClient", func() {
 	var (
+		page   *fakes.Page
 		api    *fakes.VolumesAPI
 		client openstack.VolumesBlockStorageClient
 	)
 
 	BeforeEach(func() {
+		page = &fakes.Page{}
 		api = &fakes.VolumesAPI{}
 		client = openstack.NewVolumesBlockStorageClient(api)
 	})
 
 	Describe("List", func() {
 		BeforeEach(func() {
+			page = &fakes.Page{}
 			api.GetVolumesPagerCall.Returns.Pager = pagination.Pager{Headers: map[string]string{"header": "test"}}
-			api.PagerToPageCall.Returns.Page = fakes.Page{Name: "page name"}
-			api.PageToVolumesCall.Returns.Volumes = []volumes.Volume{{Name: "volume name"}}
+			api.PagerToPageCall.Returns.Page = page
+			api.PageToVolumesCall.Returns.VolumeSlice = []volumes.Volume{{Name: "volume name"}}
 		})
 
 		It("returns all the volumes", func() {
@@ -35,7 +38,7 @@ var _ = Describe("VolumesBlockStorageClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(api.PagerToPageCall.Receives.Pager.Headers["header"]).To(Equal("test"))
-			Expect((api.PageToVolumesCall.Receives.Page.(fakes.Page)).Name).To(Equal("page name"))
+			Expect(api.PageToVolumesCall.Receives.Page).To(Equal(page))
 
 			Expect(list).To(HaveLen(1))
 			Expect(list[0].Name).To(Equal("volume name"))
@@ -70,7 +73,7 @@ var _ = Describe("VolumesBlockStorageClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(api.DeleteVolumeCall.CallCount).To(Equal(1))
-			Expect(api.DeleteVolumeCall.ReceivesForCall[0].VolumeID).To(Equal("some id"))
+			Expect(api.DeleteVolumeCall.Receives.Id).To(Equal("some id"))
 		})
 
 		Context("when the api fails", func() {

@@ -14,13 +14,13 @@ import (
 var _ = Describe("DBInstance", func() {
 	var (
 		dbInstance   rds.DBInstance
-		client       *fakes.DBInstancesClient
+		client       *fakes.DbInstancesClient
 		name         *string
 		skipSnapshot *bool
 	)
 
 	BeforeEach(func() {
-		client = &fakes.DBInstancesClient{}
+		client = &fakes.DbInstancesClient{}
 		name = aws.String("the-name")
 		skipSnapshot = aws.Bool(true)
 
@@ -33,8 +33,8 @@ var _ = Describe("DBInstance", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteDBInstanceCall.CallCount).To(Equal(1))
-			Expect(client.DeleteDBInstanceCall.Receives.Input.DBInstanceIdentifier).To(Equal(name))
-			Expect(client.DeleteDBInstanceCall.Receives.Input.SkipFinalSnapshot).To(Equal(skipSnapshot))
+			Expect(client.DeleteDBInstanceCall.Receives.DeleteDBInstanceInput.DBInstanceIdentifier).To(Equal(name))
+			Expect(client.DeleteDBInstanceCall.Receives.DeleteDBInstanceInput.SkipFinalSnapshot).To(Equal(skipSnapshot))
 		})
 
 		Context("when the client fails", func() {

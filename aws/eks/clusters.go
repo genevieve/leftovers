@@ -8,14 +8,16 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface clustersClient --output fakes/clusters_client.go
 type clustersClient interface {
 	ListClusters(*awseks.ListClustersInput) (*awseks.ListClustersOutput, error)
 	DeleteCluster(*awseks.DeleteClusterInput) (*awseks.DeleteClusterOutput, error)
 }
 
+//go:generate faux --interface logger --output fakes/logger.go
 type logger interface {
 	Printf(m string, a ...interface{})
-	PromptWithDetails(resourceType, resourceName string) bool
+	PromptWithDetails(resourceType, resourceName string) (proceed bool)
 }
 
 type Clusters struct {

@@ -31,7 +31,7 @@ var _ = Describe("HealthCheck", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DeleteHealthCheckCall.CallCount).To(Equal(1))
-			Expect(client.DeleteHealthCheckCall.Receives.Input.HealthCheckId).To(Equal(id))
+			Expect(client.DeleteHealthCheckCall.Receives.DeleteHealthCheckInput.HealthCheckId).To(Equal(id))
 		})
 
 		Context("when the client fails to delete the health check", func() {

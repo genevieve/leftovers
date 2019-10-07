@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface keysClient --output fakes/keys_client.go
 type keysClient interface {
 	ListKeys(*awskms.ListKeysInput) (*awskms.ListKeysOutput, error)
 	DescribeKey(*awskms.DescribeKeyInput) (*awskms.DescribeKeyOutput, error)

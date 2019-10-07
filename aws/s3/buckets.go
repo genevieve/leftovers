@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/common"
 )
 
+//go:generate faux --interface bucketsClient --output fakes/buckets_client.go
 type bucketsClient interface {
 	ListBuckets(*awss3.ListBucketsInput) (*awss3.ListBucketsOutput, error)
 	DeleteBucket(*awss3.DeleteBucketInput) (*awss3.DeleteBucketOutput, error)

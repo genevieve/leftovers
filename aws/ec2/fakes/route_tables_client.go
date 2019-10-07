@@ -1,59 +1,77 @@
 package fakes
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"sync"
+
+	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type RouteTablesClient struct {
-	DescribeRouteTablesCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.DescribeRouteTablesInput
-		}
-		Returns struct {
-			Output *ec2.DescribeRouteTablesOutput
-			Error  error
-		}
-	}
-
-	DisassociateRouteTableCall struct {
-		CallCount int
-		Receives  struct {
-			Input *ec2.DisassociateRouteTableInput
-		}
-		Returns struct {
-			Output *ec2.DisassociateRouteTableOutput
-			Error  error
-		}
-	}
-
 	DeleteRouteTableCall struct {
+		sync.Mutex
 		CallCount int
 		Receives  struct {
-			Input *ec2.DeleteRouteTableInput
+			DeleteRouteTableInput *awsec2.DeleteRouteTableInput
 		}
 		Returns struct {
-			Output *ec2.DeleteRouteTableOutput
-			Error  error
+			DeleteRouteTableOutput *awsec2.DeleteRouteTableOutput
+			Error                  error
 		}
+		Stub func(*awsec2.DeleteRouteTableInput) (*awsec2.DeleteRouteTableOutput, error)
+	}
+	DescribeRouteTablesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeRouteTablesInput *awsec2.DescribeRouteTablesInput
+		}
+		Returns struct {
+			DescribeRouteTablesOutput *awsec2.DescribeRouteTablesOutput
+			Error                     error
+		}
+		Stub func(*awsec2.DescribeRouteTablesInput) (*awsec2.DescribeRouteTablesOutput, error)
+	}
+	DisassociateRouteTableCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DisassociateRouteTableInput *awsec2.DisassociateRouteTableInput
+		}
+		Returns struct {
+			DisassociateRouteTableOutput *awsec2.DisassociateRouteTableOutput
+			Error                        error
+		}
+		Stub func(*awsec2.DisassociateRouteTableInput) (*awsec2.DisassociateRouteTableOutput, error)
 	}
 }
 
-func (i *RouteTablesClient) DescribeRouteTables(input *ec2.DescribeRouteTablesInput) (*ec2.DescribeRouteTablesOutput, error) {
-	i.DescribeRouteTablesCall.CallCount++
-	i.DescribeRouteTablesCall.Receives.Input = input
-
-	return i.DescribeRouteTablesCall.Returns.Output, i.DescribeRouteTablesCall.Returns.Error
+func (f *RouteTablesClient) DeleteRouteTable(param1 *awsec2.DeleteRouteTableInput) (*awsec2.DeleteRouteTableOutput, error) {
+	f.DeleteRouteTableCall.Lock()
+	defer f.DeleteRouteTableCall.Unlock()
+	f.DeleteRouteTableCall.CallCount++
+	f.DeleteRouteTableCall.Receives.DeleteRouteTableInput = param1
+	if f.DeleteRouteTableCall.Stub != nil {
+		return f.DeleteRouteTableCall.Stub(param1)
+	}
+	return f.DeleteRouteTableCall.Returns.DeleteRouteTableOutput, f.DeleteRouteTableCall.Returns.Error
 }
-
-func (i *RouteTablesClient) DisassociateRouteTable(input *ec2.DisassociateRouteTableInput) (*ec2.DisassociateRouteTableOutput, error) {
-	i.DisassociateRouteTableCall.CallCount++
-	i.DisassociateRouteTableCall.Receives.Input = input
-
-	return i.DisassociateRouteTableCall.Returns.Output, i.DisassociateRouteTableCall.Returns.Error
+func (f *RouteTablesClient) DescribeRouteTables(param1 *awsec2.DescribeRouteTablesInput) (*awsec2.DescribeRouteTablesOutput, error) {
+	f.DescribeRouteTablesCall.Lock()
+	defer f.DescribeRouteTablesCall.Unlock()
+	f.DescribeRouteTablesCall.CallCount++
+	f.DescribeRouteTablesCall.Receives.DescribeRouteTablesInput = param1
+	if f.DescribeRouteTablesCall.Stub != nil {
+		return f.DescribeRouteTablesCall.Stub(param1)
+	}
+	return f.DescribeRouteTablesCall.Returns.DescribeRouteTablesOutput, f.DescribeRouteTablesCall.Returns.Error
 }
-
-func (i *RouteTablesClient) DeleteRouteTable(input *ec2.DeleteRouteTableInput) (*ec2.DeleteRouteTableOutput, error) {
-	i.DeleteRouteTableCall.CallCount++
-	i.DeleteRouteTableCall.Receives.Input = input
-
-	return i.DeleteRouteTableCall.Returns.Output, i.DeleteRouteTableCall.Returns.Error
+func (f *RouteTablesClient) DisassociateRouteTable(param1 *awsec2.DisassociateRouteTableInput) (*awsec2.DisassociateRouteTableOutput, error) {
+	f.DisassociateRouteTableCall.Lock()
+	defer f.DisassociateRouteTableCall.Unlock()
+	f.DisassociateRouteTableCall.CallCount++
+	f.DisassociateRouteTableCall.Receives.DisassociateRouteTableInput = param1
+	if f.DisassociateRouteTableCall.Stub != nil {
+		return f.DisassociateRouteTableCall.Stub(param1)
+	}
+	return f.DisassociateRouteTableCall.Returns.DisassociateRouteTableOutput, f.DisassociateRouteTableCall.Returns.Error
 }

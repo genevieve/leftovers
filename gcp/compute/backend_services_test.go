@@ -31,7 +31,7 @@ var _ = Describe("BackendServices", func() {
 		BeforeEach(func() {
 			filter = "banana"
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListBackendServicesCall.Returns.Output = []*gcpcompute.BackendService{{
+			client.ListBackendServicesCall.Returns.BackendServiceSlice = []*gcpcompute.BackendService{{
 				Name: "banana-backend-service",
 			}}
 		})
@@ -43,8 +43,8 @@ var _ = Describe("BackendServices", func() {
 			Expect(client.ListBackendServicesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Backend Service"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-backend-service"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Backend Service"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-backend-service"))
 
 			Expect(list).To(HaveLen(1))
 		})

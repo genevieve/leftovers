@@ -6,6 +6,7 @@ import (
 	gcpdns "google.golang.org/api/dns/v1"
 )
 
+//go:generate faux --interface recordSetsClient --output fakes/record_sets_client.go
 type recordSetsClient interface {
 	ListRecordSets(managedZone string) (*gcpdns.ResourceRecordSetsListResponse, error)
 	DeleteRecordSets(managedZone string, change *gcpdns.Change) error

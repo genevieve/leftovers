@@ -21,12 +21,12 @@ var _ = Describe("Compute Instance", func() {
 
 	Describe("Delete", func() {
 		var (
-			fakeComputeClient *fakes.ComputeInstanceClient
+			fakeComputeClient *fakes.ComputeClient
 			computeInstance   openstack.ComputeInstance
 		)
 
 		BeforeEach(func() {
-			fakeComputeClient = &fakes.ComputeInstanceClient{}
+			fakeComputeClient = &fakes.ComputeClient{}
 			computeInstance = openstack.NewComputeInstance("some-name", "some-id", fakeComputeClient)
 		})
 

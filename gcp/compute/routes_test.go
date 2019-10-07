@@ -30,7 +30,7 @@ var _ = Describe("Routes", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListRoutesCall.Returns.Output = []*gcpcompute.Route{{
+			client.ListRoutesCall.Returns.RouteSlice = []*gcpcompute.Route{{
 				Name: "banana-route",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("Routes", func() {
 			Expect(client.ListRoutesCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Route"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-route"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Route"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-route"))
 
 			Expect(list).To(HaveLen(1))
 		})
@@ -62,7 +62,7 @@ var _ = Describe("Routes", func() {
 
 		Context("when the route name contains the word 'default'", func() {
 			BeforeEach(func() {
-				client.ListRoutesCall.Returns.Output = []*gcpcompute.Route{{
+				client.ListRoutesCall.Returns.RouteSlice = []*gcpcompute.Route{{
 					Name: "default-route",
 				}}
 			})

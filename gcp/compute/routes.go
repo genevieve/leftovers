@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface routesClient --output fakes/routes_client.go
 type routesClient interface {
 	ListRoutes() ([]*gcpcompute.Route, error)
 	DeleteRoute(route string) error

@@ -2,6 +2,7 @@ package iam_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -14,22 +15,27 @@ import (
 
 var _ = Describe("UserPolicies", func() {
 	var (
-		client *fakes.UserPoliciesClient
-		logger *fakes.Logger
+		client   *fakes.UserPoliciesClient
+		logger   *fakes.Logger
+		messages []string
 
 		policies iam.UserPolicies
 	)
 
 	BeforeEach(func() {
 		client = &fakes.UserPoliciesClient{}
+		messages = []string{}
 		logger = &fakes.Logger{}
+		logger.PrintfCall.Stub = func(format string, v ...interface{}) {
+			messages = append(messages, fmt.Sprintf(format, v...))
+		}
 
 		policies = iam.NewUserPolicies(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.ListAttachedUserPoliciesCall.Returns.Output = &awsiam.ListAttachedUserPoliciesOutput{
+			client.ListAttachedUserPoliciesCall.Returns.ListAttachedUserPoliciesOutput = &awsiam.ListAttachedUserPoliciesOutput{
 				AttachedPolicies: []*awsiam.AttachedPolicy{{
 					PolicyName: aws.String("the-policy"),
 					PolicyArn:  aws.String("the-policy-arn"),
@@ -42,17 +48,17 @@ var _ = Describe("UserPolicies", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAttachedUserPoliciesCall.CallCount).To(Equal(1))
-			Expect(client.ListAttachedUserPoliciesCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
+			Expect(client.ListAttachedUserPoliciesCall.Receives.ListAttachedUserPoliciesInput.UserName).To(Equal(aws.String("banana")))
 
 			Expect(client.DetachUserPolicyCall.CallCount).To(Equal(1))
-			Expect(client.DetachUserPolicyCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
-			Expect(client.DetachUserPolicyCall.Receives.Input.PolicyArn).To(Equal(aws.String("the-policy-arn")))
+			Expect(client.DetachUserPolicyCall.Receives.DetachUserPolicyInput.UserName).To(Equal(aws.String("banana")))
+			Expect(client.DetachUserPolicyCall.Receives.DetachUserPolicyInput.PolicyArn).To(Equal(aws.String("the-policy-arn")))
 
 			Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
-			Expect(client.DeleteUserPolicyCall.Receives.Input.UserName).To(Equal(aws.String("banana")))
-			Expect(client.DeleteUserPolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-policy")))
+			Expect(client.DeleteUserPolicyCall.Receives.DeleteUserPolicyInput.UserName).To(Equal(aws.String("banana")))
+			Expect(client.DeleteUserPolicyCall.Receives.DeleteUserPolicyInput.PolicyName).To(Equal(aws.String("the-policy")))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
+			Expect(messages).To(Equal([]string{
 				"[IAM User: banana] Detached policy the-policy \n",
 				"[IAM User: banana] Deleted policy the-policy \n",
 			}))
@@ -82,7 +88,7 @@ var _ = Describe("UserPolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM User: banana] Detach policy the-policy: some error \n",
 					"[IAM User: banana] Deleted policy the-policy \n",
 				}))
@@ -99,7 +105,7 @@ var _ = Describe("UserPolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM User: banana] Detached policy the-policy \n",
 					"[IAM User: banana] Deleted policy the-policy \n",
 				}))
@@ -115,7 +121,7 @@ var _ = Describe("UserPolicies", func() {
 				err := policies.Delete("banana")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM User: banana] Detached policy the-policy \n",
 					"[IAM User: banana] Delete policy the-policy: some error \n",
 				}))
@@ -133,7 +139,7 @@ var _ = Describe("UserPolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM User: banana] Detached policy the-policy \n",
 					"[IAM User: banana] Deleted policy the-policy \n",
 				}))

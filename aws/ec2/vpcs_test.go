@@ -13,14 +13,14 @@ import (
 
 var _ = Describe("Vpcs", func() {
 	var (
-		client *fakes.VpcClient
+		client *fakes.VpcsClient
 		logger *fakes.Logger
 
 		vpcs ec2.Vpcs
 	)
 
 	BeforeEach(func() {
-		client = &fakes.VpcClient{}
+		client = &fakes.VpcsClient{}
 		logger = &fakes.Logger{}
 		routes := &fakes.RouteTables{}
 		subnets := &fakes.Subnets{}
@@ -35,7 +35,7 @@ var _ = Describe("Vpcs", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeVpcsCall.Returns.Output = &awsec2.DescribeVpcsOutput{
+			client.DescribeVpcsCall.Returns.DescribeVpcsOutput = &awsec2.DescribeVpcsOutput{
 				Vpcs: []*awsec2.Vpc{{
 					IsDefault: aws.Bool(false),
 					Tags: []*awsec2.Tag{{
@@ -53,12 +53,12 @@ var _ = Describe("Vpcs", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVpcsCall.CallCount).To(Equal(1))
-			Expect(client.DescribeVpcsCall.Receives.Input.Filters[0].Name).To(Equal(aws.String("isDefault")))
-			Expect(client.DescribeVpcsCall.Receives.Input.Filters[0].Values[0]).To(Equal(aws.String("false")))
+			Expect(client.DescribeVpcsCall.Receives.DescribeVpcsInput.Filters[0].Name).To(Equal(aws.String("isDefault")))
+			Expect(client.DescribeVpcsCall.Receives.DescribeVpcsInput.Filters[0].Values[0]).To(Equal(aws.String("false")))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 VPC"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-vpc-id (Name:banana)"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 VPC"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-vpc-id (Name:banana)"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -74,7 +74,7 @@ var _ = Describe("Vpcs", func() {
 
 		Context("when there is no tag name", func() {
 			BeforeEach(func() {
-				client.DescribeVpcsCall.Returns.Output = &awsec2.DescribeVpcsOutput{
+				client.DescribeVpcsCall.Returns.DescribeVpcsOutput = &awsec2.DescribeVpcsOutput{
 					Vpcs: []*awsec2.Vpc{{
 						IsDefault: aws.Bool(false),
 						VpcId:     aws.String("the-vpc-id"),
@@ -86,7 +86,7 @@ var _ = Describe("Vpcs", func() {
 				items, err := vpcs.List("the-vpc")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("the-vpc-id"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-vpc-id"))
 				Expect(items).To(HaveLen(1))
 			})
 		})

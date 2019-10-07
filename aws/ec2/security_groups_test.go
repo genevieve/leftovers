@@ -33,7 +33,7 @@ var _ = Describe("SecurityGroups", func() {
 		var filter string
 
 		BeforeEach(func() {
-			client.DescribeSecurityGroupsCall.Returns.Output = &awsec2.DescribeSecurityGroupsOutput{
+			client.DescribeSecurityGroupsCall.Returns.DescribeSecurityGroupsOutput = &awsec2.DescribeSecurityGroupsOutput{
 				SecurityGroups: []*awsec2.SecurityGroup{{
 					GroupName: aws.String("banana-group"),
 					GroupId:   aws.String("the-group-id"),
@@ -48,8 +48,8 @@ var _ = Describe("SecurityGroups", func() {
 
 			Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("EC2 Security Group"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("EC2 Security Group"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-group"))
 
 			Expect(items).To(HaveLen(1))
 		})

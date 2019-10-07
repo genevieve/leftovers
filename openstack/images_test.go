@@ -5,80 +5,84 @@ import (
 
 	"github.com/genevieve/leftovers/openstack"
 	"github.com/genevieve/leftovers/openstack/fakes"
-	openstackimages "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Images", func() {
-	var (
-		logger *fakes.Logger
-		client *fakes.ImageClient
-		images openstack.Images
-	)
+	Describe("Type", func() {
+		It("is of type Image", func() {
+			images := openstack.NewImages(nil, nil)
+			result := images.Type()
 
-	BeforeEach(func() {
-		client = &fakes.ImageClient{}
-		logger = &fakes.Logger{}
-
-		images = openstack.NewImages(client, logger)
+			Expect(result).To(Equal("Image"))
+		})
 	})
 
 	Describe("List", func() {
-		BeforeEach(func() {
-			logger.PromptWithDetailsCall.Returns.Bool = true
+		var (
+			subject         openstack.Images
+			fakeLogger      *fakes.Logger
+			fakeImageClient *fakes.ImageServiceClient
+		)
 
-			client.ListCall.Returns.Images = []openstackimages.Image{
-				{ID: "id 1", Name: "name 1"},
-				{ID: "id 2", Name: "name 2"},
+		BeforeEach(func() {
+			fakeImageClient = &fakes.ImageServiceClient{}
+			fakeLogger = &fakes.Logger{}
+			skipUserConfirmation := true
+			fakeLogger.PromptWithDetailsCall.Returns.Bool = skipUserConfirmation
+
+			fakeImageClient.ListCall.Returns.ImageSlice = []images.Image{
+				images.Image{ID: "id 1", Name: "name 1"},
+				images.Image{ID: "id 2", Name: "name 2"},
 			}
+
+			subject = openstack.NewImages(fakeImageClient, fakeLogger)
 		})
 
 		It("returns the corresponding resources", func() {
-			list, err := images.List()
+			res, err := subject.List()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(2))
-			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Image"))
-			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("name 2 id 2"))
-
-			Expect(list).To(HaveLen(2))
-			Expect(list[0].Name()).To(Equal("name 1 id 1"))
-			Expect(list[1].Name()).To(Equal("name 2 id 2"))
+			Expect(len(res)).To(Equal(2))
+			Expect(res[0].Name()).To(Equal("name 1 id 1"))
+			Expect(res[1].Name()).To(Equal("name 2 id 2"))
 		})
 
 		Context("when the user wants to confirm deletions", func() {
 			BeforeEach(func() {
-				logger.PromptWithDetailsCall.ReturnsForCall = append(logger.PromptWithDetailsCall.ReturnsForCall,
-					fakes.LoggerPromptWithDetailsCallReturn{Bool: false},
-					fakes.LoggerPromptWithDetailsCallReturn{Bool: true},
-				)
+				fakeLogger.PromptWithDetailsCall.Stub = func(string, string) bool {
+					return fakeLogger.PromptWithDetailsCall.CallCount > 1
+				}
 			})
 
 			It("only returns confirmed images", func() {
-				list, err := images.List()
+				res, err := subject.List()
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(list).To(HaveLen(1))
-				Expect(list[0].Name()).To(Equal("name 2 id 2"))
+				Expect(len(res)).To(Equal(1))
+				Expect(res[0].Name()).To(Equal("name 2 id 2"))
+			})
+
+			It("prompts the user", func() {
+				subject.List()
+
+				Expect(fakeLogger.PromptWithDetailsCall.CallCount).To(Equal(2))
+				Expect(fakeLogger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Image"))
+				Expect(fakeLogger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("name 2 id 2"))
 			})
 		})
 
-		Context("when the image client returns an error", func() {
-			BeforeEach(func() {
-				client.ListCall.Returns.Error = errors.New("banana")
-			})
+		Context("when an error occurs", func() {
+			It("returns an error", func() {
+				fakeImageClient.ListCall.Returns.ImageSlice = nil
+				fakeImageClient.ListCall.Returns.Error = errors.New("error getting list")
 
-			It("returns a helpful error message", func() {
-				_, err := images.List()
-				Expect(err).To(MatchError("List Images: banana"))
+				res, err := subject.List()
+				Expect(err).To(MatchError("List Images: error getting list"))
+				Expect(res).To(BeNil())
 			})
-		})
-	})
-
-	Describe("Type", func() {
-		It("returns the resource type", func() {
-			Expect(images.Type()).To(Equal("Image"))
 		})
 	})
 })

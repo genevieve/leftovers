@@ -30,7 +30,7 @@ var _ = Describe("HttpHealthChecks", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListHttpHealthChecksCall.Returns.Output = []*gcpcompute.HttpHealthCheck{{
+			client.ListHttpHealthChecksCall.Returns.HttpHealthCheckSlice = []*gcpcompute.HttpHealthCheck{{
 				Name: "banana-check",
 			}}
 			filter = "banana"
@@ -43,8 +43,8 @@ var _ = Describe("HttpHealthChecks", func() {
 			Expect(client.ListHttpHealthChecksCall.CallCount).To(Equal(1))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Http Health Check"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-check"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Http Health Check"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-check"))
 
 			Expect(list).To(HaveLen(1))
 		})

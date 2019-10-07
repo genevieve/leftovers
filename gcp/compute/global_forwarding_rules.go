@@ -8,6 +8,7 @@ import (
 	gcpcompute "google.golang.org/api/compute/v1"
 )
 
+//go:generate faux --interface globalForwardingRulesClient --output fakes/global_forwarding_rules_client.go
 type globalForwardingRulesClient interface {
 	ListGlobalForwardingRules() ([]*gcpcompute.ForwardingRule, error)
 	DeleteGlobalForwardingRule(rule string) error

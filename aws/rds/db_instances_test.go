@@ -14,14 +14,14 @@ import (
 
 var _ = Describe("DBInstances", func() {
 	var (
-		client *fakes.DBInstancesClient
+		client *fakes.DbInstancesClient
 		logger *fakes.Logger
 
 		dbInstances rds.DBInstances
 	)
 
 	BeforeEach(func() {
-		client = &fakes.DBInstancesClient{}
+		client = &fakes.DbInstancesClient{}
 		logger = &fakes.Logger{}
 
 		dbInstances = rds.NewDBInstances(client, logger)
@@ -32,7 +32,7 @@ var _ = Describe("DBInstances", func() {
 
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.DescribeDBInstancesCall.Returns.Output = &awsrds.DescribeDBInstancesOutput{
+			client.DescribeDBInstancesCall.Returns.DescribeDBInstancesOutput = &awsrds.DescribeDBInstancesOutput{
 				DBInstances: []*awsrds.DBInstance{{
 					DBInstanceIdentifier: aws.String("banana"),
 					DBInstanceStatus:     aws.String("status"),
@@ -46,8 +46,8 @@ var _ = Describe("DBInstances", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBInstancesCall.CallCount).To(Equal(1))
-			Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("RDS DB Instance"))
-			Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("RDS DB Instance"))
+			Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana"))
 
 			Expect(items).To(HaveLen(1))
 		})
@@ -76,7 +76,7 @@ var _ = Describe("DBInstances", func() {
 
 		Context("when the db instance is being deleted", func() {
 			BeforeEach(func() {
-				client.DescribeDBInstancesCall.Returns.Output = &awsrds.DescribeDBInstancesOutput{
+				client.DescribeDBInstancesCall.Returns.DescribeDBInstancesOutput = &awsrds.DescribeDBInstancesOutput{
 					DBInstances: []*awsrds.DBInstance{{
 						DBInstanceIdentifier: aws.String("banana"),
 						DBInstanceStatus:     aws.String("deleting"),

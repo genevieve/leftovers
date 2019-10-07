@@ -2,6 +2,7 @@ package iam_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
@@ -13,28 +14,33 @@ import (
 
 var _ = Describe("RolePolicies", func() {
 	var (
-		client *fakes.RolePoliciesClient
-		logger *fakes.Logger
+		client   *fakes.RolePoliciesClient
+		logger   *fakes.Logger
+		messages []string
 
 		policies iam.RolePolicies
 	)
 
 	BeforeEach(func() {
 		client = &fakes.RolePoliciesClient{}
+		messages = []string{}
 		logger = &fakes.Logger{}
+		logger.PrintfCall.Stub = func(format string, v ...interface{}) {
+			messages = append(messages, fmt.Sprintf(format, v...))
+		}
 
 		policies = iam.NewRolePolicies(client, logger)
 	})
 
 	Describe("Delete", func() {
 		BeforeEach(func() {
-			client.ListAttachedRolePoliciesCall.Returns.Output = &awsiam.ListAttachedRolePoliciesOutput{
+			client.ListAttachedRolePoliciesCall.Returns.ListAttachedRolePoliciesOutput = &awsiam.ListAttachedRolePoliciesOutput{
 				AttachedPolicies: []*awsiam.AttachedPolicy{{
 					PolicyName: aws.String("the-policy"),
 					PolicyArn:  aws.String("the-policy-arn"),
 				}},
 			}
-			client.ListRolePoliciesCall.Returns.Output = &awsiam.ListRolePoliciesOutput{}
+			client.ListRolePoliciesCall.Returns.ListRolePoliciesOutput = &awsiam.ListRolePoliciesOutput{}
 		})
 
 		It("detaches and deletes the attached policies", func() {
@@ -42,17 +48,17 @@ var _ = Describe("RolePolicies", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAttachedRolePoliciesCall.CallCount).To(Equal(1))
-			Expect(client.ListAttachedRolePoliciesCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
+			Expect(client.ListAttachedRolePoliciesCall.Receives.ListAttachedRolePoliciesInput.RoleName).To(Equal(aws.String("banana")))
 
 			Expect(client.DetachRolePolicyCall.CallCount).To(Equal(1))
-			Expect(client.DetachRolePolicyCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
-			Expect(client.DetachRolePolicyCall.Receives.Input.PolicyArn).To(Equal(aws.String("the-policy-arn")))
+			Expect(client.DetachRolePolicyCall.Receives.DetachRolePolicyInput.RoleName).To(Equal(aws.String("banana")))
+			Expect(client.DetachRolePolicyCall.Receives.DetachRolePolicyInput.PolicyArn).To(Equal(aws.String("the-policy-arn")))
 
 			Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(1))
-			Expect(client.DeleteRolePolicyCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
-			Expect(client.DeleteRolePolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-policy")))
+			Expect(client.DeleteRolePolicyCall.Receives.DeleteRolePolicyInput.RoleName).To(Equal(aws.String("banana")))
+			Expect(client.DeleteRolePolicyCall.Receives.DeleteRolePolicyInput.PolicyName).To(Equal(aws.String("the-policy")))
 
-			Expect(logger.PrintfCall.Messages).To(Equal([]string{
+			Expect(messages).To(Equal([]string{
 				"[IAM Role: banana] Detached policy the-policy \n",
 				"[IAM Role: banana] Deleted policy the-policy \n",
 			}))
@@ -60,8 +66,8 @@ var _ = Describe("RolePolicies", func() {
 
 		Context("when the policies are not attached", func() {
 			BeforeEach(func() {
-				client.ListAttachedRolePoliciesCall.Returns.Output = &awsiam.ListAttachedRolePoliciesOutput{}
-				client.ListRolePoliciesCall.Returns.Output = &awsiam.ListRolePoliciesOutput{
+				client.ListAttachedRolePoliciesCall.Returns.ListAttachedRolePoliciesOutput = &awsiam.ListAttachedRolePoliciesOutput{}
+				client.ListRolePoliciesCall.Returns.ListRolePoliciesOutput = &awsiam.ListRolePoliciesOutput{
 					PolicyNames: []*string{aws.String("the-not-attached-policy")},
 				}
 			})
@@ -71,15 +77,15 @@ var _ = Describe("RolePolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ListRolePoliciesCall.CallCount).To(Equal(1))
-				Expect(client.ListRolePoliciesCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
+				Expect(client.ListRolePoliciesCall.Receives.ListRolePoliciesInput.RoleName).To(Equal(aws.String("banana")))
 
 				Expect(client.DetachRolePolicyCall.CallCount).To(Equal(0))
 
 				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(1))
-				Expect(client.DeleteRolePolicyCall.Receives.Input.RoleName).To(Equal(aws.String("banana")))
-				Expect(client.DeleteRolePolicyCall.Receives.Input.PolicyName).To(Equal(aws.String("the-not-attached-policy")))
+				Expect(client.DeleteRolePolicyCall.Receives.DeleteRolePolicyInput.RoleName).To(Equal(aws.String("banana")))
+				Expect(client.DeleteRolePolicyCall.Receives.DeleteRolePolicyInput.PolicyName).To(Equal(aws.String("the-not-attached-policy")))
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM Role: banana] Deleted policy the-not-attached-policy \n",
 				}))
 			})
@@ -88,7 +94,7 @@ var _ = Describe("RolePolicies", func() {
 		Context("when the client fails to list attached role policies", func() {
 			BeforeEach(func() {
 				client.ListAttachedRolePoliciesCall.Returns.Error = errors.New("some error")
-				client.ListRolePoliciesCall.Returns.Output = &awsiam.ListRolePoliciesOutput{}
+				client.ListRolePoliciesCall.Returns.ListRolePoliciesOutput = &awsiam.ListRolePoliciesOutput{}
 			})
 
 			It("returns the error and does not try deleting them", func() {
@@ -102,7 +108,7 @@ var _ = Describe("RolePolicies", func() {
 
 		Context("when the client fails to list role policies", func() {
 			BeforeEach(func() {
-				client.ListAttachedRolePoliciesCall.Returns.Output = &awsiam.ListAttachedRolePoliciesOutput{}
+				client.ListAttachedRolePoliciesCall.Returns.ListAttachedRolePoliciesOutput = &awsiam.ListAttachedRolePoliciesOutput{}
 				client.ListRolePoliciesCall.Returns.Error = errors.New("some error")
 			})
 
@@ -124,7 +130,7 @@ var _ = Describe("RolePolicies", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DeleteRolePolicyCall.CallCount).To(Equal(1))
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM Role: banana] Detach policy the-policy: some error \n",
 					"[IAM Role: banana] Deleted policy the-policy \n",
 				}))
@@ -140,7 +146,7 @@ var _ = Describe("RolePolicies", func() {
 				err := policies.Delete("banana")
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PrintfCall.Messages).To(Equal([]string{
+				Expect(messages).To(Equal([]string{
 					"[IAM Role: banana] Detached policy the-policy \n",
 					"[IAM Role: banana] Delete policy the-policy: some error \n",
 				}))

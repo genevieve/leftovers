@@ -31,7 +31,7 @@ var _ = Describe("AppSecurityGroups", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			logger.PromptWithDetailsCall.Returns.Proceed = true
-			client.ListAppSecurityGroupsCall.Returns.List = []string{"banana-group", "kiwi-group"}
+			client.ListAppSecurityGroupsCall.Returns.StringSlice = []string{"banana-group", "kiwi-group"}
 		})
 
 		It("returns a list of resources to delete", func() {
@@ -39,7 +39,7 @@ var _ = Describe("AppSecurityGroups", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAppSecurityGroupsCall.CallCount).To(Equal(1))
-			Expect(client.ListAppSecurityGroupsCall.Receives.ResourceGroupName).To(Equal(rgName))
+			Expect(client.ListAppSecurityGroupsCall.Receives.RgName).To(Equal(rgName))
 
 			Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
 
@@ -66,8 +66,8 @@ var _ = Describe("AppSecurityGroups", func() {
 				items, err := groups.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(logger.PromptWithDetailsCall.Receives.Type).To(Equal("Application Security Group"))
-				Expect(logger.PromptWithDetailsCall.Receives.Name).To(Equal("banana-group"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Application Security Group"))
+				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana-group"))
 
 				Expect(items).To(HaveLen(0))
 			})
