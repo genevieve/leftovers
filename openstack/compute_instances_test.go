@@ -32,24 +32,32 @@ var _ = Describe("Compute Instance", func() {
 		BeforeEach(func() {
 			fakeLogger.PromptWithDetailsCall.Returns.Bool = true
 			fakeClient.ListCall.Returns.ServerSlice = []servers.Server{
-				servers.Server{
-					ID:   "some id",
-					Name: "some name",
-				},
-				servers.Server{
-					ID:   "other id",
-					Name: "other name",
-				},
+				{ID: "some id", Name: "some name"},
+				{ID: "other id", Name: "other name"},
 			}
 		})
 
-		It("should return many compute instances", func() {
+		It("should return all compute instances", func() {
 			result, err := computeInstances.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result).To(HaveLen(2))
 			Expect(result[0].Name()).To(Equal("some name some id"))
 			Expect(result[1].Name()).To(Equal("other name other id"))
+		})
+
+		Context("when the resource does not contain the filter", func() {
+			BeforeEach(func() {
+				fakeClient.ListCall.Returns.ServerSlice = []servers.Server{
+					{ID: "id", Name: "banana"},
+				}
+			})
+			It("does not get returned", func() {
+				result, err := computeInstances.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(result).To(HaveLen(0))
+			})
 		})
 
 		Context("when prompt with details is false", func() {

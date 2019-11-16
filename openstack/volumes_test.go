@@ -46,6 +46,21 @@ var _ = Describe("Volumes", func() {
 			Expect(list[1].Name()).To(Equal("other-name other-ID"))
 		})
 
+		Context("when the resource does not contain the filter", func() {
+			BeforeEach(func() {
+				client.ListCall.Returns.VolumeSlice = []openstackvolumes.Volume{
+					{ID: "id", Name: "banana"},
+				}
+			})
+
+			It("returns all the deletables", func() {
+				list, err := volumes.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(list).To(HaveLen(0))
+			})
+		})
+
 		Context("when listing fails", func() {
 			BeforeEach(func() {
 				client.ListCall.Returns.Error = errors.New("error-description")

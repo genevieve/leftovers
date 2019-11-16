@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -36,6 +37,10 @@ func (ci ComputeInstances) List(filter string) ([]common.Deletable, error) {
 	var resources []common.Deletable
 	for _, instance := range computeInstances {
 		r := NewComputeInstance(instance.Name, instance.ID, ci.computeClient)
+
+		if !strings.Contains(instance.Name, filter) {
+			continue
+		}
 
 		proceed := ci.logger.PromptWithDetails(r.Type(), r.Name())
 		if !proceed {
