@@ -26,23 +26,10 @@ type OpenStackAcceptance struct {
 	Region     string
 	TenantName string
 
-	testResources         []deletable
 	volumesClient         *gophercloud.ServiceClient
 	computeInstanceClient *gophercloud.ServiceClient
 	imagesClient          *gophercloud.ServiceClient
 	networkClient         *gophercloud.ServiceClient
-}
-
-type deletable interface {
-	Delete() error
-}
-
-type testResource struct {
-	deleteFunction func() error
-}
-
-func (t testResource) Delete() error {
-	return t.deleteFunction()
 }
 
 func NewOpenStackAcceptance() OpenStackAcceptance {
