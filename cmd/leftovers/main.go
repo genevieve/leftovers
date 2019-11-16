@@ -67,14 +67,7 @@ func main() {
 		}
 		l, err = vsphere.NewLeftovers(logger, o.VSphereIP, o.VSphereUser, o.VSpherePassword, o.VSphereDC)
 	case app.Openstack:
-		l, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
-			AuthURL:    o.OpenstackAuthUrl,
-			Username:   o.OpenstackUsername,
-			Password:   o.OpenstackPassword,
-			Domain:     o.OpenstackDomain,
-			TenantName: o.OpenstackTenant,
-			Region:     o.OpenstackRegion,
-		})
+		l, err = openstack.NewLeftovers(logger, o.OpenstackAuthUrl, o.OpenstackUsername, o.OpenstackPassword, o.OpenstackDomain, o.OpenstackTenant, o.OpenstackRegion)
 	default:
 		err = errors.New("Missing or unsupported BBL_IAAS.")
 	}

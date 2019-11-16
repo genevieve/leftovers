@@ -32,25 +32,16 @@ type Leftovers struct {
 	resources    []listTyper
 }
 
-type AuthArgs struct {
-	AuthURL    string
-	Username   string
-	Password   string
-	Domain     string
-	Region     string
-	TenantName string
-}
-
 // NewLeftovers returns a new Leftovers for OpenStack that can be used to list resources,
 // list types, or delete resources for the provided account. It returns an error
 // if the credentials provided are invalid or if a client fails to be created.
-func NewLeftovers(logger logger, authArgs AuthArgs) (Leftovers, error) {
+func NewLeftovers(logger logger, authURL, username, password, domain, tenantName, region string) (Leftovers, error) {
 	provider, err := openstack.AuthenticatedClient(gophercloud.AuthOptions{
-		IdentityEndpoint: authArgs.AuthURL,
-		Username:         authArgs.Username,
-		Password:         authArgs.Password,
-		DomainName:       authArgs.Domain,
-		TenantName:       authArgs.TenantName,
+		IdentityEndpoint: authURL,
+		Username:         username,
+		Password:         password,
+		DomainName:       domain,
+		TenantName:       tenantName,
 		AllowReauth:      true,
 	})
 	if err != nil {
@@ -58,7 +49,7 @@ func NewLeftovers(logger logger, authArgs AuthArgs) (Leftovers, error) {
 	}
 
 	openstackOptions := gophercloud.EndpointOpts{
-		Region:       authArgs.Region,
+		Region:       region,
 		Availability: gophercloud.AvailabilityPublic,
 	}
 

@@ -49,15 +49,36 @@ func (t testResource) Delete() error {
 }
 
 func NewOpenStackAcceptance() *OpenStackAcceptance {
+	authUrl := os.Getenv("BBL_OPENSTACK_AUTH_URL")
+	Expect(authUrl).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_AUTH_URL.")
+
+	domain := os.Getenv("BBL_OPENSTACK_DOMAIN")
+	Expect(domain).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_DOMAIN.")
+
+	username := os.Getenv("BBL_OPENSTACK_USERNAME")
+	Expect(username).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_USERNAME.")
+
+	password := os.Getenv("BBL_OPENSTACK_PASSWORD")
+	Expect(password).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_PASSWORD.")
+
+	network := os.Getenv("BBL_OPENSTACK_NETWORK_NAME")
+	Expect(network).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_NETWORK_NAME.")
+
+	region := os.Getenv("BBL_OPENSTACK_REGION")
+	Expect(region).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_REGION.")
+
+	tenant := os.Getenv("BBL_OPENSTACK_PROJECT")
+	Expect(tenant).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_PROJECT.")
+
 	return &OpenStackAcceptance{
 		Logger:      app.NewLogger(os.Stdin, os.Stdout, true, false),
-		AuthURL:     os.Getenv("BBL_OPENSTACK_AUTH_URL"),
-		Domain:      os.Getenv("BBL_OPENSTACK_DOMAIN"),
-		Username:    os.Getenv("BBL_OPENSTACK_USERNAME"),
-		Password:    os.Getenv("BBL_OPENSTACK_PASSWORD"),
-		NetworkName: os.Getenv("BBL_OPENSTACK_NETWORK_NAME"),
-		Region:      os.Getenv("BBL_OPENSTACK_REGION"),
-		TenantName:  os.Getenv("BBL_OPENSTACK_PROJECT"),
+		AuthURL:     authUrl,
+		Domain:      domain,
+		Username:    username,
+		Password:    password,
+		NetworkName: network,
+		Region:      region,
+		TenantName:  tenant,
 	}
 }
 

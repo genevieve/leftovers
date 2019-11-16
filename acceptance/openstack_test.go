@@ -15,11 +15,7 @@ import (
 )
 
 var _ = Describe("Openstack", func() {
-	var (
-		acc       *OpenStackAcceptance
-		stdout    *bytes.Buffer
-		leftovers openstack.Leftovers
-	)
+	var acc *OpenStackAcceptance
 
 	BeforeEach(func() {
 		color.NoColor = true
@@ -34,35 +30,28 @@ var _ = Describe("Openstack", func() {
 	})
 
 	AfterEach(func() {
-		err := acc.CleanUpTestResources()
-		Expect(err).NotTo(HaveOccurred())
+		Expect(acc.CleanUpTestResources()).NotTo(HaveOccurred())
 	})
 
 	Describe("Deleting OpenStack Resources Journey", func() {
+		Context("when a user provides invalid credentials", func() {
+			It("fails with a helpful error message", func() {
+				_, err := openstack.NewLeftovers(nil, "", "", "", "", "", "")
+				Expect(err).To(MatchError(ContainSubstring("could not create authenticated client provider")))
+			})
+		})
+
 		It("deletes the appropriate OpenStack resources", func() {
-			By("failing to create a new Leftovers when openstack can't authenticate")
-			incorrectAuthArgs := openstack.AuthArgs{}
-			var err error
-			leftovers, err = openstack.NewLeftovers(nil, incorrectAuthArgs)
-
-			Expect(leftovers).To(Equal(openstack.Leftovers{}))
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("failed to make authenticated client"))
-
-			By("listing all resources when calling Types")
 			noConfirm := true
 			debug := true
-			stdout = bytes.NewBuffer([]byte{})
+
+			stdout := bytes.NewBuffer([]byte{})
 			logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
-			leftovers, err = openstack.NewLeftovers(logger, openstack.AuthArgs{
-				AuthURL:    acc.AuthURL,
-				Username:   acc.Username,
-				Password:   acc.Password,
-				Domain:     acc.Domain,
-				Region:     acc.Region,
-				TenantName: acc.TenantName,
-			})
+
+			leftovers, err := openstack.NewLeftovers(logger, acc.AuthURL, acc.Username, acc.Password, acc.Domain, acc.TenantName, acc.Region)
 			Expect(err).NotTo(HaveOccurred())
+
+			By("listing all resources when calling Types")
 			leftovers.Types()
 
 			Expect(stdout.String()).To(ContainSubstring("Volume"))
@@ -73,6 +62,7 @@ var _ = Describe("Openstack", func() {
 			volumeID := acc.CreateVolume("some volume")
 			instanceID := acc.CreateComputeInstance("some instance")
 			imageID := acc.CreateImage("some image")
+
 			leftovers.List("filter")
 
 			Expect(stdout.String()).To(ContainSubstring("Warning: Filters are not supported for OpenStack."))
@@ -92,9 +82,8 @@ var _ = Describe("Openstack", func() {
 
 			By("passing a filter to DeleteByType")
 			err = leftovers.DeleteByType("some filter", "Volume")
+			Expect(err).To(MatchError("cannot delete openstack resources using a filter"))
 
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("cannot delete openstack resources using a filter"))
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("Error: Filters are not supported for OpenStack. Aborting deletion!")))
 			Consistently(func() bool {
 				return acc.VolumeExists(volumeID) && acc.ComputeInstanceExists(instanceID) && acc.ImageExists(imageID)
