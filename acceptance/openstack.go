@@ -20,14 +20,13 @@ import (
 )
 
 type OpenStackAcceptance struct {
-	Logger      *app.Logger
-	AuthURL     string
-	Domain      string
-	Username    string
-	Password    string
-	NetworkName string
-	Region      string
-	TenantName  string
+	Logger     *app.Logger
+	AuthURL    string
+	Domain     string
+	Username   string
+	Password   string
+	Region     string
+	TenantName string
 
 	testResources         []deletable
 	volumesClient         *gophercloud.ServiceClient
@@ -61,9 +60,6 @@ func NewOpenStackAcceptance() *OpenStackAcceptance {
 	password := os.Getenv("BBL_OPENSTACK_PASSWORD")
 	Expect(password).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_PASSWORD.")
 
-	network := os.Getenv("BBL_OPENSTACK_NETWORK_NAME")
-	Expect(network).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_NETWORK_NAME.")
-
 	region := os.Getenv("BBL_OPENSTACK_REGION")
 	Expect(region).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_REGION.")
 
@@ -71,14 +67,13 @@ func NewOpenStackAcceptance() *OpenStackAcceptance {
 	Expect(tenant).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_PROJECT.")
 
 	return &OpenStackAcceptance{
-		Logger:      app.NewLogger(os.Stdin, os.Stdout, true, false),
-		AuthURL:     authUrl,
-		Domain:      domain,
-		Username:    username,
-		Password:    password,
-		NetworkName: network,
-		Region:      region,
-		TenantName:  tenant,
+		Logger:     app.NewLogger(os.Stdin, os.Stdout, true, false),
+		AuthURL:    authUrl,
+		Domain:     domain,
+		Username:   username,
+		Password:   password,
+		Region:     region,
+		TenantName: tenant,
 	}
 }
 
