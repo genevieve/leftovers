@@ -8,6 +8,7 @@ import (
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/aws"
 	"github.com/genevieve/leftovers/azure"
+	"github.com/genevieve/leftovers/commands"
 	"github.com/genevieve/leftovers/gcp"
 	"github.com/genevieve/leftovers/nsxt"
 	"github.com/genevieve/leftovers/openstack"
@@ -23,6 +24,10 @@ type leftovers interface {
 	Types()
 }
 
+type command interface {
+	Execute(app.Options) error
+}
+
 var Version = "dev"
 
 func main() {
@@ -32,17 +37,20 @@ func main() {
 	parser := flags.NewParser(&o, flags.HelpFlag|flags.PrintErrors)
 	remaining, err := parser.ParseArgs(os.Args)
 	if err != nil {
-		log.Fatalf("\n\n%s\n", err)
-	}
-
-	command := "destroy"
-	if len(remaining) > 1 {
-		command = remaining[1]
+		return
 	}
 
 	if o.Version {
 		log.Printf("%s\n", Version)
 		return
+	}
+
+	cmd := "delete"
+	if len(remaining) > 1 {
+		cmd = "types"
+	}
+	if o.DryRun {
+		cmd = "list"
 	}
 
 	logger := app.NewLogger(os.Stdout, os.Stdin, o.NoConfirm, o.Debug)
@@ -76,25 +84,12 @@ func main() {
 		log.Fatalf("\n\n%s\n", err)
 	}
 
-	if command == "types" {
-		l.Types()
-		return
-	}
+	commandSet := map[string]command{}
+	commandSet["delete"] = commands.NewDelete(l)
+	commandSet["list"] = commands.NewList(l)
+	commandSet["types"] = commands.NewTypes(l)
 
-	if o.DryRun {
-		if o.Type == "" {
-			l.List(o.Filter)
-		} else {
-			l.ListByType(o.Filter, o.Type)
-		}
-		return
-	}
-
-	if o.Type == "" {
-		err = l.Delete(o.Filter)
-	} else {
-		err = l.DeleteByType(o.Filter, o.Type)
-	}
+	err = commandSet[cmd].Execute(o)
 	if err != nil {
 		log.Fatalf("\n\n%s\n", err)
 	}
