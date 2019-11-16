@@ -47,7 +47,7 @@ func (t testResource) Delete() error {
 	return t.deleteFunction()
 }
 
-func NewOpenStackAcceptance() *OpenStackAcceptance {
+func NewOpenStackAcceptance() OpenStackAcceptance {
 	authUrl := os.Getenv("BBL_OPENSTACK_AUTH_URL")
 	Expect(authUrl).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_AUTH_URL.")
 
@@ -66,7 +66,7 @@ func NewOpenStackAcceptance() *OpenStackAcceptance {
 	tenant := os.Getenv("BBL_OPENSTACK_PROJECT")
 	Expect(tenant).NotTo(BeEmpty(), "Missing $BBL_OPENSTACK_PROJECT.")
 
-	return &OpenStackAcceptance{
+	return OpenStackAcceptance{
 		Logger:     app.NewLogger(os.Stdin, os.Stdout, true, false),
 		AuthURL:    authUrl,
 		Domain:     domain,
