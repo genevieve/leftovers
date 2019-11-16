@@ -32,7 +32,7 @@ func main() {
 	parser := flags.NewParser(&o, flags.HelpFlag|flags.PrintErrors)
 	remaining, err := parser.ParseArgs(os.Args)
 	if err != nil {
-		return
+		log.Fatalf("\n\n%s\n", err)
 	}
 
 	command := "destroy"
