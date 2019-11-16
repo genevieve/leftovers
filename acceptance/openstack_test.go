@@ -115,8 +115,6 @@ var _ = Describe("Openstack", func() {
 			instanceName = "delete-instance"
 			instanceID = acc.CreateComputeInstance(instanceName)
 
-			acc.AttachVolumeToComputeInstance(volumeID, instanceID)
-
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
 			Expect(acc.ComputeInstanceExists(instanceID)).To(BeTrue())
 			Expect(acc.ImageExists(imageID)).To(BeTrue())

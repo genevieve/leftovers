@@ -9,7 +9,6 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
@@ -145,18 +144,6 @@ func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
 
 func (o OpenStackAcceptance) DeleteInstance(instanceID string) {
 	servers.Delete(o.computeInstanceClient, instanceID)
-}
-
-func (o OpenStackAcceptance) AttachVolumeToComputeInstance(volumeID string, computeID string) {
-	waitTimeInSeconds := 60
-	err := servers.WaitForStatus(o.computeInstanceClient, computeID, "ACTIVE", waitTimeInSeconds)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = volumeattach.Create(o.computeInstanceClient, computeID, volumeattach.CreateOpts{
-		Device:   "/dev/ice",
-		VolumeID: volumeID,
-	}).Extract()
-	Expect(err).NotTo(HaveOccurred())
 }
 
 func (o OpenStackAcceptance) ComputeInstanceExists(instanceID string) bool {
