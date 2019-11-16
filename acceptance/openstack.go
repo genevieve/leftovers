@@ -104,9 +104,28 @@ func (o OpenStackAcceptance) CreateVolume(name string) string {
 	return vol.ID
 }
 
+func (o OpenStackAcceptance) GetVolume(volumeID string) (volumes.Volume, error) {
+	volume, err := volumes.Get(o.volumesClient, volumeID).Extract()
+	if err != nil {
+		return volumes.Volume{}, err
+	}
+
+	return *volume, nil
+}
+
+func (o OpenStackAcceptance) VolumeExists(volumeID string) bool {
+	_, err := o.GetVolume(volumeID)
+	if err != nil {
+		_, ok := err.(gophercloud.ErrDefault404)
+		Expect(ok).To(BeTrue(), fmt.Sprintf("Unexpected error: %s", err))
+		return false
+	}
+
+	return true
+}
+
 func (o OpenStackAcceptance) DeleteVolume(volumeID string) {
-	err := volumes.Delete(o.volumesClient, volumeID, volumes.DeleteOpts{}).ExtractErr()
-	Expect(err).NotTo(HaveOccurred())
+	volumes.Delete(o.volumesClient, volumeID, volumes.DeleteOpts{})
 }
 
 func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
@@ -125,8 +144,7 @@ func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
 }
 
 func (o OpenStackAcceptance) DeleteInstance(instanceID string) {
-	err := servers.Delete(o.computeInstanceClient, instanceID).ExtractErr()
-	Expect(err).NotTo(HaveOccurred())
+	servers.Delete(o.computeInstanceClient, instanceID)
 }
 
 func (o OpenStackAcceptance) AttachVolumeToComputeInstance(volumeID string, computeID string) {
@@ -139,6 +157,16 @@ func (o OpenStackAcceptance) AttachVolumeToComputeInstance(volumeID string, comp
 		VolumeID: volumeID,
 	}).Extract()
 	Expect(err).NotTo(HaveOccurred())
+}
+
+func (o OpenStackAcceptance) ComputeInstanceExists(instanceID string) bool {
+	_, err := servers.Get(o.computeInstanceClient, instanceID).Extract()
+	if err != nil {
+		_, ok := err.(gophercloud.ErrDefault404)
+		Expect(ok).To(BeTrue(), fmt.Sprintf("Unexpected error: %s", err))
+		return false
+	}
+	return true
 }
 
 func (o *OpenStackAcceptance) CreateImage(name string) string {
@@ -155,20 +183,6 @@ func (o *OpenStackAcceptance) CreateImage(name string) string {
 	return image.ID
 }
 
-func (o OpenStackAcceptance) DeleteImage(imageID string) {
-	err := images.Delete(o.imagesClient, imageID).ExtractErr()
-	Expect(err).NotTo(HaveOccurred())
-}
-
-func (o OpenStackAcceptance) GetVolume(volumeID string) (volumes.Volume, error) {
-	volume, err := volumes.Get(o.volumesClient, volumeID).Extract()
-	if err != nil {
-		return volumes.Volume{}, err
-	}
-
-	return *volume, nil
-}
-
 func (o OpenStackAcceptance) GetImage(imageID string) (images.Image, error) {
 	image, err := images.Get(o.imagesClient, imageID).Extract()
 	if err != nil {
@@ -176,17 +190,6 @@ func (o OpenStackAcceptance) GetImage(imageID string) (images.Image, error) {
 	}
 
 	return *image, nil
-}
-
-func (o OpenStackAcceptance) VolumeExists(volumeID string) bool {
-	_, err := o.GetVolume(volumeID)
-	if err != nil {
-		_, ok := err.(gophercloud.ErrDefault404)
-		Expect(ok).To(BeTrue(), fmt.Sprintf("Unexpected error: %s", err))
-		return false
-	}
-
-	return true
 }
 
 func (o OpenStackAcceptance) ImageExists(imageID string) bool {
@@ -200,12 +203,6 @@ func (o OpenStackAcceptance) ImageExists(imageID string) bool {
 	return true
 }
 
-func (o OpenStackAcceptance) ComputeInstanceExists(instanceID string) bool {
-	_, err := servers.Get(o.computeInstanceClient, instanceID).Extract()
-	if err != nil {
-		_, ok := err.(gophercloud.ErrDefault404)
-		Expect(ok).To(BeTrue(), fmt.Sprintf("Unexpected error: %s", err))
-		return false
-	}
-	return true
+func (o OpenStackAcceptance) DeleteImage(imageID string) {
+	images.Delete(o.imagesClient, imageID)
 }

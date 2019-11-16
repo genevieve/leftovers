@@ -156,6 +156,9 @@ var _ = Describe("Openstack", func() {
 
 			volumeName = "delete-type-volume"
 			volumeID = acc.CreateVolume(volumeName)
+
+			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
+			Expect(acc.ImageExists(imageID)).To(BeTrue())
 		})
 
 		AfterEach(func() {
