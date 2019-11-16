@@ -1,7 +1,6 @@
 package openstack
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -125,10 +124,6 @@ func (l Leftovers) Types() {
 // you to confirm deletion (if enabled), and delete thoseu
 // that are selected.
 func (l Leftovers) Delete(filter string) error {
-	if filter != "" {
-		return errors.New("--filter is not supported for OpenStack.")
-	}
-
 	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
