@@ -10,7 +10,7 @@ type Options struct {
 	DryRun    bool   `short:"d"  long:"dry-run"                     description:"List all resources without deleting any."`
 	Filter    string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
 	Type      string `short:"t"  long:"type"                        description:"Type of resource to delete."`
-	Debug     string `           long:"debug"                       description:"Print debug information."`
+	Debug     bool   `           long:"debug"                       description:"Print debug information."`
 
 	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
 	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
