@@ -35,21 +35,17 @@ var _ = Describe("Openstack", func() {
 		if strings.ToLower(iaas) != "openstack" {
 			Skip("Skipping Openstack acceptance tests.")
 		}
+
 		acc = NewOpenStackAcceptance()
-		err := acc.configureAuthClient()
-		Expect(err).NotTo(HaveOccurred())
 
 		noConfirm := true
 		debug := true
 		stdout = bytes.NewBuffer([]byte{})
 		logger := app.NewLogger(stdout, os.Stdin, noConfirm, debug)
 
+		var err error
 		deleter, err = openstack.NewLeftovers(logger, acc.AuthURL, acc.Username, acc.Password, acc.Domain, acc.TenantName, acc.Region)
 		Expect(err).NotTo(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		Expect(acc.CleanUpTestResources()).NotTo(HaveOccurred())
 	})
 
 	Describe("NewLeftovers", func() {
@@ -86,6 +82,10 @@ var _ = Describe("Openstack", func() {
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
 		})
 
+		AfterEach(func() {
+			acc.DeleteVolume(volumeID)
+		})
+
 		It("lists resources", func() {
 			deleter.List("")
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", volumeName, volumeID)))
@@ -95,7 +95,7 @@ var _ = Describe("Openstack", func() {
 	Describe("Delete with Filter", func() {
 		It("fails with a message that the filter flag is not supported", func() {
 			err := deleter.Delete("filter")
-			Expect(err).To(MatchError("cannot delete openstack resources using a filter"))
+			Expect(err).To(MatchError("--filter is not supported for OpenStack."))
 		})
 	})
 
@@ -108,13 +108,19 @@ var _ = Describe("Openstack", func() {
 			volumeID = acc.CreateVolume(volumeName)
 
 			instanceName = "delete-instance"
-			instanceID = acc.CreateComputeInstanceWithNetwork(instanceName, true)
+			instanceID = acc.CreateComputeInstance(instanceName)
 
 			acc.AttachVolumeToComputeInstance(volumeID, instanceID)
 
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
 			Expect(acc.ComputeInstanceExists(instanceID)).To(BeTrue())
 			Expect(acc.ImageExists(imageID)).To(BeTrue())
+		})
+
+		AfterEach(func() {
+			acc.DeleteVolume(volumeID)
+			acc.DeleteInstance(instanceID)
+			acc.DeleteImage(imageID)
 		})
 
 		It("deletes all resources", func() {
@@ -150,6 +156,11 @@ var _ = Describe("Openstack", func() {
 
 			volumeName = "delete-type-volume"
 			volumeID = acc.CreateVolume(volumeName)
+		})
+
+		AfterEach(func() {
+			acc.DeleteImage(imageID)
+			acc.DeleteVolume(volumeID)
 		})
 
 		It("deletes resources of a certain type", func() {
