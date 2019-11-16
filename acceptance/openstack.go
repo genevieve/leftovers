@@ -28,7 +28,6 @@ type OpenStackAcceptance struct {
 	volumesClient         *gophercloud.ServiceClient
 	computeInstanceClient *gophercloud.ServiceClient
 	imagesClient          *gophercloud.ServiceClient
-	networkClient         *gophercloud.ServiceClient
 }
 
 func NewOpenStackAcceptance() OpenStackAcceptance {
@@ -74,9 +73,6 @@ func NewOpenStackAcceptance() OpenStackAcceptance {
 	imagesClient, err := openstack.NewImageServiceV2(provider, endpointOpts)
 	Expect(err).NotTo(HaveOccurred())
 
-	networkClient, err := openstack.NewNetworkV2(provider, endpointOpts)
-	Expect(err).NotTo(HaveOccurred())
-
 	return OpenStackAcceptance{
 		Logger:     app.NewLogger(os.Stdin, os.Stdout, true, false),
 		AuthURL:    authUrl,
@@ -89,7 +85,6 @@ func NewOpenStackAcceptance() OpenStackAcceptance {
 		volumesClient:         blockStorage,
 		computeInstanceClient: instanceClient,
 		imagesClient:          imagesClient,
-		networkClient:         networkClient,
 	}
 }
 
