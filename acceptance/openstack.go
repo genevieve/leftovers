@@ -123,7 +123,7 @@ func (o OpenStackAcceptance) DeleteVolume(volumeID string) {
 }
 
 func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
-	imageID := o.CreateImage("empty-image")
+	imageID := o.CreateImage(fmt.Sprintf("empty-image-%s", name))
 	serverCreateOpts := servers.CreateOpts{
 		Name:          name,
 		FlavorName:    "m1.tiny",

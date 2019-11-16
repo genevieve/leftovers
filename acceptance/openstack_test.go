@@ -92,13 +92,13 @@ var _ = Describe("Openstack", func() {
 			instanceID   string
 		)
 		BeforeEach(func() {
-			imageName = "delete-image"
+			imageName = "delete-all-image"
 			imageID = acc.CreateImage(imageName)
 
-			volumeName = "delete-volume"
+			volumeName = "delete-all-volume"
 			volumeID = acc.CreateVolume(volumeName)
 
-			instanceName = "delete-instance"
+			instanceName = "delete-all-instance"
 			instanceID = acc.CreateComputeInstance(instanceName)
 
 			Expect(acc.VolumeExists(volumeID)).To(BeTrue())
@@ -113,7 +113,7 @@ var _ = Describe("Openstack", func() {
 		})
 
 		It("deletes all resources", func() {
-			err := deleter.Delete("")
+			err := deleter.Delete("delete-all")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleted!", instanceName, instanceID)))
@@ -126,15 +126,6 @@ var _ = Describe("Openstack", func() {
 			Eventually(func() bool {
 				return !(acc.VolumeExists(volumeID) || acc.ComputeInstanceExists(instanceID) || acc.ImageExists(imageID))
 			}, "2s", "100ms").Should(BeTrue(), "Resources should have been deleted")
-		})
-	})
-
-	Describe("DeleteByType with Filter", func() {
-		It("fails with a message that the filter flag is not supported", func() {
-			err := deleter.DeleteByType("filter", "Image")
-			Expect(err).To(MatchError("cannot delete openstack resources using a filter"))
-
-			Expect(stdout.String()).To(ContainSubstring("Error: Filters are not supported for OpenStack. Aborting deletion!"))
 		})
 	})
 
@@ -163,7 +154,7 @@ var _ = Describe("Openstack", func() {
 		})
 
 		It("deletes resources of a certain type", func() {
-			err := deleter.DeleteByType("", "Image")
+			err := deleter.DeleteByType("delete-type", "Image")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Image: %s %s] Deleting...", imageName, imageID)))

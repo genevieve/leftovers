@@ -28,6 +28,7 @@ func NewImages(client imagesClient, logger logger) Images {
 
 func (i Images) List(filter string) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing Images...")
+
 	images, err := i.client.ListImages()
 	if err != nil {
 		return nil, fmt.Errorf("List Images: %s", err)
