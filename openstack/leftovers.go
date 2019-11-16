@@ -13,7 +13,7 @@ import (
 )
 
 type listTyper interface {
-	List() ([]common.Deletable, error)
+	List(filter string) ([]common.Deletable, error)
 	Type() string
 }
 
@@ -89,15 +89,10 @@ func NewLeftovers(logger logger, authURL, username, password, domain, tenantName
 func (l Leftovers) List(filter string) {
 	l.logger.NoConfirm()
 
-	if filter != "" {
-		l.logger.Println(color.YellowString("Warning: Filters are not supported for OpenStack."))
-		return
-	}
-
 	var deletables []common.Deletable
 
 	for _, r := range l.resources {
-		list, err := r.List()
+		list, err := r.List(filter)
 		if err != nil {
 			l.logger.Println(color.YellowString(err.Error()))
 		}
@@ -137,7 +132,7 @@ func (l Leftovers) Delete(filter string) error {
 	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
-		list, err := r.List()
+		list, err := r.List(filter)
 		if err != nil {
 			l.logger.Println(color.YellowString(err.Error()))
 		}
@@ -153,16 +148,11 @@ func (l Leftovers) Delete(filter string) error {
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
 func (l Leftovers) DeleteByType(filter, rType string) error {
-	if filter != "" {
-		l.logger.Println(color.RedString("Error: Filters are not supported for OpenStack. Aborting deletion!"))
-		return errors.New("cannot delete openstack resources using a filter")
-	}
-
 	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
 		if r.Type() == rType {
-			list, err := r.List()
+			list, err := r.List(filter)
 			if err != nil {
 				l.logger.Println(color.YellowString(err.Error()))
 			}

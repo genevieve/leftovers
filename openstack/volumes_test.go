@@ -15,12 +15,15 @@ var _ = Describe("Volumes", func() {
 	var (
 		volumes openstack.Volumes
 		logger  *fakes.Logger
-		client  *fakes.VolumesClient
+		filter  string
+
+		client *fakes.VolumesClient
 	)
 
 	BeforeEach(func() {
 		logger = &fakes.Logger{}
 		client = &fakes.VolumesClient{}
+		filter = ""
 
 		volumes = openstack.NewVolumes(client, logger)
 	})
@@ -35,7 +38,7 @@ var _ = Describe("Volumes", func() {
 		})
 
 		It("returns all the deletables", func() {
-			list, err := volumes.List()
+			list, err := volumes.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(list).To(HaveLen(2))
@@ -49,7 +52,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := volumes.List()
+				_, err := volumes.List(filter)
 				Expect(err).To(MatchError("List Volumes: error-description"))
 			})
 		})

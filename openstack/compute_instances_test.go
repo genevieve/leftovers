@@ -13,14 +13,18 @@ import (
 
 var _ = Describe("Compute Instance", func() {
 	var (
-		fakeClient       *fakes.ComputeClient
-		fakeLogger       *fakes.Logger
+		fakeClient *fakes.ComputeClient
+		fakeLogger *fakes.Logger
+		filter     string
+
 		computeInstances openstack.ComputeInstances
 	)
 
 	BeforeEach(func() {
 		fakeClient = &fakes.ComputeClient{}
 		fakeLogger = &fakes.Logger{}
+		filter = ""
+
 		computeInstances = openstack.NewComputeInstances(fakeClient, fakeLogger)
 	})
 
@@ -40,7 +44,7 @@ var _ = Describe("Compute Instance", func() {
 		})
 
 		It("should return many compute instances", func() {
-			result, err := computeInstances.List()
+			result, err := computeInstances.List(filter)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result).To(HaveLen(2))
@@ -54,7 +58,7 @@ var _ = Describe("Compute Instance", func() {
 			})
 
 			It("should not return a compute instance", func() {
-				result, err := computeInstances.List()
+				result, err := computeInstances.List(filter)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result).To(HaveLen(0))
@@ -67,7 +71,7 @@ var _ = Describe("Compute Instance", func() {
 			})
 
 			It("should return a helpful error message", func() {
-				_, err := computeInstances.List()
+				_, err := computeInstances.List(filter)
 				Expect(err).To(MatchError("List Compute Instances: error getting list"))
 			})
 		})

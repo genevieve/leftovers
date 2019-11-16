@@ -60,19 +60,12 @@ var _ = Describe("Openstack", func() {
 		})
 	})
 
-	Describe("List with Filter", func() {
-		It("warns that the filter flag is not supported", func() {
-			deleter.List("filter")
-
-			Expect(stdout.String()).To(ContainSubstring("Warning: Filters are not supported for OpenStack."))
-		})
-	})
-
 	Describe("List", func() {
 		var (
 			volumeName string
 			volumeID   string
 		)
+
 		BeforeEach(func() {
 			volumeName = "list-volume"
 			volumeID = acc.CreateVolume(volumeName)
@@ -86,13 +79,6 @@ var _ = Describe("Openstack", func() {
 		It("lists resources", func() {
 			deleter.List("")
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", volumeName, volumeID)))
-		})
-	})
-
-	Describe("Delete with Filter", func() {
-		It("fails with a message that the filter flag is not supported", func() {
-			err := deleter.Delete("filter")
-			Expect(err).To(MatchError("--filter is not supported for OpenStack."))
 		})
 	})
 
