@@ -19,13 +19,6 @@ var _ = Describe("Openstack", func() {
 		acc     OpenStackAcceptance
 		stdout  *bytes.Buffer
 		deleter openstack.Leftovers
-
-		volumeName   string
-		volumeID     string
-		instanceName string
-		instanceID   string
-		imageName    string
-		imageID      string
 	)
 
 	BeforeEach(func() {
@@ -76,6 +69,10 @@ var _ = Describe("Openstack", func() {
 	})
 
 	Describe("List", func() {
+		var (
+			volumeName string
+			volumeID   string
+		)
 		BeforeEach(func() {
 			volumeName = "list-volume"
 			volumeID = acc.CreateVolume(volumeName)
@@ -100,6 +97,14 @@ var _ = Describe("Openstack", func() {
 	})
 
 	Describe("Delete", func() {
+		var (
+			imageName    string
+			imageID      string
+			volumeName   string
+			volumeID     string
+			instanceName string
+			instanceID   string
+		)
 		BeforeEach(func() {
 			imageName = "delete-image"
 			imageID = acc.CreateImage(imageName)
@@ -150,6 +155,13 @@ var _ = Describe("Openstack", func() {
 	})
 
 	Describe("DeleteByType", func() {
+		var (
+			imageName  string
+			imageID    string
+			volumeName string
+			volumeID   string
+		)
+
 		BeforeEach(func() {
 			imageName = "delete-type-image"
 			imageID = acc.CreateImage(imageName)
