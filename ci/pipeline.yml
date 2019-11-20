@@ -1,7 +1,7 @@
 groups:
 - name: leftovers
   jobs:
-  - test
+  - unit
   - acceptance-aws
   - acceptance-azure
   - acceptance-gcp
@@ -38,7 +38,7 @@ jobs:
   - aggregate:
     - get: leftovers
       trigger: true
-  - task: test
+  - task: unit
     file: leftovers/ci/tasks/unit/task.yml
 
 - name: acceptance-gcp
@@ -47,7 +47,7 @@ jobs:
   - aggregate:
     - get: leftovers
       trigger: true
-      passed: [test]
+      passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -60,7 +60,7 @@ jobs:
   - aggregate:
     - get: leftovers
       trigger: true
-      passed: [test]
+      passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -75,7 +75,7 @@ jobs:
   - aggregate:
     - get: leftovers
       trigger: true
-      passed: [test]
+      passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -91,7 +91,7 @@ jobs:
   - aggregate:
     - get: leftovers
       trigger: true
-      passed: [test]
+      passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     tags: [vsphere]
@@ -111,7 +111,7 @@ jobs:
   - aggregate:
     - get: leftovers
       trigger: true
-      passed: [test]
+      passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
