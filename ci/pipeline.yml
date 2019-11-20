@@ -35,19 +35,17 @@ resources:
 jobs:
 - name: unit
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
+  - get: leftovers
+    trigger: true
   - task: unit
     file: leftovers/ci/tasks/unit/task.yml
 
 - name: acceptance-gcp
   serial: true
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
-      passed: [unit]
+  - get: leftovers
+    trigger: true
+    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -57,10 +55,9 @@ jobs:
 - name: acceptance-aws
   serial: true
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
-      passed: [unit]
+  - get: leftovers
+    trigger: true
+    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -72,10 +69,9 @@ jobs:
 - name: acceptance-azure
   serial: true
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
-      passed: [unit]
+  - get: leftovers
+    trigger: true
+    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -88,10 +84,9 @@ jobs:
 - name: acceptance-vsphere
   serial: true
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
-      passed: [unit]
+  - get: leftovers
+    trigger: true
+    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     tags: [vsphere]
@@ -108,10 +103,9 @@ jobs:
 - name: acceptance-openstack
   serial: true
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
-      passed: [unit]
+  - get: leftovers
+    trigger: true
+    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -127,18 +121,17 @@ jobs:
 
 - name: releasable
   plan:
-  - aggregate:
-    - get: leftovers
-      trigger: true
-      passed:
-      - acceptance-gcp
-      - acceptance-aws
-      - acceptance-azure
-      - acceptance-vsphere
+  - get: leftovers
+    trigger: true
+    passed:
+    - acceptance-gcp
+    - acceptance-aws
+    - acceptance-azure
+    - acceptance-vsphere
 
 - name: build-release
   plan:
-  - aggregate:
+  - in_parallel:
     - get: release
     - get: leftovers
       passed: [releasable]
@@ -154,7 +147,7 @@ jobs:
 
 - name: bump-brew-tap
   plan:
-  - aggregate:
+  - in_parallel:
     - get: leftovers
       passed: [build-release]
     - get: homebrew-tap
