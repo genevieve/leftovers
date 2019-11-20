@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: cfinfrastructure/terraform
+
+inputs:
+- name: leftovers
+
+run:
+  path: leftovers/ci/tasks/unit/task

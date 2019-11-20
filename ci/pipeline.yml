@@ -1,0 +1,173 @@
+groups:
+- name: leftovers
+  jobs:
+  - test
+  - acceptance-aws
+  - acceptance-azure
+  - acceptance-gcp
+  - acceptance-vsphere
+  - acceptance-openstack
+  - releasable
+  - build-release
+  - bump-brew-tap
+
+resources:
+- name: leftovers
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/genevieve/leftovers.git
+
+- name: release
+  type: github-release
+  source:
+    owner: genevieve
+    repository: leftovers
+    access_token: ((access_token))
+
+- name: homebrew-tap
+  type: git
+  source:
+    branch: master
+    uri: git@github.com:genevieve/homebrew-tap.git
+    private_key: ((user.private_key))
+
+jobs:
+- name: unit
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+  - task: test
+    file: leftovers/ci/tasks/unit/task.yml
+
+- name: acceptance-gcp
+  serial: true
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+      passed: [test]
+  - task: acceptance
+    file: leftovers/ci/tasks/acceptance/task.yml
+    params:
+      LEFTOVERS_ACCEPTANCE: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp_service_account_key))
+
+- name: acceptance-aws
+  serial: true
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+      passed: [test]
+  - task: acceptance
+    file: leftovers/ci/tasks/acceptance/task.yml
+    params:
+      LEFTOVERS_ACCEPTANCE: aws
+      BBL_AWS_ACCESS_KEY_ID: ((aws_access_key_id))
+      BBL_AWS_SECRET_ACCESS_KEY: ((aws_secret_access_key))
+      BBL_AWS_REGION: ((aws_region))
+
+- name: acceptance-azure
+  serial: true
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+      passed: [test]
+  - task: acceptance
+    file: leftovers/ci/tasks/acceptance/task.yml
+    params:
+      LEFTOVERS_ACCEPTANCE: azure
+      BBL_AZURE_SUBSCRIPTION_ID: ((azure_subscription_id))
+      BBL_AZURE_TENANT_ID: ((azure_tenant_id))
+      BBL_AZURE_CLIENT_ID: ((azure_client_id))
+      BBL_AZURE_CLIENT_SECRET: ((azure_client_secret))
+
+- name: acceptance-vsphere
+  serial: true
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+      passed: [test]
+  - task: acceptance
+    file: leftovers/ci/tasks/acceptance/task.yml
+    tags: [vsphere]
+    params:
+      LEFTOVERS_ACCEPTANCE: vsphere
+      BBL_VSPHERE_VCENTER_IP: ((vsphere_vcenter_ip))
+      BBL_VSPHERE_VCENTER_USER: ((vsphere_vcenter_user))
+      BBL_VSPHERE_VCENTER_PASSWORD: ((vsphere_vcenter_password))
+      BBL_VSPHERE_VCENTER_DC: ((vsphere_vcenter_dc))
+      BBL_VSPHERE_VCENTER_DS: ((vsphere_vcenter_ds))
+      BBL_VSPHERE_VCENTER_RP: ((vsphere_vcenter_rp))
+      LEFTOVERS_VSPHERE_FILTER: ((vsphere_vcenter_disks))
+
+- name: acceptance-openstack
+  serial: true
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+      passed: [test]
+  - task: acceptance
+    file: leftovers/ci/tasks/acceptance/task.yml
+    params:
+      LEFTOVERS_ACCEPTANCE: openstack
+      BBL_OPENSTACK_AUTH_URL: ((bbl_openstack_auth_url))
+      BBL_OPENSTACK_PASSWORD: ((bbl_openstack_user.password))
+      BBL_OPENSTACK_USERNAME: ((bbl_openstack_user.username))
+      BBL_OPENSTACK_PROJECT: ((bbl_openstack_project))
+      BBL_OPENSTACK_DOMAIN: ((bbl_openstack_domain))
+      BBL_OPENSTACK_REGION: ((bbl_openstack_region))
+    tags:
+    - vsphere
+
+- name: releasable
+  plan:
+  - aggregate:
+    - get: leftovers
+      trigger: true
+      passed:
+      - acceptance-gcp
+      - acceptance-aws
+      - acceptance-azure
+      - acceptance-vsphere
+
+- name: build-release
+  plan:
+  - aggregate:
+    - get: release
+    - get: leftovers
+      passed: [releasable]
+  - task: build-release-with-minor-bump
+    file: leftovers/ci/tasks/build-release/task.yml
+  - put: release
+    params:
+      name: builds/name
+      tag: builds/name
+      commitish: builds/commitish
+      globs:
+      - builds/bin/leftovers-*
+
+- name: bump-brew-tap
+  plan:
+  - aggregate:
+    - get: leftovers
+      passed: [build-release]
+    - get: homebrew-tap
+    - get: release
+      passed: [build-release]
+      trigger: true
+      params:
+        version: { tag: release/version }
+        globs:
+        - leftovers-*-darwin-amd64
+        - leftovers-*-linux-amd64
+  - task: bump-brew-tap
+    file: leftovers/ci/tasks/bump-brew-tap/task.yml
+  - put: homebrew-tap
+    params:
+      repository: updated-homebrew-tap/homebrew-tap

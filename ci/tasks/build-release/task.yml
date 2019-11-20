@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: cfinfrastructure/deployment
+
+inputs:
+  - name: leftovers
+  - name: release
+
+outputs:
+  - name: builds
+
+run:
+  path: leftovers/ci/tasks/build-release/task

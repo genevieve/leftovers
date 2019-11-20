@@ -1,0 +1,57 @@
+#!/bin/bash -exu
+
+ROOT="${PWD}"
+VERSION=$(cat "${ROOT}/release/version")
+
+function bump_minor_version() {
+  major=$(cat "${ROOT}/release/version" | cut -d 'v' -f 2 | cut -d '.' -f 1)
+  minor=$(cat "${ROOT}/release/version" | cut -d '.' -f 2)
+  patch=$(cat "${ROOT}/release/version" | cut -d '.' -f 3)
+
+  minor=$(($minor + 1))
+
+  VERSION=$major.$minor.$patch
+}
+
+function main() {
+  local commit_sha
+
+  mkdir -p "${GOPATH}/src/github.com/genevieve/"
+
+  ln -s "${ROOT}/leftovers" "${GOPATH}/src/github.com/genevieve/"
+
+  commit_sha=$(git -C "${ROOT}/leftovers" rev-parse HEAD)
+
+  pushd "${GOPATH}/src/github.com/genevieve/leftovers/cmd/leftovers" > /dev/null
+
+    echo "Building 64-bit Linux"
+    CGO_ENABLED=0 GOARCH=amd64 GOOS=linux \
+      go build \
+      -a -tags netgo -installsuffix netgo \
+      -ldflags "-X main.Version=v${VERSION}" \
+      -o "${ROOT}/builds/bin/leftovers-v${VERSION}-linux-amd64" .
+
+    echo "Building 64-bit Darwin"
+    GOARCH=amd64 GOOS=darwin \
+      go build \
+      -ldflags "-X main.Version=v${VERSION}" \
+      -o "${ROOT}/builds/bin/leftovers-v${VERSION}-darwin-amd64" .
+
+    echo "Building 64-bit Windows"
+    CGO_ENABLED=0 GOARCH=amd64 GOOS=windows \
+      go build \
+      -ldflags "-X main.Version=v${VERSION}" \
+      -o "${ROOT}/builds/bin/leftovers-v${VERSION}-windows-amd64.exe" .
+
+  popd > /dev/null
+
+  pushd "${ROOT}/builds" > /dev/null
+
+    echo -n "v${VERSION}" > name
+    echo -n "${commit_sha}" > commitish
+
+  popd > /dev/null
+}
+
+bump_minor_version
+main

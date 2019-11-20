@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -e -x -u
+
+ROOT="${PWD}"
+VERSION=$(cat "${ROOT}/release/version")
+
+shaOS=$(shasum -a 256 release/leftovers-*-darwin-amd64 | cut -d ' ' -f 1)
+shaLinux=$(shasum -a 256 release/leftovers-*-linux-amd64 | cut -d ' ' -f 1)
+
+pushd homebrew-tap
+  cat <<EOF > leftovers.rb
+class Leftovers < Formula
+  desc "Command line utility for cleaning orphaned IAAS resources."
+  homepage "https://github.com/genevieve/leftovers"
+  version "v${VERSION}"
+
+  if OS.mac?
+    url "https://github.com/genevieve/leftovers/releases/download/#{version}/leftovers-#{version}-darwin-amd64"
+    sha256 "${shaOS}"
+  elsif OS.linux?
+    url "https://github.com/genevieve/leftovers/releases/download/#{version}/leftovers-#{version}-linux-amd64"
+    sha256 "${shaLinux}"
+  end
+
+  depends_on :arch => :x86_64
+  depends_on "az" => "2.0.25"
+
+  def install
+    binary_name = "leftovers"
+    if OS.mac?
+      bin.install "leftovers-#{version}-darwin-amd64" => binary_name
+    elsif OS.linux?
+      bin.install "leftovers-#{version}-linux-amd64" => binary_name
+    end
+  end
+
+  test do
+    system "#{bin}/#{binary_name} --help"
+  end
+end
+EOF
+
+  cat leftovers.rb
+
+  git add leftovers.rb
+  if ! [ -z "$(git status --porcelain)" ];
+  then
+    git config --global user.email "cf-infrastructure@pivotal.io"
+    git config --global user.name "CF Infrastructure"
+    git commit -m "Release leftovers ${VERSION}"
+  else
+    echo "No new version to commit"
+  fi
+popd
+
+cp -R homebrew-tap updated-homebrew-tap
