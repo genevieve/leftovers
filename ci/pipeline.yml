@@ -117,7 +117,7 @@ jobs:
       BBL_OPENSTACK_DOMAIN: ((openstack_domain))
       BBL_OPENSTACK_REGION: ((openstack_region))
     tags:
-    - vsphere
+    - ((openstack_tag))
 
 - name: releasable
   plan:
