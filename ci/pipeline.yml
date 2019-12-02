@@ -35,6 +35,7 @@ resources:
 
 jobs:
 - name: unit
+  serial: true
   plan:
   - get: leftovers
     trigger: true
