@@ -110,12 +110,12 @@ jobs:
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
       LEFTOVERS_ACCEPTANCE: openstack
-      BBL_OPENSTACK_AUTH_URL: ((bbl_openstack_auth_url))
-      BBL_OPENSTACK_PASSWORD: ((bbl_openstack_user.password))
-      BBL_OPENSTACK_USERNAME: ((bbl_openstack_user.username))
-      BBL_OPENSTACK_PROJECT: ((bbl_openstack_project))
-      BBL_OPENSTACK_DOMAIN: ((bbl_openstack_domain))
-      BBL_OPENSTACK_REGION: ((bbl_openstack_region))
+      BBL_OPENSTACK_AUTH_URL: ((openstack_auth_url))
+      BBL_OPENSTACK_PASSWORD: ((openstack_password))
+      BBL_OPENSTACK_USERNAME: ((openstack_username))
+      BBL_OPENSTACK_PROJECT: ((openstack_project))
+      BBL_OPENSTACK_DOMAIN: ((openstack_domain))
+      BBL_OPENSTACK_REGION: ((openstack_region))
     tags:
     - vsphere
 
