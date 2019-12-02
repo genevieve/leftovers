@@ -17,6 +17,7 @@ resources:
   source:
     branch: master
     uri: https://github.com/genevieve/leftovers.git
+    ignore_paths: [ci]
 
 - name: release
   type: github-release
