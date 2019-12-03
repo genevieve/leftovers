@@ -125,7 +125,7 @@ var _ = Describe("Openstack", func() {
 
 			Eventually(func() bool {
 				return !(acc.VolumeExists(volumeID) || acc.ComputeInstanceExists(instanceID) || acc.ImageExists(imageID))
-			}, "2s", "100ms").Should(BeTrue(), "Resources should have been deleted")
+			}, "3s", "100ms").Should(BeTrue(), "Resources should have been deleted")
 		})
 	})
 
