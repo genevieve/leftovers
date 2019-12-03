@@ -90,7 +90,8 @@ jobs:
     passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
-    tags: [vsphere]
+    tags:
+    - ((vsphere_tag))
     params:
       LEFTOVERS_ACCEPTANCE: vsphere
       BBL_VSPHERE_VCENTER_IP: ((vsphere_vcenter_ip))
