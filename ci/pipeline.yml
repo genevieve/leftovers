@@ -23,14 +23,14 @@ resources:
   source:
     owner: genevieve
     repository: leftovers
-    access_token: ((access_token))
+    access_token: ((leftovers_access_token))
 
 - name: homebrew-tap
   type: git
   source:
     branch: master
     uri: git@github.com:genevieve/homebrew-tap.git
-    private_key: ((user.private_key))
+    private_key: ((tap_private_key))
 
 jobs:
 - name: unit
