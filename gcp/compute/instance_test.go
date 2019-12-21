@@ -13,10 +13,11 @@ import (
 
 var _ = Describe("Instance", func() {
 	var (
-		client *fakes.InstancesClient
-		name   string
-		zone   string
-		tags   *gcpcompute.Tags
+		client            *fakes.InstancesClient
+		name              string
+		zone              string
+		networkInterfaces []*gcpcompute.NetworkInterface
+		tags              *gcpcompute.Tags
 
 		instance compute.Instance
 	)
@@ -25,9 +26,10 @@ var _ = Describe("Instance", func() {
 		client = &fakes.InstancesClient{}
 		name = "banana"
 		zone = "zone"
+		networkInterfaces = []*gcpcompute.NetworkInterface{{Name: "kiwi"}}
 		tags = &gcpcompute.Tags{Items: []string{"tag-1"}}
 
-		instance = compute.NewInstance(client, name, zone, tags)
+		instance = compute.NewInstance(client, name, zone, tags, networkInterfaces)
 	})
 
 	Describe("Delete", func() {
@@ -54,7 +56,7 @@ var _ = Describe("Instance", func() {
 
 	Describe("Name", func() {
 		It("returns the name", func() {
-			Expect(instance.Name()).To(Equal("banana (tag-1)"))
+			Expect(instance.Name()).To(Equal("banana (kiwi, tag-1)"))
 		})
 	})
 

@@ -14,10 +14,17 @@ type Instance struct {
 	zone        string
 }
 
-func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tags) Instance {
+func NewInstance(client instancesClient, name, zone string,
+	tags *gcpcompute.Tags,
+	networkInterfaces []*gcpcompute.NetworkInterface) Instance {
+
 	clearerName := name
 
 	extra := []string{}
+	for _, ni := range networkInterfaces {
+		extra = append(extra, ni.Name)
+	}
+
 	if tags != nil && len(tags.Items) > 0 {
 		for _, tag := range tags.Items {
 			extra = append(extra, tag)

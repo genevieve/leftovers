@@ -42,7 +42,7 @@ func (i Instances) List(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, instance := range instances {
-		resource := NewInstance(i.client, instance.Name, i.zones[instance.Zone], instance.Tags)
+		resource := NewInstance(i.client, instance.Name, i.zones[instance.Zone], instance.Tags, instance.NetworkInterfaces)
 
 		if !strings.Contains(resource.Name(), filter) {
 			continue

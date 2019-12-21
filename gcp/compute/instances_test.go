@@ -53,6 +53,23 @@ var _ = Describe("Instances", func() {
 			Expect(list).To(HaveLen(1))
 		})
 
+		Context("when the vm name does not contain the filter, but the network does", func() {
+			BeforeEach(func() {
+				client.ListInstancesCall.Returns.InstanceSlice = []*gcpcompute.Instance{{
+					Name:              "banana-instance",
+					Zone:              "https://zone-1",
+					NetworkInterfaces: []*gcpcompute.NetworkInterface{{Name: "kiwi"}},
+				}}
+				filter = "kiwi"
+			})
+			It("will add it to the list to delete", func() {
+				list, err := instances.List(filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(list).To(HaveLen(1))
+			})
+		})
+
 		Context("when the client fails to list instances", func() {
 			BeforeEach(func() {
 				client.ListInstancesCall.Returns.Error = errors.New("some error")
