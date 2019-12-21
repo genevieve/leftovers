@@ -26,7 +26,7 @@ var _ = Describe("Instance", func() {
 		client = &fakes.InstancesClient{}
 		name = "banana"
 		zone = "zone"
-		networkInterfaces = []*gcpcompute.NetworkInterface{{Name: "kiwi"}}
+		networkInterfaces = []*gcpcompute.NetworkInterface{{Network: "https://www.googleapis.com/compute/v1/projects/id/global/networks/kiwi-network"}}
 		tags = &gcpcompute.Tags{Items: []string{"tag-1"}}
 
 		instance = compute.NewInstance(client, name, zone, tags, networkInterfaces)
@@ -56,7 +56,7 @@ var _ = Describe("Instance", func() {
 
 	Describe("Name", func() {
 		It("returns the name", func() {
-			Expect(instance.Name()).To(Equal("banana (kiwi, tag-1)"))
+			Expect(instance.Name()).To(Equal("banana (kiwi-network, tag-1)"))
 		})
 	})
 

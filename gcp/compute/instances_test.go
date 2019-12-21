@@ -58,7 +58,7 @@ var _ = Describe("Instances", func() {
 				client.ListInstancesCall.Returns.InstanceSlice = []*gcpcompute.Instance{{
 					Name:              "banana-instance",
 					Zone:              "https://zone-1",
-					NetworkInterfaces: []*gcpcompute.NetworkInterface{{Name: "kiwi"}},
+					NetworkInterfaces: []*gcpcompute.NetworkInterface{{Network: "global/networks/kiwi"}},
 				}}
 				filter = "kiwi"
 			})
