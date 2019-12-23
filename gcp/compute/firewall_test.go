@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/compute/fakes"
@@ -12,8 +13,9 @@ import (
 
 var _ = Describe("Firewall", func() {
 	var (
-		client *fakes.FirewallsClient
-		name   string
+		client  *fakes.FirewallsClient
+		name    string
+		network string
 
 		firewall compute.Firewall
 	)
@@ -21,8 +23,11 @@ var _ = Describe("Firewall", func() {
 	BeforeEach(func() {
 		client = &fakes.FirewallsClient{}
 		name = "banana"
+		network = "global/networks/kiwi-network"
 
-		firewall = compute.NewFirewall(client, name)
+		client.GetNetworkNameCall.Returns.Name = "kiwi-network"
+
+		firewall = compute.NewFirewall(client, name, network)
 	})
 
 	Describe("Delete", func() {
@@ -48,7 +53,7 @@ var _ = Describe("Firewall", func() {
 
 	Describe("Name", func() {
 		It("returns the name", func() {
-			Expect(firewall.Name()).To(Equal(name))
+			Expect(firewall.Name()).To(Equal(fmt.Sprintf("%s (kiwi-network)", name)))
 		})
 	})
 

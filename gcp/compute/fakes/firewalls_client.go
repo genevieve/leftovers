@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	gcp "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type FirewallsClient struct {
@@ -18,14 +18,25 @@ type FirewallsClient struct {
 		}
 		Stub func(string) error
 	}
+	GetNetworkNameCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Url string
+		}
+		Returns struct {
+			Name string
+		}
+		Stub func(string) string
+	}
 	ListFirewallsCall struct {
 		sync.Mutex
 		CallCount int
 		Returns   struct {
-			FirewallSlice []*gcp.Firewall
+			FirewallSlice []*gcpcompute.Firewall
 			Error         error
 		}
-		Stub func() ([]*gcp.Firewall, error)
+		Stub func() ([]*gcpcompute.Firewall, error)
 	}
 }
 
@@ -39,7 +50,17 @@ func (f *FirewallsClient) DeleteFirewall(param1 string) error {
 	}
 	return f.DeleteFirewallCall.Returns.Error
 }
-func (f *FirewallsClient) ListFirewalls() ([]*gcp.Firewall, error) {
+func (f *FirewallsClient) GetNetworkName(param1 string) string {
+	f.GetNetworkNameCall.Lock()
+	defer f.GetNetworkNameCall.Unlock()
+	f.GetNetworkNameCall.CallCount++
+	f.GetNetworkNameCall.Receives.Url = param1
+	if f.GetNetworkNameCall.Stub != nil {
+		return f.GetNetworkNameCall.Stub(param1)
+	}
+	return f.GetNetworkNameCall.Returns.Name
+}
+func (f *FirewallsClient) ListFirewalls() ([]*gcpcompute.Firewall, error) {
 	f.ListFirewallsCall.Lock()
 	defer f.ListFirewallsCall.Unlock()
 	f.ListFirewallsCall.CallCount++

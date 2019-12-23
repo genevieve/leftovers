@@ -49,6 +49,23 @@ var _ = Describe("Firewalls", func() {
 			Expect(list).To(HaveLen(1))
 		})
 
+		Context("when the firewall name does not contain the filter but the network does", func() {
+			BeforeEach(func() {
+				client.ListFirewallsCall.Returns.FirewallSlice = []*gcpcompute.Firewall{{
+					Name:    "banana-firewall",
+					Network: "global/networks/kiwi-network",
+				}}
+				client.GetNetworkNameCall.Returns.Name = "kiwi-network"
+			})
+
+			It("returns it in the list to delete", func() {
+				list, err := firewalls.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(list).To(HaveLen(1))
+			})
+		})
+
 		Context("when the client fails to list firewalls", func() {
 			BeforeEach(func() {
 				client.ListFirewallsCall.Returns.Error = errors.New("some error")

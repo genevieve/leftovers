@@ -10,6 +10,7 @@ import (
 
 //go:generate faux --interface firewallsClient --output fakes/firewalls_client.go
 type firewallsClient interface {
+	GetNetworkName(url string) (name string)
 	ListFirewalls() ([]*gcpcompute.Firewall, error)
 	DeleteFirewall(firewall string) error
 }
@@ -35,7 +36,7 @@ func (f Firewalls) List(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, firewall := range firewalls {
-		resource := NewFirewall(f.client, firewall.Name)
+		resource := NewFirewall(f.client, firewall.Name, firewall.Network)
 
 		if strings.Contains(resource.Name(), "default") {
 			continue
