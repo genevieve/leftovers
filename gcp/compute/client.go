@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -77,6 +78,15 @@ func NewClient(project string, service *gcpcompute.Service, logger logger) clien
 		regions:               service.Regions,
 		zones:                 service.Zones,
 	}
+}
+
+func (c client) GetNetworkName(url string) string {
+	a := strings.Split(url, "/networks/")
+	if len(a) > 1 {
+		name := a[1]
+		return name
+	}
+	return ""
 }
 
 func (c client) ListAddresses(region string) ([]*gcpcompute.Address, error) {

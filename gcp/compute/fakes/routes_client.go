@@ -18,6 +18,17 @@ type RoutesClient struct {
 		}
 		Stub func(string) error
 	}
+	GetNetworkNameCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Url string
+		}
+		Returns struct {
+			Name string
+		}
+		Stub func(string) string
+	}
 	ListRoutesCall struct {
 		sync.Mutex
 		CallCount int
@@ -38,6 +49,16 @@ func (f *RoutesClient) DeleteRoute(param1 string) error {
 		return f.DeleteRouteCall.Stub(param1)
 	}
 	return f.DeleteRouteCall.Returns.Error
+}
+func (f *RoutesClient) GetNetworkName(param1 string) string {
+	f.GetNetworkNameCall.Lock()
+	defer f.GetNetworkNameCall.Unlock()
+	f.GetNetworkNameCall.CallCount++
+	f.GetNetworkNameCall.Receives.Url = param1
+	if f.GetNetworkNameCall.Stub != nil {
+		return f.GetNetworkNameCall.Stub(param1)
+	}
+	return f.GetNetworkNameCall.Returns.Name
 }
 func (f *RoutesClient) ListRoutes() ([]*gcpcompute.Route, error) {
 	f.ListRoutesCall.Lock()

@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/genevieve/leftovers/gcp/compute"
 	"github.com/genevieve/leftovers/gcp/compute/fakes"
@@ -12,8 +13,9 @@ import (
 
 var _ = Describe("Route", func() {
 	var (
-		client *fakes.RoutesClient
-		name   string
+		client  *fakes.RoutesClient
+		name    string
+		network string
 
 		route compute.Route
 	)
@@ -21,8 +23,11 @@ var _ = Describe("Route", func() {
 	BeforeEach(func() {
 		client = &fakes.RoutesClient{}
 		name = "banana"
+		network = ".com/networks/kiwi-network"
 
-		route = compute.NewRoute(client, name)
+		client.GetNetworkNameCall.Returns.Name = "kiwi-network"
+
+		route = compute.NewRoute(client, name, network)
 	})
 
 	Describe("Delete", func() {
@@ -48,7 +53,7 @@ var _ = Describe("Route", func() {
 
 	Describe("Name", func() {
 		It("returns the name", func() {
-			Expect(route.Name()).To(Equal(name))
+			Expect(route.Name()).To(Equal(fmt.Sprintf("%s (kiwi-network)", name)))
 		})
 	})
 

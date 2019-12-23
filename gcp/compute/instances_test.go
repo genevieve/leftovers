@@ -60,8 +60,10 @@ var _ = Describe("Instances", func() {
 					Zone:              "https://zone-1",
 					NetworkInterfaces: []*gcpcompute.NetworkInterface{{Network: "global/networks/kiwi"}},
 				}}
+				client.GetNetworkNameCall.Returns.Name = "kiwi-network"
 				filter = "kiwi"
 			})
+
 			It("will add it to the list to delete", func() {
 				list, err := instances.List(filter)
 				Expect(err).NotTo(HaveOccurred())

@@ -49,6 +49,22 @@ var _ = Describe("Routes", func() {
 			Expect(list).To(HaveLen(1))
 		})
 
+		Context("when the route name does not contain the filter, but the network does", func() {
+			BeforeEach(func() {
+				client.ListRoutesCall.Returns.RouteSlice = []*gcpcompute.Route{{
+					Name:    "banana-route",
+					Network: ".com/networks/kiwi-network",
+				}}
+				client.GetNetworkNameCall.Returns.Name = "kiwi-network"
+			})
+			It("returns the route in the list to delete", func() {
+				list, err := routes.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(list).To(HaveLen(1))
+			})
+		})
+
 		Context("when the client fails to list routes", func() {
 			BeforeEach(func() {
 				client.ListRoutesCall.Returns.Error = errors.New("some error")

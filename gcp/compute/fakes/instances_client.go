@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	compute "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type InstancesClient struct {
@@ -19,6 +19,17 @@ type InstancesClient struct {
 		}
 		Stub func(string, string) error
 	}
+	GetNetworkNameCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Url string
+		}
+		Returns struct {
+			Name string
+		}
+		Stub func(string) string
+	}
 	ListInstancesCall struct {
 		sync.Mutex
 		CallCount int
@@ -26,10 +37,10 @@ type InstancesClient struct {
 			Zone string
 		}
 		Returns struct {
-			InstanceSlice []*compute.Instance
+			InstanceSlice []*gcpcompute.Instance
 			Error         error
 		}
-		Stub func(string) ([]*compute.Instance, error)
+		Stub func(string) ([]*gcpcompute.Instance, error)
 	}
 }
 
@@ -44,7 +55,17 @@ func (f *InstancesClient) DeleteInstance(param1 string, param2 string) error {
 	}
 	return f.DeleteInstanceCall.Returns.Error
 }
-func (f *InstancesClient) ListInstances(param1 string) ([]*compute.Instance, error) {
+func (f *InstancesClient) GetNetworkName(param1 string) string {
+	f.GetNetworkNameCall.Lock()
+	defer f.GetNetworkNameCall.Unlock()
+	f.GetNetworkNameCall.CallCount++
+	f.GetNetworkNameCall.Receives.Url = param1
+	if f.GetNetworkNameCall.Stub != nil {
+		return f.GetNetworkNameCall.Stub(param1)
+	}
+	return f.GetNetworkNameCall.Returns.Name
+}
+func (f *InstancesClient) ListInstances(param1 string) ([]*gcpcompute.Instance, error) {
 	f.ListInstancesCall.Lock()
 	defer f.ListInstancesCall.Unlock()
 	f.ListInstancesCall.CallCount++

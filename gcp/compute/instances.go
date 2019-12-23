@@ -10,6 +10,7 @@ import (
 
 //go:generate faux --interface instancesClient --output fakes/instances_client.go
 type instancesClient interface {
+	GetNetworkName(url string) (name string)
 	ListInstances(zone string) ([]*gcpcompute.Instance, error)
 	DeleteInstance(zone, instance string) error
 }

@@ -29,6 +29,8 @@ var _ = Describe("Instance", func() {
 		networkInterfaces = []*gcpcompute.NetworkInterface{{Network: "https://www.googleapis.com/compute/v1/projects/id/global/networks/kiwi-network"}}
 		tags = &gcpcompute.Tags{Items: []string{"tag-1"}}
 
+		client.GetNetworkNameCall.Returns.Name = "kiwi-network"
+
 		instance = compute.NewInstance(client, name, zone, tags, networkInterfaces)
 	})
 

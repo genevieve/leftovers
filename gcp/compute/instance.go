@@ -14,21 +14,14 @@ type Instance struct {
 	zone        string
 }
 
-func NewInstance(
-	client instancesClient,
-	name, zone string,
-	tags *gcpcompute.Tags,
-	networkInterfaces []*gcpcompute.NetworkInterface,
-) Instance {
-
+func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tags, networkInterfaces []*gcpcompute.NetworkInterface) Instance {
 	clearerName := name
 
 	extra := []string{}
 	for _, ni := range networkInterfaces {
-		link := strings.Split(ni.Network, "/networks/")
-		if len(link) > 1 {
-			networkName := link[1]
-			extra = append(extra, networkName)
+		network := client.GetNetworkName(ni.Network)
+		if len(network) > 0 {
+			extra = append(extra, network)
 		}
 	}
 
