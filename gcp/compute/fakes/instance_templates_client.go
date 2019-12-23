@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	gcp "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type InstanceTemplatesClient struct {
@@ -22,10 +22,10 @@ type InstanceTemplatesClient struct {
 		sync.Mutex
 		CallCount int
 		Returns   struct {
-			InstanceTemplateSlice []*gcp.InstanceTemplate
+			InstanceTemplateSlice []*gcpcompute.InstanceTemplate
 			Error                 error
 		}
-		Stub func() ([]*gcp.InstanceTemplate, error)
+		Stub func() ([]*gcpcompute.InstanceTemplate, error)
 	}
 }
 
@@ -39,7 +39,7 @@ func (f *InstanceTemplatesClient) DeleteInstanceTemplate(param1 string) error {
 	}
 	return f.DeleteInstanceTemplateCall.Returns.Error
 }
-func (f *InstanceTemplatesClient) ListInstanceTemplates() ([]*gcp.InstanceTemplate, error) {
+func (f *InstanceTemplatesClient) ListInstanceTemplates() ([]*gcpcompute.InstanceTemplate, error) {
 	f.ListInstanceTemplatesCall.Lock()
 	defer f.ListInstanceTemplatesCall.Unlock()
 	f.ListInstanceTemplatesCall.CallCount++

@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	gcpcompute "google.golang.org/api/compute/v1"
+	gcp "google.golang.org/api/compute/v1"
 )
 
 type FirewallsClient struct {
@@ -22,10 +22,10 @@ type FirewallsClient struct {
 		sync.Mutex
 		CallCount int
 		Returns   struct {
-			FirewallSlice []*gcpcompute.Firewall
+			FirewallSlice []*gcp.Firewall
 			Error         error
 		}
-		Stub func() ([]*gcpcompute.Firewall, error)
+		Stub func() ([]*gcp.Firewall, error)
 	}
 }
 
@@ -39,7 +39,7 @@ func (f *FirewallsClient) DeleteFirewall(param1 string) error {
 	}
 	return f.DeleteFirewallCall.Returns.Error
 }
-func (f *FirewallsClient) ListFirewalls() ([]*gcpcompute.Firewall, error) {
+func (f *FirewallsClient) ListFirewalls() ([]*gcp.Firewall, error) {
 	f.ListFirewallsCall.Lock()
 	defer f.ListFirewallsCall.Unlock()
 	f.ListFirewallsCall.CallCount++
