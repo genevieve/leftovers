@@ -12,9 +12,10 @@ type Instance struct {
 	name        string
 	clearerName string
 	zone        string
+	diskNames   []string
 }
 
-func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tags, networkInterfaces []*gcpcompute.NetworkInterface) Instance {
+func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tags, networkInterfaces []*gcpcompute.NetworkInterface, disks []*gcpcompute.AttachedDisk) Instance {
 	clearerName := name
 
 	extra := []string{}
@@ -35,17 +36,29 @@ func NewInstance(client instancesClient, name, zone string, tags *gcpcompute.Tag
 		clearerName = fmt.Sprintf("%s (%s)", name, strings.Join(extra, ", "))
 	}
 
+	diskNames := []string{}
+	for _, d := range disks {
+		diskNames = append(diskNames, d.DeviceName)
+	}
+
 	return Instance{
 		client:      client,
 		name:        name,
 		clearerName: clearerName,
 		zone:        zone,
+		diskNames:   diskNames,
 	}
 }
 
 func (i Instance) Delete() error {
-	err := i.client.DeleteInstance(i.zone, i.name)
+	for _, d := range i.diskNames {
+		err := i.client.SetDiskAutoDelete(i.zone, i.name, d)
+		if err != nil {
+			return fmt.Errorf("Set Disk Auto Delete: %s", err)
+		}
+	}
 
+	err := i.client.DeleteInstance(i.zone, i.name)
 	if err != nil {
 		return fmt.Errorf("Delete: %s", err)
 	}

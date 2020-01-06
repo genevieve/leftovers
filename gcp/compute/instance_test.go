@@ -27,11 +27,12 @@ var _ = Describe("Instance", func() {
 		name = "banana"
 		zone = "zone"
 		networkInterfaces = []*gcpcompute.NetworkInterface{{Network: "https://www.googleapis.com/compute/v1/projects/id/global/networks/kiwi-network"}}
+		disks := []*gcpcompute.AttachedDisk{}
 		tags = &gcpcompute.Tags{Items: []string{"tag-1"}}
 
 		client.GetNetworkNameCall.Returns.Name = "kiwi-network"
 
-		instance = compute.NewInstance(client, name, zone, tags, networkInterfaces)
+		instance = compute.NewInstance(client, name, zone, tags, networkInterfaces, disks)
 	})
 
 	Describe("Delete", func() {
@@ -42,6 +43,24 @@ var _ = Describe("Instance", func() {
 			Expect(client.DeleteInstanceCall.CallCount).To(Equal(1))
 			Expect(client.DeleteInstanceCall.Receives.Instance).To(Equal(name))
 			Expect(client.DeleteInstanceCall.Receives.Zone).To(Equal(zone))
+		})
+
+		Context("when there are attached disks", func() {
+			BeforeEach(func() {
+				disks := []*gcpcompute.AttachedDisk{{DeviceName: "yogurt"}}
+				instance = compute.NewInstance(client, name, zone, tags, networkInterfaces, disks)
+			})
+			It("marks all with auto_delete true", func() {
+				err := instance.Delete()
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.SetDiskAutoDeleteCall.CallCount).To(Equal(1))
+				Expect(client.SetDiskAutoDeleteCall.Receives.Instance).To(Equal(name))
+				Expect(client.SetDiskAutoDeleteCall.Receives.Zone).To(Equal(zone))
+				Expect(client.SetDiskAutoDeleteCall.Receives.Disk).To(Equal("yogurt"))
+
+				Expect(client.DeleteInstanceCall.CallCount).To(Equal(1))
+			})
 		})
 
 		Context("when the client fails to delete", func() {

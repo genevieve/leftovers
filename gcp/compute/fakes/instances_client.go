@@ -42,6 +42,19 @@ type InstancesClient struct {
 		}
 		Stub func(string) ([]*gcpcompute.Instance, error)
 	}
+	SetDiskAutoDeleteCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Zone     string
+			Instance string
+			Disk     string
+		}
+		Returns struct {
+			Error error
+		}
+		Stub func(string, string, string) error
+	}
 }
 
 func (f *InstancesClient) DeleteInstance(param1 string, param2 string) error {
@@ -74,4 +87,16 @@ func (f *InstancesClient) ListInstances(param1 string) ([]*gcpcompute.Instance, 
 		return f.ListInstancesCall.Stub(param1)
 	}
 	return f.ListInstancesCall.Returns.InstanceSlice, f.ListInstancesCall.Returns.Error
+}
+func (f *InstancesClient) SetDiskAutoDelete(param1 string, param2 string, param3 string) error {
+	f.SetDiskAutoDeleteCall.Lock()
+	defer f.SetDiskAutoDeleteCall.Unlock()
+	f.SetDiskAutoDeleteCall.CallCount++
+	f.SetDiskAutoDeleteCall.Receives.Zone = param1
+	f.SetDiskAutoDeleteCall.Receives.Instance = param2
+	f.SetDiskAutoDeleteCall.Receives.Disk = param3
+	if f.SetDiskAutoDeleteCall.Stub != nil {
+		return f.SetDiskAutoDeleteCall.Stub(param1, param2, param3)
+	}
+	return f.SetDiskAutoDeleteCall.Returns.Error
 }

@@ -185,6 +185,10 @@ func (c client) ListDisks(zone string) ([]*gcpcompute.Disk, error) {
 	return list, nil
 }
 
+func (c client) SetDiskAutoDelete(zone, instance, disk string) error {
+	return c.wait(c.instances.SetDiskAutoDelete(c.project, zone, instance, true, disk))
+}
+
 func (c client) DeleteDisk(zone, disk string) error {
 	return c.wait(c.disks.Delete(c.project, zone, disk))
 }

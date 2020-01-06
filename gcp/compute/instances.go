@@ -13,6 +13,8 @@ type instancesClient interface {
 	GetNetworkName(url string) (name string)
 	ListInstances(zone string) ([]*gcpcompute.Instance, error)
 	DeleteInstance(zone, instance string) error
+
+	SetDiskAutoDelete(zone, instance, disk string) error
 }
 
 type Instances struct {
@@ -43,7 +45,7 @@ func (i Instances) List(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, instance := range instances {
-		resource := NewInstance(i.client, instance.Name, i.zones[instance.Zone], instance.Tags, instance.NetworkInterfaces)
+		resource := NewInstance(i.client, instance.Name, i.zones[instance.Zone], instance.Tags, instance.NetworkInterfaces, instance.Disks)
 
 		if !strings.Contains(resource.Name(), filter) {
 			continue
