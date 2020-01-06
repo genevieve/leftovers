@@ -2,6 +2,7 @@ package route53_test
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
@@ -116,7 +117,7 @@ var _ = Describe("RecordSets", func() {
 		})
 
 		It("deletes the record sets", func() {
-			err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
+			err := recordSets.DeleteAll(hostedZoneId, hostedZoneName, records)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
@@ -134,7 +135,7 @@ var _ = Describe("RecordSets", func() {
 			})
 
 			It("does not try to delete it", func() {
-				err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
+				err := recordSets.DeleteAll(hostedZoneId, hostedZoneName, records)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(0))
@@ -150,7 +151,7 @@ var _ = Describe("RecordSets", func() {
 			})
 
 			It("does not try to delete it", func() {
-				err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
+				err := recordSets.DeleteAll(hostedZoneId, hostedZoneName, records)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(0))
@@ -163,8 +164,44 @@ var _ = Describe("RecordSets", func() {
 			})
 
 			It("returns the error", func() {
-				err := recordSets.Delete(hostedZoneId, hostedZoneName, records)
+				err := recordSets.DeleteAll(hostedZoneId, hostedZoneName, records)
 				Expect(err).To(MatchError("Delete Resource Record Sets: banana"))
+			})
+		})
+	})
+
+	Describe("DeleteWithFilter", func() {
+		var (
+			records []*awsroute53.ResourceRecordSet
+			filter  string
+		)
+
+		BeforeEach(func() {
+			records = []*awsroute53.ResourceRecordSet{
+				{Name: aws.String(fmt.Sprintf("kiwi-%s", hostedZoneName)), Type: aws.String("A")},
+				{Name: aws.String(fmt.Sprintf("banana-%s", hostedZoneName)), Type: aws.String("A")},
+			}
+			filter = "banana"
+		})
+
+		It("deletes the record sets that contain the filter", func() {
+			err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
+			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.HostedZoneId).To(Equal(hostedZoneId))
+			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].Action).To(Equal(aws.String("DELETE")))
+			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].ResourceRecordSet.Type).To(Equal(aws.String("A")))
+		})
+
+		Context("when the client fails to delete resource record sets", func() {
+			BeforeEach(func() {
+				client.ChangeResourceRecordSetsCall.Returns.Error = errors.New("ruhroh")
+			})
+
+			It("returns the error", func() {
+				err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter)
+				Expect(err).To(MatchError(fmt.Sprintf("Delete Resource Record Sets in Hosted Zone %s: ruhroh", hostedZoneName)))
 			})
 		})
 	})

@@ -23,7 +23,8 @@ type HostedZones struct {
 //go:generate faux --interface recordSets --output fakes/record_sets.go
 type recordSets interface {
 	Get(hostedZoneId *string) ([]*awsroute53.ResourceRecordSet, error)
-	Delete(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet) error
+	DeleteAll(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet) error
+	DeleteWithFilter(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet, filter string) error
 }
 
 func NewHostedZones(client hostedZonesClient, logger logger, recordSets recordSets) HostedZones {
@@ -42,9 +43,9 @@ func (z HostedZones) List(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, zone := range zones.HostedZones {
-		r := NewHostedZone(z.client, zone.Id, zone.Name, z.recordSets)
+		r := NewHostedZone(z.client, zone.Id, zone.Name, z.recordSets, filter)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !strings.Contains(r.Name(), filter) && !z.recordSetsContainFilter(zone.Id, filter) {
 			continue
 		}
 
@@ -61,4 +62,20 @@ func (z HostedZones) List(filter string) ([]common.Deletable, error) {
 
 func (z HostedZones) Type() string {
 	return "route53-hosted-zone"
+}
+
+// Check if any record sets in the hosted zone reference the filter.
+func (z HostedZones) recordSetsContainFilter(hostedZoneId *string, filter string) bool {
+	records, err := z.recordSets.Get(hostedZoneId)
+	if err != nil {
+		return false
+	}
+
+	for _, record := range records {
+		if strings.Contains(*record.Name, filter) {
+			return true
+		}
+	}
+
+	return false
 }

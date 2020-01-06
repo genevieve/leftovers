@@ -23,6 +23,7 @@ var _ = Describe("HostedZones", func() {
 	BeforeEach(func() {
 		client = &fakes.HostedZonesClient{}
 		logger = &fakes.Logger{}
+		recordSets = &fakes.RecordSets{}
 
 		hostedZones = route53.NewHostedZones(client, logger, recordSets)
 	})
@@ -72,6 +73,21 @@ var _ = Describe("HostedZones", func() {
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
 				Expect(items).To(HaveLen(0))
+			})
+		})
+
+		Context("when the record sets contain the filter", func() {
+			BeforeEach(func() {
+				recordSets.GetCall.Returns.ResourceRecordSetSlice = []*awsroute53.ResourceRecordSet{{
+					Name: aws.String("kiwi"),
+				}}
+			})
+			It("does not return it in the list", func() {
+				items, err := hostedZones.List("kiwi")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
+				Expect(items).To(HaveLen(1))
 			})
 		})
 

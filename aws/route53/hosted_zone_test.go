@@ -17,6 +17,7 @@ var _ = Describe("HostedZone", func() {
 		recordSets *fakes.RecordSets
 		id         *string
 		name       *string
+		filter     string
 
 		hostedZone route53.HostedZone
 	)
@@ -26,55 +27,94 @@ var _ = Describe("HostedZone", func() {
 		recordSets = &fakes.RecordSets{}
 		id = aws.String("the-zone-id")
 		name = aws.String("the-zone-name")
+		filter = "zone"
 
-		hostedZone = route53.NewHostedZone(client, id, name, recordSets)
+		hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter)
 	})
 
 	Describe("Delete", func() {
-		It("deletes the record sets and deletes the hosted zone", func() {
+		It("deletes all record sets and deletes the hosted zone", func() {
 			err := hostedZone.Delete()
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(recordSets.GetCall.CallCount).To(Equal(1))
 			Expect(recordSets.GetCall.Receives.HostedZoneId).To(Equal(id))
 
-			Expect(recordSets.DeleteCall.CallCount).To(Equal(1))
-			Expect(recordSets.DeleteCall.Receives.HostedZoneId).To(Equal(id))
+			Expect(recordSets.DeleteAllCall.CallCount).To(Equal(1))
+			Expect(recordSets.DeleteAllCall.Receives.HostedZoneId).To(Equal(id))
+
+			Expect(recordSets.DeleteWithFilterCall.CallCount).To(Equal(0))
 
 			Expect(client.DeleteHostedZoneCall.CallCount).To(Equal(1))
 			Expect(client.DeleteHostedZoneCall.Receives.DeleteHostedZoneInput.Id).To(Equal(id))
 		})
 
-		Context("when record sets fails to get", func() {
+		Context("when the zone does not contain the filter", func() {
 			BeforeEach(func() {
-				recordSets.GetCall.Returns.Error = errors.New("banana")
+				filter = "banana"
+				hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter)
 			})
 
-			It("returns the error", func() {
+			It("deletes only record sets in the zone that contain the filter", func() {
 				err := hostedZone.Delete()
-				Expect(err).To(MatchError("Get Record Sets: banana"))
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(recordSets.GetCall.CallCount).To(Equal(1))
+				Expect(recordSets.GetCall.Receives.HostedZoneId).To(Equal(id))
+
+				Expect(recordSets.DeleteAllCall.CallCount).To(Equal(0))
+
+				Expect(recordSets.DeleteWithFilterCall.CallCount).To(Equal(1))
+				Expect(recordSets.DeleteWithFilterCall.Receives.HostedZoneId).To(Equal(id))
+				Expect(recordSets.DeleteWithFilterCall.Receives.Filter).To(Equal("banana"))
+
+				Expect(client.DeleteHostedZoneCall.CallCount).To(Equal(0))
 			})
 		})
 
-		Context("when record sets fails to delete", func() {
+		Context("when record sets fails to get", func() {
 			BeforeEach(func() {
-				recordSets.DeleteCall.Returns.Error = errors.New("banana")
+				recordSets.GetCall.Returns.Error = errors.New("ruhroh")
 			})
 
 			It("returns the error", func() {
 				err := hostedZone.Delete()
-				Expect(err).To(MatchError("Delete Record Sets: banana"))
+				Expect(err).To(MatchError("Get Record Sets: ruhroh"))
+			})
+		})
+
+		Context("when deleting all record sets fails", func() {
+			BeforeEach(func() {
+				recordSets.DeleteAllCall.Returns.Error = errors.New("ruhroh")
+			})
+
+			It("returns the error", func() {
+				err := hostedZone.Delete()
+				Expect(err).To(MatchError("Delete All Record Sets: ruhroh"))
+			})
+		})
+
+		Context("when deleting record sets with filter fails", func() {
+			BeforeEach(func() {
+				filter = "banana"
+				hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter)
+				recordSets.DeleteWithFilterCall.Returns.Error = errors.New("ruhroh")
+			})
+
+			It("returns the error", func() {
+				err := hostedZone.Delete()
+				Expect(err).To(MatchError("Delete Record Sets With Filter: ruhroh"))
 			})
 		})
 
 		Context("when the client fails to delete the zone", func() {
 			BeforeEach(func() {
-				client.DeleteHostedZoneCall.Returns.Error = errors.New("banana")
+				client.DeleteHostedZoneCall.Returns.Error = errors.New("ruhroh")
 			})
 
 			It("returns the error", func() {
 				err := hostedZone.Delete()
-				Expect(err).To(MatchError("Delete: banana"))
+				Expect(err).To(MatchError("Delete: ruhroh"))
 			})
 		})
 	})

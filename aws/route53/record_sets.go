@@ -48,7 +48,7 @@ func (r RecordSets) Get(hostedZoneId *string) ([]*awsroute53.ResourceRecordSet, 
 	return records, nil
 }
 
-func (r RecordSets) Delete(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet) error {
+func (r RecordSets) DeleteAll(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet) error {
 	var changes []*awsroute53.Change
 	for _, record := range records {
 		if strings.TrimSuffix(*record.Name, ".") == strings.TrimSuffix(hostedZoneName, ".") && (*record.Type == "NS" || *record.Type == "SOA") {
@@ -67,6 +67,30 @@ func (r RecordSets) Delete(hostedZoneId *string, hostedZoneName string, records 
 		})
 		if err != nil {
 			return fmt.Errorf("Delete Resource Record Sets: %s", err)
+		}
+	}
+
+	return nil
+}
+
+func (r RecordSets) DeleteWithFilter(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet, filter string) error {
+	var changes []*awsroute53.Change
+	for _, record := range records {
+		if strings.Contains(*record.Name, filter) && *record.Type == "A" {
+			changes = append(changes, &awsroute53.Change{
+				Action:            aws.String("DELETE"),
+				ResourceRecordSet: record,
+			})
+		}
+	}
+
+	if len(changes) > 0 {
+		_, err := r.client.ChangeResourceRecordSets(&awsroute53.ChangeResourceRecordSetsInput{
+			HostedZoneId: hostedZoneId,
+			ChangeBatch:  &awsroute53.ChangeBatch{Changes: changes},
+		})
+		if err != nil {
+			return fmt.Errorf("Delete Resource Record Sets in Hosted Zone %s: %s", hostedZoneName, err)
 		}
 	}
 
