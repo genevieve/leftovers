@@ -9,7 +9,6 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 * <a href='#how'>Installation</a>
 * <a href='#usage'>Usage</a>
 * <a href='#maintainers'>Maintainers</a>
-* [Resources you can delete by IaaS.](RESOURCES.md)
 
 
 
