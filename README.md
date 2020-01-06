@@ -26,24 +26,24 @@ infrastructure resources were tragically orphaned. :-(
 
 It will **prompt you before deleting** any resource by default, ie:
 
-```css
-> leftovers --filter banana
+```console
+$ leftovers --filter banana
 
 [Firewall: banana-http] Delete? (y/N)
 ```
 
 It can be configured to **not** prompt, ie:
 
-```css
-> leftovers --filter banana --no-confirm
+```console
+$ leftovers --filter banana --no-confirm
 
 [Firewall: banana-http] Deleting...
 [Firewall: banana-http] Deleted!
 ```
 
 Or maybe you want to **see all of the resources** in your IaaS, ie:
-```css
-> leftovers --filter banana --dry-run
+```console
+$ leftovers --filter banana --dry-run
 
 [Firewall: banana-http]
 [Network: banana]
@@ -51,11 +51,11 @@ Or maybe you want to **see all of the resources** in your IaaS, ie:
 
 
 Finally, you might want to delete a single resource type::
-```css
-> leftovers types
+```console
+$ leftovers types
 service-account
 
-> leftovers --filter banana --type service-account --no-confirm
+$ leftovers --filter banana --type service-account --no-confirm
 [Service Account: banana@pivotal.io] Deleting...
 [Service Account: banana@pivotal.io] Deleted!
 ```
@@ -67,15 +67,15 @@ service-account
 ### Option 1
 [Install go.](https://golang.org/doc/install) Then:
 
-```
-go get -u github.com/genevieve/leftovers/cmd/leftovers
+```console
+$ go get -u github.com/genevieve/leftovers/cmd/leftovers
 ```
 
 ### Option 2
 
-```
-brew tap genevieve/tap
-brew install leftovers
+```console
+$ brew tap genevieve/tap
+$ brew install leftovers
 ```
 
 ### Option 3
@@ -86,7 +86,9 @@ Linux binaries can be found on the [releases page](https://github.com/genevieve/
 
 ## <a name='how'></a>Usage
 
-```
+```console
+$ leftovers -h
+
 Usage:
   leftovers [OPTIONS]
 
