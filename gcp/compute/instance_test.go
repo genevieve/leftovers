@@ -50,6 +50,7 @@ var _ = Describe("Instance", func() {
 				disks := []*gcpcompute.AttachedDisk{{DeviceName: "yogurt"}}
 				instance = compute.NewInstance(client, name, zone, tags, networkInterfaces, disks)
 			})
+
 			It("marks all with auto_delete true", func() {
 				err := instance.Delete()
 				Expect(err).NotTo(HaveOccurred())
@@ -60,6 +61,17 @@ var _ = Describe("Instance", func() {
 				Expect(client.SetDiskAutoDeleteCall.Receives.Disk).To(Equal("yogurt"))
 
 				Expect(client.DeleteInstanceCall.CallCount).To(Equal(1))
+			})
+
+			Context("when the client fails to mark attached disks with auto delete", func() {
+				BeforeEach(func() {
+					client.SetDiskAutoDeleteCall.Returns.Error = errors.New("ruhroh")
+				})
+
+				It("returns the error", func() {
+					err := instance.Delete()
+					Expect(err).To(MatchError("Set Disk Auto Delete: ruhroh"))
+				})
 			})
 		})
 
