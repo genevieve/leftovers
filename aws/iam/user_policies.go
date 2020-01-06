@@ -11,6 +11,7 @@ import (
 //go:generate faux --interface userPoliciesClient --output fakes/user_policies_client.go
 type userPoliciesClient interface {
 	ListAttachedUserPolicies(*awsiam.ListAttachedUserPoliciesInput) (*awsiam.ListAttachedUserPoliciesOutput, error)
+	ListUserPolicies(*awsiam.ListUserPoliciesInput) (*awsiam.ListUserPoliciesOutput, error)
 	DetachUserPolicy(*awsiam.DetachUserPolicyInput) (*awsiam.DetachUserPolicyOutput, error)
 	DeleteUserPolicy(*awsiam.DeleteUserPolicyInput) (*awsiam.DeleteUserPolicyOutput, error)
 }
@@ -33,12 +34,12 @@ func NewUserPolicies(client userPoliciesClient, logger logger) UserPolicies {
 }
 
 func (o UserPolicies) Delete(userName string) error {
-	policies, err := o.client.ListAttachedUserPolicies(&awsiam.ListAttachedUserPoliciesInput{UserName: aws.String(userName)})
+	ap, err := o.client.ListAttachedUserPolicies(&awsiam.ListAttachedUserPoliciesInput{UserName: aws.String(userName)})
 	if err != nil {
-		return fmt.Errorf("List IAM User Policies: %s", err)
+		return fmt.Errorf("List Attached User Policies: %s", err)
 	}
 
-	for _, p := range policies.AttachedPolicies {
+	for _, p := range ap.AttachedPolicies {
 		n := *p.PolicyName
 
 		_, err = o.client.DetachUserPolicy(&awsiam.DetachUserPolicyInput{
@@ -58,6 +59,29 @@ func (o UserPolicies) Delete(userName string) error {
 		_, err = o.client.DeleteUserPolicy(&awsiam.DeleteUserPolicyInput{
 			UserName:   aws.String(userName),
 			PolicyName: p.PolicyName,
+		})
+		if err != nil {
+			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchEntity" {
+				o.logger.Printf("[IAM User: %s] Deleted policy %s \n", userName, n)
+			} else {
+				o.logger.Printf("[IAM User: %s] Delete policy %s: %s \n", userName, n, err)
+			}
+		} else {
+			o.logger.Printf("[IAM User: %s] Deleted policy %s \n", userName, n)
+		}
+	}
+
+	up, err := o.client.ListUserPolicies(&awsiam.ListUserPoliciesInput{UserName: aws.String(userName)})
+	if err != nil {
+		return fmt.Errorf("List User Policies: %s", err)
+	}
+
+	for _, p := range up.PolicyNames {
+		n := *p
+
+		_, err = o.client.DeleteUserPolicy(&awsiam.DeleteUserPolicyInput{
+			UserName:   aws.String(userName),
+			PolicyName: p,
 		})
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchEntity" {

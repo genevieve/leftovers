@@ -41,9 +41,12 @@ var _ = Describe("UserPolicies", func() {
 					PolicyArn:  aws.String("the-policy-arn"),
 				}},
 			}
+			client.ListUserPoliciesCall.Returns.ListUserPoliciesOutput = &awsiam.ListUserPoliciesOutput{
+				PolicyNames: []*string{},
+			}
 		})
 
-		It("detaches and deletes the policies", func() {
+		It("detaches attached policies and deletes them", func() {
 			err := policies.Delete("banana")
 			Expect(err).NotTo(HaveOccurred())
 
@@ -64,6 +67,35 @@ var _ = Describe("UserPolicies", func() {
 			}))
 		})
 
+		Context("when there are unattached user policies", func() {
+			BeforeEach(func() {
+				client.ListAttachedUserPoliciesCall.Returns.ListAttachedUserPoliciesOutput = &awsiam.ListAttachedUserPoliciesOutput{
+					AttachedPolicies: []*awsiam.AttachedPolicy{},
+				}
+				client.ListUserPoliciesCall.Returns.ListUserPoliciesOutput = &awsiam.ListUserPoliciesOutput{
+					PolicyNames: []*string{aws.String("the-other-policy")},
+				}
+			})
+
+			It("deletes them", func() {
+				err := policies.Delete("banana")
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ListUserPoliciesCall.CallCount).To(Equal(1))
+				Expect(client.ListUserPoliciesCall.Receives.ListUserPoliciesInput.UserName).To(Equal(aws.String("banana")))
+
+				Expect(client.DetachUserPolicyCall.CallCount).To(Equal(0))
+
+				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(1))
+				Expect(client.DeleteUserPolicyCall.Receives.DeleteUserPolicyInput.UserName).To(Equal(aws.String("banana")))
+				Expect(client.DeleteUserPolicyCall.Receives.DeleteUserPolicyInput.PolicyName).To(Equal(aws.String("the-other-policy")))
+
+				Expect(messages).To(Equal([]string{
+					"[IAM User: banana] Deleted policy the-other-policy \n",
+				}))
+			})
+		})
+
 		Context("when the client fails to list attached user policies", func() {
 			BeforeEach(func() {
 				client.ListAttachedUserPoliciesCall.Returns.Error = errors.New("some error")
@@ -71,7 +103,7 @@ var _ = Describe("UserPolicies", func() {
 
 			It("returns the error and does not try deleting them", func() {
 				err := policies.Delete("banana")
-				Expect(err).To(MatchError("List IAM User Policies: some error"))
+				Expect(err).To(MatchError("List Attached User Policies: some error"))
 
 				Expect(client.DetachUserPolicyCall.CallCount).To(Equal(0))
 				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
@@ -143,6 +175,22 @@ var _ = Describe("UserPolicies", func() {
 					"[IAM User: banana] Detached policy the-policy \n",
 					"[IAM User: banana] Deleted policy the-policy \n",
 				}))
+			})
+		})
+
+		Context("when the client fails to list user policies", func() {
+			BeforeEach(func() {
+				client.ListAttachedUserPoliciesCall.Returns.ListAttachedUserPoliciesOutput = &awsiam.ListAttachedUserPoliciesOutput{
+					AttachedPolicies: []*awsiam.AttachedPolicy{},
+				}
+				client.ListUserPoliciesCall.Returns.Error = errors.New("some error")
+			})
+
+			It("returns the error and does not try deleting them", func() {
+				err := policies.Delete("banana")
+				Expect(err).To(MatchError("List User Policies: some error"))
+
+				Expect(client.DeleteUserPolicyCall.CallCount).To(Equal(0))
 			})
 		})
 	})

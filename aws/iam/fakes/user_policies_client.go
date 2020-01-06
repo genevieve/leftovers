@@ -43,6 +43,18 @@ type UserPoliciesClient struct {
 		}
 		Stub func(*awsiam.ListAttachedUserPoliciesInput) (*awsiam.ListAttachedUserPoliciesOutput, error)
 	}
+	ListUserPoliciesCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			ListUserPoliciesInput *awsiam.ListUserPoliciesInput
+		}
+		Returns struct {
+			ListUserPoliciesOutput *awsiam.ListUserPoliciesOutput
+			Error                  error
+		}
+		Stub func(*awsiam.ListUserPoliciesInput) (*awsiam.ListUserPoliciesOutput, error)
+	}
 }
 
 func (f *UserPoliciesClient) DeleteUserPolicy(param1 *awsiam.DeleteUserPolicyInput) (*awsiam.DeleteUserPolicyOutput, error) {
@@ -74,4 +86,14 @@ func (f *UserPoliciesClient) ListAttachedUserPolicies(param1 *awsiam.ListAttache
 		return f.ListAttachedUserPoliciesCall.Stub(param1)
 	}
 	return f.ListAttachedUserPoliciesCall.Returns.ListAttachedUserPoliciesOutput, f.ListAttachedUserPoliciesCall.Returns.Error
+}
+func (f *UserPoliciesClient) ListUserPolicies(param1 *awsiam.ListUserPoliciesInput) (*awsiam.ListUserPoliciesOutput, error) {
+	f.ListUserPoliciesCall.Lock()
+	defer f.ListUserPoliciesCall.Unlock()
+	f.ListUserPoliciesCall.CallCount++
+	f.ListUserPoliciesCall.Receives.ListUserPoliciesInput = param1
+	if f.ListUserPoliciesCall.Stub != nil {
+		return f.ListUserPoliciesCall.Stub(param1)
+	}
+	return f.ListUserPoliciesCall.Returns.ListUserPoliciesOutput, f.ListUserPoliciesCall.Returns.Error
 }
