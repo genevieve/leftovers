@@ -194,6 +194,26 @@ var _ = Describe("RecordSets", func() {
 			Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].ResourceRecordSet.Type).To(Equal(aws.String("A")))
 		})
 
+		Context("if the record set is NS type", func() {
+			BeforeEach(func() {
+				records = []*awsroute53.ResourceRecordSet{
+					{Name: aws.String(fmt.Sprintf("kiwi-%s", hostedZoneName)), Type: aws.String("A")},
+					{Name: aws.String(fmt.Sprintf("banana-%s", hostedZoneName)), Type: aws.String("NS")},
+				}
+				filter = "banana"
+			})
+
+			It("deletes the record sets that contain the filter", func() {
+				err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
+				Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.HostedZoneId).To(Equal(hostedZoneId))
+				Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].Action).To(Equal(aws.String("DELETE")))
+				Expect(client.ChangeResourceRecordSetsCall.Receives.ChangeResourceRecordSetsInput.ChangeBatch.Changes[0].ResourceRecordSet.Type).To(Equal(aws.String("NS")))
+			})
+		})
+
 		Context("when the client fails to delete resource record sets", func() {
 			BeforeEach(func() {
 				client.ChangeResourceRecordSetsCall.Returns.Error = errors.New("ruhroh")
