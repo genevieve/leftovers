@@ -24,7 +24,6 @@ class Leftovers < Formula
   end
 
   depends_on :arch => :x86_64
-  depends_on "az" => "2.0.25"
 
   def install
     binary_name = "leftovers"
