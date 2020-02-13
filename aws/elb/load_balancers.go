@@ -12,6 +12,8 @@ import (
 type loadBalancersClient interface {
 	DescribeLoadBalancers(*awselb.DescribeLoadBalancersInput) (*awselb.DescribeLoadBalancersOutput, error)
 	DeleteLoadBalancer(*awselb.DeleteLoadBalancerInput) (*awselb.DeleteLoadBalancerOutput, error)
+
+	DescribeTags(*awselb.DescribeTagsInput) (*awselb.DescribeTagsOutput, error)
 }
 
 type LoadBalancers struct {

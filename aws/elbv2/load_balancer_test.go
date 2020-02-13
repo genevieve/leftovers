@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/aws/aws-sdk-go/aws"
+	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/genevieve/leftovers/aws/elbv2"
 	"github.com/genevieve/leftovers/aws/elbv2/fakes"
 
@@ -23,11 +24,43 @@ var _ = Describe("LoadBalancer", func() {
 		client = &fakes.LoadBalancersClient{}
 		name = aws.String("the-name")
 		arn = aws.String("the-arn")
+	})
 
-		loadBalancer = elbv2.NewLoadBalancer(client, name, arn)
+	Describe("NewLoadBalancer", func() {
+		BeforeEach(func() {
+			tags := []*awselbv2.Tag{{Key: aws.String("the-key"), Value: aws.String("the-value")}}
+			client.DescribeTagsCall.Returns.DescribeTagsOutput = &awselbv2.DescribeTagsOutput{
+				TagDescriptions: []*awselbv2.TagDescription{{
+					ResourceArn: arn,
+					Tags:        tags,
+				}},
+			}
+		})
+
+		It("returns the identifier", func() {
+			loadBalancer = elbv2.NewLoadBalancer(client, name, arn)
+			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
+			Expect(client.DescribeTagsCall.Receives.DescribeTagsInput.ResourceArns[0]).To(Equal(arn))
+
+			Expect(loadBalancer.Name()).To(Equal("the-name (the-key:the-value)"))
+		})
+
+		Context("when the describe tags call fails", func() {
+			BeforeEach(func() {
+				client.DescribeTagsCall.Returns.Error = errors.New("banana")
+			})
+
+			It("ignores it", func() {
+				loadBalancer = elbv2.NewLoadBalancer(client, name, arn)
+				Expect(loadBalancer.Name()).To(Equal("the-name"))
+			})
+		})
 	})
 
 	Describe("Delete", func() {
+		BeforeEach(func() {
+			loadBalancer = elbv2.NewLoadBalancer(client, name, arn)
+		})
 		It("deletes the load balancer", func() {
 			err := loadBalancer.Delete()
 			Expect(err).NotTo(HaveOccurred())
@@ -50,12 +83,14 @@ var _ = Describe("LoadBalancer", func() {
 
 	Describe("Name", func() {
 		It("returns the identifier", func() {
+			loadBalancer = elbv2.NewLoadBalancer(client, name, arn)
 			Expect(loadBalancer.Name()).To(Equal("the-name"))
 		})
 	})
 
 	Describe("Type", func() {
-		It("returns \"load balancer\"", func() {
+		It("returns load balancer", func() {
+			loadBalancer = elbv2.NewLoadBalancer(client, name, arn)
 			Expect(loadBalancer.Type()).To(Equal("ELBV2 Load Balancer"))
 		})
 	})

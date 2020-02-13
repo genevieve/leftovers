@@ -2,6 +2,7 @@ package elb
 
 import (
 	"fmt"
+	"strings"
 
 	awselb "github.com/aws/aws-sdk-go/service/elb"
 )
@@ -14,10 +15,26 @@ type LoadBalancer struct {
 }
 
 func NewLoadBalancer(client loadBalancersClient, name *string) LoadBalancer {
+	identifier := *name
+
+	tagsOutput, err := client.DescribeTags(&awselb.DescribeTagsInput{LoadBalancerNames: []*string{name}})
+	if err == nil && tagsOutput != nil && len(tagsOutput.TagDescriptions) == 1 {
+		tags := tagsOutput.TagDescriptions[0].Tags
+
+		var extra []string
+		for _, t := range tags {
+			extra = append(extra, fmt.Sprintf("%s:%s", *t.Key, *t.Value))
+		}
+
+		if len(extra) > 0 {
+			identifier = fmt.Sprintf("%s (%s)", *name, strings.Join(extra, ", "))
+		}
+	}
+
 	return LoadBalancer{
 		client:     client,
 		name:       name,
-		identifier: *name,
+		identifier: identifier,
 		rtype:      "ELB Load Balancer",
 	}
 }

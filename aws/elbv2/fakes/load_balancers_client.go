@@ -31,6 +31,18 @@ type LoadBalancersClient struct {
 		}
 		Stub func(*awselbv2.DescribeLoadBalancersInput) (*awselbv2.DescribeLoadBalancersOutput, error)
 	}
+	DescribeTagsCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			DescribeTagsInput *awselbv2.DescribeTagsInput
+		}
+		Returns struct {
+			DescribeTagsOutput *awselbv2.DescribeTagsOutput
+			Error              error
+		}
+		Stub func(*awselbv2.DescribeTagsInput) (*awselbv2.DescribeTagsOutput, error)
+	}
 }
 
 func (f *LoadBalancersClient) DeleteLoadBalancer(param1 *awselbv2.DeleteLoadBalancerInput) (*awselbv2.DeleteLoadBalancerOutput, error) {
@@ -52,4 +64,14 @@ func (f *LoadBalancersClient) DescribeLoadBalancers(param1 *awselbv2.DescribeLoa
 		return f.DescribeLoadBalancersCall.Stub(param1)
 	}
 	return f.DescribeLoadBalancersCall.Returns.DescribeLoadBalancersOutput, f.DescribeLoadBalancersCall.Returns.Error
+}
+func (f *LoadBalancersClient) DescribeTags(param1 *awselbv2.DescribeTagsInput) (*awselbv2.DescribeTagsOutput, error) {
+	f.DescribeTagsCall.Lock()
+	defer f.DescribeTagsCall.Unlock()
+	f.DescribeTagsCall.CallCount++
+	f.DescribeTagsCall.Receives.DescribeTagsInput = param1
+	if f.DescribeTagsCall.Stub != nil {
+		return f.DescribeTagsCall.Stub(param1)
+	}
+	return f.DescribeTagsCall.Returns.DescribeTagsOutput, f.DescribeTagsCall.Returns.Error
 }
