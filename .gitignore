@@ -4,4 +4,3 @@
 terraform.key.json
 *.tfvars
 *.tf
-.idea/*
