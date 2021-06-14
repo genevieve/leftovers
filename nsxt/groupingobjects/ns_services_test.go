@@ -51,7 +51,7 @@ var _ = Describe("NS Services", func() {
 		})
 
 		It("lists, filters, and prompts for ns services to delete", func() {
-			list, err := nsServices.List(filter)
+			list, err := nsServices.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListNSServicesCall.CallCount).To(Equal(1))
@@ -71,7 +71,7 @@ var _ = Describe("NS Services", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := nsServices.List(filter)
+				_, err := nsServices.List(filter, false)
 				Expect(err).To(MatchError("List NS Services: PC LOAD LETTER"))
 			})
 		})

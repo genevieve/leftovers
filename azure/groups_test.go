@@ -33,7 +33,7 @@ var _ = Describe("Groups", func() {
 		})
 
 		It("returns a list of resource groups to delete", func() {
-			items, err := groups.List(filter)
+			items, err := groups.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListGroupsCall.CallCount).To(Equal(1))
@@ -48,7 +48,7 @@ var _ = Describe("Groups", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := groups.List(filter)
+				_, err := groups.List(filter, false)
 				Expect(err).To(MatchError("Listing Resource Groups: some error"))
 			})
 		})
@@ -59,7 +59,7 @@ var _ = Describe("Groups", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := groups.List(filter)
+				items, err := groups.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Resource Group"))
@@ -71,7 +71,7 @@ var _ = Describe("Groups", func() {
 
 		Context("when the resource group name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := groups.List("grape")
+				items, err := groups.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))

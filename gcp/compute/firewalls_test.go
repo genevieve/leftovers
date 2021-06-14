@@ -37,7 +37,7 @@ var _ = Describe("Firewalls", func() {
 		})
 
 		It("lists, filters, and prompts for firewalls to delete", func() {
-			list, err := firewalls.List(filter)
+			list, err := firewalls.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListFirewallsCall.CallCount).To(Equal(1))
@@ -59,7 +59,7 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("returns it in the list to delete", func() {
-				list, err := firewalls.List("kiwi")
+				list, err := firewalls.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(1))
@@ -72,14 +72,14 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := firewalls.List(filter)
+				_, err := firewalls.List(filter, false)
 				Expect(err).To(MatchError("Listing Firewalls: some error"))
 			})
 		})
 
 		Context("when the firewall name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := firewalls.List("grape")
+				list, err := firewalls.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -95,7 +95,7 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := firewalls.List("banana")
+				list, err := firewalls.List("banana", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -109,7 +109,7 @@ var _ = Describe("Firewalls", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := firewalls.List(filter)
+				list, err := firewalls.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

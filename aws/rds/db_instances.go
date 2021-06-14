@@ -2,9 +2,8 @@ package rds
 
 import (
 	"fmt"
-	"strings"
-
 	awsrds "github.com/aws/aws-sdk-go/service/rds"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewDBInstances(client dbInstancesClient, logger logger) DBInstances {
 	}
 }
 
-func (d DBInstances) List(filter string) ([]common.Deletable, error) {
+func (d DBInstances) List(filter string, regex bool) ([]common.Deletable, error) {
 	dbInstances, err := d.client.DescribeDBInstances(&awsrds.DescribeDBInstancesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing RDS DB Instances: %s", err)
@@ -40,7 +39,7 @@ func (d DBInstances) List(filter string) ([]common.Deletable, error) {
 
 		r := NewDBInstance(d.client, db.DBInstanceIdentifier)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

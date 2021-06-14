@@ -40,7 +40,7 @@ var _ = Describe("NetworkInterfaces", func() {
 		})
 
 		It("returns a list of network interfaces to delete", func() {
-			items, err := networkInterfaces.List(filter)
+			items, err := networkInterfaces.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeNetworkInterfacesCall.CallCount).To(Equal(1))
@@ -57,14 +57,14 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := networkInterfaces.List(filter)
+				_, err := networkInterfaces.List(filter, false)
 				Expect(err).To(MatchError("Describing EC2 Network Interfaces: some error"))
 			})
 		})
 
 		Context("when the network interface name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := networkInterfaces.List("kiwi")
+				items, err := networkInterfaces.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeNetworkInterfacesCall.CallCount).To(Equal(1))
@@ -87,7 +87,7 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 
 			It("uses them in the prompt", func() {
-				_, err := networkInterfaces.List(filter)
+				_, err := networkInterfaces.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("banana (the-key:the-value)"))
@@ -100,7 +100,7 @@ var _ = Describe("NetworkInterfaces", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := networkInterfaces.List(filter)
+				items, err := networkInterfaces.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

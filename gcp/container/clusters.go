@@ -2,7 +2,6 @@ package container
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcontainer "google.golang.org/api/container/v1"
@@ -28,7 +27,7 @@ func NewClusters(client clustersClient, zones map[string]string, logger logger) 
 	}
 }
 
-func (c Clusters) List(filter string) ([]common.Deletable, error) {
+func (c Clusters) List(filter string, regex bool) ([]common.Deletable, error) {
 	clusters := []*gcpcontainer.Cluster{}
 	for _, zone := range c.zones {
 		c.logger.Debugf("Listing Clusters for Zone %s...\n", zone)
@@ -43,7 +42,7 @@ func (c Clusters) List(filter string) ([]common.Deletable, error) {
 	for _, cluster := range clusters {
 		resource := NewCluster(c.client, cluster.Zone, cluster.Name)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

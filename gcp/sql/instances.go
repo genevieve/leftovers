@@ -2,8 +2,6 @@ package sql
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpsql "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -26,7 +24,7 @@ func NewInstances(client instancesClient, logger logger) Instances {
 	}
 }
 
-func (i Instances) List(filter string) ([]common.Deletable, error) {
+func (i Instances) List(filter string, regex bool) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing SQL Instances...")
 	instances, err := i.client.ListInstances()
 	if err != nil {
@@ -37,7 +35,7 @@ func (i Instances) List(filter string) ([]common.Deletable, error) {
 	for _, instance := range instances.Items {
 		resource := NewInstance(i.client, instance.Name)
 
-		if !strings.Contains(resource.name, filter) {
+		if !common.MatchRegex(resource.name, filter, regex) {
 			continue
 		}
 

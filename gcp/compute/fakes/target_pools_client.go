@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	gcpcompute "google.golang.org/api/compute/v1"
+	gcp "google.golang.org/api/compute/v1"
 )
 
 type TargetPoolsClient struct {
@@ -26,10 +26,10 @@ type TargetPoolsClient struct {
 			Region string
 		}
 		Returns struct {
-			TargetPoolList *gcpcompute.TargetPoolList
+			TargetPoolList *gcp.TargetPoolList
 			Error          error
 		}
-		Stub func(string) (*gcpcompute.TargetPoolList, error)
+		Stub func(string) (*gcp.TargetPoolList, error)
 	}
 }
 
@@ -44,7 +44,7 @@ func (f *TargetPoolsClient) DeleteTargetPool(param1 string, param2 string) error
 	}
 	return f.DeleteTargetPoolCall.Returns.Error
 }
-func (f *TargetPoolsClient) ListTargetPools(param1 string) (*gcpcompute.TargetPoolList, error) {
+func (f *TargetPoolsClient) ListTargetPools(param1 string) (*gcp.TargetPoolList, error) {
 	f.ListTargetPoolsCall.Lock()
 	defer f.ListTargetPoolsCall.Unlock()
 	f.ListTargetPoolsCall.CallCount++

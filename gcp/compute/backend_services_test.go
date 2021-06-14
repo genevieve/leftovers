@@ -37,7 +37,7 @@ var _ = Describe("BackendServices", func() {
 		})
 
 		It("lists, filters, and prompts for backend services to delete", func() {
-			list, err := backendServices.List(filter)
+			list, err := backendServices.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBackendServicesCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("BackendServices", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := backendServices.List(filter)
+				_, err := backendServices.List(filter, false)
 				Expect(err).To(MatchError("List Backend Services: some error"))
 			})
 		})
 
 		Context("when the backend service name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := backendServices.List("grape")
+				list, err := backendServices.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -76,7 +76,7 @@ var _ = Describe("BackendServices", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := backendServices.List(filter)
+				list, err := backendServices.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

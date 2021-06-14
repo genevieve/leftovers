@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -26,7 +24,7 @@ func NewImages(client imagesClient, logger logger) Images {
 	}
 }
 
-func (i Images) List(filter string) ([]common.Deletable, error) {
+func (i Images) List(filter string, regex bool) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing Images...")
 
 	images, err := i.client.ListImages()
@@ -38,7 +36,7 @@ func (i Images) List(filter string) ([]common.Deletable, error) {
 	for _, image := range images {
 		resource := NewImage(i.client, image.Name)
 
-		if !strings.Contains(image.Name, filter) {
+		if !common.MatchRegex(image.Name, filter, regex) {
 			continue
 		}
 

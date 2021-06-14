@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -26,7 +25,7 @@ func NewSslCertificates(client sslCertificatesClient, logger logger) SslCertific
 	}
 }
 
-func (s SslCertificates) List(filter string) ([]common.Deletable, error) {
+func (s SslCertificates) List(filter string, regex bool) ([]common.Deletable, error) {
 	s.logger.Debugln("Listing SSL Certificates...")
 	sslCertificates, err := s.client.ListSslCertificates()
 	if err != nil {
@@ -37,7 +36,7 @@ func (s SslCertificates) List(filter string) ([]common.Deletable, error) {
 	for _, cert := range sslCertificates {
 		resource := NewSslCertificate(s.client, cert.Name)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -26,7 +25,7 @@ func NewUrlMaps(client urlMapsClient, logger logger) UrlMaps {
 	}
 }
 
-func (u UrlMaps) List(filter string) ([]common.Deletable, error) {
+func (u UrlMaps) List(filter string, regex bool) ([]common.Deletable, error) {
 	u.logger.Debugln("Listing Url Maps...")
 	urlMaps, err := u.client.ListUrlMaps()
 	if err != nil {
@@ -38,7 +37,7 @@ func (u UrlMaps) List(filter string) ([]common.Deletable, error) {
 	for _, urlMap := range urlMaps.Items {
 		resource := NewUrlMap(u.client, urlMap.Name)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

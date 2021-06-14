@@ -49,7 +49,7 @@ var _ = Describe("Vpcs", func() {
 		})
 
 		It("returns a list of vpcs to delete", func() {
-			items, err := vpcs.List(filter)
+			items, err := vpcs.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVpcsCall.CallCount).To(Equal(1))
@@ -65,7 +65,7 @@ var _ = Describe("Vpcs", func() {
 
 		Context("when the vpc tags contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := vpcs.List("kiwi")
+				items, err := vpcs.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(items).To(HaveLen(0))
@@ -83,7 +83,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("uses just the vpc id in the prompt", func() {
-				items, err := vpcs.List("the-vpc")
+				items, err := vpcs.List("the-vpc", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-vpc-id"))
@@ -97,7 +97,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := vpcs.List(filter)
+				_, err := vpcs.List(filter, false)
 				Expect(err).To(MatchError("Describe EC2 VPCs: some error"))
 			})
 		})
@@ -108,7 +108,7 @@ var _ = Describe("Vpcs", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := vpcs.List(filter)
+				items, err := vpcs.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

@@ -48,7 +48,7 @@ var _ = Describe("Keys", func() {
 		})
 
 		It("returns a list of kms keys to delete", func() {
-			items, err := keys.List(filter)
+			items, err := keys.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListKeysCall.CallCount).To(Equal(1))
@@ -70,7 +70,7 @@ var _ = Describe("Keys", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := keys.List(filter)
+				items, err := keys.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ListKeysCall.CallCount).To(Equal(1))
@@ -85,7 +85,7 @@ var _ = Describe("Keys", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := keys.List(filter)
+				_, err := keys.List(filter, false)
 				Expect(err).To(MatchError("Listing KMS Keys: some error"))
 			})
 		})
@@ -96,7 +96,7 @@ var _ = Describe("Keys", func() {
 			})
 
 			It("ignores the error", func() {
-				_, err := keys.List(filter)
+				_, err := keys.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -107,7 +107,7 @@ var _ = Describe("Keys", func() {
 			})
 
 			It("ignores the error", func() {
-				_, err := keys.List(filter)
+				_, err := keys.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -118,7 +118,7 @@ var _ = Describe("Keys", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := keys.List(filter)
+				items, err := keys.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

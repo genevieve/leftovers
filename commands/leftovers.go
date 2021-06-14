@@ -1,9 +1,9 @@
 package commands
 
 type leftovers interface {
-	Delete(filter string) error
-	DeleteByType(filter, rType string) error
-	List(filter string)
-	ListByType(filter, rType string)
+	Delete(filter string, regex bool) error
+	DeleteByType(filter, rType string, regex bool) error
+	List(filter string, regex bool)
+	ListByType(filter, rType string, regex bool)
 	Types()
 }

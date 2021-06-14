@@ -2,9 +2,8 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -30,7 +29,7 @@ func NewSecurityGroups(client securityGroupsClient, logger logger, resourceTags 
 	}
 }
 
-func (s SecurityGroups) List(filter string) ([]common.Deletable, error) {
+func (s SecurityGroups) List(filter string, regex bool) ([]common.Deletable, error) {
 	output, err := s.client.DescribeSecurityGroups(&awsec2.DescribeSecurityGroupsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describe EC2 Security Groups: %s", err)
@@ -44,7 +43,7 @@ func (s SecurityGroups) List(filter string) ([]common.Deletable, error) {
 
 		r := NewSecurityGroup(s.client, s.logger, s.resourceTags, sg.GroupId, sg.GroupName, sg.Tags, sg.IpPermissions, sg.IpPermissionsEgress)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

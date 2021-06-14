@@ -2,9 +2,8 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewKeyPairs(client keyPairsClient, logger logger) KeyPairs {
 	}
 }
 
-func (k KeyPairs) List(filter string) ([]common.Deletable, error) {
+func (k KeyPairs) List(filter string, regex bool) ([]common.Deletable, error) {
 	keyPairs, err := k.client.DescribeKeyPairs(&awsec2.DescribeKeyPairsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Key Pairs: %s", err)
@@ -36,7 +35,7 @@ func (k KeyPairs) List(filter string) ([]common.Deletable, error) {
 	for _, key := range keyPairs.KeyPairs {
 		r := NewKeyPair(k.client, key.KeyName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

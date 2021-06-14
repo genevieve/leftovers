@@ -2,9 +2,8 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewNetworkInterfaces(client networkInterfacesClient, logger logger) Network
 	}
 }
 
-func (e NetworkInterfaces) List(filter string) ([]common.Deletable, error) {
+func (e NetworkInterfaces) List(filter string, regex bool) ([]common.Deletable, error) {
 	networkInterfaces, err := e.client.DescribeNetworkInterfaces(&awsec2.DescribeNetworkInterfacesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Network Interfaces: %s", err)
@@ -36,7 +35,7 @@ func (e NetworkInterfaces) List(filter string) ([]common.Deletable, error) {
 	for _, i := range networkInterfaces.NetworkInterfaces {
 		r := NewNetworkInterface(e.client, i.NetworkInterfaceId, i.TagSet)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

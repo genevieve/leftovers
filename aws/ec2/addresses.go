@@ -2,9 +2,8 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewAddresses(client addressesClient, logger logger) Addresses {
 	}
 }
 
-func (d Addresses) List(filter string) ([]common.Deletable, error) {
+func (d Addresses) List(filter string, regex bool) ([]common.Deletable, error) {
 	addresses, err := d.client.DescribeAddresses(&awsec2.DescribeAddressesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing EC2 Addresses: %s", err)
@@ -36,7 +35,7 @@ func (d Addresses) List(filter string) ([]common.Deletable, error) {
 	for _, a := range addresses.Addresses {
 		r := NewAddress(d.client, a.PublicIp, a.AllocationId, a.Tags)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

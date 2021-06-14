@@ -29,7 +29,7 @@ var _ = Describe("HostedZone", func() {
 		name = aws.String("the-zone-name")
 		filter = "zone"
 
-		hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter)
+		hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter, false)
 	})
 
 	Describe("Delete", func() {
@@ -52,7 +52,7 @@ var _ = Describe("HostedZone", func() {
 		Context("when the zone does not contain the filter", func() {
 			BeforeEach(func() {
 				filter = "banana"
-				hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter)
+				hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter, false)
 			})
 
 			It("deletes only record sets in the zone that contain the filter", func() {
@@ -97,7 +97,7 @@ var _ = Describe("HostedZone", func() {
 		Context("when deleting record sets with filter fails", func() {
 			BeforeEach(func() {
 				filter = "banana"
-				hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter)
+				hostedZone = route53.NewHostedZone(client, id, name, recordSets, filter, false)
 				recordSets.DeleteWithFilterCall.Returns.Error = errors.New("ruhroh")
 			})
 

@@ -2,9 +2,8 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewTags(client tagsClient, logger logger) Tags {
 	}
 }
 
-func (a Tags) List(filter string) ([]common.Deletable, error) {
+func (a Tags) List(filter string, regex bool) ([]common.Deletable, error) {
 	output, err := a.client.DescribeTags(&awsec2.DescribeTagsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describe EC2 Tags: %s", err)
@@ -40,7 +39,7 @@ func (a Tags) List(filter string) ([]common.Deletable, error) {
 
 		r := NewTag(a.client, t.Key, t.Value, t.ResourceId)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -2,9 +2,8 @@ package rds
 
 import (
 	"fmt"
-	"strings"
-
 	awsrds "github.com/aws/aws-sdk-go/service/rds"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewDBClusters(client dbClustersClient, logger logger) DBClusters {
 	}
 }
 
-func (d DBClusters) List(filter string) ([]common.Deletable, error) {
+func (d DBClusters) List(filter string, regex bool) ([]common.Deletable, error) {
 	dbClusters, err := d.client.DescribeDBClusters(&awsrds.DescribeDBClustersInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing RDS DB Clusters: %s", err)
@@ -40,7 +39,7 @@ func (d DBClusters) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

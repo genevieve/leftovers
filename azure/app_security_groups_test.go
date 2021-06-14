@@ -35,7 +35,7 @@ var _ = Describe("AppSecurityGroups", func() {
 		})
 
 		It("returns a list of resources to delete", func() {
-			items, err := groups.List(filter)
+			items, err := groups.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAppSecurityGroupsCall.CallCount).To(Equal(1))
@@ -52,7 +52,7 @@ var _ = Describe("AppSecurityGroups", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := groups.List(filter)
+				_, err := groups.List(filter, false)
 				Expect(err).To(MatchError("Listing Application Security Groups: some error"))
 			})
 		})
@@ -63,7 +63,7 @@ var _ = Describe("AppSecurityGroups", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := groups.List(filter)
+				items, err := groups.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Application Security Group"))
@@ -75,7 +75,7 @@ var _ = Describe("AppSecurityGroups", func() {
 
 		Context("when the resource group name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := groups.List("grape")
+				items, err := groups.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))

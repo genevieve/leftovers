@@ -27,7 +27,7 @@ func NewFolders(client client, logger logger) Folders {
 
 // List not only lists top-level folders, it also lists child and grandchild
 // folders, and all VMs within those folders.
-func (v Folders) List(filter string, rType string) ([]common.Deletable, error) {
+func (v Folders) List(filter string, rType string, regex bool) ([]common.Deletable, error) {
 	v.logger.Debugln("Getting root folder...")
 	root, err := v.client.GetRootFolder(filter)
 	if err != nil {

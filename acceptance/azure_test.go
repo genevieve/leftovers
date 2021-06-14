@@ -48,12 +48,12 @@ var _ = Describe("Azure", func() {
 		})
 
 		AfterEach(func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("lists resources without deleting", func() {
-			deleter.List(filter)
+			deleter.List(filter, false)
 
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s]", filter))
 			Expect(stdout.String()).To(ContainSubstring("Listing Resource Groups..."))
@@ -76,7 +76,7 @@ var _ = Describe("Azure", func() {
 		})
 
 		It("deletes resources with the filter", func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleting...", filter))
@@ -91,7 +91,7 @@ var _ = Describe("Azure", func() {
 			})
 
 			PIt("prompts them for subresources after they say no to the resource group", func() {
-				err := deleter.Delete(filter)
+				err := deleter.Delete(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: %s] Deleting...", filter))

@@ -2,7 +2,6 @@ package route53
 
 import (
 	"fmt"
-	"strings"
 
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
 	"github.com/genevieve/leftovers/common"
@@ -24,7 +23,7 @@ type HostedZones struct {
 type recordSets interface {
 	Get(hostedZoneId *string) ([]*awsroute53.ResourceRecordSet, error)
 	DeleteAll(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet) error
-	DeleteWithFilter(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet, filter string) error
+	DeleteWithFilter(hostedZoneId *string, hostedZoneName string, recordSets []*awsroute53.ResourceRecordSet, filter string, regex bool) error
 }
 
 func NewHostedZones(client hostedZonesClient, logger logger, recordSets recordSets) HostedZones {
@@ -35,7 +34,7 @@ func NewHostedZones(client hostedZonesClient, logger logger, recordSets recordSe
 	}
 }
 
-func (z HostedZones) List(filter string) ([]common.Deletable, error) {
+func (z HostedZones) List(filter string, regex bool) ([]common.Deletable, error) {
 	zones, err := z.client.ListHostedZones(&awsroute53.ListHostedZonesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List Route53 Hosted Zones: %s", err)
@@ -43,9 +42,9 @@ func (z HostedZones) List(filter string) ([]common.Deletable, error) {
 
 	var resources []common.Deletable
 	for _, zone := range zones.HostedZones {
-		r := NewHostedZone(z.client, zone.Id, zone.Name, z.recordSets, filter)
+		r := NewHostedZone(z.client, zone.Id, zone.Name, z.recordSets, filter, false)
 
-		if !strings.Contains(r.Name(), filter) && !z.recordSetsContainFilter(zone.Id, filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) && !z.recordSetsContainFilter(zone.Id, filter, regex) {
 			continue
 		}
 
@@ -65,14 +64,14 @@ func (z HostedZones) Type() string {
 }
 
 // Check if any record sets in the hosted zone reference the filter.
-func (z HostedZones) recordSetsContainFilter(hostedZoneId *string, filter string) bool {
+func (z HostedZones) recordSetsContainFilter(hostedZoneId *string, filter string, regex bool) bool {
 	records, err := z.recordSets.Get(hostedZoneId)
 	if err != nil {
 		return false
 	}
 
 	for _, record := range records {
-		if strings.Contains(*record.Name, filter) {
+		if common.MatchRegex(*record.Name, filter, regex) {
 			return true
 		}
 	}

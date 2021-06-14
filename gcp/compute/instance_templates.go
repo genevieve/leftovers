@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -26,7 +25,7 @@ func NewInstanceTemplates(client instanceTemplatesClient, logger logger) Instanc
 	}
 }
 
-func (i InstanceTemplates) List(filter string) ([]common.Deletable, error) {
+func (i InstanceTemplates) List(filter string, regex bool) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing Instance Templates...")
 	templates, err := i.client.ListInstanceTemplates()
 	if err != nil {
@@ -37,7 +36,7 @@ func (i InstanceTemplates) List(filter string) ([]common.Deletable, error) {
 	for _, template := range templates {
 		resource := NewInstanceTemplate(i.client, template.Name)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

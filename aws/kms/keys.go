@@ -2,9 +2,8 @@ package kms
 
 import (
 	"fmt"
-	"strings"
-
 	awskms "github.com/aws/aws-sdk-go/service/kms"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -30,7 +29,7 @@ func NewKeys(client keysClient, logger logger) Keys {
 	}
 }
 
-func (k Keys) List(filter string) ([]common.Deletable, error) {
+func (k Keys) List(filter string, regex bool) ([]common.Deletable, error) {
 	keys, err := k.client.ListKeys(&awskms.ListKeysInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Listing KMS Keys: %s", err)
@@ -47,7 +46,7 @@ func (k Keys) List(filter string) ([]common.Deletable, error) {
 
 		r := NewKey(k.client, key.KeyId, metadata.KeyMetadata, tags.Tags)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

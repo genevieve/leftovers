@@ -2,9 +2,8 @@ package iam
 
 import (
 	"fmt"
-	"strings"
-
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -28,7 +27,7 @@ func NewRoles(client rolesClient, logger logger, policies rolePolicies) Roles {
 	}
 }
 
-func (o Roles) List(filter string) ([]common.Deletable, error) {
+func (o Roles) List(filter string, regex bool) ([]common.Deletable, error) {
 	roles, err := o.client.ListRoles(&awsiam.ListRolesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List IAM Roles: %s", err)
@@ -38,7 +37,7 @@ func (o Roles) List(filter string) ([]common.Deletable, error) {
 	for _, role := range roles.Roles {
 		r := NewRole(o.client, o.policies, role.RoleName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -51,7 +51,7 @@ var _ = Describe("IP Sets", func() {
 		})
 
 		It("lists, filters, and prompts for ip sets to delete", func() {
-			list, err := ipSets.List(filter)
+			list, err := ipSets.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListIPSetsCall.CallCount).To(Equal(1))
@@ -71,7 +71,7 @@ var _ = Describe("IP Sets", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := ipSets.List(filter)
+				_, err := ipSets.List(filter, false)
 				Expect(err).To(MatchError("List IP Sets: PC LOAD LETTER"))
 			})
 		})

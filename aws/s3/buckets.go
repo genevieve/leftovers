@@ -2,9 +2,8 @@ package s3
 
 import (
 	"fmt"
-	"strings"
-
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -31,7 +30,7 @@ func NewBuckets(client bucketsClient, logger logger, manager bucketManager) Buck
 	}
 }
 
-func (b Buckets) List(filter string) ([]common.Deletable, error) {
+func (b Buckets) List(filter string, regex bool) ([]common.Deletable, error) {
 	buckets, err := b.client.ListBuckets(&awss3.ListBucketsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Listing S3 Buckets: %s", err)
@@ -41,7 +40,7 @@ func (b Buckets) List(filter string) ([]common.Deletable, error) {
 	for _, bucket := range buckets.Buckets {
 		r := NewBucket(b.client, bucket.Name)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

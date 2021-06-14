@@ -41,7 +41,7 @@ var _ = Describe("Buckets", func() {
 		})
 
 		It("lists, filters, and prompts for buckets to delete", func() {
-			list, err := buckets.List(filter)
+			list, err := buckets.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
@@ -59,14 +59,14 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := buckets.List(filter)
+				_, err := buckets.List(filter, false)
 				Expect(err).To(MatchError("List Storage Buckets: some error"))
 			})
 		})
 
 		Context("when the bucket name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := buckets.List("grape")
+				list, err := buckets.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -80,7 +80,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := buckets.List(filter)
+				list, err := buckets.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

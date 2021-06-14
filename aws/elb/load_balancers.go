@@ -2,9 +2,8 @@ package elb
 
 import (
 	"fmt"
-	"strings"
-
 	awselb "github.com/aws/aws-sdk-go/service/elb"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -28,7 +27,7 @@ func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	}
 }
 
-func (l LoadBalancers) List(filter string) ([]common.Deletable, error) {
+func (l LoadBalancers) List(filter string, regex bool) ([]common.Deletable, error) {
 	loadBalancers, err := l.client.DescribeLoadBalancers(&awselb.DescribeLoadBalancersInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describe ELB Load Balancers: %s", err)
@@ -38,7 +37,7 @@ func (l LoadBalancers) List(filter string) ([]common.Deletable, error) {
 	for _, lb := range loadBalancers.LoadBalancerDescriptions {
 		r := NewLoadBalancer(l.client, lb.LoadBalancerName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+
 	"strings"
 
 	"github.com/genevieve/leftovers/common"
@@ -27,7 +28,7 @@ func NewFirewalls(client firewallsClient, logger logger) Firewalls {
 	}
 }
 
-func (f Firewalls) List(filter string) ([]common.Deletable, error) {
+func (f Firewalls) List(filter string, regex bool) ([]common.Deletable, error) {
 	f.logger.Debugln("Listing Firewalls...")
 	firewalls, err := f.client.ListFirewalls()
 	if err != nil {
@@ -42,7 +43,7 @@ func (f Firewalls) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

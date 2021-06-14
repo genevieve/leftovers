@@ -44,7 +44,7 @@ var _ = Describe("Images", func() {
 		})
 
 		It("returns the corresponding resources", func() {
-			res, err := subject.List(filter)
+			res, err := subject.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(res).To(HaveLen(2))
@@ -61,7 +61,7 @@ var _ = Describe("Images", func() {
 			})
 
 			It("returns the matching resources", func() {
-				res, err := subject.List("kiwi")
+				res, err := subject.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(res).To(HaveLen(0))
@@ -76,7 +76,7 @@ var _ = Describe("Images", func() {
 			})
 
 			It("only returns confirmed images", func() {
-				res, err := subject.List(filter)
+				res, err := subject.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(fakeLogger.PromptWithDetailsCall.CallCount).To(Equal(2))
@@ -92,7 +92,7 @@ var _ = Describe("Images", func() {
 			It("returns an error", func() {
 				fakeImageClient.ListCall.Returns.Error = errors.New("error getting list")
 
-				_, err := subject.List(filter)
+				_, err := subject.List(filter, false)
 				Expect(err).To(MatchError("List Images: error getting list"))
 			})
 		})

@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -28,7 +26,7 @@ func NewForwardingRules(client forwardingRulesClient, logger logger, regions map
 	}
 }
 
-func (f ForwardingRules) List(filter string) ([]common.Deletable, error) {
+func (f ForwardingRules) List(filter string, regex bool) ([]common.Deletable, error) {
 	rules := []*gcpcompute.ForwardingRule{}
 	for _, region := range f.regions {
 		f.logger.Debugf("Listing Forwarding Rules for Region %s...\n", region)
@@ -44,7 +42,7 @@ func (f ForwardingRules) List(filter string) ([]common.Deletable, error) {
 	for _, rule := range rules {
 		resource := NewForwardingRule(f.client, rule.Name, f.regions[rule.Region])
 
-		if !strings.Contains(rule.Name, filter) {
+		if !common.MatchRegex(rule.Name, filter, regex) {
 			continue
 		}
 

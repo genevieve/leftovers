@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	gcpcompute "google.golang.org/api/compute/v1"
+	compute "google.golang.org/api/compute/v1"
 )
 
 type NetworksClient struct {
@@ -22,10 +22,10 @@ type NetworksClient struct {
 		sync.Mutex
 		CallCount int
 		Returns   struct {
-			NetworkSlice []*gcpcompute.Network
+			NetworkSlice []*compute.Network
 			Error        error
 		}
-		Stub func() ([]*gcpcompute.Network, error)
+		Stub func() ([]*compute.Network, error)
 	}
 }
 
@@ -39,7 +39,7 @@ func (f *NetworksClient) DeleteNetwork(param1 string) error {
 	}
 	return f.DeleteNetworkCall.Returns.Error
 }
-func (f *NetworksClient) ListNetworks() ([]*gcpcompute.Network, error) {
+func (f *NetworksClient) ListNetworks() ([]*compute.Network, error) {
 	f.ListNetworksCall.Lock()
 	defer f.ListNetworksCall.Unlock()
 	f.ListNetworksCall.CallCount++

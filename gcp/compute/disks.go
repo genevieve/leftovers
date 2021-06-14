@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -28,7 +27,7 @@ func NewDisks(client disksClient, logger logger, zones map[string]string) Disks 
 	}
 }
 
-func (d Disks) List(filter string) ([]common.Deletable, error) {
+func (d Disks) List(filter string, regex bool) ([]common.Deletable, error) {
 	disks := []*gcpcompute.Disk{}
 	for _, zone := range d.zones {
 		d.logger.Debugf("Listing Disks for Zone %s...\n", zone)
@@ -44,7 +43,7 @@ func (d Disks) List(filter string) ([]common.Deletable, error) {
 	for _, disk := range disks {
 		resource := NewDisk(d.client, disk.Name, d.zones[disk.Zone])
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

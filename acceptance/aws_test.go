@@ -49,12 +49,12 @@ var _ = Describe("AWS", func() {
 		})
 
 		AfterEach(func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("lists resources without deleting", func() {
-			deleter.List(filter)
+			deleter.List(filter, false)
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s]", filter))
 			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
@@ -69,12 +69,12 @@ var _ = Describe("AWS", func() {
 		})
 
 		AfterEach(func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("lists resources of the specified type without deleting", func() {
-			deleter.List(filter)
+			deleter.List(filter, false)
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s]", filter))
 			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
@@ -97,7 +97,7 @@ var _ = Describe("AWS", func() {
 		})
 
 		It("deletes resources with the filter", func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
@@ -112,7 +112,7 @@ var _ = Describe("AWS", func() {
 		})
 
 		It("deletes the key pair resources with the filter", func() {
-			err := deleter.DeleteByType(filter, "ec2-key-pair")
+			err := deleter.DeleteByType(filter, "ec2-key-pair", false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))

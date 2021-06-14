@@ -35,7 +35,7 @@ var _ = Describe("Clusters", func() {
 		})
 
 		It("returns a list of eks clusters to delete", func() {
-			items, err := clusters.List("")
+			items, err := clusters.List("", false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListClustersCall.CallCount).To(Equal(1))
@@ -53,7 +53,7 @@ var _ = Describe("Clusters", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := clusters.List("")
+				_, err := clusters.List("", false)
 				Expect(err).To(MatchError("List EKS Clusters: some error"))
 			})
 		})
@@ -64,7 +64,7 @@ var _ = Describe("Clusters", func() {
 			})
 
 			It("does not return it to the list", func() {
-				items, err := clusters.List("")
+				items, err := clusters.List("", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

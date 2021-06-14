@@ -3,8 +3,6 @@ package logicalrouting
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -22,7 +20,7 @@ func NewTier1Routers(client logicalRoutingAPI, ctx context.Context, logger logge
 	}
 }
 
-func (t Tier1Routers) List(filter string) ([]common.Deletable, error) {
+func (t Tier1Routers) List(filter string, regex bool) ([]common.Deletable, error) {
 	t.logger.Debugln("Listing Tier 1 Routers...")
 	result, _, err := t.client.ListLogicalRouters(t.ctx, map[string]interface{}{
 		"routerType": "TIER1",
@@ -40,7 +38,7 @@ func (t Tier1Routers) List(filter string) ([]common.Deletable, error) {
 
 		resource := NewTier1Router(t.client, t.ctx, router.DisplayName, router.Id)
 
-		if !strings.Contains(router.DisplayName, filter) {
+		if !common.MatchRegex(router.DisplayName, filter, regex) {
 			continue
 		}
 

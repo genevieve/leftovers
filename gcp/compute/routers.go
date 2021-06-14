@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -28,7 +27,7 @@ func NewRouters(routersClient routersClient, logger logger, regions map[string]s
 	}
 }
 
-func (r Routers) List(filter string) ([]common.Deletable, error) {
+func (r Routers) List(filter string, regex bool) ([]common.Deletable, error) {
 	routers := []*gcpcompute.Router{}
 	for _, region := range r.regions {
 		r.logger.Debugf("Listing Routers for Region %s...\n", region)
@@ -44,7 +43,7 @@ func (r Routers) List(filter string) ([]common.Deletable, error) {
 	for _, router := range routers {
 		resource := NewRouter(r.routersClient, router.Name, r.regions[router.Region])
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

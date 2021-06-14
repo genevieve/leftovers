@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -28,7 +26,7 @@ func NewSubnetworks(client subnetworksClient, logger logger, regions map[string]
 	}
 }
 
-func (n Subnetworks) List(filter string) ([]common.Deletable, error) {
+func (n Subnetworks) List(filter string, regex bool) ([]common.Deletable, error) {
 	subnetworks := []*gcpcompute.Subnetwork{}
 	for _, region := range n.regions {
 		n.logger.Debugf("Listing Subnetworks for region %s...\n", region)
@@ -48,7 +46,7 @@ func (n Subnetworks) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !strings.Contains(subnetwork.Name, filter) {
+		if !common.MatchRegex(subnetwork.Name, filter, regex) {
 			continue
 		}
 

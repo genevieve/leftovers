@@ -2,9 +2,8 @@ package route53
 
 import (
 	"fmt"
-	"strings"
-
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewHealthChecks(client healthChecksClient, logger logger) HealthChecks {
 	}
 }
 
-func (h HealthChecks) List(filter string) ([]common.Deletable, error) {
+func (h HealthChecks) List(filter string, regex bool) ([]common.Deletable, error) {
 	checks, err := h.client.ListHealthChecks(&awsroute53.ListHealthChecksInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List Route53 Health Checks: %s", err)
@@ -36,7 +35,7 @@ func (h HealthChecks) List(filter string) ([]common.Deletable, error) {
 	for _, check := range checks.HealthChecks {
 		r := NewHealthCheck(h.client, check.Id)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

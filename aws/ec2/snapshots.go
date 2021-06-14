@@ -2,11 +2,10 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	awssts "github.com/aws/aws-sdk-go/service/sts"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -30,7 +29,7 @@ func NewSnapshots(client snapshotsClient, stsClient stsClient, logger logger) Sn
 	}
 }
 
-func (s Snapshots) List(filter string) ([]common.Deletable, error) {
+func (s Snapshots) List(filter string, regex bool) ([]common.Deletable, error) {
 	caller, err := s.stsClient.GetCallerIdentity(&awssts.GetCallerIdentityInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Get caller identity: %s", err)
@@ -51,7 +50,7 @@ func (s Snapshots) List(filter string) ([]common.Deletable, error) {
 	for _, snapshot := range output.Snapshots {
 		r := NewSnapshot(s.client, snapshot.SnapshotId)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -28,7 +26,7 @@ func NewAddresses(client addressesClient, logger logger, regions map[string]stri
 	}
 }
 
-func (a Addresses) List(filter string) ([]common.Deletable, error) {
+func (a Addresses) List(filter string, regex bool) ([]common.Deletable, error) {
 	addresses := []*gcpcompute.Address{}
 	for _, region := range a.regions {
 		a.logger.Debugf("Listing Addresses for Region %s...\n", region)
@@ -44,7 +42,7 @@ func (a Addresses) List(filter string) ([]common.Deletable, error) {
 	for _, address := range addresses {
 		resource := NewAddress(a.client, address.Name, a.regions[address.Region], len(address.Users))
 
-		if !strings.Contains(address.Name, filter) {
+		if !common.MatchRegex(address.Name, filter, regex) {
 			continue
 		}
 

@@ -2,7 +2,6 @@ package azure
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 )
@@ -25,7 +24,7 @@ func NewGroups(client groupsClient, logger logger) Groups {
 	}
 }
 
-func (g Groups) List(filter string) ([]common.Deletable, error) {
+func (g Groups) List(filter string, regex bool) ([]common.Deletable, error) {
 	g.logger.Debugln("Listing Resource Groups...")
 	groups, err := g.client.ListGroups()
 	if err != nil {
@@ -36,7 +35,7 @@ func (g Groups) List(filter string) ([]common.Deletable, error) {
 	for _, group := range groups {
 		r := NewGroup(g.client, group)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

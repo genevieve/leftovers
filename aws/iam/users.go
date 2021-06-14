@@ -2,9 +2,8 @@ package iam
 
 import (
 	"fmt"
-	"strings"
-
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -30,7 +29,7 @@ func NewUsers(client usersClient, logger logger, policies userPolicies, accessKe
 	}
 }
 
-func (u Users) List(filter string) ([]common.Deletable, error) {
+func (u Users) List(filter string, regex bool) ([]common.Deletable, error) {
 	users, err := u.client.ListUsers(&awsiam.ListUsersInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List IAM Users: %s", err)
@@ -40,7 +39,7 @@ func (u Users) List(filter string) ([]common.Deletable, error) {
 	for _, r := range users.Users {
 		r := NewUser(u.client, u.policies, u.accessKeys, r.UserName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

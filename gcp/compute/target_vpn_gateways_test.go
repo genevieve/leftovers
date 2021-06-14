@@ -42,7 +42,7 @@ var _ = Describe("TargetVpnGateways", func() {
 		})
 
 		It("lists, filters, and prompts for target vpn gateways to delete", func() {
-			list, err := targetVpnGateways.List(filter)
+			list, err := targetVpnGateways.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListTargetVpnGatewaysCall.CallCount).To(Equal(1))
@@ -61,14 +61,14 @@ var _ = Describe("TargetVpnGateways", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := targetVpnGateways.List(filter)
+				_, err := targetVpnGateways.List(filter, false)
 				Expect(err).To(MatchError("List Target Vpn Gateways: some error"))
 			})
 		})
 
 		Context("when the target vpn gateway name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := targetVpnGateways.List("grape")
+				list, err := targetVpnGateways.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -82,7 +82,7 @@ var _ = Describe("TargetVpnGateways", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := targetVpnGateways.List(filter)
+				list, err := targetVpnGateways.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

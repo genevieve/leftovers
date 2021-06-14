@@ -2,9 +2,8 @@ package rds
 
 import (
 	"fmt"
-	"strings"
-
 	awsrds "github.com/aws/aws-sdk-go/service/rds"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewDBSubnetGroups(client dbSubnetGroupsClient, logger logger) DBSubnetGroup
 	}
 }
 
-func (d DBSubnetGroups) List(filter string) ([]common.Deletable, error) {
+func (d DBSubnetGroups) List(filter string, regex bool) ([]common.Deletable, error) {
 	dbSubnetGroups, err := d.client.DescribeDBSubnetGroups(&awsrds.DescribeDBSubnetGroupsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describing RDS DB Subnet Groups: %s", err)
@@ -36,7 +35,7 @@ func (d DBSubnetGroups) List(filter string) ([]common.Deletable, error) {
 	for _, db := range dbSubnetGroups.DBSubnetGroups {
 		r := NewDBSubnetGroup(d.client, db.DBSubnetGroupName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

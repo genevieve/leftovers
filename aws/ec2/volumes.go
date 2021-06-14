@@ -2,10 +2,9 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -27,7 +26,7 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 	}
 }
 
-func (v Volumes) List(filter string) ([]common.Deletable, error) {
+func (v Volumes) List(filter string, regex bool) ([]common.Deletable, error) {
 	output, err := v.client.DescribeVolumes(&awsec2.DescribeVolumesInput{
 		Filters: []*awsec2.Filter{{
 			Name:   aws.String("status"),
@@ -42,7 +41,7 @@ func (v Volumes) List(filter string) ([]common.Deletable, error) {
 	for _, volume := range output.Volumes {
 		r := NewVolume(v.client, volume.VolumeId, volume.State, volume.Tags)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

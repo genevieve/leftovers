@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -26,7 +24,7 @@ func NewGlobalHealthChecks(client globalHealthChecksClient, logger logger) Globa
 	}
 }
 
-func (h GlobalHealthChecks) List(filter string) ([]common.Deletable, error) {
+func (h GlobalHealthChecks) List(filter string, regex bool) ([]common.Deletable, error) {
 	h.logger.Debugln("Listing Global Health Checks...")
 	checks, err := h.client.ListGlobalHealthChecks()
 	if err != nil {
@@ -37,7 +35,7 @@ func (h GlobalHealthChecks) List(filter string) ([]common.Deletable, error) {
 	for _, check := range checks {
 		resource := NewGlobalHealthCheck(h.client, check.Name)
 
-		if !strings.Contains(check.Name, filter) {
+		if !common.MatchRegex(check.Name, filter, regex) {
 			continue
 		}
 

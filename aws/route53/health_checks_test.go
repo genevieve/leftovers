@@ -40,7 +40,7 @@ var _ = Describe("HealthChecks", func() {
 		})
 
 		It("returns a list of route53 health checks to delete", func() {
-			items, err := healthChecks.List(filter)
+			items, err := healthChecks.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListHealthChecksCall.CallCount).To(Equal(1))
@@ -58,14 +58,14 @@ var _ = Describe("HealthChecks", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := healthChecks.List(filter)
+				_, err := healthChecks.List(filter, false)
 				Expect(err).To(MatchError("List Route53 Health Checks: some error"))
 			})
 		})
 
 		Context("when the health check name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := healthChecks.List("kiwi")
+				items, err := healthChecks.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -79,7 +79,7 @@ var _ = Describe("HealthChecks", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := healthChecks.List(filter)
+				items, err := healthChecks.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

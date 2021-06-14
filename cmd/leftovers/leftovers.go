@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/aws"
@@ -13,10 +14,10 @@ import (
 )
 
 type leftovers interface {
-	Delete(filter string) error
-	DeleteByType(filter, rType string) error
-	List(filter string)
-	ListByType(filter, rType string)
+	Delete(filter string, regex bool) error
+	DeleteByType(filter, rType string, regex bool) error
+	List(filter string, regex bool)
+	ListByType(filter, rType string, regex bool)
 	Types()
 }
 
@@ -32,6 +33,7 @@ func GetLeftovers(logger *app.Logger, o app.Options) (leftovers, error) {
 	case app.Azure:
 		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
 	case app.GCP:
+		fmt.Println("in gcp")
 		l, err = gcp.NewLeftovers(logger, o.GCPServiceAccountKey)
 	case app.NSXT:
 		l, err = nsxt.NewLeftovers(logger, o.NSXTManagerHost, o.NSXTUser, o.NSXTPassword)

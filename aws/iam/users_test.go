@@ -43,7 +43,7 @@ var _ = Describe("Users", func() {
 		})
 
 		It("returns a list of iam users to delete", func() {
-			items, err := users.List(filter)
+			items, err := users.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListUsersCall.CallCount).To(Equal(1))
@@ -61,14 +61,14 @@ var _ = Describe("Users", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				_, err := users.List(filter)
+				_, err := users.List(filter, false)
 				Expect(err).To(MatchError("List IAM Users: some error"))
 			})
 		})
 
 		Context("when the user name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := users.List("kiwi")
+				items, err := users.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -82,7 +82,7 @@ var _ = Describe("Users", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := users.List(filter)
+				items, err := users.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

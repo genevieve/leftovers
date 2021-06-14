@@ -37,7 +37,7 @@ var _ = Describe("Routes", func() {
 		})
 
 		It("lists, filters, and prompts for routes to delete", func() {
-			list, err := routes.List(filter)
+			list, err := routes.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListRoutesCall.CallCount).To(Equal(1))
@@ -58,7 +58,7 @@ var _ = Describe("Routes", func() {
 				client.GetNetworkNameCall.Returns.Name = "kiwi-network"
 			})
 			It("returns the route in the list to delete", func() {
-				list, err := routes.List("kiwi")
+				list, err := routes.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(1))
@@ -71,7 +71,7 @@ var _ = Describe("Routes", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := routes.List(filter)
+				_, err := routes.List(filter, false)
 				Expect(err).To(MatchError("List Routes: some error"))
 			})
 		})
@@ -84,7 +84,7 @@ var _ = Describe("Routes", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := routes.List("")
+				list, err := routes.List("", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -94,7 +94,7 @@ var _ = Describe("Routes", func() {
 
 		Context("when the route name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := routes.List("grape")
+				list, err := routes.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -108,7 +108,7 @@ var _ = Describe("Routes", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := routes.List((filter))
+				list, err := routes.List((filter), false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

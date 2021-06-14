@@ -2,8 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 )
@@ -26,7 +24,7 @@ func NewImages(client imageServiceClient, logger logger) Images {
 	}
 }
 
-func (i Images) List(filter string) ([]common.Deletable, error) {
+func (i Images) List(filter string, regex bool) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing Images...")
 
 	images, err := i.client.List()
@@ -38,7 +36,7 @@ func (i Images) List(filter string) ([]common.Deletable, error) {
 	for _, image := range images {
 		r := NewImage(image.Name, image.ID, i.client)
 
-		if !strings.Contains(image.Name, filter) {
+		if !common.MatchRegex(image.Name, filter, regex) {
 			continue
 		}
 

@@ -46,7 +46,7 @@ var _ = Describe("Routers", func() {
 		})
 
 		It("lists, filters, and prompts for routers to delete", func() {
-			list, err := routers.List(filter)
+			list, err := routers.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListRoutersCall.CallCount).To(Equal(1))
@@ -63,7 +63,7 @@ var _ = Describe("Routers", func() {
 			})
 
 			It("returns helpful error message", func() {
-				_, err := routers.List(filter)
+				_, err := routers.List(filter, false)
 				Expect(err).To(MatchError("List Routers for region region-1: some error"))
 			})
 		})
@@ -74,7 +74,7 @@ var _ = Describe("Routers", func() {
 			})
 
 			It("removes it from the list", func() {
-				list, err := routers.List(filter)
+				list, err := routers.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(list).To(HaveLen(0))
 			})

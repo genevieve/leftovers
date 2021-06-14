@@ -2,9 +2,8 @@ package eks
 
 import (
 	"fmt"
-	"strings"
-
 	awseks "github.com/aws/aws-sdk-go/service/eks"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -32,7 +31,7 @@ func NewClusters(client clustersClient, logger logger) Clusters {
 	}
 }
 
-func (c Clusters) List(filter string) ([]common.Deletable, error) {
+func (c Clusters) List(filter string, regex bool) ([]common.Deletable, error) {
 	clusters, err := c.client.ListClusters(&awseks.ListClustersInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List EKS Clusters: %s", err)
@@ -42,7 +41,7 @@ func (c Clusters) List(filter string) ([]common.Deletable, error) {
 	for _, cluster := range clusters.Clusters {
 		r := NewCluster(c.client, cluster)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcp "google.golang.org/api/compute/v1"
@@ -26,7 +25,7 @@ func NewNetworks(client networksClient, logger logger) Networks {
 	}
 }
 
-func (n Networks) List(filter string) ([]common.Deletable, error) {
+func (n Networks) List(filter string, regex bool) ([]common.Deletable, error) {
 	n.logger.Debugln("Listing Networks...")
 	networks, err := n.client.ListNetworks()
 	if err != nil {
@@ -41,7 +40,7 @@ func (n Networks) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.MatchRegex(resource.Name(), filter, regex) {
 			continue
 		}
 

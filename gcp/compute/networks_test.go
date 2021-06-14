@@ -37,7 +37,7 @@ var _ = Describe("Networks", func() {
 		})
 
 		It("lists, filters, and prompts for networks to delete", func() {
-			list, err := networks.List(filter)
+			list, err := networks.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListNetworksCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := networks.List(filter)
+				_, err := networks.List(filter, false)
 				Expect(err).To(MatchError("List Networks: some error"))
 			})
 		})
 
 		Context("when the network name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := networks.List("grape")
+				list, err := networks.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -78,7 +78,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := networks.List("")
+				list, err := networks.List("", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -92,7 +92,7 @@ var _ = Describe("Networks", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := networks.List(filter)
+				list, err := networks.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

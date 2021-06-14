@@ -47,7 +47,7 @@ var _ = Describe("NSX-T", func() {
 
 		It("can list and delete resources with the filter", func() {
 			By("listing resources first", func() {
-				deleter.List("leftover")
+				deleter.List("leftover", false)
 				Expect(stdout.String()).NotTo(ContainSubstring("403"))
 
 				Expect(stdout.String()).To(ContainSubstring("Listing Tier 1 Routers..."))
@@ -56,7 +56,7 @@ var _ = Describe("NSX-T", func() {
 			})
 
 			By("successfully deleting resources", func() {
-				err := deleter.Delete("leftover")
+				err := deleter.Delete("leftover", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stdout.String()).To(ContainSubstring("[Tier 1 Router: leftover-tier1-router] Deleting..."))

@@ -38,7 +38,7 @@ var _ = Describe("Compute Instance", func() {
 		})
 
 		It("should return all compute instances", func() {
-			result, err := computeInstances.List(filter)
+			result, err := computeInstances.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result).To(HaveLen(2))
@@ -53,7 +53,7 @@ var _ = Describe("Compute Instance", func() {
 				}
 			})
 			It("does not get returned", func() {
-				result, err := computeInstances.List("kiwi")
+				result, err := computeInstances.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result).To(HaveLen(0))
@@ -66,7 +66,7 @@ var _ = Describe("Compute Instance", func() {
 			})
 
 			It("should not return a compute instance", func() {
-				result, err := computeInstances.List(filter)
+				result, err := computeInstances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result).To(HaveLen(0))
@@ -79,7 +79,7 @@ var _ = Describe("Compute Instance", func() {
 			})
 
 			It("should return a helpful error message", func() {
-				_, err := computeInstances.List(filter)
+				_, err := computeInstances.List(filter, false)
 				Expect(err).To(MatchError("List Compute Instances: error getting list"))
 			})
 		})

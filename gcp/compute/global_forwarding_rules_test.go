@@ -37,7 +37,7 @@ var _ = Describe("GlobalForwardingRules", func() {
 		})
 
 		It("lists, filters, and prompts for global forwarding rules to delete", func() {
-			list, err := globalForwardingRules.List(filter)
+			list, err := globalForwardingRules.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListGlobalForwardingRulesCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("GlobalForwardingRules", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := globalForwardingRules.List(filter)
+				_, err := globalForwardingRules.List(filter, false)
 				Expect(err).To(MatchError("List Global Forwarding Rules: some error"))
 			})
 		})
 
 		Context("when the global forwarding rule name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := globalForwardingRules.List("grape")
+				list, err := globalForwardingRules.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -76,7 +76,7 @@ var _ = Describe("GlobalForwardingRules", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := globalForwardingRules.List(filter)
+				list, err := globalForwardingRules.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

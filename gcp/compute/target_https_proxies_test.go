@@ -39,7 +39,7 @@ var _ = Describe("TargetHttpsProxies", func() {
 		})
 
 		It("lists, filters, and prompts for target https proxies to delete", func() {
-			list, err := targetHttpsProxies.List(filter)
+			list, err := targetHttpsProxies.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListTargetHttpsProxiesCall.CallCount).To(Equal(1))
@@ -57,14 +57,14 @@ var _ = Describe("TargetHttpsProxies", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := targetHttpsProxies.List(filter)
+				_, err := targetHttpsProxies.List(filter, false)
 				Expect(err).To(MatchError("List Target Https Proxies: some error"))
 			})
 		})
 
 		Context("when the target https proxy name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := targetHttpsProxies.List("grape")
+				list, err := targetHttpsProxies.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -78,7 +78,7 @@ var _ = Describe("TargetHttpsProxies", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := targetHttpsProxies.List(filter)
+				list, err := targetHttpsProxies.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

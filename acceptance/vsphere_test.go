@@ -60,7 +60,7 @@ var _ = Describe("vSphere", func() {
 
 		It("can list and delete resources with the filter", func() {
 			By("listing resources first", func() {
-				deleter.List(filter)
+				deleter.List(filter, false)
 
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm]"))
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-nested-vm]"))
@@ -72,7 +72,7 @@ var _ = Describe("vSphere", func() {
 			})
 
 			By("successfully deleting VMs", func() {
-				err := deleter.Delete(filter)
+				err := deleter.Delete(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stdout.String()).To(ContainSubstring("[Virtual Machine: leftover-vm] Deleting..."))

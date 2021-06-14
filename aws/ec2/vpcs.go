@@ -2,10 +2,9 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -35,7 +34,7 @@ func NewVpcs(client vpcsClient, logger logger, routes routeTables, subnets subne
 	}
 }
 
-func (v Vpcs) List(filter string) ([]common.Deletable, error) {
+func (v Vpcs) List(filter string, regex bool) ([]common.Deletable, error) {
 	output, err := v.client.DescribeVpcs(&awsec2.DescribeVpcsInput{
 		Filters: []*awsec2.Filter{{
 			Name:   aws.String("isDefault"),
@@ -50,7 +49,7 @@ func (v Vpcs) List(filter string) ([]common.Deletable, error) {
 	for _, vpc := range output.Vpcs {
 		r := NewVpc(v.client, v.routes, v.subnets, v.gateways, v.resourceTags, vpc.VpcId, vpc.Tags)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.MatchRegex(r.Name(),  filter, regex) {
 			continue
 		}
 

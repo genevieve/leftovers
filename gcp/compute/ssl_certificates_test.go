@@ -37,7 +37,7 @@ var _ = Describe("SslCertificates", func() {
 		})
 
 		It("lists, filters, and prompts for instance templates to delete", func() {
-			list, err := sslCertificates.List(filter)
+			list, err := sslCertificates.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListSslCertificatesCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("SslCertificates", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := sslCertificates.List(filter)
+				_, err := sslCertificates.List(filter, false)
 				Expect(err).To(MatchError("List Ssl Certificates: some error"))
 			})
 		})
 
 		Context("when the ssl certificate name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := sslCertificates.List("grape")
+				list, err := sslCertificates.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -76,7 +76,7 @@ var _ = Describe("SslCertificates", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := sslCertificates.List(filter)
+				list, err := sslCertificates.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

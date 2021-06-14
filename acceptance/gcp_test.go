@@ -48,12 +48,12 @@ var _ = Describe("GCP", func() {
 		})
 
 		AfterEach(func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("lists only the deletable resources that contain the specified filter", func() {
-			deleter.List(filter)
+			deleter.List(filter, false)
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: %s]", filter))
 			Expect(stdout.String()).To(ContainSubstring("Listing Disks for Zone"))
@@ -69,12 +69,12 @@ var _ = Describe("GCP", func() {
 		})
 
 		AfterEach(func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("lists only the deletable resources of the specified type", func() {
-			deleter.ListByType(filter, "disk")
+			deleter.ListByType(filter, "disk", false)
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: %s]", filter))
 			Expect(stdout.String()).NotTo(ContainSubstring("[Disk: %s] Deleting...", filter))
@@ -99,7 +99,7 @@ var _ = Describe("GCP", func() {
 		})
 
 		It("deletes resources with the filter", func() {
-			err := deleter.Delete(filter)
+			err := deleter.Delete(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleting...", filter))
@@ -117,7 +117,7 @@ var _ = Describe("GCP", func() {
 		})
 
 		It("deletes resources with the filter", func() {
-			err := deleter.DeleteByType(filter, "disk")
+			err := deleter.DeleteByType(filter, "disk", false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[Disk: %s] Deleting...", filter))
