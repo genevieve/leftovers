@@ -31,6 +31,17 @@ type DbInstancesClient struct {
 		}
 		Stub func(*awsrds.DescribeDBInstancesInput) (*awsrds.DescribeDBInstancesOutput, error)
 	}
+	WaitUntilDBInstanceDeletedCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Input *awsrds.DescribeDBInstancesInput
+		}
+		Returns struct {
+			Error error
+		}
+		Stub func(*awsrds.DescribeDBInstancesInput) error
+	}
 }
 
 func (f *DbInstancesClient) DeleteDBInstance(param1 *awsrds.DeleteDBInstanceInput) (*awsrds.DeleteDBInstanceOutput, error) {
@@ -52,4 +63,14 @@ func (f *DbInstancesClient) DescribeDBInstances(param1 *awsrds.DescribeDBInstanc
 		return f.DescribeDBInstancesCall.Stub(param1)
 	}
 	return f.DescribeDBInstancesCall.Returns.DescribeDBInstancesOutput, f.DescribeDBInstancesCall.Returns.Error
+}
+func (f *DbInstancesClient) WaitUntilDBInstanceDeleted(param1 *awsrds.DescribeDBInstancesInput) error {
+	f.WaitUntilDBInstanceDeletedCall.Lock()
+	defer f.WaitUntilDBInstanceDeletedCall.Unlock()
+	f.WaitUntilDBInstanceDeletedCall.CallCount++
+	f.WaitUntilDBInstanceDeletedCall.Receives.Input = param1
+	if f.WaitUntilDBInstanceDeletedCall.Stub != nil {
+		return f.WaitUntilDBInstanceDeletedCall.Stub(param1)
+	}
+	return f.WaitUntilDBInstanceDeletedCall.Returns.Error
 }

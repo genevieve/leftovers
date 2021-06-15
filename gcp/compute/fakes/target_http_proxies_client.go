@@ -3,7 +3,7 @@ package fakes
 import (
 	"sync"
 
-	gcp "google.golang.org/api/compute/v1"
+	gcpcompute "google.golang.org/api/compute/v1"
 )
 
 type TargetHttpProxiesClient struct {
@@ -22,10 +22,10 @@ type TargetHttpProxiesClient struct {
 		sync.Mutex
 		CallCount int
 		Returns   struct {
-			TargetHttpProxyList *gcp.TargetHttpProxyList
+			TargetHttpProxyList *gcpcompute.TargetHttpProxyList
 			Error               error
 		}
-		Stub func() (*gcp.TargetHttpProxyList, error)
+		Stub func() (*gcpcompute.TargetHttpProxyList, error)
 	}
 }
 
@@ -39,7 +39,7 @@ func (f *TargetHttpProxiesClient) DeleteTargetHttpProxy(param1 string) error {
 	}
 	return f.DeleteTargetHttpProxyCall.Returns.Error
 }
-func (f *TargetHttpProxiesClient) ListTargetHttpProxies() (*gcp.TargetHttpProxyList, error) {
+func (f *TargetHttpProxiesClient) ListTargetHttpProxies() (*gcpcompute.TargetHttpProxyList, error) {
 	f.ListTargetHttpProxiesCall.Lock()
 	defer f.ListTargetHttpProxiesCall.Unlock()
 	f.ListTargetHttpProxiesCall.CallCount++
