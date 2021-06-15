@@ -11,6 +11,7 @@ import (
 type dbInstancesClient interface {
 	DescribeDBInstances(*awsrds.DescribeDBInstancesInput) (*awsrds.DescribeDBInstancesOutput, error)
 	DeleteDBInstance(*awsrds.DeleteDBInstanceInput) (*awsrds.DeleteDBInstanceOutput, error)
+	WaitUntilDBInstanceDeleted(input *awsrds.DescribeDBInstancesInput) error
 }
 
 type DBInstances struct {

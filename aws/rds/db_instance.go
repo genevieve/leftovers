@@ -33,6 +33,14 @@ func (d DBInstance) Delete() error {
 		return fmt.Errorf("Delete: %s", err)
 	}
 
+	err = d.client.WaitUntilDBInstanceDeleted(&awsrds.DescribeDBInstancesInput{
+		DBInstanceIdentifier: d.name,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Delete: %s", err)
+	}
+
 	return nil
 }
 
