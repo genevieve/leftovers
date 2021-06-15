@@ -1,61 +1,34 @@
 package common
 
-import "testing"
+import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
 
+var _ = Describe("RegexMatch", func() {
+	It("doesn't match", func() {
+		Expect(MatchRegex("my-resource-name", "not-my-resource", false)).To(BeFalse())
+	})
 
-func TestMatchRegex(t *testing.T) {
-	type args struct {
-		resourceName string
-		filter       string
-		regex		 bool
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "doesn't match",
-			args: args{
-				resourceName: "matc",
-				filter:       "match",
-				regex: true,
-			},
-			want: false,
-		},
-		{
-			name: "does match",
-			args: args{
-				resourceName: "please-match-me",
-				filter: "match",
-				regex: true,
-			},
-			want: true,
-		},
-		{
-			name: "matches for empty filter",
-			args: args{
-				resourceName: "something-arbitrary",
-				filter: "",
-				regex: true,
-			},
-			want: true,
-		},
-		{
-			name: "matches for empty filter",
-			args: args{
-				resourceName: "something-arbitrary",
-				filter: "",
-				regex: false,
-			},
-			want: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := MatchRegex(tt.args.resourceName, tt.args.filter, tt.args.regex); got != tt.want {
-				t.Errorf("MatchRegex() = %v, want %v", got, tt.want)
-			}
+	It("does match", func() {
+		Expect(MatchRegex("my-resource-name", "my-res", false)).To(BeTrue())
+	})
+
+	It("matches for empty filter", func() {
+		Expect(MatchRegex("my-resource-name", "", false)).To(BeTrue())
+	})
+
+	Context("interpreting filter as regex", func() {
+		It("doesn't match", func() {
+			Expect(MatchRegex("my-resource-name", "not-.*-resource", true)).To(BeFalse())
 		})
-	}
-}
+
+		It("does match", func() {
+			Expect(MatchRegex("my-resource-name", "my-res.*-name", true)).To(BeTrue())
+		})
+
+		It("matches for empty filter", func() {
+			Expect(MatchRegex("my-resource-name", "", true)).To(BeTrue())
+		})
+	})
+})
