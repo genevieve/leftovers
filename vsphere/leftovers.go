@@ -29,7 +29,7 @@ func (l Leftovers) List(filter string, regex bool) {
 	var all []common.Deletable
 
 	for _, r := range l.resources {
-		list, err := r.List(filter, "", false)
+		list, err := r.List(filter, "", regex)
 		if err != nil {
 			l.logger.Println(color.YellowString(err.Error()))
 		}
@@ -44,7 +44,7 @@ func (l Leftovers) List(filter string, regex bool) {
 
 // ListByType defaults to List.
 func (l Leftovers) ListByType(filter, rType string, regex bool) {
-	l.List(filter, false)
+	l.List(filter, regex)
 }
 
 // Types will print all the resource types that can
@@ -78,7 +78,7 @@ func (l Leftovers) DeleteByType(filter, rType string, regex bool) error {
 	)
 
 	for _, r := range l.resources {
-		list, err := r.List(filter, rType, false)
+		list, err := r.List(filter, rType, regex)
 		if err != nil {
 			return err
 		}
