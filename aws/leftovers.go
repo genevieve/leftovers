@@ -107,12 +107,10 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, sessionToken, reg
 
 			ec2.NewKeyPairs(ec2Client, logger),
 			ec2.NewInstances(ec2Client, logger, resourceTags),
-			ec2.NewSecurityGroups(ec2Client, logger, resourceTags),
 			ec2.NewTags(ec2Client, logger),
 			ec2.NewVolumes(ec2Client, logger),
 			ec2.NewNetworkInterfaces(ec2Client, logger),
 			ec2.NewNatGateways(ec2Client, logger),
-			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways, resourceTags),
 			ec2.NewImages(ec2Client, stsClient, logger, resourceTags),
 			ec2.NewAddresses(ec2Client, logger),
 			ec2.NewSnapshots(ec2Client, stsClient, logger),
@@ -120,6 +118,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, sessionToken, reg
 			s3.NewBuckets(s3Client, logger, bucketManager),
 
 			rds.NewDBInstances(rdsClient, logger),
+			ec2.NewSecurityGroups(ec2Client, logger, resourceTags),
 			rds.NewDBSubnetGroups(rdsClient, logger),
 			rds.NewDBClusters(rdsClient, logger),
 
@@ -128,6 +127,7 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, sessionToken, reg
 
 			route53.NewHostedZones(route53Client, logger, recordSets),
 			route53.NewHealthChecks(route53Client, logger),
+			ec2.NewVpcs(ec2Client, logger, routeTables, subnets, internetGateways, resourceTags),
 		},
 	}, nil
 }
