@@ -19,6 +19,7 @@ var _ = Describe("AWS", func() {
 
 		stdout  *bytes.Buffer
 		filter  string
+		regexFilter string
 		deleter aws.Leftovers
 	)
 
@@ -45,6 +46,7 @@ var _ = Describe("AWS", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-list-all"
+			regexFilter = "leftovers-acc-lis[t]{1}-a[l]{2}$"
 			acc.CreateKeyPair(filter)
 		})
 
@@ -65,6 +67,7 @@ var _ = Describe("AWS", func() {
 	Describe("ListByType", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-list-by-type"
+			regexFilter = "leftovers-acc-lis[t]{1}-b[y]{1}-type$"
 			acc.CreateKeyPair(filter)
 		})
 
@@ -75,6 +78,14 @@ var _ = Describe("AWS", func() {
 
 		It("lists resources of the specified type without deleting", func() {
 			deleter.List(filter, false)
+
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s]", filter))
+			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
+			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: %s] Deleted!", filter))
+		})
+
+		It("lists resources of the specified type without deleting with the regex filter", func() {
+			deleter.List(filter, true)
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s]", filter))
 			Expect(stdout.String()).NotTo(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
@@ -93,6 +104,7 @@ var _ = Describe("AWS", func() {
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-delete-all"
+			regexFilter = "leftovers-acc-dele[t]{1}e-a[l]{2}$"
 			acc.CreateKeyPair(filter)
 		})
 
@@ -103,16 +115,34 @@ var _ = Describe("AWS", func() {
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleted!", filter))
 		})
+
+
+		It("deletes resources with the regex filter", func() {
+			err := deleter.Delete(regexFilter, true)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleted!", filter))
+		})
 	})
 
 	Describe("DeleteByType", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-delete-type"
+			regexFilter = "leftovers-acc-dele[t]{1}e-type"
 			acc.CreateKeyPair(filter)
 		})
 
 		It("deletes the key pair resources with the filter", func() {
 			err := deleter.DeleteByType(filter, "ec2-key-pair", false)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleted!", filter))
+		})
+
+		It("deletes resources with the regex filter", func() {
+			err := deleter.DeleteByType(regexFilter, "ec2-key-pair", true)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[EC2 Key Pair: %s] Deleting...", filter))

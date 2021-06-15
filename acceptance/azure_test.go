@@ -19,6 +19,7 @@ var _ = Describe("Azure", func() {
 		stdout  *bytes.Buffer
 		filter  string
 		deleter azure.Leftovers
+		regexFilter string
 	)
 
 	BeforeEach(func() {
@@ -44,6 +45,7 @@ var _ = Describe("Azure", func() {
 	Describe("List", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-list"
+			regexFilter = "leftovers-acc-lis[t]{1}"
 			acc.CreateResourceGroup(filter)
 		})
 
@@ -54,6 +56,14 @@ var _ = Describe("Azure", func() {
 
 		It("lists resources without deleting", func() {
 			deleter.List(filter, false)
+
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s]", filter))
+			Expect(stdout.String()).To(ContainSubstring("Listing Resource Groups..."))
+			Expect(stdout.String()).NotTo(ContainSubstring("[Resource Group: %s] Deleting...", filter))
+		})
+
+		It("lists resources without deleting filtered by regex", func() {
+			deleter.List(regexFilter, true)
 
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s]", filter))
 			Expect(stdout.String()).To(ContainSubstring("Listing Resource Groups..."))
@@ -72,11 +82,20 @@ var _ = Describe("Azure", func() {
 	Describe("Delete", func() {
 		BeforeEach(func() {
 			filter = "leftovers-acc-delete"
+			regexFilter = "leftovers-acc-dele[t]{1}e"
 			acc.CreateResourceGroup(filter)
 		})
 
 		It("deletes resources with the filter", func() {
 			err := deleter.Delete(filter, false)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleting...", filter))
+			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleted!", filter))
+		})
+
+		It("deletes resources with the regex filter", func() {
+			err := deleter.Delete(regexFilter, true)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring("[Resource Group: %s] Deleting...", filter))

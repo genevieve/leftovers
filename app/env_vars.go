@@ -9,7 +9,7 @@ type Options struct {
 	NoConfirm     bool   `short:"n"  long:"no-confirm"                  description:"Destroy resources without prompting. This is dangerous, make good choices!"`
 	DryRun        bool   `short:"d"  long:"dry-run"                     description:"List all resources without deleting any."`
 	Filter        string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
-	RegexFiltered bool   `           long:"filter-by-regex"             description:"Filtering resources by interpreting the filter as a regex matcher."`
+	RegexFiltered bool   `           long:"filter-as-regex"             description:"Interpret the filter as regex. (**This is a beta feature** Tested on AWS, Azure, and GCP)"`
 	Type          string `short:"t"  long:"type"                        description:"Type of resource to delete."`
 	Debug         bool   `           long:"debug"                       description:"Print debug information."`
 
