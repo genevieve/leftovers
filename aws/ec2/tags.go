@@ -39,7 +39,7 @@ func (a Tags) List(filter string, regex bool) ([]common.Deletable, error) {
 
 		r := NewTag(a.client, t.Key, t.Value, t.ResourceId)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -32,7 +32,7 @@ func (n NSServices) List(filter string, regex bool) ([]common.Deletable, error) 
 	for _, nsService := range result.Results {
 		resource := NewNSService(n.client, n.ctx, nsService.DisplayName, nsService.Id)
 
-		if !common.MatchRegex(nsService.DisplayName, filter, regex) {
+		if !common.ResourceMatches(nsService.DisplayName, filter, regex) {
 			continue
 		}
 

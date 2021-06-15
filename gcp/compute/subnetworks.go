@@ -46,7 +46,7 @@ func (n Subnetworks) List(filter string, regex bool) ([]common.Deletable, error)
 			continue
 		}
 
-		if !common.MatchRegex(subnetwork.Name, filter, regex) {
+		if !common.ResourceMatches(subnetwork.Name, filter, regex) {
 			continue
 		}
 

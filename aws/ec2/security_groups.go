@@ -43,7 +43,7 @@ func (s SecurityGroups) List(filter string, regex bool) ([]common.Deletable, err
 
 		r := NewSecurityGroup(s.client, s.logger, s.resourceTags, sg.GroupId, sg.GroupName, sg.Tags, sg.IpPermissions, sg.IpPermissionsEgress)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -35,7 +35,7 @@ func (b BackendServices) List(filter string, regex bool) ([]common.Deletable, er
 	for _, backend := range backendServices {
 		resource := NewBackendService(b.client, backend.Name)
 
-		if !common.MatchRegex(backend.Name, filter, regex) {
+		if !common.ResourceMatches(backend.Name, filter, regex) {
 			continue
 		}
 

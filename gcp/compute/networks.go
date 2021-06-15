@@ -40,7 +40,7 @@ func (n Networks) List(filter string, regex bool) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

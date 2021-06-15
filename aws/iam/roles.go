@@ -37,7 +37,7 @@ func (o Roles) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, role := range roles.Roles {
 		r := NewRole(o.client, o.policies, role.RoleName)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

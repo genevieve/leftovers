@@ -38,7 +38,7 @@ func (l LoadBalancers) List(filter string, regex bool) ([]common.Deletable, erro
 	for _, lb := range loadBalancers.LoadBalancers {
 		r := NewLoadBalancer(l.client, lb.LoadBalancerName, lb.LoadBalancerArn)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

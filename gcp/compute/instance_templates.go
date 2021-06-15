@@ -36,7 +36,7 @@ func (i InstanceTemplates) List(filter string, regex bool) ([]common.Deletable, 
 	for _, template := range templates {
 		resource := NewInstanceTemplate(i.client, template.Name)
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

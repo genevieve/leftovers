@@ -43,7 +43,7 @@ func (d Disks) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, disk := range disks {
 		resource := NewDisk(d.client, disk.Name, d.zones[disk.Zone])
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

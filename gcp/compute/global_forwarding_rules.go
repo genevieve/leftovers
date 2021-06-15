@@ -35,7 +35,7 @@ func (g GlobalForwardingRules) List(filter string, regex bool) ([]common.Deletab
 	for _, rule := range rules {
 		resource := NewGlobalForwardingRule(g.client, rule.Name)
 
-		if !common.MatchRegex(rule.Name, filter, regex) {
+		if !common.ResourceMatches(rule.Name, filter, regex) {
 			continue
 		}
 

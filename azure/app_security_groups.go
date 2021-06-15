@@ -37,7 +37,7 @@ func (g AppSecurityGroups) List(filter string, regex bool) ([]common.Deletable, 
 	for _, group := range groups {
 		r := NewAppSecurityGroup(g.client, g.rgName, group)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

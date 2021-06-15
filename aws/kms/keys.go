@@ -46,7 +46,7 @@ func (k Keys) List(filter string, regex bool) ([]common.Deletable, error) {
 
 		r := NewKey(k.client, key.KeyId, metadata.KeyMetadata, tags.Tags)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

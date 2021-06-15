@@ -35,7 +35,7 @@ func (h GlobalHealthChecks) List(filter string, regex bool) ([]common.Deletable,
 	for _, check := range checks {
 		resource := NewGlobalHealthCheck(h.client, check.Name)
 
-		if !common.MatchRegex(check.Name, filter, regex) {
+		if !common.ResourceMatches(check.Name, filter, regex) {
 			continue
 		}
 

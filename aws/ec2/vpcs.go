@@ -49,7 +49,7 @@ func (v Vpcs) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, vpc := range output.Vpcs {
 		r := NewVpc(v.client, v.routes, v.subnets, v.gateways, v.resourceTags, vpc.VpcId, vpc.Tags)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

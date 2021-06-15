@@ -50,7 +50,7 @@ func (s Snapshots) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, snapshot := range output.Snapshots {
 		r := NewSnapshot(s.client, snapshot.SnapshotId)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

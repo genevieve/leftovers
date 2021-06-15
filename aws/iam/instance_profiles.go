@@ -36,7 +36,7 @@ func (i InstanceProfiles) List(filter string, regex bool) ([]common.Deletable, e
 	for _, p := range profiles.InstanceProfiles {
 		r := NewInstanceProfile(i.client, p.InstanceProfileName, p.Roles, i.logger)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

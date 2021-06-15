@@ -35,7 +35,7 @@ func (t TargetGroups) List(filter string, regex bool) ([]common.Deletable, error
 	for _, g := range targetGroups.TargetGroups {
 		r := NewTargetGroup(t.client, g.TargetGroupName, g.TargetGroupArn)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

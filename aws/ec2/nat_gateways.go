@@ -41,7 +41,7 @@ func (n NatGateways) List(filter string, regex bool) ([]common.Deletable, error)
 	for _, g := range natGateways.NatGateways {
 		r := NewNatGateway(n.client, n.logger, g.NatGatewayId, g.Tags)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

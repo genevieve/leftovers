@@ -35,7 +35,7 @@ func (h HttpHealthChecks) List(filter string, regex bool) ([]common.Deletable, e
 	for _, check := range checks {
 		resource := NewHttpHealthCheck(h.client, check.Name)
 
-		if !common.MatchRegex(check.Name, filter, regex) {
+		if !common.ResourceMatches(check.Name, filter, regex) {
 			continue
 		}
 

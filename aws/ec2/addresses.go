@@ -35,7 +35,7 @@ func (d Addresses) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, a := range addresses.Addresses {
 		r := NewAddress(d.client, a.PublicIp, a.AllocationId, a.Tags)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

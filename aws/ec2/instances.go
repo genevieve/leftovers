@@ -46,7 +46,7 @@ func (i Instances) List(filter string, regex bool) ([]common.Deletable, error) {
 		for _, instance := range r.Instances {
 			r := NewInstance(i.client, i.logger, i.resourceTags, instance.InstanceId, instance.KeyName, instance.Tags)
 
-			if !common.MatchRegex(r.Name(),  filter, regex) {
+			if !common.ResourceMatches(r.Name(),  filter, regex) {
 				continue
 			}
 

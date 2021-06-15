@@ -43,7 +43,7 @@ func (t TargetPools) List(filter string, regex bool) ([]common.Deletable, error)
 	for _, pool := range pools {
 		resource := NewTargetPool(t.client, pool.Name, t.regions[pool.Region])
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

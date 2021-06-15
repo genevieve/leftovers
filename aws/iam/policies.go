@@ -38,7 +38,7 @@ func (p Policies) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, o := range policies.Policies {
 		r := NewPolicy(p.client, p.logger, o.PolicyName, o.Arn)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

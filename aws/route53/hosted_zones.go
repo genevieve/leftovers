@@ -44,7 +44,7 @@ func (z HostedZones) List(filter string, regex bool) ([]common.Deletable, error)
 	for _, zone := range zones.HostedZones {
 		r := NewHostedZone(z.client, zone.Id, zone.Name, z.recordSets, filter, false)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) && !z.recordSetsContainFilter(zone.Id, filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) && !z.recordSetsContainFilter(zone.Id, filter, regex) {
 			continue
 		}
 
@@ -71,7 +71,7 @@ func (z HostedZones) recordSetsContainFilter(hostedZoneId *string, filter string
 	}
 
 	for _, record := range records {
-		if common.MatchRegex(*record.Name, filter, regex) {
+		if common.ResourceMatches(*record.Name, filter, regex) {
 			return true
 		}
 	}

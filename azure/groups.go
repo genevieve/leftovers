@@ -35,7 +35,7 @@ func (g Groups) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, group := range groups {
 		r := NewGroup(g.client, group)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

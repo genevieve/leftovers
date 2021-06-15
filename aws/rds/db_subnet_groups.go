@@ -35,7 +35,7 @@ func (d DBSubnetGroups) List(filter string, regex bool) ([]common.Deletable, err
 	for _, db := range dbSubnetGroups.DBSubnetGroups {
 		r := NewDBSubnetGroup(d.client, db.DBSubnetGroupName)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -40,7 +40,7 @@ func (b Buckets) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, bucket := range buckets.Buckets {
 		r := NewBucket(b.client, bucket.Name)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

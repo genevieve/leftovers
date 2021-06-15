@@ -36,7 +36,7 @@ func (s SslCertificates) List(filter string, regex bool) ([]common.Deletable, er
 	for _, cert := range sslCertificates {
 		resource := NewSslCertificate(s.client, cert.Name)
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

@@ -36,7 +36,7 @@ func (ci ComputeInstances) List(filter string, regex bool) ([]common.Deletable, 
 	for _, instance := range computeInstances {
 		r := NewComputeInstance(instance.Name, instance.ID, ci.computeClient)
 
-		if !common.MatchRegex(instance.Name, filter, regex) {
+		if !common.ResourceMatches(instance.Name, filter, regex) {
 			continue
 		}
 

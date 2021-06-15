@@ -36,7 +36,7 @@ func (v Volumes) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, volume := range result {
 		r := NewVolume(volume.Name, volume.ID, v.client)
 
-		if !common.MatchRegex(volume.Name, filter, regex) {
+		if !common.ResourceMatches(volume.Name, filter, regex) {
 			continue
 		}
 

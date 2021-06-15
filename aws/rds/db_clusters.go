@@ -39,7 +39,7 @@ func (d DBClusters) List(filter string, regex bool) ([]common.Deletable, error) 
 			continue
 		}
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

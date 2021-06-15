@@ -39,7 +39,7 @@ func (u Users) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, r := range users.Users {
 		r := NewUser(u.client, u.policies, u.accessKeys, r.UserName)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

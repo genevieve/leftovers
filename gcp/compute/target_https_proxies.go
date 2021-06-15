@@ -36,7 +36,7 @@ func (t TargetHttpsProxies) List(filter string, regex bool) ([]common.Deletable,
 	for _, targetHttpsProxy := range targetHttpsProxies.Items {
 		resource := NewTargetHttpsProxy(t.client, targetHttpsProxy.Name)
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

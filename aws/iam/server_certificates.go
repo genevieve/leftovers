@@ -35,7 +35,7 @@ func (s ServerCertificates) List(filter string, regex bool) ([]common.Deletable,
 	for _, c := range certificates.ServerCertificateMetadataList {
 		r := NewServerCertificate(s.client, c.ServerCertificateName)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

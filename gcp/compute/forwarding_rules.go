@@ -42,7 +42,7 @@ func (f ForwardingRules) List(filter string, regex bool) ([]common.Deletable, er
 	for _, rule := range rules {
 		resource := NewForwardingRule(f.client, rule.Name, f.regions[rule.Region])
 
-		if !common.MatchRegex(rule.Name, filter, regex) {
+		if !common.ResourceMatches(rule.Name, filter, regex) {
 			continue
 		}
 

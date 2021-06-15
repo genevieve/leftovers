@@ -41,7 +41,7 @@ func (c Clusters) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, cluster := range clusters.Clusters {
 		r := NewCluster(c.client, cluster)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

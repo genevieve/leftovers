@@ -42,7 +42,7 @@ func (m ManagedZones) List(filter string, regex bool) ([]common.Deletable, error
 	for _, zone := range managedZones.ManagedZones {
 		resource := NewManagedZone(m.client, m.recordSets, zone.Name)
 
-		if !common.MatchRegex(resource.name, filter, regex) {
+		if !common.ResourceMatches(resource.name, filter, regex) {
 			continue
 		}
 

@@ -32,7 +32,7 @@ func (h HostedZone) Delete() error {
 		return fmt.Errorf("Get Record Sets: %s", err)
 	}
 
-	if common.MatchRegex(h.Name(), h.filter, h.regex) {
+	if common.ResourceMatches(h.Name(), h.filter, h.regex) {
 		err = h.recordSets.DeleteAll(h.id, h.identifier, r)
 		if err != nil {
 			return fmt.Errorf("Delete All Record Sets: %s", err)

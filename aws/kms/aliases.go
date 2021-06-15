@@ -35,7 +35,7 @@ func (a Aliases) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, alias := range aliases.Aliases {
 		r := NewAlias(a.client, alias.AliasName)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

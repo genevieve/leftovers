@@ -35,7 +35,7 @@ func (k KeyPairs) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, key := range keyPairs.KeyPairs {
 		r := NewKeyPair(k.client, key.KeyName)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

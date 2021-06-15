@@ -39,7 +39,7 @@ func (r Routes) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, route := range routes {
 		resource := NewRoute(r.client, route.Name, route.Network)
 
-		if !common.MatchRegex(resource.Name(), filter, regex) || strings.Contains(route.Name, "default") {
+		if !common.ResourceMatches(resource.Name(), filter, regex) || strings.Contains(route.Name, "default") {
 			continue
 		}
 

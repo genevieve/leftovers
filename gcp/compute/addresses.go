@@ -42,7 +42,7 @@ func (a Addresses) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, address := range addresses {
 		resource := NewAddress(a.client, address.Name, a.regions[address.Region], len(address.Users))
 
-		if !common.MatchRegex(address.Name, filter, regex) {
+		if !common.ResourceMatches(address.Name, filter, regex) {
 			continue
 		}
 

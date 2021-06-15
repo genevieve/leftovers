@@ -35,7 +35,7 @@ func (a GlobalAddresses) List(filter string, regex bool) ([]common.Deletable, er
 	for _, address := range addresses {
 		resource := NewGlobalAddress(a.client, address.Name)
 
-		if !common.MatchRegex(address.Name, filter, regex) {
+		if !common.ResourceMatches(address.Name, filter, regex) {
 			continue
 		}
 

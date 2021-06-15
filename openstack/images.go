@@ -36,7 +36,7 @@ func (i Images) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, image := range images {
 		r := NewImage(image.Name, image.ID, i.client)
 
-		if !common.MatchRegex(image.Name, filter, regex) {
+		if !common.ResourceMatches(image.Name, filter, regex) {
 			continue
 		}
 

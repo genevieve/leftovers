@@ -43,7 +43,7 @@ func (i InstanceGroups) List(filter string, regex bool) ([]common.Deletable, err
 	for _, group := range groups {
 		resource := NewInstanceGroup(i.client, group.Name, i.zones[group.Zone])
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

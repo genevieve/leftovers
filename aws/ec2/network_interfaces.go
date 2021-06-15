@@ -35,7 +35,7 @@ func (e NetworkInterfaces) List(filter string, regex bool) ([]common.Deletable, 
 	for _, i := range networkInterfaces.NetworkInterfaces {
 		r := NewNetworkInterface(e.client, i.NetworkInterfaceId, i.TagSet)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

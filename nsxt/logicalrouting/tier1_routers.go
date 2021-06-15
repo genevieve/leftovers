@@ -38,7 +38,7 @@ func (t Tier1Routers) List(filter string, regex bool) ([]common.Deletable, error
 
 		resource := NewTier1Router(t.client, t.ctx, router.DisplayName, router.Id)
 
-		if !common.MatchRegex(router.DisplayName, filter, regex) {
+		if !common.ResourceMatches(router.DisplayName, filter, regex) {
 			continue
 		}
 

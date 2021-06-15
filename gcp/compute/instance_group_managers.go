@@ -43,7 +43,7 @@ func (i InstanceGroupManagers) List(filter string, regex bool) ([]common.Deletab
 	for _, manager := range managers {
 		resource := NewInstanceGroupManager(i.client, manager.Name, i.zones[manager.Zone])
 
-		if !common.MatchRegex(resource.Name(), filter, regex) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

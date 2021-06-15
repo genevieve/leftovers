@@ -32,7 +32,7 @@ func (n NSGroups) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, nsGroup := range result.Results {
 		resource := NewNSGroup(n.client, n.ctx, nsGroup.DisplayName, nsGroup.Id)
 
-		if !common.MatchRegex(nsGroup.DisplayName, filter, regex) {
+		if !common.ResourceMatches(nsGroup.DisplayName, filter, regex) {
 			continue
 		}
 

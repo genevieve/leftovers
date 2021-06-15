@@ -77,7 +77,7 @@ func (r RecordSets) DeleteAll(hostedZoneId *string, hostedZoneName string, recor
 func (r RecordSets) DeleteWithFilter(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet, filter string, regex bool) error {
 	var changes []*awsroute53.Change
 	for _, record := range records {
-		if common.MatchRegex(*record.Name, filter, regex) && (*record.Type == "A" || *record.Type == "NS") {
+		if common.ResourceMatches(*record.Name, filter, regex) && (*record.Type == "A" || *record.Type == "NS") {
 			changes = append(changes, &awsroute53.Change{
 				Action:            aws.String("DELETE"),
 				ResourceRecordSet: record,

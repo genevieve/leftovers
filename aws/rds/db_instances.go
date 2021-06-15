@@ -39,7 +39,7 @@ func (d DBInstances) List(filter string, regex bool) ([]common.Deletable, error)
 
 		r := NewDBInstance(d.client, db.DBInstanceIdentifier)
 
-		if !common.MatchRegex(r.Name(),  filter, regex) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

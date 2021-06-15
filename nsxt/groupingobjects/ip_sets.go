@@ -32,7 +32,7 @@ func (i IPSets) List(filter string, regex bool) ([]common.Deletable, error) {
 	for _, ipSet := range result.Results {
 		resource := NewIPSet(i.client, i.ctx, ipSet.DisplayName, ipSet.Id)
 
-		if !common.MatchRegex(ipSet.DisplayName, filter, regex) {
+		if !common.ResourceMatches(ipSet.DisplayName, filter, regex) {
 			continue
 		}
 
