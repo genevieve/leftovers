@@ -14,7 +14,6 @@ func ResourceMatches(resourceName string, filter string, regex bool) bool {
 			} else {
 				return strings.Contains(resourceName, filter)
 			}
-
 		} else if len(filter) == 0 {
 			return true
 		}
