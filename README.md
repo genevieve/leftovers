@@ -75,8 +75,8 @@ $ go get -u github.com/notrepo05/leftovers/cmd/leftovers
 ### Option 2
 
 ```console
-$ brew tap genevieve/tap
-$ brew install leftovers
+~~$ brew tap genevieve/tap~~
+~~$ brew install leftovers~~
 ```
 
 ### Option 3
