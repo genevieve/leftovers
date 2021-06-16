@@ -1,3 +1,5 @@
+# This README is for the github.com/notrepo05/leftovers fork
+
 # Leftovers :turkey:
 
 [![GoDoc](https://godoc.org/github.com/genevieve/leftovers?status.svg)](https://godoc.org/github.com/genevieve/leftovers)
@@ -67,7 +69,7 @@ $ leftovers --filter banana --type service-account --no-confirm
 [Install go.](https://golang.org/doc/install) Then:
 
 ```console
-$ go get -u github.com/genevieve/leftovers/cmd/leftovers
+$ go get -u github.com/notrepo05/leftovers/cmd/leftovers
 ```
 
 ### Option 2
