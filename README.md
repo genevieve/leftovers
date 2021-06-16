@@ -79,17 +79,17 @@ $ brew install leftovers
 
 ### Option 3
 
-Linux binaries can be found on the [releases page](https://github.com/genevieve/leftovers/releases).
+Linux and OSX binaries for this fork can be found on the [releases page](https://github.com/notrepo05/leftovers/releases).
 
 
 
 ## <a name='how'></a>Usage
 
 ```console
-$ leftovers -h
+$ ./leftovers-v0.63.0-darwin-amd64 --help
 
 Usage:
-  leftovers [OPTIONS]
+  leftovers-v0.63.0-darwin-amd64 [OPTIONS]
 
 Application Options:
   -v, --version                   Print version.
@@ -97,7 +97,9 @@ Application Options:
   -n, --no-confirm                Destroy resources without prompting. This is dangerous, make good choices!
   -d, --dry-run                   List all resources without deleting any.
   -f, --filter=                   Filtering resources by an environment name.
+      --filter-as-regex           Interpret the filter as regex. (**This is a beta feature** Tested on AWS, Azure, and GCP)
   -t, --type=                     Type of resource to delete.
+      --debug                     Print debug information.
       --aws-access-key-id=        AWS access key id. [$BBL_AWS_ACCESS_KEY_ID]
       --aws-secret-access-key=    AWS secret access key. [$BBL_AWS_SECRET_ACCESS_KEY]
       --aws-session-token=        AWS session token. [$BBL_AWS_SESSION_TOKEN]
