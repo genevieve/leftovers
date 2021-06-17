@@ -9,8 +9,9 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/aws/aws-sdk-go v1.38.64
+	github.com/dlclark/regexp2 v1.4.0
 	github.com/fatih/color v1.12.0
-	github.com/gophercloud/gophercloud v0.18.0
+	github.com/gophercloud/gophercloud v0.0.0-20190322150113-a30f18a1bae0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/mitchellh/go-homedir v1.1.0
