@@ -5,7 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("RegexMatch", func() {
+var _ = Describe("ResourceMatches", func() {
 	It("doesn't match", func() {
 		Expect(ResourceMatches("my-resource-name", "not-my-resource", false)).To(BeFalse())
 	})
