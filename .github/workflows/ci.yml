@@ -18,4 +18,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        run: .github/tasks/test.sh
+      - id: compute_test_matrices
+          name: Compute Test Matrices
+          run: .github/tasks/test.sh
