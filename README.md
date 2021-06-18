@@ -22,6 +22,7 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned. :-(
 - `terraform destroy` isn't working because the refresh step is failing due to a missing resource.
+- You're too lazy to `terraform destroy`
 
 
 
@@ -135,7 +136,7 @@ Help Options:
   -h, --help                      Show this help message
 ```
 
-## <a name='maintainers'></a>Maintainers
+## <a name='maintainers'></a>Maintainers of the actual project
 
 - [Genevieve L'Esperance](https://twitter.com/genevieve_vl)
 - [Rowan Jacobs](https://github.com/rowanjacobs)
