@@ -1,6 +1,6 @@
 # This README is for the github.com/notrepo05/leftovers fork
 
-### This fork aims to stablize deletion (so far for AWS) and add extended regex filtering support.
+### This fork aims to stabilize deletion (so far for AWS) and add extended regex filtering support.
 
 # Leftovers :turkey:
 
