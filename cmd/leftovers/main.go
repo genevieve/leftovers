@@ -13,7 +13,7 @@ type command interface {
 	Execute(app.Options) error
 }
 
-var Version = "notrepo05/v0.63.0-beta.2"
+var Version = "notrepo05/v0.64.0-beta.1"
 
 func main() {
 	log.SetFlags(0)
