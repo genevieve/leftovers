@@ -1,4 +1,4 @@
-# This README is for the github.com/notrepo05/leftovers fork
+# This README is for the github.com/notrepo05/leftovers fork from github.com/genevieve/leftovers
 
 ### This fork aims to stabilize deletion (so far for AWS) and add extended regex filtering support.
 
@@ -80,13 +80,6 @@ $ go get -u github.com/notrepo05/leftovers/cmd/leftovers
 ```
 
 ### Option 2
-
-```console
-~~$ brew tap genevieve/tap~~
-~~$ brew install leftovers~~
-```
-
-### Option 3
 
 Linux and OSX binaries for this fork can be found on the [releases page](https://github.com/notrepo05/leftovers/releases).
 
