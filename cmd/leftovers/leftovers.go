@@ -28,7 +28,7 @@ func GetLeftovers(logger *app.Logger, o app.Options) (leftovers, error) {
 
 	switch o.IAAS {
 	case app.AWS:
-		l, err = aws.NewLeftovers(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSSessionToken, o.AWSRegion)
+		l, err = aws.NewLeftoversWithAssumeRole(logger, o.AWSAccessKeyID, o.AWSSecretAccessKey, o.AWSAssumeRole, o.AWSSessionToken, o.AWSRegion)
 	case app.Azure:
 		l, err = azure.NewLeftovers(logger, o.AzureClientID, o.AzureClientSecret, o.AzureSubscriptionID, o.AzureTenantID)
 	case app.GCP:

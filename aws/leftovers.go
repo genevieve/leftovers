@@ -6,6 +6,7 @@ import (
 
 	awslib "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	awseks "github.com/aws/aws-sdk-go/service/eks"
@@ -46,6 +47,10 @@ type Leftovers struct {
 // list types, or delete resources for the provided account. It returns an error
 // if the credentials provided are invalid.
 func NewLeftovers(logger logger, accessKeyId, secretAccessKey, sessionToken, region string) (Leftovers, error) {
+	return NewLeftoversWithAssumeRole(logger, accessKeyId, secretAccessKey, "", sessionToken, region)
+}
+
+func NewLeftoversWithAssumeRole(logger logger, accessKeyId, secretAccessKey, assumeRoleArn, sessionToken, region string) (Leftovers, error) {
 	if accessKeyId == "" {
 		return Leftovers{}, errors.New("Missing aws access key id.")
 	}
@@ -62,7 +67,23 @@ func NewLeftovers(logger logger, accessKeyId, secretAccessKey, sessionToken, reg
 		Credentials: credentials.NewStaticCredentials(accessKeyId, secretAccessKey, sessionToken),
 		Region:      awslib.String(region),
 	}
-	sess := session.New(config)
+	sess, err := session.NewSession(config)
+
+	if err != nil {
+		return Leftovers{}, err
+	}
+
+	if assumeRoleArn != "" {
+		assumeRoleConfig := &awslib.Config{
+			Credentials: stscreds.NewCredentials(sess, assumeRoleArn),
+			Region:      awslib.String(region),
+		}
+		sess, err = session.NewSession(assumeRoleConfig)
+
+		if err != nil {
+			return Leftovers{}, err
+		}
+	}
 
 	eksClient := awseks.New(sess)
 	ec2Client := awsec2.New(sess)
