@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/nsxt"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

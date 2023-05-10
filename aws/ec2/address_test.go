@@ -9,7 +9,7 @@ import (
 	"github.com/genevieve/leftovers/aws/ec2"
 	"github.com/genevieve/leftovers/aws/ec2/fakes"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

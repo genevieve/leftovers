@@ -7,7 +7,7 @@ import (
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
 	"github.com/genevieve/leftovers/aws/route53"
 	"github.com/genevieve/leftovers/aws/route53/fakes"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

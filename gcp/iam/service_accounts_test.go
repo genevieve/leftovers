@@ -7,7 +7,7 @@ import (
 
 	"github.com/genevieve/leftovers/gcp/iam"
 	"github.com/genevieve/leftovers/gcp/iam/fakes"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

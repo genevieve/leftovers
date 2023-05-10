@@ -7,7 +7,7 @@ import (
 	"github.com/genevieve/leftovers/gcp/iam/fakes"
 	gcpcrm "google.golang.org/api/cloudresourcemanager/v1"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
