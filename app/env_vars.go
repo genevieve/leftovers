@@ -14,6 +14,7 @@ type Options struct {
 
 	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
 	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`
+	AWSAssumeRole        string `long:"aws-assume-role"          env:"BBL_AWS_ASSUME_ROLE"          description:"AWS assume role ARN."`
 	AWSSessionToken      string `long:"aws-session-token"        env:"BBL_AWS_SESSION_TOKEN"        description:"AWS session token."`
 	AWSRegion            string `long:"aws-region"               env:"BBL_AWS_REGION"               description:"AWS region."`
 	AzureClientID        string `long:"azure-client-id"          env:"BBL_AZURE_CLIENT_ID"          description:"Azure client id."`
@@ -60,6 +61,9 @@ func (e OtherEnvVars) LoadConfig(o *Options) {
 		}
 		if o.AWSSecretAccessKey == "" {
 			o.AWSSecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+		}
+		if o.AWSAssumeRole == "" {
+			o.AWSAssumeRole = os.Getenv(("AWS_ROLE_ARN"))
 		}
 		if o.AWSSessionToken == "" {
 			o.AWSSessionToken = os.Getenv("AWS_SESSION_TOKEN")

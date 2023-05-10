@@ -26,6 +26,7 @@ var _ = Describe("OtherEnvVars", func() {
 				os.Setenv("AWS_SECRET_ACCESS_KEY", "kiwi")
 				os.Setenv("AWS_SESSION_TOKEN", "pineapple")
 				os.Setenv("AWS_DEFAULT_REGION", "plum")
+				os.Setenv("AWS_ROLE_ARN", "pomegranate")
 			})
 
 			AfterEach(func() {
@@ -42,6 +43,7 @@ var _ = Describe("OtherEnvVars", func() {
 				Expect(options.AWSSecretAccessKey).To(Equal("kiwi"))
 				Expect(options.AWSSessionToken).To(Equal("pineapple"))
 				Expect(options.AWSRegion).To(Equal("plum"))
+				Expect(options.AWSAssumeRole).To(Equal(("pomegranate")))
 			})
 		})
 
