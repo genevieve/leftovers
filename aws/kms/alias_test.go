@@ -7,7 +7,6 @@ import (
 	"github.com/genevieve/leftovers/aws/kms"
 	"github.com/genevieve/leftovers/aws/kms/fakes"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

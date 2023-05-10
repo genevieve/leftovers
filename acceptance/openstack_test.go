@@ -10,7 +10,6 @@ import (
 	"github.com/genevieve/leftovers/app"
 	"github.com/genevieve/leftovers/openstack"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

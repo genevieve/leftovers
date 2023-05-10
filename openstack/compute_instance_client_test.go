@@ -7,7 +7,6 @@ import (
 	"github.com/genevieve/leftovers/openstack/fakes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/pagination"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

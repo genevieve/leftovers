@@ -7,7 +7,6 @@ import (
 	"github.com/genevieve/leftovers/gcp/compute/fakes"
 	gcpcompute "google.golang.org/api/compute/v1"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

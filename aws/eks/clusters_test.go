@@ -7,7 +7,6 @@ import (
 	awseks "github.com/aws/aws-sdk-go/service/eks"
 	"github.com/genevieve/leftovers/aws/eks"
 	"github.com/genevieve/leftovers/aws/eks/fakes"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

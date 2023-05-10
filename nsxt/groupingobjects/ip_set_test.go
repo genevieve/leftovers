@@ -6,7 +6,6 @@ import (
 
 	"github.com/genevieve/leftovers/nsxt/groupingobjects"
 	"github.com/genevieve/leftovers/nsxt/groupingobjects/fakes"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

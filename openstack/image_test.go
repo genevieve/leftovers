@@ -6,7 +6,6 @@ import (
 	"github.com/genevieve/leftovers/openstack"
 	"github.com/genevieve/leftovers/openstack/fakes"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

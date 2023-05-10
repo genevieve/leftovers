@@ -7,7 +7,6 @@ import (
 	"github.com/genevieve/leftovers/gcp/storage/fakes"
 	gcpstorage "google.golang.org/api/storage/v1"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

@@ -7,7 +7,6 @@ import (
 	awselb "github.com/aws/aws-sdk-go/service/elb"
 	"github.com/genevieve/leftovers/aws/elb"
 	"github.com/genevieve/leftovers/aws/elb/fakes"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

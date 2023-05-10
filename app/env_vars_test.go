@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/genevieve/leftovers/app"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

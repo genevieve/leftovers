@@ -9,7 +9,6 @@ import (
 	"github.com/genevieve/leftovers/aws/route53"
 	"github.com/genevieve/leftovers/aws/route53/fakes"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

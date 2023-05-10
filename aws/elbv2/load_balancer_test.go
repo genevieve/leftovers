@@ -8,7 +8,6 @@ import (
 	"github.com/genevieve/leftovers/aws/elbv2"
 	"github.com/genevieve/leftovers/aws/elbv2/fakes"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

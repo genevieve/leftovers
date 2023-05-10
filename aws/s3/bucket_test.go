@@ -7,7 +7,6 @@ import (
 	"github.com/genevieve/leftovers/aws/s3"
 	"github.com/genevieve/leftovers/aws/s3/fakes"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

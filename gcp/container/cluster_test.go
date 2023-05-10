@@ -5,7 +5,6 @@ import (
 
 	"github.com/genevieve/leftovers/gcp/container"
 	"github.com/genevieve/leftovers/gcp/container/fakes"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 

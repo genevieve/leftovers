@@ -6,7 +6,6 @@ import (
 
 	"github.com/genevieve/leftovers/nsxt/logicalrouting"
 	"github.com/genevieve/leftovers/nsxt/logicalrouting/fakes"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/vmware/go-vmware-nsxt/manager"
 )
