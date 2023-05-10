@@ -41,7 +41,7 @@ var _ = Describe("Roles", func() {
 		})
 
 		It("returns a list of iam roles and associated policies to delete", func() {
-			items, err := roles.List(filter)
+			items, err := roles.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListRolesCall.CallCount).To(Equal(1))
@@ -58,14 +58,14 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := roles.List(filter)
+				_, err := roles.List(filter, false)
 				Expect(err).To(MatchError("List IAM Roles: some error"))
 			})
 		})
 
 		Context("when the role name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := roles.List("kiwi")
+				items, err := roles.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -79,7 +79,7 @@ var _ = Describe("Roles", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := roles.List(filter)
+				items, err := roles.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

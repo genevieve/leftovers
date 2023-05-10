@@ -40,7 +40,7 @@ var _ = Describe("InstanceGroupManagers", func() {
 		})
 
 		It("lists, filters, and prompts for instance group managers to delete", func() {
-			list, err := instanceGroupManagers.List(filter)
+			list, err := instanceGroupManagers.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListInstanceGroupManagersCall.CallCount).To(Equal(1))
@@ -59,14 +59,14 @@ var _ = Describe("InstanceGroupManagers", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := instanceGroupManagers.List(filter)
+				_, err := instanceGroupManagers.List(filter, false)
 				Expect(err).To(MatchError("List Instance Group Managers for zone zone-1: some error"))
 			})
 		})
 
 		Context("when the instance group manager name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := instanceGroupManagers.List("grape")
+				list, err := instanceGroupManagers.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -80,7 +80,7 @@ var _ = Describe("InstanceGroupManagers", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := instanceGroupManagers.List(filter)
+				list, err := instanceGroupManagers.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

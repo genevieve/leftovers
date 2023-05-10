@@ -40,7 +40,7 @@ var _ = Describe("NatGateways", func() {
 		})
 
 		It("returns a list of resources to delete", func() {
-			items, err := natGateways.List(filter)
+			items, err := natGateways.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeNatGatewaysCall.CallCount).To(Equal(1))
@@ -57,14 +57,14 @@ var _ = Describe("NatGateways", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := natGateways.List(filter)
+				_, err := natGateways.List(filter, false)
 				Expect(err).To(MatchError("Describing EC2 Nat Gateways: some error"))
 			})
 		})
 
 		Context("when the resource name does not contain the filter", func() {
 			It("does not try deleting it", func() {
-				items, err := natGateways.List("kiwi")
+				items, err := natGateways.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -78,7 +78,7 @@ var _ = Describe("NatGateways", func() {
 			})
 
 			It("does not delete the resource", func() {
-				items, err := natGateways.List(filter)
+				items, err := natGateways.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

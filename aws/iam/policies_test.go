@@ -40,7 +40,7 @@ var _ = Describe("Policies", func() {
 		})
 
 		It("returns a list of policies to delete", func() {
-			items, err := policies.List(filter)
+			items, err := policies.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListPoliciesCall.CallCount).To(Equal(1))
@@ -58,7 +58,7 @@ var _ = Describe("Policies", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				_, err := policies.List(filter)
+				_, err := policies.List(filter, false)
 				Expect(err).To(MatchError("List IAM Policies: some error"))
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -67,7 +67,7 @@ var _ = Describe("Policies", func() {
 
 		Context("when the policy name does not contain the filter", func() {
 			It("does not try to delete it", func() {
-				items, err := policies.List("kiwi")
+				items, err := policies.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -82,7 +82,7 @@ var _ = Describe("Policies", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := policies.List(filter)
+				items, err := policies.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("IAM Policy"))

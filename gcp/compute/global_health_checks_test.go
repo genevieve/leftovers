@@ -37,7 +37,7 @@ var _ = Describe("GlobalHealthChecks", func() {
 		})
 
 		It("lists, filters, and prompts for global health checks to delete", func() {
-			list, err := globalHealthChecks.List(filter)
+			list, err := globalHealthChecks.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListGlobalHealthChecksCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("GlobalHealthChecks", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := globalHealthChecks.List(filter)
+				_, err := globalHealthChecks.List(filter, false)
 				Expect(err).To(MatchError("List Global Health Checks: some error"))
 			})
 		})
 
 		Context("when the health check name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := globalHealthChecks.List("grape")
+				list, err := globalHealthChecks.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -76,7 +76,7 @@ var _ = Describe("GlobalHealthChecks", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := globalHealthChecks.List(filter)
+				list, err := globalHealthChecks.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

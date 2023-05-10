@@ -42,7 +42,7 @@ var _ = Describe("VpnTunnels", func() {
 		})
 
 		It("lists, filters, and prompts for vpn tunnels to delete", func() {
-			list, err := vpnTunnels.List(filter)
+			list, err := vpnTunnels.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListVpnTunnelsCall.CallCount).To(Equal(1))
@@ -61,14 +61,14 @@ var _ = Describe("VpnTunnels", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := vpnTunnels.List(filter)
+				_, err := vpnTunnels.List(filter, false)
 				Expect(err).To(MatchError("List Vpn Tunnels: some error"))
 			})
 		})
 
 		Context("when the vpn tunnel name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := vpnTunnels.List("grape")
+				list, err := vpnTunnels.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -82,7 +82,7 @@ var _ = Describe("VpnTunnels", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := vpnTunnels.List(filter)
+				list, err := vpnTunnels.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

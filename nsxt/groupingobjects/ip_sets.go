@@ -3,8 +3,6 @@ package groupingobjects
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -22,7 +20,7 @@ func NewIPSets(client groupingObjectsAPI, ctx context.Context, logger logger) IP
 	}
 }
 
-func (i IPSets) List(filter string) ([]common.Deletable, error) {
+func (i IPSets) List(filter string, regex bool) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing IP Sets...")
 	result, _, err := i.client.ListIPSets(i.ctx, map[string]interface{}{})
 
@@ -34,7 +32,7 @@ func (i IPSets) List(filter string) ([]common.Deletable, error) {
 	for _, ipSet := range result.Results {
 		resource := NewIPSet(i.client, i.ctx, ipSet.DisplayName, ipSet.Id)
 
-		if !strings.Contains(ipSet.DisplayName, filter) {
+		if !common.ResourceMatches(ipSet.DisplayName, filter, regex) {
 			continue
 		}
 

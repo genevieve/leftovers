@@ -41,7 +41,7 @@ var _ = Describe("Addresses", func() {
 		})
 
 		It("lists, filters, and prompts for addresses to delete", func() {
-			list, err := addresses.List(filter)
+			list, err := addresses.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAddressesCall.CallCount).To(Equal(1))
@@ -60,14 +60,14 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := addresses.List(filter)
+				_, err := addresses.List(filter, false)
 				Expect(err).To(MatchError("List Addresses for Region region-1: some error"))
 			})
 		})
 
 		Context("when the address name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := addresses.List("grape")
+				list, err := addresses.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -81,7 +81,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := addresses.List(filter)
+				list, err := addresses.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

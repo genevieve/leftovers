@@ -40,7 +40,7 @@ var _ = Describe("Clusters", func() {
 		})
 
 		It("returns a list of clusters to delete", func() {
-			list, err := clusters.List(filter)
+			list, err := clusters.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(logger.PromptWithDetailsCall.Receives.ResourceType).To(Equal("Container Cluster"))
@@ -55,7 +55,7 @@ var _ = Describe("Clusters", func() {
 			})
 
 			It("does not return the resource in the list", func() {
-				list, err := clusters.List(filter)
+				list, err := clusters.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
@@ -72,7 +72,7 @@ var _ = Describe("Clusters", func() {
 			})
 
 			It("does not return the resource in the list", func() {
-				list, err := clusters.List(filter)
+				list, err := clusters.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
@@ -85,7 +85,7 @@ var _ = Describe("Clusters", func() {
 			})
 
 			It("wraps it in a helpful error message", func() {
-				_, err := clusters.List(filter)
+				_, err := clusters.List(filter, false)
 				Expect(err).To(MatchError("List Clusters for Zone zone-1: panic time"))
 			})
 		})

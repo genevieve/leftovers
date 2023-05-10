@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -31,7 +30,7 @@ func NewInstances(client instancesClient, logger logger, zones map[string]string
 	}
 }
 
-func (i Instances) List(filter string) ([]common.Deletable, error) {
+func (i Instances) List(filter string, regex bool) ([]common.Deletable, error) {
 	instances := []*gcpcompute.Instance{}
 	for _, zone := range i.zones {
 		i.logger.Debugf("Listing Instances for Zone %s...\n", zone)
@@ -47,7 +46,7 @@ func (i Instances) List(filter string) ([]common.Deletable, error) {
 	for _, instance := range instances {
 		resource := NewInstance(i.client, instance.Name, i.zones[instance.Zone], instance.Tags, instance.NetworkInterfaces, instance.Disks)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

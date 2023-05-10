@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -28,7 +27,7 @@ func NewTargetVpnGateways(client targetVpnGatewaysClient, logger logger, regions
 	}
 }
 
-func (t TargetVpnGateways) List(filter string) ([]common.Deletable, error) {
+func (t TargetVpnGateways) List(filter string, regex bool) ([]common.Deletable, error) {
 	gateways := []*gcpcompute.TargetVpnGateway{}
 
 	for _, region := range t.regions {
@@ -46,7 +45,7 @@ func (t TargetVpnGateways) List(filter string) ([]common.Deletable, error) {
 	for _, g := range gateways {
 		resource := NewTargetVpnGateway(t.client, g.Name, t.regions[g.Region])
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

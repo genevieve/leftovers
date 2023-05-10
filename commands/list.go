@@ -14,9 +14,9 @@ func NewList(l leftovers) List {
 
 func (l List) Execute(o app.Options) error {
 	if o.Type == "" {
-		l.leftovers.List(o.Filter)
+		l.leftovers.List(o.Filter, o.RegexFiltered)
 	} else {
-		l.leftovers.ListByType(o.Filter, o.Type)
+		l.leftovers.ListByType(o.Filter, o.Type, o.RegexFiltered)
 	}
 	return nil
 }

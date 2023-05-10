@@ -51,7 +51,7 @@ var _ = Describe("Tier 1 Routers", func() {
 		})
 
 		It("lists, filters, and prompts for tier 1 routers to delete", func() {
-			list, err := tier1Routers.List(filter)
+			list, err := tier1Routers.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListLogicalRoutersCall.CallCount).To(Equal(1))
@@ -84,7 +84,7 @@ var _ = Describe("Tier 1 Routers", func() {
 			})
 
 			It("skips system owned resources", func() {
-				list, err := tier1Routers.List(filter)
+				list, err := tier1Routers.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
@@ -102,7 +102,7 @@ var _ = Describe("Tier 1 Routers", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := tier1Routers.List(filter)
+				_, err := tier1Routers.List(filter, false)
 				Expect(err).To(MatchError("List Tier 1 Routers: PC LOAD LETTER"))
 			})
 		})

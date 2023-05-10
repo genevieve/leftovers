@@ -42,7 +42,7 @@ var _ = Describe("TargetGroups", func() {
 		})
 
 		It("returns a list of target groups to delete", func() {
-			items, err := targetGroups.List(filter)
+			items, err := targetGroups.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeTargetGroupsCall.CallCount).To(Equal(1))
@@ -60,14 +60,14 @@ var _ = Describe("TargetGroups", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := targetGroups.List(filter)
+				_, err := targetGroups.List(filter, false)
 				Expect(err).To(MatchError("Describe ELBV2 Target Groups: error"))
 			})
 		})
 
 		Context("when the target group name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := targetGroups.List("kiwi")
+				items, err := targetGroups.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -81,7 +81,7 @@ var _ = Describe("TargetGroups", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := targetGroups.List(filter)
+				items, err := targetGroups.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

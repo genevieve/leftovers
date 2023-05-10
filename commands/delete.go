@@ -14,8 +14,8 @@ func NewDelete(l leftovers) Delete {
 
 func (d Delete) Execute(o app.Options) error {
 	if o.Type == "" {
-		return d.leftovers.Delete(o.Filter)
+		return d.leftovers.Delete(o.Filter, o.RegexFiltered)
 	}
 
-	return d.leftovers.DeleteByType(o.Filter, o.Type)
+	return d.leftovers.DeleteByType(o.Filter, o.Type, o.RegexFiltered)
 }

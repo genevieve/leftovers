@@ -40,7 +40,7 @@ var _ = Describe("ForwardingRules", func() {
 		})
 
 		It("lists, filters, and prompts for forwarding rules to delete", func() {
-			list, err := forwardingRules.List(filter)
+			list, err := forwardingRules.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListForwardingRulesCall.CallCount).To(Equal(1))
@@ -59,14 +59,14 @@ var _ = Describe("ForwardingRules", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := forwardingRules.List(filter)
+				_, err := forwardingRules.List(filter, false)
 				Expect(err).To(MatchError("List Forwarding Rules for region region-1: some error"))
 			})
 		})
 
 		Context("when the forwarding rule name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := forwardingRules.List("grape")
+				list, err := forwardingRules.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -80,7 +80,7 @@ var _ = Describe("ForwardingRules", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := forwardingRules.List(filter)
+				list, err := forwardingRules.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

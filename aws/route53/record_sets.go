@@ -2,6 +2,7 @@ package route53
 
 import (
 	"fmt"
+	"github.com/genevieve/leftovers/common"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -73,10 +74,10 @@ func (r RecordSets) DeleteAll(hostedZoneId *string, hostedZoneName string, recor
 	return nil
 }
 
-func (r RecordSets) DeleteWithFilter(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet, filter string) error {
+func (r RecordSets) DeleteWithFilter(hostedZoneId *string, hostedZoneName string, records []*awsroute53.ResourceRecordSet, filter string, regex bool) error {
 	var changes []*awsroute53.Change
 	for _, record := range records {
-		if strings.Contains(*record.Name, filter) && (*record.Type == "A" || *record.Type == "NS") {
+		if common.ResourceMatches(*record.Name, filter, regex) && (*record.Type == "A" || *record.Type == "NS") {
 			changes = append(changes, &awsroute53.Change{
 				Action:            aws.String("DELETE"),
 				ResourceRecordSet: record,

@@ -15,7 +15,7 @@ import (
 )
 
 type resource interface {
-	List(filter string) ([]common.Deletable, error)
+	List(filter string, regex bool) ([]common.Deletable, error)
 	Type() string
 }
 
@@ -25,10 +25,10 @@ type Leftovers struct {
 }
 
 // List will print all of the resources that match the provided filter.
-func (l Leftovers) List(filter string) {
+func (l Leftovers) List(filter string, regex bool) {
 	l.logger.NoConfirm()
 
-	list, err := l.resource.List(filter)
+	list, err := l.resource.List(filter, regex)
 	if err != nil {
 		l.logger.Println(color.YellowString(err.Error()))
 	}
@@ -39,8 +39,8 @@ func (l Leftovers) List(filter string) {
 }
 
 // ListByType defaults to List as there is only one resource type.
-func (l Leftovers) ListByType(filter, rType string) {
-	l.List(filter)
+func (l Leftovers) ListByType(filter, rType string, regex bool) {
+	l.List(filter, regex)
 }
 
 // Types will print all the resource types that can
@@ -53,14 +53,14 @@ func (l Leftovers) Types() {
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
-func (l Leftovers) Delete(filter string) error {
+func (l Leftovers) Delete(filter string, regex bool) error {
 	var (
 		deletables []common.Deletable
 		result     *multierror.Error
 	)
 
 	// TODO: If they say no to the Resource Group, prompt for individual resources.
-	deletables, err := l.resource.List(filter)
+	deletables, err := l.resource.List(filter, regex)
 	if err != nil {
 		l.logger.Println(color.YellowString(err.Error()))
 	}
@@ -86,8 +86,9 @@ func (l Leftovers) Delete(filter string) error {
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
-func (l Leftovers) DeleteByType(filter, rType string) error {
-	return l.Delete(filter)
+// TODO: rType isn't used here? Is this an error? @ciriarte
+func (l Leftovers) DeleteByType(filter, rType string, regex bool) error {
+	return l.Delete(filter, regex)
 }
 
 // NewLeftovers returns a new Leftovers for Azure that can be used to list resources,

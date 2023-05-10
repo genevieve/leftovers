@@ -40,7 +40,7 @@ var _ = Describe("LoadBalancers", func() {
 		})
 
 		It("deletes elb load balancers", func() {
-			items, err := loadBalancers.List(filter)
+			items, err := loadBalancers.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
@@ -56,14 +56,14 @@ var _ = Describe("LoadBalancers", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := loadBalancers.List(filter)
+				_, err := loadBalancers.List(filter, false)
 				Expect(err).To(MatchError("Describe ELB Load Balancers: some error"))
 			})
 		})
 
 		Context("when the load balancer name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := loadBalancers.List("kiwi")
+				items, err := loadBalancers.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeLoadBalancersCall.CallCount).To(Equal(1))
@@ -78,7 +78,7 @@ var _ = Describe("LoadBalancers", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := loadBalancers.List(filter)
+				items, err := loadBalancers.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

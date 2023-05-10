@@ -38,7 +38,7 @@ var _ = Describe("Volumes", func() {
 		})
 
 		It("returns all the deletables", func() {
-			list, err := volumes.List(filter)
+			list, err := volumes.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(list).To(HaveLen(2))
@@ -54,7 +54,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("returns all the deletables", func() {
-				list, err := volumes.List("kiwi")
+				list, err := volumes.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))
@@ -67,7 +67,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := volumes.List(filter)
+				_, err := volumes.List(filter, false)
 				Expect(err).To(MatchError("List Volumes: error-description"))
 			})
 		})

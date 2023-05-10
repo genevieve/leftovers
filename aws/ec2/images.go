@@ -2,10 +2,9 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
 	awssts "github.com/aws/aws-sdk-go/service/sts"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -36,7 +35,7 @@ func NewImages(client imagesClient, stsClient stsClient, logger logger, resource
 	}
 }
 
-func (i Images) List(filter string) ([]common.Deletable, error) {
+func (i Images) List(filter string, regex bool) ([]common.Deletable, error) {
 	caller, err := i.stsClient.GetCallerIdentity(&awssts.GetCallerIdentityInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Get caller identity: %s", err)
@@ -53,7 +52,7 @@ func (i Images) List(filter string) ([]common.Deletable, error) {
 	for _, image := range images.Images {
 		r := NewImage(i.client, image.ImageId, i.resourceTags)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

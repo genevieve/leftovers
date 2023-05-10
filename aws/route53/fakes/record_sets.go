@@ -28,11 +28,12 @@ type RecordSets struct {
 			HostedZoneName string
 			RecordSets     []*awsroute53.ResourceRecordSet
 			Filter         string
+			Regex          bool
 		}
 		Returns struct {
 			Error error
 		}
-		Stub func(*string, string, []*awsroute53.ResourceRecordSet, string) error
+		Stub func(*string, string, []*awsroute53.ResourceRecordSet, string, bool) error
 	}
 	GetCall struct {
 		sync.Mutex
@@ -60,7 +61,7 @@ func (f *RecordSets) DeleteAll(param1 *string, param2 string, param3 []*awsroute
 	}
 	return f.DeleteAllCall.Returns.Error
 }
-func (f *RecordSets) DeleteWithFilter(param1 *string, param2 string, param3 []*awsroute53.ResourceRecordSet, param4 string) error {
+func (f *RecordSets) DeleteWithFilter(param1 *string, param2 string, param3 []*awsroute53.ResourceRecordSet, param4 string, param5 bool) error {
 	f.DeleteWithFilterCall.Lock()
 	defer f.DeleteWithFilterCall.Unlock()
 	f.DeleteWithFilterCall.CallCount++
@@ -68,8 +69,9 @@ func (f *RecordSets) DeleteWithFilter(param1 *string, param2 string, param3 []*a
 	f.DeleteWithFilterCall.Receives.HostedZoneName = param2
 	f.DeleteWithFilterCall.Receives.RecordSets = param3
 	f.DeleteWithFilterCall.Receives.Filter = param4
+	f.DeleteWithFilterCall.Receives.Regex = param5
 	if f.DeleteWithFilterCall.Stub != nil {
-		return f.DeleteWithFilterCall.Stub(param1, param2, param3, param4)
+		return f.DeleteWithFilterCall.Stub(param1, param2, param3, param4, param5)
 	}
 	return f.DeleteWithFilterCall.Returns.Error
 }

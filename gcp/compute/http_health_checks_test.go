@@ -37,7 +37,7 @@ var _ = Describe("HttpHealthChecks", func() {
 		})
 
 		It("lists, filters, and prompts for http health checks to delete", func() {
-			list, err := httpHealthChecks.List(filter)
+			list, err := httpHealthChecks.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListHttpHealthChecksCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("HttpHealthChecks", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := httpHealthChecks.List(filter)
+				_, err := httpHealthChecks.List(filter, false)
 				Expect(err).To(MatchError("List Http Health Checks: some error"))
 			})
 		})
 
 		Context("when the health check name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := httpHealthChecks.List("grape")
+				list, err := httpHealthChecks.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -76,7 +76,7 @@ var _ = Describe("HttpHealthChecks", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := httpHealthChecks.List(filter)
+				list, err := httpHealthChecks.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

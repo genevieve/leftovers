@@ -39,7 +39,7 @@ var _ = Describe("InstanceProfiles", func() {
 		})
 
 		It("returns a list of instance profiles to delete", func() {
-			items, err := instanceProfiles.List(filter)
+			items, err := instanceProfiles.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListInstanceProfilesCall.CallCount).To(Equal(1))
@@ -53,7 +53,7 @@ var _ = Describe("InstanceProfiles", func() {
 
 		Context("when the instance profile name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := instanceProfiles.List("kiwi")
+				items, err := instanceProfiles.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -68,7 +68,7 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				_, err := instanceProfiles.List(filter)
+				_, err := instanceProfiles.List(filter, false)
 				Expect(err).To(MatchError("List IAM Instance Profiles: listing error"))
 			})
 		})
@@ -79,7 +79,7 @@ var _ = Describe("InstanceProfiles", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := instanceProfiles.List(filter)
+				items, err := instanceProfiles.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

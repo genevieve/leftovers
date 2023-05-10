@@ -39,7 +39,7 @@ var _ = Describe("UrlMaps", func() {
 		})
 
 		It("lists, filters, and prompts for url maps to delete", func() {
-			list, err := urlMaps.List(filter)
+			list, err := urlMaps.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListUrlMapsCall.CallCount).To(Equal(1))
@@ -57,14 +57,14 @@ var _ = Describe("UrlMaps", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := urlMaps.List(filter)
+				_, err := urlMaps.List(filter, false)
 				Expect(err).To(MatchError("List Url Maps: some error"))
 			})
 		})
 
 		Context("when the url map name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := urlMaps.List("grape")
+				list, err := urlMaps.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -78,7 +78,7 @@ var _ = Describe("UrlMaps", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := urlMaps.List(filter)
+				list, err := urlMaps.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

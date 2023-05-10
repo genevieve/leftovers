@@ -1,3 +1,7 @@
+# This README is for the github.com/notrepo05/leftovers fork from github.com/genevieve/leftovers
+
+### This fork aims to stabilize deletion (so far for AWS) and add extended regex filtering support.
+
 # Leftovers :turkey:
 
 [![GoDoc](https://godoc.org/github.com/genevieve/leftovers?status.svg)](https://godoc.org/github.com/genevieve/leftovers)
@@ -18,6 +22,7 @@ Go cli & library for cleaning up **orphaned IaaS resources**.
 - Your acceptance tests in CI failed, the container disappeared, and
 infrastructure resources were tragically orphaned. :-(
 - `terraform destroy` isn't working because the refresh step is failing due to a missing resource.
+- You're too lazy to `terraform destroy`
 
 
 
@@ -49,7 +54,7 @@ $ leftovers --filter banana --dry-run
 ```
 
 
-Finally, you might want to delete a single resource type::
+You might want to delete a single resource type::
 ```console
 $ leftovers types
 service-account
@@ -59,7 +64,11 @@ $ leftovers --filter banana --type service-account --no-confirm
 [Service Account: banana@pivotal.io] Deleted!
 ```
 
-
+Or you might want to filter using regex (this is a beta feature)
+```console
+$ BBL_IAAS=gcp leftovers --gcp-service-account-key="gcp-service-account.json" --filter '^(?=.*pull-1234)(?!.*iless-).*' --filter-as-regex --dry-run
+[Compute Instance: vm-137e7129-aaa-bbb-cccc-e3ddb3aaec23 (pull-1234-pcf-network, cf-1234567890abc1234567, cf-1234567890abc1234567-control, control, p-bosh, p-bosh-cf-1234567890abc1234567, p-bosh-cf-1234567890abc1234567-control, pcf-lb, pull-1234-cf-ssh, pull-1234-vms)]
+```
 
 ## <a name='how'></a>Installation
 
@@ -67,26 +76,19 @@ $ leftovers --filter banana --type service-account --no-confirm
 [Install go.](https://golang.org/doc/install) Then:
 
 ```console
-$ go get -u github.com/genevieve/leftovers/cmd/leftovers
+$ go get -u github.com/notrepo05/leftovers/cmd/leftovers
 ```
 
 ### Option 2
 
-```console
-$ brew tap genevieve/tap
-$ brew install leftovers
-```
-
-### Option 3
-
-Linux binaries can be found on the [releases page](https://github.com/genevieve/leftovers/releases).
+Linux and OSX binaries for this fork can be found on the [releases page](https://github.com/notrepo05/leftovers/releases).
 
 
 
 ## <a name='how'></a>Usage
 
 ```console
-$ leftovers -h
+$ ./leftovers --help
 
 Usage:
   leftovers [OPTIONS]
@@ -97,7 +99,9 @@ Application Options:
   -n, --no-confirm                Destroy resources without prompting. This is dangerous, make good choices!
   -d, --dry-run                   List all resources without deleting any.
   -f, --filter=                   Filtering resources by an environment name.
+      --filter-as-regex           Interpret the filter as regex. (**This is a beta feature** Tested on AWS, Azure, and GCP)
   -t, --type=                     Type of resource to delete.
+      --debug                     Print debug information.
       --aws-access-key-id=        AWS access key id. [$BBL_AWS_ACCESS_KEY_ID]
       --aws-secret-access-key=    AWS secret access key. [$BBL_AWS_SECRET_ACCESS_KEY]
       --aws-session-token=        AWS session token. [$BBL_AWS_SESSION_TOKEN]
@@ -125,7 +129,7 @@ Help Options:
   -h, --help                      Show this help message
 ```
 
-## <a name='maintainers'></a>Maintainers
+## <a name='maintainers'></a>Maintainers of the actual project
 
 - [Genevieve L'Esperance](https://twitter.com/genevieve_vl)
 - [Rowan Jacobs](https://github.com/rowanjacobs)

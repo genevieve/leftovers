@@ -41,7 +41,7 @@ var _ = Describe("DBSubnetGroups", func() {
 		})
 
 		It("deletes db subnet groups", func() {
-			items, err := dbSubnetGroups.List(filter)
+			items, err := dbSubnetGroups.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBSubnetGroupsCall.CallCount).To(Equal(1))
@@ -57,14 +57,14 @@ var _ = Describe("DBSubnetGroups", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := dbSubnetGroups.List(filter)
+				_, err := dbSubnetGroups.List(filter, false)
 				Expect(err).To(MatchError("Describing RDS DB Subnet Groups: some error"))
 			})
 		})
 
 		Context("when the db subnet group name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := dbSubnetGroups.List("kiwi")
+				items, err := dbSubnetGroups.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeDBSubnetGroupsCall.CallCount).To(Equal(1))
@@ -79,7 +79,7 @@ var _ = Describe("DBSubnetGroups", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := dbSubnetGroups.List(filter)
+				items, err := dbSubnetGroups.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

@@ -40,7 +40,7 @@ var _ = Describe("KeyPairs", func() {
 		})
 
 		It("returns a list of ec2 key pairs to delete", func() {
-			items, err := keys.List(filter)
+			items, err := keys.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeKeyPairsCall.CallCount).To(Equal(1))
@@ -57,14 +57,14 @@ var _ = Describe("KeyPairs", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := keys.List(filter)
+				_, err := keys.List(filter, false)
 				Expect(err).To(MatchError("Describing EC2 Key Pairs: some error"))
 			})
 		})
 
 		Context("when the key pair name does not contain the filter", func() {
 			It("does not try deleting it", func() {
-				items, err := keys.List("kiwi")
+				items, err := keys.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -78,7 +78,7 @@ var _ = Describe("KeyPairs", func() {
 			})
 
 			It("does not delete the key pair", func() {
-				items, err := keys.List(filter)
+				items, err := keys.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

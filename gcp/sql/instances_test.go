@@ -41,7 +41,7 @@ var _ = Describe("Instances", func() {
 		})
 
 		It("lists, filters, and prompts for instances to delete", func() {
-			list, err := instances.List(filter)
+			list, err := instances.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListInstancesCall.CallCount).To(Equal(1))
@@ -59,14 +59,14 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := instances.List(filter)
+				_, err := instances.List(filter, false)
 				Expect(err).To(MatchError("List SQL Instances: some error"))
 			})
 		})
 
 		Context("when the instance name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := instances.List("grape")
+				list, err := instances.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -80,7 +80,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := instances.List(filter)
+				list, err := instances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

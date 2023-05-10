@@ -43,7 +43,7 @@ var _ = Describe("HostedZones", func() {
 		})
 
 		It("returns a list of route53 hosted zones to delete", func() {
-			items, err := hostedZones.List(filter)
+			items, err := hostedZones.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListHostedZonesCall.CallCount).To(Equal(1))
@@ -61,14 +61,14 @@ var _ = Describe("HostedZones", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := hostedZones.List(filter)
+				_, err := hostedZones.List(filter, false)
 				Expect(err).To(MatchError("List Route53 Hosted Zones: some error"))
 			})
 		})
 
 		Context("when the hosted zone name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := hostedZones.List("kiwi")
+				items, err := hostedZones.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -83,7 +83,7 @@ var _ = Describe("HostedZones", func() {
 				}}
 			})
 			It("does not return it in the list", func() {
-				items, err := hostedZones.List("kiwi")
+				items, err := hostedZones.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))
@@ -97,7 +97,7 @@ var _ = Describe("HostedZones", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := hostedZones.List(filter)
+				items, err := hostedZones.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

@@ -2,10 +2,9 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -27,7 +26,7 @@ func NewNatGateways(client natGatewaysClient, logger logger) NatGateways {
 	}
 }
 
-func (n NatGateways) List(filter string) ([]common.Deletable, error) {
+func (n NatGateways) List(filter string, regex bool) ([]common.Deletable, error) {
 	natGateways, err := n.client.DescribeNatGateways(&awsec2.DescribeNatGatewaysInput{
 		Filter: []*awsec2.Filter{{
 			Name:   aws.String("state"),
@@ -42,7 +41,7 @@ func (n NatGateways) List(filter string) ([]common.Deletable, error) {
 	for _, g := range natGateways.NatGateways {
 		r := NewNatGateway(n.client, n.logger, g.NatGatewayId, g.Tags)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

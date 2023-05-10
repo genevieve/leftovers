@@ -2,8 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 )
@@ -26,7 +24,7 @@ func NewVolumes(client volumesClient, logger logger) Volumes {
 	}
 }
 
-func (v Volumes) List(filter string) ([]common.Deletable, error) {
+func (v Volumes) List(filter string, regex bool) ([]common.Deletable, error) {
 	v.logger.Debugln("Listing Volumes...")
 
 	result, err := v.client.List()
@@ -38,7 +36,7 @@ func (v Volumes) List(filter string) ([]common.Deletable, error) {
 	for _, volume := range result {
 		r := NewVolume(volume.Name, volume.ID, v.client)
 
-		if !strings.Contains(volume.Name, filter) {
+		if !common.ResourceMatches(volume.Name, filter, regex) {
 			continue
 		}
 

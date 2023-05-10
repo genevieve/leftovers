@@ -2,10 +2,9 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awsec2 "github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -31,7 +30,7 @@ func NewInstances(client instancesClient, logger logger, resourceTags resourceTa
 	}
 }
 
-func (i Instances) List(filter string) ([]common.Deletable, error) {
+func (i Instances) List(filter string, regex bool) ([]common.Deletable, error) {
 	instances, err := i.client.DescribeInstances(&awsec2.DescribeInstancesInput{
 		Filters: []*awsec2.Filter{{
 			Name:   aws.String("instance-state-name"),
@@ -47,7 +46,7 @@ func (i Instances) List(filter string) ([]common.Deletable, error) {
 		for _, instance := range r.Instances {
 			r := NewInstance(i.client, i.logger, i.resourceTags, instance.InstanceId, instance.KeyName, instance.Tags)
 
-			if !strings.Contains(r.Name(), filter) {
+			if !common.ResourceMatches(r.Name(),  filter, regex) {
 				continue
 			}
 

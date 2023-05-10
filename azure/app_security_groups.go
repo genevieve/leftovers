@@ -2,7 +2,6 @@ package azure
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 )
@@ -27,7 +26,7 @@ func NewAppSecurityGroups(client appSecurityGroupsClient, rgName string, logger 
 	}
 }
 
-func (g AppSecurityGroups) List(filter string) ([]common.Deletable, error) {
+func (g AppSecurityGroups) List(filter string, regex bool) ([]common.Deletable, error) {
 	g.logger.Debugln("Listing Application Security Groups")
 	groups, err := g.client.ListAppSecurityGroups(g.rgName)
 	if err != nil {
@@ -38,7 +37,7 @@ func (g AppSecurityGroups) List(filter string) ([]common.Deletable, error) {
 	for _, group := range groups {
 		r := NewAppSecurityGroup(g.client, g.rgName, group)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

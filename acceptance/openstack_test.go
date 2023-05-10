@@ -77,7 +77,7 @@ var _ = Describe("Openstack", func() {
 		})
 
 		It("lists resources", func() {
-			deleter.List("")
+			deleter.List("", false)
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Volume: %s %s]", volumeName, volumeID)))
 		})
 	})
@@ -113,7 +113,7 @@ var _ = Describe("Openstack", func() {
 		})
 
 		It("deletes all resources", func() {
-			err := deleter.Delete("delete-all")
+			err := deleter.Delete("delete-all", false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Compute Instance: %s %s] Deleted!", instanceName, instanceID)))
@@ -154,7 +154,7 @@ var _ = Describe("Openstack", func() {
 		})
 
 		It("deletes resources of a certain type", func() {
-			err := deleter.DeleteByType("delete-type", "Image")
+			err := deleter.DeleteByType("delete-type", "Image", false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stdout.String()).To(ContainSubstring(fmt.Sprintf("[Image: %s %s] Deleting...", imageName, imageID)))

@@ -185,7 +185,7 @@ var _ = Describe("RecordSets", func() {
 		})
 
 		It("deletes the record sets that contain the filter", func() {
-			err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter)
+			err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
@@ -204,7 +204,7 @@ var _ = Describe("RecordSets", func() {
 			})
 
 			It("deletes the record sets that contain the filter", func() {
-				err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter)
+				err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ChangeResourceRecordSetsCall.CallCount).To(Equal(1))
@@ -220,7 +220,7 @@ var _ = Describe("RecordSets", func() {
 			})
 
 			It("returns the error", func() {
-				err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter)
+				err := recordSets.DeleteWithFilter(hostedZoneId, hostedZoneName, records, filter, false)
 				Expect(err).To(MatchError(fmt.Sprintf("Delete Resource Record Sets in Hosted Zone %s: ruhroh", hostedZoneName)))
 			})
 		})

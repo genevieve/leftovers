@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -28,7 +27,7 @@ func NewInstanceGroups(client instanceGroupsClient, logger logger, zones map[str
 	}
 }
 
-func (i InstanceGroups) List(filter string) ([]common.Deletable, error) {
+func (i InstanceGroups) List(filter string, regex bool) ([]common.Deletable, error) {
 	groups := []*gcpcompute.InstanceGroup{}
 	for _, zone := range i.zones {
 		i.logger.Debugf("Listing Instance Groups for Zone %s...\n", zone)
@@ -44,7 +43,7 @@ func (i InstanceGroups) List(filter string) ([]common.Deletable, error) {
 	for _, group := range groups {
 		resource := NewInstanceGroup(i.client, group.Name, i.zones[group.Zone])
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

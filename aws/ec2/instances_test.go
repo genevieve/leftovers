@@ -49,7 +49,7 @@ var _ = Describe("Instances", func() {
 		})
 
 		It("returns a list of ec2 instances to delete", func() {
-			items, err := instances.List(filter)
+			items, err := instances.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
@@ -64,7 +64,7 @@ var _ = Describe("Instances", func() {
 
 		Context("when the instance name does not contain the filter", func() {
 			It("does not try to delete it", func() {
-				items, err := instances.List("kiwi")
+				items, err := instances.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeInstancesCall.CallCount).To(Equal(1))
@@ -88,7 +88,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("uses just the instance id in the prompt", func() {
-				items, err := instances.List(filter)
+				items, err := instances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-instance-id"))
@@ -111,7 +111,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("uses it in the prompt", func() {
-				items, err := instances.List(filter)
+				items, err := instances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.Receives.ResourceName).To(Equal("the-instance-id (KeyPairName:the-key-pair)"))
@@ -126,7 +126,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := instances.List(filter)
+				_, err := instances.List(filter, false)
 				Expect(err).To(MatchError("Describing EC2 Instances: some error"))
 			})
 		})
@@ -137,7 +137,7 @@ var _ = Describe("Instances", func() {
 			})
 
 			It("does not return it to the list", func() {
-				items, err := instances.List(filter)
+				items, err := instances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

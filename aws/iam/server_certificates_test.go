@@ -39,7 +39,7 @@ var _ = Describe("ServerCertificates", func() {
 		})
 
 		It("returns a list of iam server certificates to delete", func() {
-			items, err := serverCertificates.List(filter)
+			items, err := serverCertificates.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListServerCertificatesCall.CallCount).To(Equal(1))
@@ -56,14 +56,14 @@ var _ = Describe("ServerCertificates", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := serverCertificates.List(filter)
+				_, err := serverCertificates.List(filter, false)
 				Expect(err).To(MatchError("List IAM Server Certificates: some error"))
 			})
 		})
 
 		Context("when the certificate name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := serverCertificates.List("kiwi")
+				items, err := serverCertificates.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -77,7 +77,7 @@ var _ = Describe("ServerCertificates", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := serverCertificates.List(filter)
+				items, err := serverCertificates.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

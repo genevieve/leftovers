@@ -2,9 +2,8 @@ package kms
 
 import (
 	"fmt"
-	"strings"
-
 	awskms "github.com/aws/aws-sdk-go/service/kms"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewAliases(client aliasesClient, logger logger) Aliases {
 	}
 }
 
-func (a Aliases) List(filter string) ([]common.Deletable, error) {
+func (a Aliases) List(filter string, regex bool) ([]common.Deletable, error) {
 	aliases, err := a.client.ListAliases(&awskms.ListAliasesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Listing KMS Aliases: %s", err)
@@ -36,7 +35,7 @@ func (a Aliases) List(filter string) ([]common.Deletable, error) {
 	for _, alias := range aliases.Aliases {
 		r := NewAlias(a.client, alias.AliasName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

@@ -43,7 +43,7 @@ var _ = Describe("SecurityGroups", func() {
 		})
 
 		It("deletes ec2 security groups", func() {
-			items, err := securityGroups.List(filter)
+			items, err := securityGroups.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
@@ -60,14 +60,14 @@ var _ = Describe("SecurityGroups", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := securityGroups.List(filter)
+				_, err := securityGroups.List(filter, false)
 				Expect(err).To(MatchError("Describe EC2 Security Groups: some error"))
 			})
 		})
 
 		Context("when the security group name does not contain the filter", func() {
 			It("does not try deleting them", func() {
-				items, err := securityGroups.List("kiwi")
+				items, err := securityGroups.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeSecurityGroupsCall.CallCount).To(Equal(1))
@@ -82,7 +82,7 @@ var _ = Describe("SecurityGroups", func() {
 			})
 
 			It("does not delete the security group", func() {
-				items, err := securityGroups.List(filter)
+				items, err := securityGroups.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

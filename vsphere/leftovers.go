@@ -14,7 +14,7 @@ import (
 )
 
 type resource interface {
-	List(filter string, rType string) ([]common.Deletable, error)
+	List(filter string, rType string, regex bool) ([]common.Deletable, error)
 	Type() string
 }
 
@@ -25,11 +25,11 @@ type Leftovers struct {
 
 // List will print all the resources that contain
 // the provided filter in the resource's identifier.
-func (l Leftovers) List(filter string) {
+func (l Leftovers) List(filter string, regex bool) {
 	var all []common.Deletable
 
 	for _, r := range l.resources {
-		list, err := r.List(filter, "")
+		list, err := r.List(filter, "", regex)
 		if err != nil {
 			l.logger.Println(color.YellowString(err.Error()))
 		}
@@ -43,8 +43,8 @@ func (l Leftovers) List(filter string) {
 }
 
 // ListByType defaults to List.
-func (l Leftovers) ListByType(filter, rType string) {
-	l.List(filter)
+func (l Leftovers) ListByType(filter, rType string, regex bool) {
+	l.List(filter, regex)
 }
 
 // Types will print all the resource types that can
@@ -59,15 +59,15 @@ func (l Leftovers) Types() {
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
-func (l Leftovers) Delete(filter string) error {
-	return l.DeleteByType(filter, "")
+func (l Leftovers) Delete(filter string, regex bool) error {
+	return l.DeleteByType(filter, "", regex)
 }
 
 // DeleteByType will collect all resources of the provied type that contain
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion, and delete those
 // that are selected.
-func (l Leftovers) DeleteByType(filter, rType string) error {
+func (l Leftovers) DeleteByType(filter, rType string, regex bool) error {
 	if filter == "" {
 		return errors.New("--filter is required for vSphere.")
 	}
@@ -78,7 +78,7 @@ func (l Leftovers) DeleteByType(filter, rType string) error {
 	)
 
 	for _, r := range l.resources {
-		list, err := r.List(filter, rType)
+		list, err := r.List(filter, rType, regex)
 		if err != nil {
 			return err
 		}

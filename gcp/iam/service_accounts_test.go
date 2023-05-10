@@ -44,7 +44,7 @@ var _ = Describe("ServiceAccounts", func() {
 		})
 
 		It("lists, filters, and prompts for service accounts to delete", func() {
-			list, err := serviceAccounts.List(filter)
+			list, err := serviceAccounts.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListServiceAccountsCall.CallCount).To(Equal(1))
@@ -62,7 +62,7 @@ var _ = Describe("ServiceAccounts", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := serviceAccounts.List(filter)
+				_, err := serviceAccounts.List(filter, false)
 				Expect(err).To(MatchError("List IAM Service Accounts: some error"))
 			})
 		})
@@ -77,7 +77,7 @@ var _ = Describe("ServiceAccounts", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := serviceAccounts.List("banana")
+				list, err := serviceAccounts.List("banana", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -95,7 +95,7 @@ var _ = Describe("ServiceAccounts", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := serviceAccounts.List("banana")
+				list, err := serviceAccounts.List("banana", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -105,7 +105,7 @@ var _ = Describe("ServiceAccounts", func() {
 
 		Context("when the serviceAccount name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := serviceAccounts.List("grape")
+				list, err := serviceAccounts.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -119,7 +119,7 @@ var _ = Describe("ServiceAccounts", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := serviceAccounts.List(filter)
+				list, err := serviceAccounts.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

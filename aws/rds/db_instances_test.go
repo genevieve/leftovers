@@ -42,7 +42,7 @@ var _ = Describe("DBInstances", func() {
 		})
 
 		It("deletes db instances", func() {
-			items, err := dbInstances.List(filter)
+			items, err := dbInstances.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBInstancesCall.CallCount).To(Equal(1))
@@ -58,14 +58,14 @@ var _ = Describe("DBInstances", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := dbInstances.List(filter)
+				_, err := dbInstances.List(filter, false)
 				Expect(err).To(MatchError("Describing RDS DB Instances: some error"))
 			})
 		})
 
 		Context("when the db instance name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := dbInstances.List("kiwi")
+				items, err := dbInstances.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeDBInstancesCall.CallCount).To(Equal(1))
@@ -85,7 +85,7 @@ var _ = Describe("DBInstances", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := dbInstances.List(filter)
+				items, err := dbInstances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -99,7 +99,7 @@ var _ = Describe("DBInstances", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := dbInstances.List(filter)
+				items, err := dbInstances.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

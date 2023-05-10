@@ -42,7 +42,7 @@ var _ = Describe("Addresses", func() {
 		})
 
 		It("releases ec2 addresses", func() {
-			items, err := addresses.List(filter)
+			items, err := addresses.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeAddressesCall.CallCount).To(Equal(1))
@@ -54,7 +54,7 @@ var _ = Describe("Addresses", func() {
 
 		Context("when the address tags do not contain the filter", func() {
 			It("does not try releasing them", func() {
-				_, err := addresses.List("kiwi")
+				_, err := addresses.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -67,7 +67,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not try releasing them", func() {
-				_, err := addresses.List(filter)
+				_, err := addresses.List(filter, false)
 				Expect(err).To(MatchError("Describing EC2 Addresses: some error"))
 			})
 		})
@@ -78,7 +78,7 @@ var _ = Describe("Addresses", func() {
 			})
 
 			It("does not release the address", func() {
-				items, err := addresses.List(filter)
+				items, err := addresses.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

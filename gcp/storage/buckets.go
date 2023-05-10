@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpstorage "google.golang.org/api/storage/v1"
@@ -29,7 +28,7 @@ func NewBuckets(client bucketsClient, logger logger) Buckets {
 	}
 }
 
-func (i Buckets) List(filter string) ([]common.Deletable, error) {
+func (i Buckets) List(filter string, regex bool) ([]common.Deletable, error) {
 	i.logger.Debugln("Listing Storage Buckets...")
 	buckets, err := i.client.ListBuckets()
 	if err != nil {
@@ -40,7 +39,7 @@ func (i Buckets) List(filter string) ([]common.Deletable, error) {
 	for _, bucket := range buckets.Items {
 		resource := NewBucket(i.client, bucket.Name)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

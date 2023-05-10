@@ -13,7 +13,7 @@ type command interface {
 	Execute(app.Options) error
 }
 
-var Version = "dev"
+var Version = "Dev"
 
 func main() {
 	log.SetFlags(0)

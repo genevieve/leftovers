@@ -2,8 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 )
@@ -26,7 +24,7 @@ func NewComputeInstances(computeClient ComputeClient, logger logger) ComputeInst
 	}
 }
 
-func (ci ComputeInstances) List(filter string) ([]common.Deletable, error) {
+func (ci ComputeInstances) List(filter string, regex bool) ([]common.Deletable, error) {
 	ci.logger.Debugln("Listing Compute Instances...")
 
 	computeInstances, err := ci.computeClient.List()
@@ -38,7 +36,7 @@ func (ci ComputeInstances) List(filter string) ([]common.Deletable, error) {
 	for _, instance := range computeInstances {
 		r := NewComputeInstance(instance.Name, instance.ID, ci.computeClient)
 
-		if !strings.Contains(instance.Name, filter) {
+		if !common.ResourceMatches(instance.Name, filter, regex) {
 			continue
 		}
 

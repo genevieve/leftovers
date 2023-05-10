@@ -2,10 +2,9 @@ package iam
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -29,7 +28,7 @@ func NewPolicies(client policiesClient, logger logger) Policies {
 	}
 }
 
-func (p Policies) List(filter string) ([]common.Deletable, error) {
+func (p Policies) List(filter string, regex bool) ([]common.Deletable, error) {
 	policies, err := p.client.ListPolicies(&awsiam.ListPoliciesInput{Scope: aws.String("Local")})
 	if err != nil {
 		return nil, fmt.Errorf("List IAM Policies: %s", err)
@@ -39,7 +38,7 @@ func (p Policies) List(filter string) ([]common.Deletable, error) {
 	for _, o := range policies.Policies {
 		r := NewPolicy(p.client, p.logger, o.PolicyName, o.Arn)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

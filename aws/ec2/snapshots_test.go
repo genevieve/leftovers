@@ -46,7 +46,7 @@ var _ = Describe("Snapshots", func() {
 		})
 
 		It("returns a list of ec2 snapshots to delete", func() {
-			items, err := snapshots.List(filter)
+			items, err := snapshots.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(stsClient.GetCallerIdentityCall.CallCount).To(Equal(1))
@@ -69,7 +69,7 @@ var _ = Describe("Snapshots", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := snapshots.List(filter)
+				_, err := snapshots.List(filter, false)
 				Expect(err).To(MatchError("Get caller identity: some error"))
 			})
 		})
@@ -80,14 +80,14 @@ var _ = Describe("Snapshots", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := snapshots.List(filter)
+				_, err := snapshots.List(filter, false)
 				Expect(err).To(MatchError("Describe EC2 Snapshots: some error"))
 			})
 		})
 
 		Context("when the snapshot name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := snapshots.List("kiwi")
+				items, err := snapshots.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeSnapshotsCall.CallCount).To(Equal(1))
@@ -103,7 +103,7 @@ var _ = Describe("Snapshots", func() {
 			})
 
 			It("does not return it to the list", func() {
-				items, err := snapshots.List(filter)
+				items, err := snapshots.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

@@ -2,8 +2,6 @@ package dns
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpdns "google.golang.org/api/dns/v1"
 )
@@ -33,7 +31,7 @@ func NewManagedZones(client managedZonesClient, recordSets recordSets, logger lo
 	}
 }
 
-func (m ManagedZones) List(filter string) ([]common.Deletable, error) {
+func (m ManagedZones) List(filter string, regex bool) ([]common.Deletable, error) {
 	m.logger.Debugln("Listing DNS Managed Zones...")
 	managedZones, err := m.client.ListManagedZones()
 	if err != nil {
@@ -44,7 +42,7 @@ func (m ManagedZones) List(filter string) ([]common.Deletable, error) {
 	for _, zone := range managedZones.ManagedZones {
 		resource := NewManagedZone(m.client, m.recordSets, zone.Name)
 
-		if !strings.Contains(resource.name, filter) {
+		if !common.ResourceMatches(resource.name, filter, regex) {
 			continue
 		}
 

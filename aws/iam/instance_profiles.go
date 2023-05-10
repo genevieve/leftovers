@@ -2,9 +2,8 @@ package iam
 
 import (
 	"fmt"
-	"strings"
-
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -27,7 +26,7 @@ func NewInstanceProfiles(client instanceProfilesClient, logger logger) InstanceP
 	}
 }
 
-func (i InstanceProfiles) List(filter string) ([]common.Deletable, error) {
+func (i InstanceProfiles) List(filter string, regex bool) ([]common.Deletable, error) {
 	profiles, err := i.client.ListInstanceProfiles(&awsiam.ListInstanceProfilesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List IAM Instance Profiles: %s", err)
@@ -37,7 +36,7 @@ func (i InstanceProfiles) List(filter string) ([]common.Deletable, error) {
 	for _, p := range profiles.InstanceProfiles {
 		r := NewInstanceProfile(i.client, p.InstanceProfileName, p.Roles, i.logger)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

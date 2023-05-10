@@ -40,7 +40,7 @@ var _ = Describe("Aliases", func() {
 		})
 
 		It("returns a list of kms aliases to delete", func() {
-			items, err := aliases.List(filter)
+			items, err := aliases.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListAliasesCall.CallCount).To(Equal(1))
@@ -62,7 +62,7 @@ var _ = Describe("Aliases", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := aliases.List(filter)
+				items, err := aliases.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.ListAliasesCall.CallCount).To(Equal(1))
@@ -77,7 +77,7 @@ var _ = Describe("Aliases", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := aliases.List(filter)
+				_, err := aliases.List(filter, false)
 				Expect(err).To(MatchError("Listing KMS Aliases: some error"))
 			})
 		})
@@ -88,7 +88,7 @@ var _ = Describe("Aliases", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := aliases.List(filter)
+				items, err := aliases.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

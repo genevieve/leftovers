@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -26,7 +24,7 @@ func NewHttpsHealthChecks(client httpsHealthChecksClient, logger logger) HttpsHe
 	}
 }
 
-func (h HttpsHealthChecks) List(filter string) ([]common.Deletable, error) {
+func (h HttpsHealthChecks) List(filter string, regex bool) ([]common.Deletable, error) {
 	h.logger.Debugln("Listing Https Health Checks...")
 	checks, err := h.client.ListHttpsHealthChecks()
 	if err != nil {
@@ -37,7 +35,7 @@ func (h HttpsHealthChecks) List(filter string) ([]common.Deletable, error) {
 	for _, check := range checks {
 		resource := NewHttpsHealthCheck(h.client, check.Name)
 
-		if !strings.Contains(check.Name, filter) {
+		if !common.ResourceMatches(check.Name, filter, regex) {
 			continue
 		}
 

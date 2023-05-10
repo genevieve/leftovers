@@ -2,9 +2,8 @@ package route53
 
 import (
 	"fmt"
-	"strings"
-
 	awsroute53 "github.com/aws/aws-sdk-go/service/route53"
+	"github.com/genevieve/leftovers/common"
 )
 
 type HostedZone struct {
@@ -13,15 +12,17 @@ type HostedZone struct {
 	identifier string
 	recordSets recordSets
 	filter     string
+	regex	   bool
 }
 
-func NewHostedZone(client hostedZonesClient, id, name *string, recordSets recordSets, filter string) HostedZone {
+func NewHostedZone(client hostedZonesClient, id, name *string, recordSets recordSets, filter string, regex bool) HostedZone {
 	return HostedZone{
 		client:     client,
 		id:         id,
 		identifier: *name,
 		recordSets: recordSets,
 		filter:     filter,
+		regex:      regex,
 	}
 }
 
@@ -31,7 +32,7 @@ func (h HostedZone) Delete() error {
 		return fmt.Errorf("Get Record Sets: %s", err)
 	}
 
-	if strings.Contains(h.Name(), h.filter) {
+	if common.ResourceMatches(h.Name(), h.filter, h.regex) {
 		err = h.recordSets.DeleteAll(h.id, h.identifier, r)
 		if err != nil {
 			return fmt.Errorf("Delete All Record Sets: %s", err)
@@ -42,7 +43,7 @@ func (h HostedZone) Delete() error {
 			return fmt.Errorf("Delete: %s", err)
 		}
 	} else {
-		err = h.recordSets.DeleteWithFilter(h.id, h.identifier, r, h.filter)
+		err = h.recordSets.DeleteWithFilter(h.id, h.identifier, r, h.filter, h.regex)
 		if err != nil {
 			return fmt.Errorf("Delete Record Sets With Filter: %s", err)
 		}

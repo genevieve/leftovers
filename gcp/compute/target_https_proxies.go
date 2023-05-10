@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -26,7 +25,7 @@ func NewTargetHttpsProxies(client targetHttpsProxiesClient, logger logger) Targe
 	}
 }
 
-func (t TargetHttpsProxies) List(filter string) ([]common.Deletable, error) {
+func (t TargetHttpsProxies) List(filter string, regex bool) ([]common.Deletable, error) {
 	t.logger.Debugln("Listing Target Https Proxies...")
 	targetHttpsProxies, err := t.client.ListTargetHttpsProxies()
 	if err != nil {
@@ -37,7 +36,7 @@ func (t TargetHttpsProxies) List(filter string) ([]common.Deletable, error) {
 	for _, targetHttpsProxy := range targetHttpsProxies.Items {
 		resource := NewTargetHttpsProxy(t.client, targetHttpsProxy.Name)
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

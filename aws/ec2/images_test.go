@@ -45,7 +45,7 @@ var _ = Describe("Images", func() {
 		})
 
 		It("returns a list of ec2 images to delete", func() {
-			items, err := images.List("")
+			items, err := images.List("", false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeImagesCall.CallCount).To(Equal(1))
@@ -64,7 +64,7 @@ var _ = Describe("Images", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := images.List("")
+				_, err := images.List("", false)
 				Expect(err).To(MatchError("Describing EC2 Images: some error"))
 			})
 		})
@@ -75,7 +75,7 @@ var _ = Describe("Images", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := images.List("")
+				_, err := images.List("", false)
 				Expect(err).To(MatchError("Get caller identity: some error"))
 			})
 		})
@@ -86,7 +86,7 @@ var _ = Describe("Images", func() {
 			})
 
 			It("does not return it to the list", func() {
-				items, err := images.List("")
+				items, err := images.List("", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

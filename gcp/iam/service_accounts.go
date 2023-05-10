@@ -2,7 +2,6 @@ package iam
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcrm "google.golang.org/api/cloudresourcemanager/v1"
@@ -34,7 +33,7 @@ func NewServiceAccounts(client serviceAccountsClient, projectName string, projec
 	}
 }
 
-func (s ServiceAccounts) List(filter string) ([]common.Deletable, error) {
+func (s ServiceAccounts) List(filter string, regex bool) ([]common.Deletable, error) {
 	s.logger.Debugln("Listing IAM Service Accounts...")
 	accounts, err := s.client.ListServiceAccounts()
 	if err != nil {
@@ -49,7 +48,7 @@ func (s ServiceAccounts) List(filter string) ([]common.Deletable, error) {
 			continue
 		}
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

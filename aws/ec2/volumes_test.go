@@ -41,7 +41,7 @@ var _ = Describe("Volumes", func() {
 		})
 
 		It("deletes ec2 volumes", func() {
-			items, err := volumes.List(filter)
+			items, err := volumes.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
@@ -57,7 +57,7 @@ var _ = Describe("Volumes", func() {
 
 		Context("when the filter is empty", func() {
 			It("deletes ec2 volumes", func() {
-				items, err := volumes.List("")
+				items, err := volumes.List("", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
@@ -74,7 +74,7 @@ var _ = Describe("Volumes", func() {
 
 		Context("when the volume name does not contain the filter", func() {
 			It("does not try to delete it", func() {
-				items, err := volumes.List("kiwi")
+				items, err := volumes.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeVolumesCall.CallCount).To(Equal(1))
@@ -90,7 +90,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := volumes.List(filter)
+				_, err := volumes.List(filter, false)
 				Expect(err).To(MatchError("Describe EC2 Volumes: some error"))
 			})
 		})
@@ -101,7 +101,7 @@ var _ = Describe("Volumes", func() {
 			})
 
 			It("does not delete the volume", func() {
-				items, err := volumes.List(filter)
+				items, err := volumes.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

@@ -42,7 +42,7 @@ var _ = Describe("Tags", func() {
 		})
 
 		It("returns a list of ec2 tags to delete", func() {
-			items, err := tags.List(filter)
+			items, err := tags.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
@@ -59,14 +59,14 @@ var _ = Describe("Tags", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := tags.List(filter)
+				_, err := tags.List(filter, false)
 				Expect(err).To(MatchError("Describe EC2 Tags: some error"))
 			})
 		})
 
 		Context("when the tag name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := tags.List("kiwi")
+				items, err := tags.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
@@ -87,7 +87,7 @@ var _ = Describe("Tags", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := tags.List("banana")
+				items, err := tags.List("banana", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeTagsCall.CallCount).To(Equal(1))
@@ -102,7 +102,7 @@ var _ = Describe("Tags", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := tags.List(filter)
+				items, err := tags.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

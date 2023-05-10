@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - feature/regex-matching
+
+jobs:
+  unit-tests:
+    container:
+      image: pivotalcfreleng/golang
+
+    timeout-minutes: 90
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+      - id: run_unit_tests
+        name: Run unit tests
+        run: .github/tasks/test.sh

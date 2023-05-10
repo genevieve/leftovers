@@ -30,7 +30,7 @@ import (
 )
 
 type resource interface {
-	List(filter string) ([]common.Deletable, error)
+	List(filter string, regex bool) ([]common.Deletable, error)
 	Type() string
 }
 
@@ -172,29 +172,29 @@ func NewLeftovers(logger logger, keyPath string) (Leftovers, error) {
 }
 
 // List will print all of the resources that match the provided filter.
-func (l Leftovers) List(filter string) {
+func (l Leftovers) List(filter string, regex bool) {
 	l.logger.NoConfirm()
 
 	for _, r := range l.resources {
-		l.list(r, filter)
+		l.list(r, filter, regex)
 	}
 }
 
 // ListByType will print resources of the specified type with
 // names that match the provided filter.
-func (l Leftovers) ListByType(filter, rtype string) {
+func (l Leftovers) ListByType(filter, rType string, regex bool) {
 	l.logger.NoConfirm()
 
 	for _, r := range l.resources {
-		if r.Type() == rtype {
-			l.list(r, filter)
+		if r.Type() == rType {
+			l.list(r, filter, regex)
 			return
 		}
 	}
 }
 
-func (l Leftovers) list(r resource, filter string) {
-	list, err := r.List(filter)
+func (l Leftovers) list(r resource, filter string, regex bool) {
+	list, err := r.List(filter, regex)
 	if err != nil {
 		l.logger.Println(color.YellowString(err.Error()))
 	}
@@ -218,11 +218,11 @@ func (l Leftovers) Types() {
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
-func (l Leftovers) Delete(filter string) error {
+func (l Leftovers) Delete(filter string, regex bool) error {
 	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
-		list, err := r.List(filter)
+		list, err := r.List(filter, regex)
 		if err != nil {
 			l.logger.Println(color.YellowString(err.Error()))
 		}
@@ -237,12 +237,12 @@ func (l Leftovers) Delete(filter string) error {
 // the provided filter in the resource's identifier, prompt
 // you to confirm deletion (if enabled), and delete those
 // that are selected.
-func (l Leftovers) DeleteByType(filter, rType string) error {
+func (l Leftovers) DeleteByType(filter, rType string, regex bool) error {
 	deletables := [][]common.Deletable{}
 
 	for _, r := range l.resources {
 		if r.Type() == rType {
-			list, err := r.List(filter)
+			list, err := r.List(filter, regex)
 			if err != nil {
 				l.logger.Println(color.YellowString(err.Error()))
 			}

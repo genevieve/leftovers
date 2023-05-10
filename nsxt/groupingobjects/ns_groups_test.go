@@ -51,7 +51,7 @@ var _ = Describe("NS Groups", func() {
 		})
 
 		It("lists, filters, and prompts for ns groups to delete", func() {
-			list, err := nsGroups.List(filter)
+			list, err := nsGroups.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListNSGroupsCall.CallCount).To(Equal(1))
@@ -71,7 +71,7 @@ var _ = Describe("NS Groups", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := nsGroups.List(filter)
+				_, err := nsGroups.List(filter, false)
 				Expect(err).To(MatchError("List NS Groups: PC LOAD LETTER"))
 			})
 		})

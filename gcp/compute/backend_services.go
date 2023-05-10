@@ -2,8 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
 )
@@ -26,7 +24,7 @@ func NewBackendServices(client backendServicesClient, logger logger) BackendServ
 	}
 }
 
-func (b BackendServices) List(filter string) ([]common.Deletable, error) {
+func (b BackendServices) List(filter string, regex bool) ([]common.Deletable, error) {
 	b.logger.Debugln("Listing Backend Services...")
 	backendServices, err := b.client.ListBackendServices()
 	if err != nil {
@@ -37,7 +35,7 @@ func (b BackendServices) List(filter string) ([]common.Deletable, error) {
 	for _, backend := range backendServices {
 		resource := NewBackendService(b.client, backend.Name)
 
-		if !strings.Contains(backend.Name, filter) {
+		if !common.ResourceMatches(backend.Name, filter, regex) {
 			continue
 		}
 

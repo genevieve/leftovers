@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -28,7 +27,7 @@ func NewInstanceGroupManagers(client instanceGroupManagersClient, logger logger,
 	}
 }
 
-func (i InstanceGroupManagers) List(filter string) ([]common.Deletable, error) {
+func (i InstanceGroupManagers) List(filter string, regex bool) ([]common.Deletable, error) {
 	managers := []*gcpcompute.InstanceGroupManager{}
 	for _, zone := range i.zones {
 		i.logger.Debugf("Listing Instance Group Managers for Zone %s...\n", zone)
@@ -44,7 +43,7 @@ func (i InstanceGroupManagers) List(filter string) ([]common.Deletable, error) {
 	for _, manager := range managers {
 		resource := NewInstanceGroupManager(i.client, manager.Name, i.zones[manager.Zone])
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

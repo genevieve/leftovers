@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/genevieve/leftovers/common"
 	gcpcompute "google.golang.org/api/compute/v1"
@@ -28,7 +27,7 @@ func NewTargetPools(client targetPoolsClient, logger logger, regions map[string]
 	}
 }
 
-func (t TargetPools) List(filter string) ([]common.Deletable, error) {
+func (t TargetPools) List(filter string, regex bool) ([]common.Deletable, error) {
 	pools := []*gcpcompute.TargetPool{}
 	for _, region := range t.regions {
 		t.logger.Debugf("Listing Target Pools for region %s...\n", region)
@@ -44,7 +43,7 @@ func (t TargetPools) List(filter string) ([]common.Deletable, error) {
 	for _, pool := range pools {
 		resource := NewTargetPool(t.client, pool.Name, t.regions[pool.Region])
 
-		if !strings.Contains(resource.Name(), filter) {
+		if !common.ResourceMatches(resource.Name(), filter, regex) {
 			continue
 		}
 

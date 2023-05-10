@@ -3,8 +3,6 @@ package groupingobjects
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -22,7 +20,7 @@ func NewNSGroups(client groupingObjectsAPI, ctx context.Context, logger logger) 
 	}
 }
 
-func (n NSGroups) List(filter string) ([]common.Deletable, error) {
+func (n NSGroups) List(filter string, regex bool) ([]common.Deletable, error) {
 	n.logger.Debugln("Listing NS Groups...")
 	result, _, err := n.client.ListNSGroups(n.ctx, map[string]interface{}{})
 
@@ -34,7 +32,7 @@ func (n NSGroups) List(filter string) ([]common.Deletable, error) {
 	for _, nsGroup := range result.Results {
 		resource := NewNSGroup(n.client, n.ctx, nsGroup.DisplayName, nsGroup.Id)
 
-		if !strings.Contains(nsGroup.DisplayName, filter) {
+		if !common.ResourceMatches(nsGroup.DisplayName, filter, regex) {
 			continue
 		}
 

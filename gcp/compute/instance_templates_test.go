@@ -37,7 +37,7 @@ var _ = Describe("InstanceTemplates", func() {
 		})
 
 		It("lists, filters, and prompts for instance templates to delete", func() {
-			list, err := instanceTemplates.List(filter)
+			list, err := instanceTemplates.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListInstanceTemplatesCall.CallCount).To(Equal(1))
@@ -55,14 +55,14 @@ var _ = Describe("InstanceTemplates", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := instanceTemplates.List(filter)
+				_, err := instanceTemplates.List(filter, false)
 				Expect(err).To(MatchError("List Instance Templates: some error"))
 			})
 		})
 
 		Context("when the instance template name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := instanceTemplates.List("grape")
+				list, err := instanceTemplates.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -76,7 +76,7 @@ var _ = Describe("InstanceTemplates", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := instanceTemplates.List(filter)
+				list, err := instanceTemplates.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(list).To(HaveLen(0))

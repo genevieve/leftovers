@@ -5,12 +5,13 @@ import "os"
 type Options struct {
 	Version bool `short:"v"  long:"version"                     description:"Print version."`
 
-	IAAS      string `short:"i"  long:"iaas"        env:"BBL_IAAS"  description:"The IaaS for clean up."  `
-	NoConfirm bool   `short:"n"  long:"no-confirm"                  description:"Destroy resources without prompting. This is dangerous, make good choices!"`
-	DryRun    bool   `short:"d"  long:"dry-run"                     description:"List all resources without deleting any."`
-	Filter    string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
-	Type      string `short:"t"  long:"type"                        description:"Type of resource to delete."`
-	Debug     bool   `           long:"debug"                       description:"Print debug information."`
+	IAAS          string `short:"i"  long:"iaas"        env:"BBL_IAAS"  description:"The IaaS for clean up."  `
+	NoConfirm     bool   `short:"n"  long:"no-confirm"                  description:"Destroy resources without prompting. This is dangerous, make good choices!"`
+	DryRun        bool   `short:"d"  long:"dry-run"                     description:"List all resources without deleting any."`
+	Filter        string `short:"f"  long:"filter"                      description:"Filtering resources by an environment name."`
+	RegexFiltered bool   `           long:"filter-as-regex"             description:"Interpret the filter as regex. (**This is a beta feature** Tested on AWS, Azure, and GCP)"`
+	Type          string `short:"t"  long:"type"                        description:"Type of resource to delete."`
+	Debug         bool   `           long:"debug"                       description:"Print debug information."`
 
 	AWSAccessKeyID       string `long:"aws-access-key-id"        env:"BBL_AWS_ACCESS_KEY_ID"        description:"AWS access key id."`
 	AWSSecretAccessKey   string `long:"aws-secret-access-key"    env:"BBL_AWS_SECRET_ACCESS_KEY"    description:"AWS secret access key."`

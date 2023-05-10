@@ -43,7 +43,7 @@ var _ = Describe("Buckets", func() {
 		})
 
 		It("returns a list of s3 buckets to delete", func() {
-			items, err := buckets.List(filter)
+			items, err := buckets.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListBucketsCall.CallCount).To(Equal(1))
@@ -62,14 +62,14 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("returns the error and does not try deleting them", func() {
-				_, err := buckets.List(filter)
+				_, err := buckets.List(filter, false)
 				Expect(err).To(MatchError("Listing S3 Buckets: some error"))
 			})
 		})
 
 		Context("when the bucket name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := buckets.List("kiwi")
+				items, err := buckets.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(manager.IsInRegionCall.CallCount).To(Equal(0))
@@ -85,7 +85,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := buckets.List(filter)
+				items, err := buckets.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(items).To(HaveLen(0))
@@ -98,7 +98,7 @@ var _ = Describe("Buckets", func() {
 			})
 
 			It("does not delete the bucket", func() {
-				items, err := buckets.List(filter)
+				items, err := buckets.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

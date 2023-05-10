@@ -42,7 +42,7 @@ var _ = Describe("TargetPools", func() {
 		})
 
 		It("lists, filters, and prompts for target pools to delete", func() {
-			list, err := targetPools.List(filter)
+			list, err := targetPools.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.ListTargetPoolsCall.CallCount).To(Equal(1))
@@ -61,14 +61,14 @@ var _ = Describe("TargetPools", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := targetPools.List(filter)
+				_, err := targetPools.List(filter, false)
 				Expect(err).To(MatchError("List Target Pools for region region-1: some error"))
 			})
 		})
 
 		Context("when the target pool name does not contain the filter", func() {
 			It("does not add it to the list", func() {
-				list, err := targetPools.List("grape")
+				list, err := targetPools.List("grape", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -82,7 +82,7 @@ var _ = Describe("TargetPools", func() {
 			})
 
 			It("does not add it to the list", func() {
-				list, err := targetPools.List(filter)
+				list, err := targetPools.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

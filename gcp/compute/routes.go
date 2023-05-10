@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+
 	"strings"
 
 	"github.com/genevieve/leftovers/common"
@@ -27,7 +28,7 @@ func NewRoutes(client routesClient, logger logger) Routes {
 	}
 }
 
-func (r Routes) List(filter string) ([]common.Deletable, error) {
+func (r Routes) List(filter string, regex bool) ([]common.Deletable, error) {
 	r.logger.Debugln("Listing Routes...")
 	routes, err := r.client.ListRoutes()
 	if err != nil {
@@ -38,7 +39,7 @@ func (r Routes) List(filter string) ([]common.Deletable, error) {
 	for _, route := range routes {
 		resource := NewRoute(r.client, route.Name, route.Network)
 
-		if !strings.Contains(resource.Name(), filter) || strings.Contains(route.Name, "default") {
+		if !common.ResourceMatches(resource.Name(), filter, regex) || strings.Contains(route.Name, "default") {
 			continue
 		}
 

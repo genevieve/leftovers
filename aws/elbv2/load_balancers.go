@@ -2,9 +2,8 @@ package elbv2
 
 import (
 	"fmt"
-	"strings"
-
 	awselbv2 "github.com/aws/aws-sdk-go/service/elbv2"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -28,7 +27,7 @@ func NewLoadBalancers(client loadBalancersClient, logger logger) LoadBalancers {
 	}
 }
 
-func (l LoadBalancers) List(filter string) ([]common.Deletable, error) {
+func (l LoadBalancers) List(filter string, regex bool) ([]common.Deletable, error) {
 	loadBalancers, err := l.client.DescribeLoadBalancers(&awselbv2.DescribeLoadBalancersInput{})
 	if err != nil {
 		return nil, fmt.Errorf("Describe ELBV2 Load Balancers: %s", err)
@@ -39,7 +38,7 @@ func (l LoadBalancers) List(filter string) ([]common.Deletable, error) {
 	for _, lb := range loadBalancers.LoadBalancers {
 		r := NewLoadBalancer(l.client, lb.LoadBalancerName, lb.LoadBalancerArn)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 

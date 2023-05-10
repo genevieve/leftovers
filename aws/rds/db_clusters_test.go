@@ -42,7 +42,7 @@ var _ = Describe("DBClusters", func() {
 		})
 
 		It("deletes db clusters", func() {
-			items, err := dbClusters.List(filter)
+			items, err := dbClusters.List(filter, false)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(client.DescribeDBClustersCall.CallCount).To(Equal(1))
@@ -58,14 +58,14 @@ var _ = Describe("DBClusters", func() {
 			})
 
 			It("returns the error", func() {
-				_, err := dbClusters.List(filter)
+				_, err := dbClusters.List(filter, false)
 				Expect(err).To(MatchError("Describing RDS DB Clusters: some error"))
 			})
 		})
 
 		Context("when the db cluster name does not contain the filter", func() {
 			It("does not return it in the list", func() {
-				items, err := dbClusters.List("kiwi")
+				items, err := dbClusters.List("kiwi", false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(client.DescribeDBClustersCall.CallCount).To(Equal(1))
@@ -85,7 +85,7 @@ var _ = Describe("DBClusters", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := dbClusters.List(filter)
+				items, err := dbClusters.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(0))
@@ -99,7 +99,7 @@ var _ = Describe("DBClusters", func() {
 			})
 
 			It("does not return it in the list", func() {
-				items, err := dbClusters.List(filter)
+				items, err := dbClusters.List(filter, false)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(logger.PromptWithDetailsCall.CallCount).To(Equal(1))

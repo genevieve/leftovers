@@ -2,9 +2,8 @@ package iam
 
 import (
 	"fmt"
-	"strings"
-
 	awsiam "github.com/aws/aws-sdk-go/service/iam"
+
 	"github.com/genevieve/leftovers/common"
 )
 
@@ -26,7 +25,7 @@ func NewServerCertificates(client serverCertificatesClient, logger logger) Serve
 	}
 }
 
-func (s ServerCertificates) List(filter string) ([]common.Deletable, error) {
+func (s ServerCertificates) List(filter string, regex bool) ([]common.Deletable, error) {
 	certificates, err := s.client.ListServerCertificates(&awsiam.ListServerCertificatesInput{})
 	if err != nil {
 		return nil, fmt.Errorf("List IAM Server Certificates: %s", err)
@@ -36,7 +35,7 @@ func (s ServerCertificates) List(filter string) ([]common.Deletable, error) {
 	for _, c := range certificates.ServerCertificateMetadataList {
 		r := NewServerCertificate(s.client, c.ServerCertificateName)
 
-		if !strings.Contains(r.Name(), filter) {
+		if !common.ResourceMatches(r.Name(),  filter, regex) {
 			continue
 		}
 
