@@ -3,12 +3,12 @@ package fakes
 import (
 	"sync"
 
-	gcpcontainer "google.golang.org/api/container/v1"
+	"google.golang.org/api/container/v1"
 )
 
 type ClustersClient struct {
 	DeleteClusterCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Zone    string
@@ -20,22 +20,19 @@ type ClustersClient struct {
 		Stub func(string, string) error
 	}
 	ListClustersCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
-		Receives  struct {
-			Zone string
-		}
-		Returns struct {
-			ListClustersResponse *gcpcontainer.ListClustersResponse
+		Returns   struct {
+			ListClustersResponse *container.ListClustersResponse
 			Error                error
 		}
-		Stub func(string) (*gcpcontainer.ListClustersResponse, error)
+		Stub func() (*container.ListClustersResponse, error)
 	}
 }
 
 func (f *ClustersClient) DeleteCluster(param1 string, param2 string) error {
-	f.DeleteClusterCall.Lock()
-	defer f.DeleteClusterCall.Unlock()
+	f.DeleteClusterCall.mutex.Lock()
+	defer f.DeleteClusterCall.mutex.Unlock()
 	f.DeleteClusterCall.CallCount++
 	f.DeleteClusterCall.Receives.Zone = param1
 	f.DeleteClusterCall.Receives.Cluster = param2
@@ -44,13 +41,12 @@ func (f *ClustersClient) DeleteCluster(param1 string, param2 string) error {
 	}
 	return f.DeleteClusterCall.Returns.Error
 }
-func (f *ClustersClient) ListClusters(param1 string) (*gcpcontainer.ListClustersResponse, error) {
-	f.ListClustersCall.Lock()
-	defer f.ListClustersCall.Unlock()
+func (f *ClustersClient) ListClusters() (*container.ListClustersResponse, error) {
+	f.ListClustersCall.mutex.Lock()
+	defer f.ListClustersCall.mutex.Unlock()
 	f.ListClustersCall.CallCount++
-	f.ListClustersCall.Receives.Zone = param1
 	if f.ListClustersCall.Stub != nil {
-		return f.ListClustersCall.Stub(param1)
+		return f.ListClustersCall.Stub()
 	}
 	return f.ListClustersCall.Returns.ListClustersResponse, f.ListClustersCall.Returns.Error
 }

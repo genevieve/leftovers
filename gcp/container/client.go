@@ -12,7 +12,7 @@ type client struct {
 	logger  logger
 
 	service    *gcpcontainer.Service
-	containers *gcpcontainer.ProjectsZonesClustersService
+	containers *gcpcontainer.ProjectsLocationsClustersService
 }
 
 func NewClient(project string, service *gcpcontainer.Service, logger logger) client {
@@ -21,16 +21,18 @@ func NewClient(project string, service *gcpcontainer.Service, logger logger) cli
 		logger:  logger,
 
 		service:    service,
-		containers: service.Projects.Zones.Clusters,
+		containers: service.Projects.Locations.Clusters,
 	}
 }
 
-func (c client) ListClusters(zone string) (*gcpcontainer.ListClustersResponse, error) {
-	return c.containers.List(c.project, zone).Do()
+func (c client) ListClusters() (*gcpcontainer.ListClustersResponse, error) {
+	parent := fmt.Sprintf("projects/%v/locations/-", c.project)
+	return c.containers.List(parent).Do()
 }
 
 func (c client) DeleteCluster(zone string, cluster string) error {
-	return c.wait(c.containers.Delete(c.project, zone, cluster))
+	name := fmt.Sprintf("projects/%v/locations/%v/clusters/%v", c.project, zone, cluster)
+	return c.wait(c.containers.Delete(name))
 }
 
 type request interface {
@@ -45,7 +47,7 @@ func (c client) wait(request request) error {
 				return nil
 			}
 		}
-		return fmt.Errorf("Do request: %s", err)
+		return fmt.Errorf("do request: %s", err)
 	}
 
 	waiter := NewOperationWaiter(op, c.service, c.project, c.logger)

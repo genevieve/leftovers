@@ -86,7 +86,7 @@ var _ = Describe("Clusters", func() {
 
 			It("wraps it in a helpful error message", func() {
 				_, err := clusters.List(filter)
-				Expect(err).To(MatchError("List Clusters for Zone zone-1: panic time"))
+				Expect(err).To(MatchError(client.ListClustersCall.Returns.Error))
 			})
 		})
 	})
