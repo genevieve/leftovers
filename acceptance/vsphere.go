@@ -51,7 +51,8 @@ func NewVSphereAcceptance() VSphereAcceptance {
 
 	vCenterUrl.User = url.UserPassword(vcenterUser, vcenterPassword)
 
-	vContext, _ := context.WithTimeout(context.Background(), time.Minute*5)
+	vContext, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	defer cancel()
 
 	vimClient, err := govmomi.NewClient(vContext, vCenterUrl, true)
 	Expect(err).NotTo(HaveOccurred())

@@ -1,7 +1,6 @@
 groups:
 - name: leftovers
   jobs:
-  - unit
   - acceptance-aws
   - acceptance-azure
   - acceptance-gcp
@@ -33,20 +32,11 @@ resources:
     private_key: ((tap_private_key))
 
 jobs:
-- name: unit
-  serial: true
-  plan:
-  - get: leftovers
-    trigger: true
-  - task: unit
-    file: leftovers/ci/tasks/unit/task.yml
-
 - name: acceptance-gcp
   serial: true
   plan:
   - get: leftovers
     trigger: true
-    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -58,7 +48,6 @@ jobs:
   plan:
   - get: leftovers
     trigger: true
-    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -72,7 +61,6 @@ jobs:
   plan:
   - get: leftovers
     trigger: true
-    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
@@ -87,7 +75,6 @@ jobs:
   plan:
   - get: leftovers
     trigger: true
-    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     tags:
@@ -107,7 +94,6 @@ jobs:
   plan:
   - get: leftovers
     trigger: true
-    passed: [unit]
   - task: acceptance
     file: leftovers/ci/tasks/acceptance/task.yml
     params:
