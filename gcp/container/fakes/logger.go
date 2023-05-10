@@ -4,7 +4,7 @@ import "sync"
 
 type Logger struct {
 	DebugfCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Message string
@@ -15,7 +15,7 @@ type Logger struct {
 		})
 	}
 	PrintfCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Message string
@@ -26,7 +26,7 @@ type Logger struct {
 		})
 	}
 	PromptWithDetailsCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			ResourceType string
@@ -41,8 +41,8 @@ type Logger struct {
 
 func (f *Logger) Debugf(param1 string, param2 ...interface {
 }) {
-	f.DebugfCall.Lock()
-	defer f.DebugfCall.Unlock()
+	f.DebugfCall.mutex.Lock()
+	defer f.DebugfCall.mutex.Unlock()
 	f.DebugfCall.CallCount++
 	f.DebugfCall.Receives.Message = param1
 	f.DebugfCall.Receives.A = param2
@@ -52,8 +52,8 @@ func (f *Logger) Debugf(param1 string, param2 ...interface {
 }
 func (f *Logger) Printf(param1 string, param2 ...interface {
 }) {
-	f.PrintfCall.Lock()
-	defer f.PrintfCall.Unlock()
+	f.PrintfCall.mutex.Lock()
+	defer f.PrintfCall.mutex.Unlock()
 	f.PrintfCall.CallCount++
 	f.PrintfCall.Receives.Message = param1
 	f.PrintfCall.Receives.A = param2
@@ -62,8 +62,8 @@ func (f *Logger) Printf(param1 string, param2 ...interface {
 	}
 }
 func (f *Logger) PromptWithDetails(param1 string, param2 string) bool {
-	f.PromptWithDetailsCall.Lock()
-	defer f.PromptWithDetailsCall.Unlock()
+	f.PromptWithDetailsCall.mutex.Lock()
+	defer f.PromptWithDetailsCall.mutex.Unlock()
 	f.PromptWithDetailsCall.CallCount++
 	f.PromptWithDetailsCall.Receives.ResourceType = param1
 	f.PromptWithDetailsCall.Receives.ResourceName = param2

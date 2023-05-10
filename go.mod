@@ -3,7 +3,7 @@ module github.com/genevieve/leftovers
 go 1.13
 
 require (
-	cloud.google.com/go v0.17.0 // indirect
+	cloud.google.com/go/compute v1.19.2 // indirect
 	github.com/Azure/azure-sdk-for-go v33.2.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.9.1
 	github.com/Azure/go-autorest/autorest/adal v0.6.0
@@ -16,13 +16,12 @@ require (
 	github.com/hashicorp/go-multierror v0.0.0-20180717150148-3d5d8f294aa0
 	github.com/jessevdk/go-flags v1.3.0
 	github.com/mattn/go-colorable v0.0.9 // indirect
-	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
 	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
 	github.com/vmware/govmomi v0.17.0
-	golang.org/x/oauth2 v0.0.0-20171215004936-dfbc86644130
-	google.golang.org/api v0.0.0-20171215000404-f4694fe510ef
-	google.golang.org/appengine v1.0.0 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/oauth2 v0.8.0
+	google.golang.org/api v0.122.0
 )
