@@ -12,8 +12,7 @@ require (
 	github.com/aws/aws-sdk-go v1.34.0
 	github.com/fatih/color v1.6.0
 	github.com/gophercloud/gophercloud v0.0.0-20190322150113-a30f18a1bae0
-	github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357 // indirect
-	github.com/hashicorp/go-multierror v0.0.0-20180717150148-3d5d8f294aa0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jessevdk/go-flags v1.3.0
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
