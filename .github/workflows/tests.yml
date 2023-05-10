@@ -40,4 +40,4 @@ jobs:
       run: go vet ./...
 
     - name: Run unit tests
-      run: ginkgo -p -r -race -randomizeAllSpecs -randomizeSuites .
+      run: ginkgo -p -r --race --randomize-all --randomize-suites .
