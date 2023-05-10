@@ -7,7 +7,7 @@ import (
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/genevieve/leftovers/aws/s3"
 	"github.com/genevieve/leftovers/aws/s3/fakes"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

@@ -7,7 +7,7 @@ import (
 	awskms "github.com/aws/aws-sdk-go/service/kms"
 	"github.com/genevieve/leftovers/aws/kms"
 	"github.com/genevieve/leftovers/aws/kms/fakes"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

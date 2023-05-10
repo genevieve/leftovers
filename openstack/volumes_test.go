@@ -7,7 +7,7 @@ import (
 	"github.com/genevieve/leftovers/openstack/fakes"
 	openstackvolumes "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
