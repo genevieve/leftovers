@@ -9,7 +9,7 @@ require (
 	github.com/Azure/go-autorest/autorest/adal v0.6.0
 	github.com/Azure/go-autorest/autorest/to v0.3.0 // indirect
 	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
-	github.com/aws/aws-sdk-go v1.34.0
+	github.com/aws/aws-sdk-go v1.44.261
 	github.com/fatih/color v1.6.0
 	github.com/gophercloud/gophercloud v0.0.0-20190322150113-a30f18a1bae0
 	github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357 // indirect
