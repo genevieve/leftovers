@@ -4,22 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-04-01/network"
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
-	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 )
 
 type client struct {
-	rgClient       resources.GroupsClient
-	sgClient       network.ApplicationSecurityGroupsClient
-	autorestClient autorest.Client
+	rgClient armresources.ResourceGroupsClient
+	sgClient armnetwork.ApplicationSecurityGroupsClient
 }
 
-func NewClient(rg resources.GroupsClient, sg network.ApplicationSecurityGroupsClient) client {
+func NewClient(rg armresources.ResourceGroupsClient, sg armnetwork.ApplicationSecurityGroupsClient) client {
 	return client{
-		rgClient:       rg,
-		sgClient:       sg,
-		autorestClient: rg.Client,
+		rgClient: rg,
+		sgClient: sg,
 	}
 }
 
@@ -27,12 +24,15 @@ func (c client) ListGroups() ([]string, error) {
 	ctx := context.Background()
 	groups := []string{}
 
-	for list, err := c.rgClient.ListComplete(ctx, "", nil); list.NotDone(); err = list.Next() {
+	pager := c.rgClient.NewListPager(nil)
+	for pager.More() {
+		nextResult, err := pager.NextPage(ctx)
 		if err != nil {
 			return []string{}, fmt.Errorf("List Complete Resource Groups: %s", err)
 		}
-
-		groups = append(groups, *list.Value().Name)
+		for _, group := range nextResult.Value {
+			groups = append(groups, *group.Name)
+		}
 	}
 
 	return groups, nil
@@ -41,14 +41,14 @@ func (c client) ListGroups() ([]string, error) {
 func (c client) DeleteGroup(name string) error {
 	ctx := context.Background()
 
-	future, err := c.rgClient.Delete(ctx, name)
+	poller, err := c.rgClient.BeginDelete(ctx, name, nil)
 	if err != nil {
 		return err
 	}
 
-	err = future.WaitForCompletionRef(ctx, c.autorestClient)
+	_, err = poller.PollUntilDone(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("Waiting for completion: %s", err)
+		return err
 	}
 
 	return nil
@@ -58,12 +58,15 @@ func (c client) ListAppSecurityGroups(rgName string) ([]string, error) {
 	ctx := context.Background()
 	groups := []string{}
 
-	for list, err := c.sgClient.ListComplete(ctx, rgName); list.NotDone(); err = list.Next() {
+	pager := c.sgClient.NewListAllPager(nil)
+	for pager.More() {
+		nextResult, err := pager.NextPage(ctx)
 		if err != nil {
 			return groups, fmt.Errorf("List Complete App Security Groups: %s", err)
 		}
-
-		groups = append(groups, *list.Value().Name)
+		for _, group := range nextResult.Value {
+			groups = append(groups, *group.Name)
+		}
 	}
 
 	return groups, nil
@@ -72,14 +75,14 @@ func (c client) ListAppSecurityGroups(rgName string) ([]string, error) {
 func (c client) DeleteAppSecurityGroup(rgName, name string) error {
 	ctx := context.Background()
 
-	future, err := c.sgClient.Delete(ctx, rgName, name)
+	poller, err := c.sgClient.BeginDelete(ctx, rgName, name, nil)
 	if err != nil {
 		return err
 	}
 
-	err = future.WaitForCompletionRef(ctx, c.autorestClient)
+	_, err = poller.PollUntilDone(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("Waiting for completion: %s", err)
+		return fmt.Errorf("failed to pull the result %s", err)
 	}
 
 	return nil
