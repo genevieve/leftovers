@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go/compute v1.19.2 // indirect
-	github.com/Azure/azure-sdk-for-go v33.2.0+incompatible
+	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.9.1
 	github.com/Azure/go-autorest/autorest/adal v0.9.23
 	github.com/Azure/go-autorest/autorest/to v0.3.0 // indirect
