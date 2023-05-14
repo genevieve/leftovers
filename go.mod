@@ -14,7 +14,7 @@ require (
 	github.com/gophercloud/gophercloud v0.0.0-20190322150113-a30f18a1bae0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
