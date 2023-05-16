@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/db/v1/flavors"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
@@ -124,11 +125,24 @@ func (o OpenStackAcceptance) DeleteVolume(volumeID string) {
 
 func (o *OpenStackAcceptance) CreateComputeInstance(name string) string {
 	imageID := o.CreateImage(fmt.Sprintf("empty-image-%s", name))
+
+	all, err := flavors.List(o.computeInstanceClient).AllPages()
+	Expect(err).NotTo(HaveOccurred())
+
+	f, err := flavors.ExtractFlavors(all)
+	Expect(err).NotTo(HaveOccurred())
+
+	var flavorID string
+	for _, flavor := range f {
+		if flavor.Name == "m1.tiny" {
+			flavorID = flavor.StrID
+			break
+		}
+	}
 	serverCreateOpts := servers.CreateOpts{
-		Name:          name,
-		FlavorName:    "m1.tiny",
-		ImageRef:      imageID,
-		ServiceClient: o.computeInstanceClient,
+		Name:      name,
+		FlavorRef: flavorID,
+		ImageRef:  imageID,
 	}
 
 	instance, err := servers.Create(o.computeInstanceClient, serverCreateOpts).Extract()
