@@ -1,9 +1,7 @@
 groups:
 - name: leftovers
   jobs:
-  - releasable
   - build-release
-  - bump-brew-tap
 
 resources:
 - name: leftovers
@@ -18,13 +16,6 @@ resources:
     owner: genevieve
     repository: leftovers
     access_token: ((leftovers_access_token))
-
-- name: homebrew-tap
-  type: git
-  source:
-    branch: master
-    uri: git@github.com:genevieve/homebrew-tap.git
-    private_key: ((tap_private_key))
 
 jobs:
 - name: build-release
@@ -41,23 +32,3 @@ jobs:
       commitish: builds/commitish
       globs:
       - builds/bin/leftovers-*
-
-- name: bump-brew-tap
-  plan:
-  - in_parallel:
-    - get: leftovers
-      passed: [build-release]
-    - get: homebrew-tap
-    - get: release
-      passed: [build-release]
-      trigger: true
-      params:
-        version: { tag: release/version }
-        globs:
-        - leftovers-*-darwin-amd64
-        - leftovers-*-linux-amd64
-  - task: bump-brew-tap
-    file: leftovers/ci/tasks/bump-brew-tap/task.yml
-  - put: homebrew-tap
-    params:
-      repository: updated-homebrew-tap/homebrew-tap

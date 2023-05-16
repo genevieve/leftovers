@@ -2,9 +2,6 @@
 
 set -e -x -u
 
-ROOT="${PWD}"
-VERSION=$(cat "${ROOT}/release/version")
-
 shaOS=$(shasum -a 256 release/leftovers-*-darwin-amd64 | cut -d ' ' -f 1)
 shaLinux=$(shasum -a 256 release/leftovers-*-linux-amd64 | cut -d ' ' -f 1)
 
@@ -13,7 +10,7 @@ pushd homebrew-tap
 class Leftovers < Formula
   desc "Command line utility for cleaning orphaned IAAS resources."
   homepage "https://github.com/genevieve/leftovers"
-  version "v${VERSION}"
+  version "${RELEASE_VERSION}"
 
   if OS.mac?
     url "https://github.com/genevieve/leftovers/releases/download/#{version}/leftovers-#{version}-darwin-amd64"
@@ -45,12 +42,11 @@ EOF
   git add leftovers.rb
   if ! [ -z "$(git status --porcelain)" ];
   then
-    git config --global user.email "cf-infrastructure@pivotal.io"
-    git config --global user.name "CF Infrastructure"
-    git commit -m "Release leftovers ${VERSION}"
+    git config --global user.email "leftovers-ci"
+    git config --global user.name "leftovers-ci"
+    git commit -m "Release leftovers ${RELEASE_VERSION}"
+    git push
   else
     echo "No new version to commit"
   fi
 popd
-
-cp -R homebrew-tap updated-homebrew-tap
