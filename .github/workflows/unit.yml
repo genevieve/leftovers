@@ -1,4 +1,4 @@
-name: test
+name: unit tests
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    name: Go ${{ matrix.version }}
+    name: Run unit tests
     steps:
     - name: Setup Go
       uses: actions/setup-go@v4
