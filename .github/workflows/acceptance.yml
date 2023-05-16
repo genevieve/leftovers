@@ -1,0 +1,72 @@
+name: acceptance tests
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run acceptance tests
+    steps:
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.x
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Ginkgo
+      run: go install github.com/onsi/ginkgo/v2/ginkgo
+
+    - name: Run AWS acceptance tests
+      run: ginkgo acceptance
+      env:
+        LEFTOVERS_ACCEPTANCE: aws
+        BBL_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        BBL_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BBL_AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    - name: Run AZURE acceptance tests
+      run: ginkgo acceptance
+      env:
+        LEFTOVERS_ACCEPTANCE: azure
+        BBL_AZURE_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
+        BBL_AZURE_TENANT_ID: ${{ secrets.azure_tenant_id }}
+        BBL_AZURE_CLIENT_ID: ${{ secrets.azure_client_id }}
+        BBL_AZURE_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+
+    - name: Run GCP acceptance tests
+      run: ginkgo acceptance
+      env:
+        LEFTOVERS_ACCEPTANCE: gcp
+        BBL_GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Run VSPHERE acceptance tests
+      run: ginkgo acceptance
+      env:
+        LEFTOVERS_ACCEPTANCE: vsphere
+        BBL_VSPHERE_VCENTER_IP: ${{ secrets.vsphere_vcenter_ip }}
+        BBL_VSPHERE_VCENTER_USER: ${{ secrets.vsphere_vcenter_user }}
+        BBL_VSPHERE_VCENTER_PASSWORD: ${{ secrets.vsphere_vcenter_password }}
+        BBL_VSPHERE_VCENTER_DC: ${{ secrets.vsphere_vcenter_dc }}
+        BBL_VSPHERE_VCENTER_DS: ${{ secrets.vsphere_vcenter_ds }}
+        BBL_VSPHERE_VCENTER_RP: ${{ secrets.vsphere_vcenter_rp }}
+        LEFTOVERS_VSPHERE_FILTER: ${{ secrets.vsphere_vcenter_disks }}
+
+    - name: Run OPENSTACK acceptance tests
+      run: ginkgo acceptance
+      env:
+        LEFTOVERS_ACCEPTANCE: openstack
+        BBL_OPENSTACK_AUTH_URL: ${{ secrets.openstack_auth_url }}
+        BBL_OPENSTACK_PASSWORD: ${{ secrets.openstack_password }}
+        BBL_OPENSTACK_USERNAME: ${{ secrets.openstack_username }}
+        BBL_OPENSTACK_PROJECT: ${{ secrets.openstack_project }}
+        BBL_OPENSTACK_DOMAIN: ${{ secrets.openstack_domain }}
+        BBL_OPENSTACK_REGION: ${{ secrets.openstack_region }}
