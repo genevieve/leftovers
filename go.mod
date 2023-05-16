@@ -8,12 +8,11 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.1.1
 	github.com/aws/aws-sdk-go v1.44.262
-	github.com/fatih/color v1.6.0
-	github.com/gophercloud/gophercloud v0.0.0-20190322150113-a30f18a1bae0
+	github.com/fatih/color v1.15.0
+	github.com/gophercloud/gophercloud v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/mattn/go-colorable v0.0.9 // indirect
-	github.com/mitchellh/go-homedir v0.0.0-20180801233206-58046073cbff
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	github.com/stretchr/testify v1.8.2 // indirect
