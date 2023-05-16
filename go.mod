@@ -4,11 +4,9 @@ go 1.13
 
 require (
 	cloud.google.com/go/compute v1.19.2 // indirect
-	github.com/Azure/azure-sdk-for-go v33.2.0+incompatible
-	github.com/Azure/go-autorest/autorest v0.11.29
-	github.com/Azure/go-autorest/autorest/adal v0.9.23
-	github.com/Azure/go-autorest/autorest/to v0.3.0 // indirect
-	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.1.0
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.1.1
 	github.com/aws/aws-sdk-go v1.44.262
 	github.com/fatih/color v1.15.0
 	github.com/gophercloud/gophercloud v1.3.0
@@ -17,6 +15,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
+	github.com/stretchr/testify v1.8.2 // indirect
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
 	github.com/vmware/govmomi v0.30.4
 	golang.org/x/crypto v0.9.0 // indirect

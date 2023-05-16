@@ -4,10 +4,8 @@ import (
 	"context"
 	"os"
 
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/Azure/go-autorest/autorest/adal"
-	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/genevieve/leftovers/app"
 	. "github.com/onsi/gomega"
 )
@@ -43,18 +41,16 @@ func NewAzureAcceptance() AzureAcceptance {
 }
 
 func (a AzureAcceptance) CreateResourceGroup(name string) {
-	oauthConfig, err := adal.NewOAuthConfig(azure.PublicCloud.ActiveDirectoryEndpoint, a.TenantId)
+	credential, err := azidentity.NewClientSecretCredential(a.TenantId, a.ClientId, a.ClientSecret, nil)
 	Expect(err).NotTo(HaveOccurred())
 
-	servicePrincipalToken, err := adal.NewServicePrincipalToken(*oauthConfig, a.ClientId, a.ClientSecret, azure.PublicCloud.ResourceManagerEndpoint)
+	clientFactory, err := armresources.NewClientFactory(a.SubscriptionId, credential, nil)
 	Expect(err).NotTo(HaveOccurred())
 
-	groupsClient := resources.NewGroupsClient(a.SubscriptionId)
-	groupsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
-	groupsClient.Sender = autorest.CreateSender(autorest.AsIs())
+	groupsClient := clientFactory.NewResourceGroupsClient()
 
 	location := "West US"
-	group := resources.Group{Name: &name, Location: &location}
-	_, err = groupsClient.CreateOrUpdate(context.Background(), name, group)
+	group := armresources.ResourceGroup{Name: &name, Location: &location}
+	_, err = groupsClient.CreateOrUpdate(context.Background(), name, group, nil)
 	Expect(err).NotTo(HaveOccurred())
 }

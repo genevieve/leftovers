@@ -4,11 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-04-01/network"
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/Azure/go-autorest/autorest/adal"
-	azurelib "github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/fatih/color"
 	"github.com/genevieve/leftovers/common"
 	multierror "github.com/hashicorp/go-multierror"
@@ -110,23 +108,22 @@ func NewLeftovers(logger logger, clientId, clientSecret, subscriptionId, tenantI
 		return Leftovers{}, errors.New("Missing tenant id.")
 	}
 
-	oauthConfig, err := adal.NewOAuthConfig(azurelib.PublicCloud.ActiveDirectoryEndpoint, tenantId)
-	if err != nil {
-		return Leftovers{}, fmt.Errorf("Creating oauth config: %s\n", err)
-	}
-
-	token, err := adal.NewServicePrincipalToken(*oauthConfig, clientId, clientSecret, azurelib.PublicCloud.ResourceManagerEndpoint)
+	credential, err := azidentity.NewClientSecretCredential(tenantId, clientId, clientSecret, nil)
 	if err != nil {
 		return Leftovers{}, fmt.Errorf("Creating service principal token: %s\n", err)
 	}
 
-	rg := resources.NewGroupsClient(subscriptionId)
-	rg.Authorizer = autorest.NewBearerAuthorizer(token)
+	rg, err := armresources.NewResourceGroupsClient(subscriptionId, credential, nil)
+	if err != nil {
+		return Leftovers{}, fmt.Errorf("Creating resource groups client: %s\n", err)
+	}
 
-	sg := network.NewApplicationSecurityGroupsClient(subscriptionId)
-	sg.Authorizer = autorest.NewBearerAuthorizer(token)
+	sg, err := armnetwork.NewApplicationSecurityGroupsClient(subscriptionId, credential, nil)
+	if err != nil {
+		return Leftovers{}, fmt.Errorf("Creating application security groups client: %s\n", err)
+	}
 
-	client := NewClient(rg, sg)
+	client := NewClient(*rg, *sg)
 
 	return Leftovers{
 		logger:   logger,
