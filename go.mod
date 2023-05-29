@@ -8,7 +8,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.1.1
 	github.com/aws/aws-sdk-go v1.44.271
 	github.com/fatih/color v1.15.0
-	github.com/gophercloud/gophercloud v1.3.0
+	github.com/gophercloud/gophercloud v1.4.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/mitchellh/go-homedir v1.1.0
