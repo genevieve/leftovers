@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/ginkgo/v2 v2.9.5
+	github.com/onsi/ginkgo/v2 v2.9.7
 	github.com/onsi/gomega v1.27.7
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
 	github.com/vmware/govmomi v0.30.4
