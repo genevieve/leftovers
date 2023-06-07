@@ -30,8 +30,8 @@ func (c client) ListClusters() (*gcpcontainer.ListClustersResponse, error) {
 	return c.containers.List(parent).Do()
 }
 
-func (c client) DeleteCluster(zone string, cluster string) error {
-	name := fmt.Sprintf("projects/%v/locations/%v/clusters/%v", c.project, zone, cluster)
+func (c client) DeleteCluster(location string, cluster string) error {
+	name := fmt.Sprintf("projects/%v/locations/%v/clusters/%v", c.project, location, cluster)
 	return c.wait(c.containers.Delete(name))
 }
 

@@ -3,21 +3,21 @@ package container
 import "fmt"
 
 type Cluster struct {
-	name   string
-	zone   string
-	client clustersClient
+	name     string
+	location string
+	client   clustersClient
 }
 
-func NewCluster(client clustersClient, zone string, name string) Cluster {
+func NewCluster(client clustersClient, location string, name string) Cluster {
 	return Cluster{
-		name:   name,
-		zone:   zone,
-		client: client,
+		name:     name,
+		location: location,
+		client:   client,
 	}
 }
 
 func (c Cluster) Delete() error {
-	err := c.client.DeleteCluster(c.zone, c.name)
+	err := c.client.DeleteCluster(c.location, c.name)
 	if err != nil {
 		return fmt.Errorf("Delete: %s", err)
 	}
