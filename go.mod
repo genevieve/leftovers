@@ -17,7 +17,7 @@ require (
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
 	github.com/vmware/govmomi v0.30.4
 	golang.org/x/oauth2 v0.8.0
-	google.golang.org/api v0.126.0
+	google.golang.org/api v0.128.0
 )
 
 require (
@@ -35,7 +35,7 @@ require (
 	github.com/google/pprof v0.0.0-20230510103437-eeec1cb781c3 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
