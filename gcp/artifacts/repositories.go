@@ -2,10 +2,9 @@ package artifacts
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/genevieve/leftovers/common"
 	gcpartifact "google.golang.org/api/artifactregistry/v1"
+	"strings"
 )
 
 type Repositories struct {
@@ -16,7 +15,7 @@ type Repositories struct {
 
 //go:generate faux --interface repositoriesClient --output fakes/repositories_client.go
 type repositoriesClient interface {
-	ListRepositories(region string) (*gcpartifact.ListRepositoriesResponse, error)
+	ListRepositories(region string) ([]*gcpartifact.Repository, error)
 	DeleteRepository(cluster string) error
 }
 
@@ -31,13 +30,12 @@ func NewRepositories(client repositoriesClient, logger logger, regions map[strin
 func (c Repositories) List(filter string) ([]common.Deletable, error) {
 	repositories := []*gcpartifact.Repository{}
 	for _, region := range c.regions {
-		c.logger.Debugf("Listing Repositories for region %s...\n", region)
-		l, err := c.client.ListRepositories(region)
+		repositoryList, err := c.client.ListRepositories(region)
 		if err != nil {
 			return nil, fmt.Errorf("list repositories for region %v: %w", region, err)
 		}
 
-		repositories = append(repositories, l.Repositories...)
+		repositories = append(repositories, repositoryList...)
 	}
 
 	deletables := []common.Deletable{}

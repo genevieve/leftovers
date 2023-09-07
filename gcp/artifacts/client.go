@@ -2,6 +2,7 @@ package artifacts
 
 import (
 	"fmt"
+	"time"
 
 	gcpartifact "google.golang.org/api/artifactregistry/v1"
 	"google.golang.org/api/googleapi"
@@ -25,9 +26,28 @@ func NewClient(project string, service *gcpartifact.Service, logger logger) clie
 	}
 }
 
-func (c client) ListRepositories(region string) (*gcpartifact.ListRepositoriesResponse, error) {
+func (c client) ListRepositories(region string) ([]*gcpartifact.Repository, error) {
 	parent := fmt.Sprintf("projects/%v/locations/%v", c.project, region)
-	return c.repositories.List(parent).Do()
+	var token string
+	var list []*gcpartifact.Repository
+
+	for {
+		resp, err := c.repositories.List(parent).PageToken(token).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, resp.Repositories...)
+
+		token = resp.NextPageToken
+		if token == "" {
+			break
+		}
+
+		time.Sleep(time.Second)
+	}
+
+	return list, nil
 }
 
 func (c client) DeleteRepository(name string) error {

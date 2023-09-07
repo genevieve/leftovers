@@ -25,10 +25,10 @@ type RepositoriesClient struct {
 			Region string
 		}
 		Returns struct {
-			ListRepositoriesResponse *artifactregistry.ListRepositoriesResponse
+			ListRepositoriesResponse []*artifactregistry.Repository
 			Error                    error
 		}
-		Stub func(string) (*artifactregistry.ListRepositoriesResponse, error)
+		Stub func(string) ([]*artifactregistry.Repository, error)
 	}
 }
 
@@ -42,7 +42,7 @@ func (f *RepositoriesClient) DeleteRepository(param1 string) error {
 	}
 	return f.DeleteRepositoryCall.Returns.Error
 }
-func (f *RepositoriesClient) ListRepositories(param1 string) (*artifactregistry.ListRepositoriesResponse, error) {
+func (f *RepositoriesClient) ListRepositories(param1 string) ([]*artifactregistry.Repository, error) {
 	f.ListRepositoriesCall.mutex.Lock()
 	defer f.ListRepositoriesCall.mutex.Unlock()
 	f.ListRepositoriesCall.CallCount++
