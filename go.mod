@@ -15,7 +15,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
-	github.com/vmware/govmomi v0.30.4
+	github.com/vmware/govmomi v0.36.3
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.172.0
 )
@@ -45,6 +45,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
