@@ -32,11 +32,9 @@ var _ = Describe("Clusters", func() {
 
 	Describe("List", func() {
 		BeforeEach(func() {
-			client.ListRepositoriesCall.Returns.ListRepositoriesResponse = &gcpartifact.ListRepositoriesResponse{
-				Repositories: []*gcpartifact.Repository{{
-					Name: "banana-repository",
-				}},
-			}
+			client.ListRepositoriesCall.Returns.ListRepositoriesResponse = []*gcpartifact.Repository{{
+				Name: "banana-repository",
+			}}
 		})
 
 		It("returns a list of clusters to delete", func() {
@@ -64,11 +62,9 @@ var _ = Describe("Clusters", func() {
 
 		Context("when the resource name does not contain the filter", func() {
 			BeforeEach(func() {
-				client.ListRepositoriesCall.Returns.ListRepositoriesResponse = &gcpartifact.ListRepositoriesResponse{
-					Repositories: []*gcpartifact.Repository{{
-						Name: "kiwi-repository",
-					}},
-				}
+				client.ListRepositoriesCall.Returns.ListRepositoriesResponse = []*gcpartifact.Repository{{
+					Name: "kiwi-repository",
+				}}
 			})
 
 			It("does not return the resource in the list", func() {
