@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.1.1
-	github.com/aws/aws-sdk-go v1.45.6
+	github.com/aws/aws-sdk-go v1.51.21
 	github.com/fatih/color v1.16.0
 	github.com/gophercloud/gophercloud v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
