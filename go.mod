@@ -15,7 +15,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/vmware/go-vmware-nsxt v0.0.0-20180719200125-23af5e753efe
-	github.com/vmware/govmomi v0.36.3
+	github.com/vmware/govmomi v0.37.3
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.172.0
 )
